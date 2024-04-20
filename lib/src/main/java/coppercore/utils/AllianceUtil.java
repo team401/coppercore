@@ -1,11 +1,10 @@
-package frc.robot.utils;
+package utils;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.Constants.FieldConstants;
-import org.littletonrobotics.junction.Logger;
+import constants.FieldConstants;
 
 public class AllianceUtil {
 
@@ -13,10 +12,8 @@ public class AllianceUtil {
         if (!DriverStation.getAlliance().isEmpty()) {
             switch (DriverStation.getAlliance().get()) {
                 case Blue:
-                    Logger.recordOutput("Field/speaker", FieldConstants.fieldToBlueSpeaker);
                     return FieldConstants.fieldToBlueSpeaker;
                 case Red:
-                    Logger.recordOutput("Field/speaker", FieldConstants.fieldToRedSpeaker);
                     return FieldConstants.fieldToRedSpeaker;
             }
         }
@@ -24,7 +21,6 @@ public class AllianceUtil {
     }
 
     public static Rotation2d getAmpHeading() {
-        Logger.recordOutput("Field/amp", FieldConstants.ampHeading);
         return FieldConstants.ampHeading;
     }
 
@@ -92,10 +88,8 @@ public class AllianceUtil {
         if (!DriverStation.getAlliance().isEmpty()) {
             switch (DriverStation.getAlliance().get()) {
                 case Blue:
-                    Logger.recordOutput("Field/source", FieldConstants.blueSourceHeading);
                     return FieldConstants.blueSourceHeading;
                 case Red:
-                    Logger.recordOutput("Field/source", FieldConstants.redSourceHeading);
                     return FieldConstants.redSourceHeading;
             }
         }
