@@ -1,6 +1,6 @@
 // TODO: WIP - Not tested
 
-package frc.robot.utils;
+package coppercore.utils;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;

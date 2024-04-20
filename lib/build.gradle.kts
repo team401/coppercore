@@ -7,9 +7,10 @@
 
 plugins {
     // Apply the java-library plugin for API and implementation separation.
-    id `java-library`
+    id ("java-library")
+
     // WPILib plugin
-    id `edu.wpi.first.GradleRIO` version `2024.3.2`
+    id ("edu.wpi.first.GradleRIO") version ("2024.3.2")
 }
 
 repositories {
@@ -30,8 +31,8 @@ dependencies {
     implementation(libs.guava)
 
     // WPILib dependencies
-    implementation wpi.java.deps.wpilib()
-	implementation wpi.java.vendor.java()
+    implementation(wpi.java.deps.wpilib())
+	implementation(wpi.java.vendor.java())
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

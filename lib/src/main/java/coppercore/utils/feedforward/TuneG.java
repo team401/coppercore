@@ -1,6 +1,6 @@
 // TODO: WIP - Not tested
 
-package frc.robot.utils.feedforward;
+package coppercore.utils.feedforward;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;

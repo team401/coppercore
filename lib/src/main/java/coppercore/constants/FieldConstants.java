@@ -1,4 +1,4 @@
-package constants;
+package coppercore.constants;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.geometry.Pose2d;

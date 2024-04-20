@@ -1,4 +1,4 @@
-package frc.robot.utils;
+package coppercore.utils;
 
 /**
  * Interface for subsystems to be tuned.

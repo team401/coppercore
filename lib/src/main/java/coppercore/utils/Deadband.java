@@ -1,4 +1,4 @@
-package frc.robot.utils;
+package coppercore.utils;
 
 public class Deadband {
     // 1D Deadband in linear format
