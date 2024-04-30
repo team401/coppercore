@@ -1,11 +1,11 @@
-package coppercore.constants;
+package constants;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
-public static final class FieldConstants {
+public final class FieldConstants {
     public static final double lengthM = 16.451;
     public static final double widthM = 8.211;
 

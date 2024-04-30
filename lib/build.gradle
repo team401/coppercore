@@ -105,12 +105,3 @@ wpi.java.configureExecutableTasks(jar)
 tasks.withType(JavaCompile) {
 	options.compilerArgs.add '-XDstringConcat=inline'
 }
-
-project.compileJava.dependsOn(createVersionFile)
-gversion {
-    srcDir = "lib/src/main/java"
-    classPackage = "coppercore"
-    dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-    timeZone = "America/New_York"
-    indent = "  "
-}

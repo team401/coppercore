@@ -4,7 +4,7 @@ package coppercore.utils.feedforward;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.utils.Tunable;
+import coppercore.utils.Tunable;
 import java.util.ArrayList;
 
 public class TuneV extends Command {
