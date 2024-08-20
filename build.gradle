@@ -1,0 +1,23 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+// configure publication tasks for maven-publish
+// run with gradle publish or ./gradlew publish
+publishing {
+    publications {
+        coppercore(MavenPublication) {
+            groupId = 'io.github.team401'
+            artifactId = 'coppercore'
+            version = '0.0.1'
+            from components.java
+        }
+    }
+
+
+//  sets up maven repository as online central
+    repositories {
+        mavenCentral()
+    }
+}
