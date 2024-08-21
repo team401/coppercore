@@ -33,7 +33,7 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build --max-workers 1 ${{ matrix.build-options }}
-        
+
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.artifact-name }}
@@ -73,14 +73,3 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build -Pbuildalldesktop
-
-      - name: Update Maven Snapshots
-        run: mvn --batch-mode --update-snapshots verify
-      
-      - name: Create Staging Area
-        run: mkdir staging && cp target/*.jar staging
-      
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Package
-          path: staging
