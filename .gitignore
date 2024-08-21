@@ -161,3 +161,6 @@ bin/
 
 # Ignore Gradle build output directory
 build
+
+# Ignore auto-generated WPILib stuff.
+wpi_interface/src/main/java/frc/robot/BuildConstants.java
