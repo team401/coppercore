@@ -53,6 +53,9 @@ repositories {
 	maven {
 		url 'https://frcmaven.wpi.edu/artifactory/release/'
 	}
+	maven {
+	url "https://plugins.gradle.org/m2/"
+	}
 }
 
 spotless {
