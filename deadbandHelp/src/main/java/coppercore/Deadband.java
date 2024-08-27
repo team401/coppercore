@@ -1,3 +1,5 @@
+package coppercore.deadbandHelp;
+
 public class Deadband {
         // 1D Deadband in linear format
         public static double oneAxisDeadband(double input, double deadband) {
