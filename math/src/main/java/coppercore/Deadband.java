@@ -1,4 +1,4 @@
-package coppercore.deadbandHelp;
+package coppercore.math;
 
 public class Deadband {
         // 1D Deadband in linear format
