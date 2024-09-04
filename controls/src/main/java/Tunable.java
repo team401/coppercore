@@ -1,3 +1,5 @@
+package coppercore.controls;
+
 public interface Tunable {
     public double getPosition(int slot);
 

@@ -11,4 +11,4 @@ plugins {
 }
 
 rootProject.name = 'coppercore'
-include('geometry', 'wpi_interface', 'math')
+include('geometry', 'wpi_interface', 'math', 'controls')
