@@ -19,7 +19,7 @@ public class JSONSyncTests {
     public void TestPrep(){
         ExampleJsonSyncClass.synced = new JSONSync<ExampleJsonSyncClass>(
             new ExampleJsonSyncClass(),
-            "D:/coppercore/coppercore/paremeter_tools/src/test/resources/ExampleJsonSyncClass.json",
+            "filePath",
             new JSONSync.JSONSyncConfigBuilder().build()
         );
     }
@@ -36,7 +36,8 @@ public class JSONSyncTests {
 
     @Test
     public void JsonSyncSetFileTest() {
-        ExampleJsonSyncClass.synced.setFile("D:/coppercore/coppercore/paremeter_tools/src/test/resources/setFileTest.json");
+        
+        ExampleJsonSyncClass.synced.setFile("filePath");
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
 

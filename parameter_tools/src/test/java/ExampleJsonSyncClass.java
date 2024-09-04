@@ -7,7 +7,7 @@ public class ExampleJsonSyncClass {
     
     public static JSONSync<ExampleJsonSyncClass> synced = new JSONSync<ExampleJsonSyncClass>(
         new ExampleJsonSyncClass(),
-        "D:/coppercore/coppercore/paremeter_tools/src/test/resources/ExampleJsonSyncClass.json",
+        "filePath",
         new JSONSync.JSONSyncConfigBuilder().build()
     );
 
