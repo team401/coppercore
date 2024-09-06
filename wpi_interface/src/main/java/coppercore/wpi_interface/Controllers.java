@@ -1,3 +1,6 @@
+package coppercore.wpi_interface;
+
+import coppercore.parameter_tools.JSONSync;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -8,9 +11,12 @@ import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 
 public class Controllers {
-    public static Map<String, Integer> buttonShorthands;
-    public static Map<String, Integer> axesShorthands;
-    public static List<Controller> controllers = null;
+    public Map<String, Integer> buttonShorthands;
+    public Map<String, Integer> axesShorthands;
+    public List<Controller> controllers = null;
+    public static transient JSONSync<Controllers> synced =
+            new JSONSync<Controllers>(
+                    new Controllers(), "filePath", new JSONSync.JSONSyncConfigBuilder().build());
 
     static class Controller {
         public int port = -1;
@@ -18,7 +24,7 @@ public class Controllers {
         public boolean hasPov = false;
         public List<Button> buttons = null;
         public List<Axis> axes = null;
-        //public transient JsonSync synced = ------;
+        // public transient JsonSync synced = ------;
         public transient CommandGenericHID commandHID;
 
         public IntSupplier getPov() {
@@ -28,11 +34,12 @@ public class Controllers {
         public void setupController() {
             if (port < 1 || port > 5)
                 throw new RuntimeException("Invalid port must be between 1 and 5 " + port);
-            commandHID = switch (type) {
-                case "joystick" -> commandHID = new CommandJoystick(port);
-                case "xbox" -> commandHID = new CommandXboxController(port);
-                default -> throw new RuntimeException("Invalid controller type " + type);
-            };
+            commandHID =
+                    switch (type) {
+                        case "joystick" -> commandHID = new CommandJoystick(port);
+                        case "xbox" -> commandHID = new CommandXboxController(port);
+                        default -> throw new RuntimeException("Invalid controller type " + type);
+                    };
             setupControlInputs();
         }
 
@@ -74,10 +81,10 @@ public class Controllers {
             try {
                 id = Integer.valueOf(button, 10);
             } catch (NumberFormatException e) {
-                if (!buttonShorthands.containsKey(button))
+                if (!synced.getObject().buttonShorthands.containsKey(button))
                     throw new RuntimeException(
                             "Button Id not found as interger or in shorthands " + button);
-                id = buttonShorthands.get(button);
+                id = synced.getObject().buttonShorthands.get(button);
             }
             if (isPov) trigger = commandHID.pov(id);
             else trigger = commandHID.button(id);
@@ -95,12 +102,11 @@ public class Controllers {
             try {
                 axisNum = Integer.valueOf(axis, 10);
             } catch (NumberFormatException e) {
-                if (!buttonShorthands.containsKey(axis))
-                    throw new RuntimeException(
-                            "Axis Id not found " + axis);
-                axisNum = buttonShorthands.get(axis);
+                if (!synced.getObject().axesShorthands.containsKey(axis))
+                    throw new RuntimeException("Axis Id not found " + axis);
+                axisNum = synced.getObject().axesShorthands.get(axis);
             }
-            supplier = () -> ((negate)? 1: -1) * commandHID.getRawAxis(axisNum);
+            supplier = () -> ((negate) ? 1 : -1) * commandHID.getRawAxis(axisNum);
         }
 
         public DoubleSupplier getSupplier() {
@@ -109,18 +115,17 @@ public class Controllers {
     }
 
     public static List<Controller> getControllers() {
-        return controllers;
+        return synced.getObject().controllers;
     }
 
     public static void setupControllers() {
-        for (Controller controller : controllers) {
+        for (Controller controller : synced.getObject().controllers) {
             controller.setupController();
         }
     }
 
     public static void loadControllers() {
-        
-        //synced.loadData();
+        synced.loadData();
 
         setupControllers();
     }
