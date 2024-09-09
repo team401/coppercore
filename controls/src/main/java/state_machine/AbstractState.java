@@ -13,6 +13,7 @@ public abstract class AbstractState {
     public void onEnter() {}
 
     public AbstractState getNextState(AbstractState targetState) {
+
         return targetState;
     }
 }

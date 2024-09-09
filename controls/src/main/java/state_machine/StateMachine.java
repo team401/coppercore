@@ -12,14 +12,12 @@ public class StateMachine<T extends AbstractState> {
 
     public StateMachine() {}
 
-    public StateMachine(HashMap<String, T> states, ArrayList<StateTransition<T>> transitions){
-        this.states = states;
-        this.transitions = transitions;
-        this.currentState = states.keySet.getIterator().getNext();
-        this.targetState = this.currentState;
+    public StateMachine(HashMap<String, T> states, ArrayList<StateTransition<T>> transitions) {
+        this(states, transitions, states.values().iterator().next());
     }
 
-    public StateMachine(HashMap<String, T> states, ArrayList<StateTransition<T>> transitions, T defaultState){
+    public StateMachine(
+            HashMap<String, T> states, ArrayList<StateTransition<T>> transitions, T defaultState) {
         this.states = states;
         this.transitions = transitions;
         this.currentState = defaultState;
@@ -34,7 +32,7 @@ public class StateMachine<T extends AbstractState> {
 
     public void registerState(String name, T state) {
         states.put(name, state);
-        if (states.size() == 0){
+        if (states.size() == 0) {
             currentState = state;
             targetState = state;
         }
@@ -69,8 +67,10 @@ public class StateMachine<T extends AbstractState> {
     public boolean transitionToState(T to) {
         if (this.currentState == to) return false;
         if (!canTransition(this.currentState, to)) return false;
+        if (!to.canEnter()) return false;
         this.currentState.onExit();
         this.currentState = to;
+        to.onEnter();
         return true;
     }
 }
