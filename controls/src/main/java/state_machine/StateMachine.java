@@ -24,6 +24,24 @@ public class StateMachine<T extends AbstractState> {
         this.targetState = defaultState;
     }
 
+    public StateMachine(StateMachineJSONConfig config) {
+        loadConfig(config);
+    }
+
+    public void loadConfig(StateMachineJSONConfig config) {
+
+        this.states = (HashMap<String, T>) config.states;
+        this.currentState = (T) config.defaultState;
+        this.targetState = (T) config.defaultState;
+
+        for (StateMachineJSONConfig.StateTransitionStringPair pair : config.transitionPairs) {
+            registerStateTransition(pair.state1, pair.state2);
+            if (pair.bothWays) {
+                registerStateTransition(pair.state2, pair.state1);
+            }
+        }
+    }
+
     public void periodic() {
         this.currentState.periodic();
         T nextState = (T) this.currentState.getNextState(this.targetState);
