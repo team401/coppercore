@@ -13,7 +13,7 @@ public abstract class AbstractState {
     }
 
     public AbstractState getNextState(AbstractState targetState) {
-
         return targetState;
     }
+
 }
