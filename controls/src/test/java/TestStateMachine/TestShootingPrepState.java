@@ -1,16 +1,21 @@
 package coppercore.controls.test.test_state_machine;
 
-public class TestShootingState extends AbstractTestState {
+import coppercore.controls.state_machine.AbstractState;
 
-    public static TestShootingState instance = new TestShootingState();
-    private static TestShootingState();
-    
-    public void periodic(){
+public class TestShootingPrepState extends AbstractTestState {
+
+    public static TestShootingPrepState instance = new TestShootingPrepState();
+
+    private TestShootingPrepState() {}
+    ;
+
+    public void periodic() {
         sharedState = true;
     }
 
     public AbstractState getNextState(AbstractState targetState) {
-        return (targetState == TestShootingState.instace || targetState == this)? targetState : TestIdleState.instance;
+        return (targetState == TestShootingState.instance || targetState == this)
+                ? targetState
+                : TestIdleState.instance;
     }
-
 }

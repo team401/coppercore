@@ -1,5 +1,3 @@
 package coppercore.controls.test;
 
-public class StateMachineTests {
-    
-}
+public class StateMachineTests {}
