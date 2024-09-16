@@ -40,9 +40,6 @@ java {
 }
 }
 
-compileJava.dependsOn 'spotlessApply'
-
-
 dependencies {
 	// Use JUnit Jupiter for testing.
 	testImplementation libs.junit.jupiter

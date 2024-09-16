@@ -1,4 +1,4 @@
-package coppercore.geometry
+package coppercore.geometry;
 
 public class FieldFinder {
     public Triangle triangle;
@@ -27,10 +27,10 @@ public class FieldFinder {
         Line line1 = new Line(triangle.getPoint1(), triangle.getPoint2());
         Line line2 = new Line(triangle.getPoint2(), triangle.getPoint3());
         Line line3 = new Line(triangle.getPoint3(), triangle.getPoint1());
-        
-        return isPointInsideTriangle(point) 
-            || line1.isPointOnLine(point) 
-            || line2.isPointOnLine(point) 
-            || line3.isPointOnLine(point);
+
+        return isPointInsideTriangle(point)
+                || line1.isPointOnLine(point)
+                || line2.isPointOnLine(point)
+                || line3.isPointOnLine(point);
     }
 }
