@@ -1,0 +1,10 @@
+{
+    "testText": "Hello World",
+    "testDouble": 10.0,
+    "testInt": 2,
+    "motorData": {
+        "minVoltage": -12.3,
+        "maxVoltage": 16.4,
+        "currentVoltage": 0.0
+    }
+}
