@@ -3,12 +3,12 @@ package coppercore.controls.state_machine;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class StateMachine<T extends AbstractState> {
+public class StateMachine<T extends AbstractState, A extends ActionInterface> {
 
     protected HashMap<String, T> states = new HashMap<String, T>();
     protected ArrayList<StateTransition<T>> transitions = new ArrayList<StateTransition<T>>();
     protected T currentState;
-    protected T targetState;
+    protected A currentAction;
 
     public StateMachine() {}
 
@@ -44,7 +44,7 @@ public class StateMachine<T extends AbstractState> {
 
     public void periodic() {
         this.currentState.periodic();
-        T nextState = (T) this.currentState.getNextState(this.targetState);
+        T nextState = (T) this.currentAction.getNextState(this);
         this.transitionToState(nextState);
     }
 
@@ -75,6 +75,14 @@ public class StateMachine<T extends AbstractState> {
         return states.get(name);
     }
 
+    public void setAction(A action){
+        this.currentState = action;
+    }
+
+    public void forceSetState(T state){
+        this.currentState = state;
+    }
+
     protected boolean canTransition(T from, T to) {
         for (StateTransition transition : transitions) {
             if (transition.valid(from, to)) return true;
@@ -83,12 +91,9 @@ public class StateMachine<T extends AbstractState> {
     }
 
     public boolean transitionToState(T to) {
-        if (this.currentState == to) return false;
+        if (this.currentState == to) return true;
         if (!canTransition(this.currentState, to)) return false;
-        if (!to.canEnter()) return false;
-        this.currentState.onExit();
         this.currentState = to;
-        to.onEnter();
         return true;
     }
 }
