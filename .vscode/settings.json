@@ -7,7 +7,5 @@
     "**/.factorypath": true
   },
   "C_Cpp.default.configurationProvider": "vscode-wpilib",
-  "cSpell.words": [
-    "deadband"
-  ]
+  "java.compile.nullAnalysis.mode": "automatic"
 }
