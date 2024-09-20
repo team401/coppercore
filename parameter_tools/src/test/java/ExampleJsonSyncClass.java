@@ -1,6 +1,6 @@
 package coppercore.paremeter_tools.test;
 
-import coppercore.parameter_tools.JSONSync;
+import coppercore.parameter_tools.*;
 
 public class ExampleJsonSyncClass {
 

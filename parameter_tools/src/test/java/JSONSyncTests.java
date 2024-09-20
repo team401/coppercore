@@ -3,6 +3,7 @@ package coppercore.paremeter_tools.test;
 import coppercore.parameter_tools.JSONSync;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class JSONSyncTests {
 
@@ -19,7 +20,7 @@ public class JSONSyncTests {
                         new JSONSync.JSONSyncConfigBuilder().build());
     }
 
-    // @Test
+    @Test
     public void JsonSyncLoadDataTest() {
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
@@ -29,10 +30,11 @@ public class JSONSyncTests {
         Assertions.assertNull(instance.motorData);
     }
 
-    // @Test
+    @Test
     public void JsonSyncSetFileTest() {
 
-        ExampleJsonSyncClass.synced.setFile("filePath");
+        ExampleJsonSyncClass.synced.setFile(
+                "filePath");
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
 
