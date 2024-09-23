@@ -1,6 +1,7 @@
 package coppercore.paremeter_tools.test;
 
 import coppercore.parameter_tools.JSONSync;
+import coppercore.parameter_tools.JSONExclude;
 
 public class ExampleJsonSyncClass {
 
