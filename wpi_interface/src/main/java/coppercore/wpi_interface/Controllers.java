@@ -1,6 +1,8 @@
 package coppercore.wpi_interface;
 
 import coppercore.parameter_tools.JSONSync;
+import coppercore.parameter_tools.JSONExclude;
+
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -14,7 +16,8 @@ public class Controllers {
     public Map<String, Integer> buttonShorthands;
     public Map<String, Integer> axesShorthands;
     public List<Controller> controllers = null;
-    public static transient JSONSync<Controllers> synced =
+    @JSONExclude
+    public static JSONSync<Controllers> synced =
             new JSONSync<Controllers>(
                     new Controllers(), "filePath", new JSONSync.JSONSyncConfigBuilder().build());
 
@@ -24,7 +27,7 @@ public class Controllers {
         public boolean hasPov = false;
         public List<Button> buttons = null;
         public List<Axis> axes = null;
-        // public transient JsonSync synced = ------;
+        @JSONExclude
         public transient CommandGenericHID commandHID;
 
         public IntSupplier getPov() {
@@ -74,7 +77,8 @@ public class Controllers {
         public String command = null;
         public String button = null;
         public boolean isPov = false;
-        public transient Trigger trigger = null;
+        @JSONExclude
+        public Trigger trigger = null;
 
         public void setupTrigger(CommandGenericHID commandHID) {
             int id;
@@ -95,8 +99,10 @@ public class Controllers {
         public String command = null;
         public String axis = null;
         public boolean negate = false;
-        public transient int axisNum = -1;
-        public transient DoubleSupplier supplier = null;
+        @JSONExclude
+        public int axisNum = -1;
+        @JSONExclude
+        public DoubleSupplier supplier = null;
 
         public void setupAxis(CommandGenericHID commandHID) {
             try {
