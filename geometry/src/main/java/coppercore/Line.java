@@ -24,8 +24,15 @@ public class Line {
     }
 
     public boolean isPointOnLine(Point point) {
-        return point.getY() == point.getX() * slope
-                && (x1 < point.getX() && point.getX() < x2)
-                && (y1 < point.getY() && point.getY() < y2);
+        // if Distance(a, b) == Distance(A, c) + Distance(c, b) then c is on the line ab
+        // tolerance of 1e-10 accepted
+        double distanceAC = new Line(x1, y1, point.getX(), point.getY()).getDistance();
+        double distanceCB = new Line(point.getX(), point.getY(), x2, y2).getDistance();
+
+        return Math.abs(this.getDistance() - (distanceAC + distanceCB)) <= 1e-10;
+    }
+
+    public double getDistance() {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 }
