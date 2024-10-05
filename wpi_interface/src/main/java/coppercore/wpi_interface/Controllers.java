@@ -1,8 +1,7 @@
 package coppercore.wpi_interface;
 
-import coppercore.parameter_tools.JSONSync;
 import coppercore.parameter_tools.JSONExclude;
-
+import coppercore.parameter_tools.JSONSync;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -16,19 +15,19 @@ public class Controllers {
     public Map<String, Integer> buttonShorthands;
     public Map<String, Integer> axesShorthands;
     public List<Controller> controllers = null;
+
     @JSONExclude
     public static JSONSync<Controllers> synced =
             new JSONSync<Controllers>(
                     new Controllers(), "filePath", new JSONSync.JSONSyncConfigBuilder().build());
 
-    static class Controller {
+    public static class Controller {
         public int port = -1;
         public String type = null;
         public boolean hasPov = false;
         public List<Button> buttons = null;
         public List<Axis> axes = null;
-        @JSONExclude
-        public transient CommandGenericHID commandHID;
+        @JSONExclude public transient CommandGenericHID commandHID;
 
         public IntSupplier getPov() {
             return () -> commandHID.getHID().getPOV();
@@ -71,52 +70,90 @@ public class Controllers {
             }
             throw new RuntimeException("Axis not found " + axisNum);
         }
+
+        public String toString() {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("Controler Object {\n");
+            stringBuilder.append("\tButtons: {\n");
+            for (Button button : this.buttons) {
+                stringBuilder.append("\t\t");
+                stringBuilder.append(button.toString());
+                stringBuilder.append("\n");
+            }
+            stringBuilder.append("\t}\n\tAxes: {\n");
+            for (Axis button : this.axes) {
+                stringBuilder.append("\t\t");
+                stringBuilder.append(button.toString());
+                stringBuilder.append("\n");
+            }
+            stringBuilder.append("\t}\n}");
+            return stringBuilder.toString();
+        }
     }
 
-    private static class Button {
+    public static class Button {
         public String command = null;
         public String button = null;
         public boolean isPov = false;
-        @JSONExclude
-        public Trigger trigger = null;
+        @JSONExclude public Trigger trigger = null;
 
         public void setupTrigger(CommandGenericHID commandHID) {
             int id;
             try {
                 id = Integer.valueOf(button, 10);
             } catch (NumberFormatException e) {
-                if (!synced.getObject().buttonShorthands.containsKey(button))
+                if (!Controllers.synced.getObject().buttonShorthands.containsKey(button))
                     throw new RuntimeException(
                             "Button Id not found as interger or in shorthands " + button);
-                id = synced.getObject().buttonShorthands.get(button);
+                id = Controllers.synced.getObject().buttonShorthands.get(button);
             }
             if (isPov) trigger = commandHID.pov(id);
             else trigger = commandHID.button(id);
         }
+
+        public String toString() {
+            return "Button Object { button: "
+                    + button
+                    + " command: "
+                    + command
+                    + " isPov: "
+                    + isPov
+                    + " }";
+        }
     }
 
-    private static class Axis {
+    public static class Axis {
         public String command = null;
         public String axis = null;
         public boolean negate = false;
-        @JSONExclude
-        public int axisNum = -1;
-        @JSONExclude
-        public DoubleSupplier supplier = null;
+        @JSONExclude public int axisNum = -1;
+        @JSONExclude public DoubleSupplier supplier = null;
 
         public void setupAxis(CommandGenericHID commandHID) {
             try {
                 axisNum = Integer.valueOf(axis, 10);
             } catch (NumberFormatException e) {
-                if (!synced.getObject().axesShorthands.containsKey(axis))
+                if (!Controllers.synced.getObject().axesShorthands.containsKey(axis))
                     throw new RuntimeException("Axis Id not found " + axis);
-                axisNum = synced.getObject().axesShorthands.get(axis);
+                axisNum = Controllers.synced.getObject().axesShorthands.get(axis);
             }
             supplier = () -> ((negate) ? 1 : -1) * commandHID.getRawAxis(axisNum);
         }
 
         public DoubleSupplier getSupplier() {
             return supplier;
+        }
+
+        public String toString() {
+            return "Axis Object { axis: "
+                    + axis
+                    + " command: "
+                    + command
+                    + " negate: "
+                    + negate
+                    + " axisNum: "
+                    + axisNum
+                    + " }";
         }
     }
 
@@ -132,7 +169,6 @@ public class Controllers {
 
     public static void loadControllers() {
         synced.loadData();
-
         setupControllers();
     }
 }
