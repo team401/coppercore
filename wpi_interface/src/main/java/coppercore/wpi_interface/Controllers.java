@@ -34,8 +34,8 @@ public class Controllers {
         }
 
         public void setupController() {
-            if (port < 1 || port > 5)
-                throw new RuntimeException("Invalid port must be between 1 and 5 " + port);
+            if (port < 0 || port > 5)
+                throw new RuntimeException("Invalid port must be between 0 and 5 " + port);
             commandHID =
                     switch (type) {
                         case "joystick" -> commandHID = new CommandJoystick(port);
@@ -71,24 +71,6 @@ public class Controllers {
             throw new RuntimeException("Axis not found " + axisNum);
         }
 
-        public String toString() {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("Controler Object {\n");
-            stringBuilder.append("\tButtons: {\n");
-            for (Button button : this.buttons) {
-                stringBuilder.append("\t\t");
-                stringBuilder.append(button.toString());
-                stringBuilder.append("\n");
-            }
-            stringBuilder.append("\t}\n\tAxes: {\n");
-            for (Axis button : this.axes) {
-                stringBuilder.append("\t\t");
-                stringBuilder.append(button.toString());
-                stringBuilder.append("\n");
-            }
-            stringBuilder.append("\t}\n}");
-            return stringBuilder.toString();
-        }
     }
 
     public static class Button {
@@ -104,22 +86,13 @@ public class Controllers {
             } catch (NumberFormatException e) {
                 if (!Controllers.synced.getObject().buttonShorthands.containsKey(button))
                     throw new RuntimeException(
-                            "Button Id not found as interger or in shorthands " + button);
+                            "Button ID not found as integer or in shorthands " + button);
                 id = Controllers.synced.getObject().buttonShorthands.get(button);
             }
             if (isPov) trigger = commandHID.pov(id);
             else trigger = commandHID.button(id);
         }
 
-        public String toString() {
-            return "Button Object { button: "
-                    + button
-                    + " command: "
-                    + command
-                    + " isPov: "
-                    + isPov
-                    + " }";
-        }
     }
 
     public static class Axis {
@@ -134,7 +107,7 @@ public class Controllers {
                 axisNum = Integer.valueOf(axis, 10);
             } catch (NumberFormatException e) {
                 if (!Controllers.synced.getObject().axesShorthands.containsKey(axis))
-                    throw new RuntimeException("Axis Id not found " + axis);
+                    throw new RuntimeException("Axis ID not found " + axis);
                 axisNum = Controllers.synced.getObject().axesShorthands.get(axis);
             }
             supplier = () -> ((negate) ? 1 : -1) * commandHID.getRawAxis(axisNum);
@@ -144,17 +117,6 @@ public class Controllers {
             return supplier;
         }
 
-        public String toString() {
-            return "Axis Object { axis: "
-                    + axis
-                    + " command: "
-                    + command
-                    + " negate: "
-                    + negate
-                    + " axisNum: "
-                    + axisNum
-                    + " }";
-        }
     }
 
     public static List<Controller> getControllers() {
