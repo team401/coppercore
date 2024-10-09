@@ -19,6 +19,7 @@ def includeDesktopSupport = true
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
 dependencies {
+	implementation project(":monitors")
 	implementation 'edu.wpi.first.wpilibj:wpilibj-java:2024.3.2'
 	implementation 'edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:2024.3.2'
 	implementation 'edu.wpi.first.wpiutil:wpiutil-java:2024.3.2'
