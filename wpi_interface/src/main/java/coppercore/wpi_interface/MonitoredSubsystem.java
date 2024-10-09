@@ -1,9 +1,11 @@
 package coppercore.wpi_interface;
 
 import coppercore.monitors.Monitor;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.List;
+import org.littletonrobotics.junction.Logger;
 
 public class MonitoredSubsystem extends SubsystemBase {
     private List<Monitor> registeredMonitors = new ArrayList<Monitor>();
@@ -34,7 +36,13 @@ public class MonitoredSubsystem extends SubsystemBase {
     private void runMonitors() {
         registeredMonitors.forEach(
                 monitor -> {
-                    monitor.periodic();
+                    monitor.periodic(Timer.getFPGATimestamp());
+
+                    // TODO: Move logging to MonitoredSubsystem under wpi interface
+                    Logger.recordOutput(
+                            "monitors/" + monitor.getName() + "/triggered", monitor.isTriggered());
+                    Logger.recordOutput(
+                            "monitors/" + monitor.getName() + "/faulted", monitor.isFaulted());
                 });
     }
 }
