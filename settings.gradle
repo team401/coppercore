@@ -12,4 +12,4 @@ plugins {
 
 rootProject.name = 'coppercore'
 
-include('geometry', 'wpilib_interface', 'math', 'controls', "parameter_tools", 'vision')
+include('geometry', 'wpilib_interface', 'math', 'controls', "parameter_tools", 'vision', 'monitors')
