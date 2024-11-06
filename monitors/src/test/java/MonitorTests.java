@@ -1,73 +1,91 @@
 package coppercore.monitors.test;
 
+import coppercore.monitors.Monitor;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 public class MonitorTests {
     // TODO: FIGURE OUT HOW TO TEST THIS
     // Callbacks are hard :(
 
     // Mimics a changing robot state
-    // boolean isStateValid = true;
+    private boolean isStateValid = true;
 
-    // @Test
-    // public void nonStickyTest() {
-    //     Monitor exampleMonitor =
-    //             new Monitor("exampleMonitor", false, () -> isStateValid, 1.0, () -> {});
+    private boolean getIsStateValid() {
+        return isStateValid;
+    }
 
-    //     exampleMonitor.periodic(0.0);
-    //     Assertions.assertFalse(exampleMonitor.isFaulted());
-    //     Assertions.assertFalse(exampleMonitor.isTriggered());
+    @Test
+    public void nonStickyTest() {
+        isStateValid = true;
 
-    //     isStateValid = false;
-    //     exampleMonitor.periodic(1.0);
-    //     Assertions.assertFalse(exampleMonitor.isFaulted());
-    //     Assertions.assertFalse(exampleMonitor.isTriggered());
+        Monitor exampleMonitor =
+                new Monitor.MonitorBuilder()
+                        .withName("exampleMonitor")
+                        .withStickyness(false)
+                        .withIsStateValidSupplier(() -> getIsStateValid())
+                        .withTimeToFault(1.0)
+                        .withFaultCallback(() -> {})
+                        .build();
 
-    //     exampleMonitor.periodic(1.25);
-    //     Assertions.assertFalse(exampleMonitor.isFaulted());
-    //     Assertions.assertFalse(exampleMonitor.isTriggered());
+        exampleMonitor.periodic(0.0);
+        Assertions.assertFalse(exampleMonitor.isFaulted());
+        Assertions.assertFalse(exampleMonitor.isTriggered());
 
-    //     exampleMonitor.periodic(2.0);
-    //     Assertions.assertTrue(exampleMonitor.isFaulted());
-    //     Assertions.assertTrue(exampleMonitor.isTriggered());
+        isStateValid = false;
+        exampleMonitor.periodic(1.0);
+        Assertions.assertFalse(exampleMonitor.isFaulted());
+        Assertions.assertTrue(exampleMonitor.isTriggered());
 
-    //     isStateValid = true;
-    //     exampleMonitor.periodic(3.0);
-    //     Assertions.assertFalse(exampleMonitor.isFaulted());
-    //     Assertions.assertFalse(exampleMonitor.isTriggered());
-    // }
+        exampleMonitor.periodic(1.25);
+        Assertions.assertFalse(exampleMonitor.isFaulted());
+        Assertions.assertTrue(exampleMonitor.isTriggered());
 
-    // @Test
-    // public void stickyTest() {
-    //     // Mimics a changing robot state
-    //     boolean isStateValid = true;
+        exampleMonitor.periodic(2.0);
+        Assertions.assertTrue(exampleMonitor.isFaulted());
+        Assertions.assertTrue(exampleMonitor.isTriggered());
 
-    //     Monitor exampleMonitor =
-    //             new Monitor(
-    //                     "exampleMonitor",
-    //                     true,
-    //                     () -> isStateValid,
-    //                     1.0,
-    //                     () -> {}); // TODO: Figure out how to test callback
+        isStateValid = true;
+        exampleMonitor.periodic(3.0);
+        Assertions.assertFalse(exampleMonitor.isFaulted());
+        Assertions.assertFalse(exampleMonitor.isTriggered());
+    }
 
-    //     exampleMonitor.periodic(0.0);
-    //     Assertions.assertFalse(exampleMonitor.isFaulted());
-    //     Assertions.assertFalse(exampleMonitor.isTriggered());
+    @Test
+    public void stickyTest() {
+        // Mimics a changing robot state
+        isStateValid = true;
 
-    //     isStateValid = false;
-    //     exampleMonitor.periodic(1.0);
-    //     Assertions.assertFalse(exampleMonitor.isFaulted());
-    //     Assertions.assertFalse(exampleMonitor.isTriggered());
+        Monitor exampleMonitor =
+                new Monitor.MonitorBuilder()
+                        .withName("exampleMonitor")
+                        .withStickyness(true)
+                        .withIsStateValidSupplier(() -> getIsStateValid())
+                        .withTimeToFault(1.0)
+                        .withFaultCallback(() -> {})
+                        .build();
 
-    //     exampleMonitor.periodic(1.25);
-    //     Assertions.assertFalse(exampleMonitor.isFaulted());
-    //     Assertions.assertFalse(exampleMonitor.isTriggered());
+        exampleMonitor.periodic(0.0);
+        Assertions.assertFalse(exampleMonitor.isFaulted());
+        Assertions.assertFalse(exampleMonitor.isTriggered());
 
-    //     exampleMonitor.periodic(2.0);
-    //     Assertions.assertTrue(exampleMonitor.isFaulted());
-    //     Assertions.assertTrue(exampleMonitor.isTriggered());
+        isStateValid = false;
+        exampleMonitor.periodic(1.0);
+        Assertions.assertFalse(exampleMonitor.isFaulted());
+        Assertions.assertFalse(getIsStateValid());
+        Assertions.assertTrue(exampleMonitor.isTriggered());
 
-    //     isStateValid = true;
-    //     exampleMonitor.periodic(3.0);
-    //     Assertions.assertTrue(exampleMonitor.isFaulted());
-    //     Assertions.assertFalse(exampleMonitor.isTriggered());
-    // }
+        exampleMonitor.periodic(1.25);
+        Assertions.assertFalse(exampleMonitor.isFaulted());
+        Assertions.assertTrue(exampleMonitor.isTriggered());
+
+        exampleMonitor.periodic(2.0);
+        Assertions.assertTrue(exampleMonitor.isFaulted());
+        Assertions.assertTrue(exampleMonitor.isTriggered());
+
+        isStateValid = true;
+        exampleMonitor.periodic(3.0);
+        Assertions.assertTrue(exampleMonitor.isFaulted());
+        Assertions.assertFalse(exampleMonitor.isTriggered());
+    }
 }
