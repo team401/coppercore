@@ -38,7 +38,6 @@ public class MonitoredSubsystem extends SubsystemBase {
                 monitor -> {
                     monitor.periodic(Timer.getFPGATimestamp());
 
-                    // TODO: Move logging to MonitoredSubsystem under wpi interface
                     Logger.recordOutput(
                             "monitors/" + monitor.getName() + "/triggered", monitor.isTriggered());
                     Logger.recordOutput(
