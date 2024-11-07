@@ -17,7 +17,7 @@ java {
 def includeDesktopSupport = true
 
 configurations.all {
-	// exclude group: "edu.wpi.first.wpilibj"
+	exclude group: "edu.wpi.first.wpilibj"
 }
 
 task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
@@ -32,6 +32,9 @@ dependencies {
 	def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
 	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
 	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:3.2.1"
+
+	implementation wpi.java.deps.wpilib()
+	implementation wpi.java.vendor.java()
 
 	implementation project(":monitors")
 	implementation 'org.littletonrobotics.akit.junction:junction-core:3.2.1'
