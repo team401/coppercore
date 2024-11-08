@@ -11,4 +11,8 @@ plugins {
 }
 
 rootProject.name = 'coppercore'
+<<<<<<< HEAD
 include('geometry', 'wpilib_interface', 'math', 'controls', "parameter_tools")
+=======
+include('geometry', 'wpi_interface', 'math', 'controls', "parameter_tools", 'vision')
+>>>>>>> 1260d09 (Move vision to its own package)

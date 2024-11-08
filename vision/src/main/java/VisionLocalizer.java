@@ -1,4 +1,4 @@
-package coppercore.wpilib_interface.vision;
+package coppercore.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.VecBuilder;
@@ -43,7 +43,9 @@ public class VisionLocalizer extends SubsystemBase {
                 visionMeasurementConsumer.accept(
                         // TODO: Actual standard deviations (not zero)
                         new VisionMeasurement(
-                                pose.get().estimatedPose.toPose2d(), result.getTimestampSeconds(), VecBuilder.fill(0.0, 0.0, Double.MAX_VALUE)));
+                                pose.get().estimatedPose.toPose2d(),
+                                result.getTimestampSeconds(),
+                                VecBuilder.fill(0.0, 0.0, Double.MAX_VALUE)));
             }
         }
     }

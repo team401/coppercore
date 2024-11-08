@@ -1,4 +1,4 @@
-package coppercore.wpilib_interface.vision;
+package coppercore.vision;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;

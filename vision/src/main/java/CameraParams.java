@@ -1,4 +1,4 @@
-package coppercore.wpilib_interface.vision;
+package coppercore.vision;
 
 import edu.wpi.first.math.geometry.Transform3d;
 import org.photonvision.PhotonCamera;
