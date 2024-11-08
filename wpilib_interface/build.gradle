@@ -3,6 +3,7 @@ import java.text.SimpleDateFormat
 plugins {
 	id "java"
 	id "maven-publish"
+	id "edu.wpi.first.GradleRIO" version "2024.3.2"
 	id "com.peterabeles.gversion" version "1.10"
 	id "com.diffplug.spotless" version "6.24.0"
 }
@@ -25,6 +26,9 @@ dependencies {
 	implementation 'edu.wpi.first.wpimath:wpimath-java:2024.3.2'
 
 	implementation project(":math")
+
+	implementation wpi.java.deps.wpilib()
+	implementation wpi.java.vendor.java()
 
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
