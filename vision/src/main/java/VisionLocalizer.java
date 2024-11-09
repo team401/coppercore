@@ -2,9 +2,11 @@ package coppercore.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -39,13 +41,20 @@ public class VisionLocalizer extends SubsystemBase {
     public void periodic() {
         for (CameraWrapper camera : cameras) {
             for (PhotonPipelineResult result : camera.getCamera().getAllUnreadResults()) {
-                Optional<EstimatedRobotPose> pose = camera.getPoseEstimator().update(result);
-                visionMeasurementConsumer.accept(
-                        // TODO: Actual standard deviations (not zero)
-                        new VisionMeasurement(
-                                pose.get().estimatedPose.toPose2d(),
-                                result.getTimestampSeconds(),
-                                VecBuilder.fill(0.0, 0.0, Double.MAX_VALUE)));
+                Optional<EstimatedRobotPose> potentialPose =
+                        camera.getPoseEstimator().update(result);
+
+                if (potentialPose.isPresent()) {
+                    EstimatedRobotPose est = potentialPose.get();
+                    Pose3d pose = est.estimatedPose;
+                    visionMeasurementConsumer.accept( // TODO: Actual standard deviations (not zero)
+                            new VisionMeasurement(
+                                    pose.toPose2d(),
+                                    result.getTimestampSeconds(),
+                                    VecBuilder.fill(0.0, 0.0, 0.0)));
+                    Logger.recordOutput(
+                            "vision/" + camera.getCamera().getName() + "/latestPoseEstimate", pose);
+                }
             }
         }
     }
