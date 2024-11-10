@@ -12,11 +12,11 @@ public class TransitionInfo<State, Trigger> {
         this.trigger = trigger;
     }
 
-    public void setTargetState(State targetState){
+    public void setTargetState(State targetState) {
         this.targetState = targetState;
     }
 
-    public void setTransition(Transition<State, Trigger> transition){
+    public void setTransition(Transition<State, Trigger> transition) {
         targetState = transition.getDestination();
         this.transition = transition;
     }
@@ -25,7 +25,7 @@ public class TransitionInfo<State, Trigger> {
         return currentState;
     }
 
-    public State getTargetState(){
+    public State getTargetState() {
         return targetState;
     }
 
@@ -33,15 +33,15 @@ public class TransitionInfo<State, Trigger> {
         return trigger;
     }
 
-    public Transition geTransition(){
+    public Transition getTransition() {
         return transition;
     }
 
-    public void fail(){
+    public void fail() {
         failed = true;
     }
 
-    public boolean wasFail(){
+    public boolean wasFail() {
         return failed;
     }
 }

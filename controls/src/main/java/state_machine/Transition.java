@@ -10,9 +10,15 @@ public class Transition<State, Trigger> {
     private boolean internalTransition;
 
     public Transition(State source, State destination, Trigger trigger) {
+        this(source, destination, trigger, false);
+    }
+
+    public Transition(
+            State source, State destination, Trigger trigger, boolean internalTransition) {
         this.source = source;
         this.destination = destination;
         this.trigger = trigger;
+        this.internalTransition = internalTransition;
     }
 
     public State getSource() {
@@ -31,11 +37,13 @@ public class Transition<State, Trigger> {
         return true;
     }
 
-    public void runAction(){
-        action.accept(this);
+    public void runAction() {
+        if (action != null) {
+            action.accept(this);
+        }
     }
 
-    public boolean isInternal(){
+    public boolean isInternal() {
         return internalTransition;
     }
 
