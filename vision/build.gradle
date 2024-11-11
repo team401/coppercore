@@ -36,7 +36,6 @@ dependencies {
 	implementation wpi.java.deps.wpilib()
 	implementation wpi.java.vendor.java()
 
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
@@ -52,15 +51,15 @@ tasks.withType(JavaCompile) {
 	options.compilerArgs.add '-XDstringConcat=inline'
 }
 
-project.compileJava.dependsOn(createVersionFile)
-gversion {
-srcDir       = "src/main/java/"
-classPackage = "frc.robot"
-className    = "BuildConstants"
-dateFormat   = "yyyy-MM-dd HH:mm:ss z"
-timeZone     = "America/New_York"
-indent       = "  "
-}
+// project.compileJava.dependsOn(createVersionFile)
+// gversion {
+// srcDir       = "src/main/java/"
+// classPackage = "frc.robot"
+// className    = "BuildConstants"
+// dateFormat   = "yyyy-MM-dd HH:mm:ss z"
+// timeZone     = "America/New_York"
+// indent       = "  "
+// }
 
 repositories {
 	mavenCentral()

@@ -5,8 +5,8 @@ import org.photonvision.PhotonPoseEstimator;
 
 /** A wrapper for a PhotonCamera. Holds the container and its respective pose estimator */
 public class CameraWrapper {
-    private PhotonCamera camera;
-    private PhotonPoseEstimator poseEstimator;
+    private final PhotonCamera camera;
+    private final PhotonPoseEstimator poseEstimator;
 
     public CameraWrapper(PhotonCamera camera, PhotonPoseEstimator poseEstimator) {
         this.camera = camera;
