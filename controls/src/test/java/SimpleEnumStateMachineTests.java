@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import coppercore.controls.StateMachine;
 import coppercore.controls.StateMachineConfiguration;
 
-public class StateMachineTests {
+public class SimpleEnumStateMachineTests {
 
     static enum simpleEnumStates {
         IDLE,
@@ -53,7 +53,7 @@ public class StateMachineTests {
     }
 
     @Test
-    void simpleEnumStateMachineTransitionNoErrorTest() {
+    void stateMachineTransitionNoErrorTest() {
         StateMachine<simpleEnumStates, simpleEnumTriggers> stateMachine =
                 new StateMachine<>(simpleEnumMachineConfig, simpleEnumStates.IDLE);
         assertEquals(simpleEnumStates.IDLE, stateMachine.getCurrentState());
@@ -74,7 +74,7 @@ public class StateMachineTests {
     }
 
     @Test
-    void simpleEnumStateMachineTransitionErrorTest() {
+    void stateMachineTransitionErrorTest() {
         StateMachine<simpleEnumStates, simpleEnumTriggers> stateMachine =
                 new StateMachine<>(simpleEnumMachineConfig, simpleEnumStates.IDLE);
         assertEquals(simpleEnumStates.IDLE, stateMachine.getCurrentState());
