@@ -24,6 +24,8 @@ dependencies {
 	implementation 'edu.wpi.first.wpilibj:wpilibj-java:2024.3.2'
 	implementation 'edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:2024.3.2'
 
+	implementation 'edu.wpi.first.wpiutil:wpiutil-java:2024.3.2'
+
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
@@ -40,15 +42,15 @@ tasks.withType(JavaCompile) {
 	options.compilerArgs.add '-XDstringConcat=inline'
 }
 
-project.compileJava.dependsOn(createVersionFile)
-gversion {
-srcDir       = "src/main/java/"
-classPackage = "frc.robot"
-className    = "BuildConstants"
-dateFormat   = "yyyy-MM-dd HH:mm:ss z"
-timeZone     = "America/New_York"
-indent       = "  "
-}
+// project.compileJava.dependsOn(createVersionFile)
+// gversion {
+// srcDir       = "src/main/java/"
+// classPackage = "frc.robot"
+// className    = "BuildConstants"
+// dateFormat   = "yyyy-MM-dd HH:mm:ss z"
+// timeZone     = "America/New_York"
+// indent       = "  "
+// }
 
 repositories {
 	mavenCentral()
