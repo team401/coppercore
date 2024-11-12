@@ -1,4 +1,4 @@
-package coppercore.wpi_interface;
+package coppercore.wpilib_interface;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 

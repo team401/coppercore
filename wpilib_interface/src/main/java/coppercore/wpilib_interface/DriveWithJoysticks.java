@@ -1,4 +1,4 @@
-package coppercore.wpi_interface;
+package coppercore.wpilib_interface;
 
 import coppercore.math.Deadband;
 import edu.wpi.first.math.geometry.Pose2d;
