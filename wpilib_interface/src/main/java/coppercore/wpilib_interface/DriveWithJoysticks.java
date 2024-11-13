@@ -13,12 +13,18 @@ public class DriveWithJoysticks extends Command {
     private DriveTemplate drive;
     private CommandJoystick leftJoystick;
     private CommandJoystick rightJoystick;
+    private double maxLinearVelocity;
+    private double maxAngularVelocity;
 
     public DriveWithJoysticks(
-            DriveTemplate drive, CommandJoystick leftJoystick, CommandJoystick rightJoystick) {
+            DriveTemplate drive, CommandJoystick leftJoystick, CommandJoystick rightJoystick, double maxLinearVelocity, double maxAngularVelocity) {
         this.drive = drive;
         this.leftJoystick = leftJoystick;
         this.rightJoystick = rightJoystick;
+        this.maxLinearVelocity = maxLinearVelocity;
+        this.maxAngularVelocity = maxAngularVelocity;
+        
+        addRequirements(this.drive);
     }
 
     @Override
@@ -28,7 +34,7 @@ public class DriveWithJoysticks extends Command {
         double omega = Deadband.oneAxisDeadband(rightJoystick.getX(), 0.1);
         omega = Math.copySign(omega * omega, omega);
 
-        drive.setGoalSpeeds(new ChassisSpeeds(linearSpeeds.getX(), linearSpeeds.getY(), omega), true);
+        drive.setGoalSpeeds(new ChassisSpeeds(linearSpeeds.getX() * maxLinearVelocity, linearSpeeds.getY() * maxLinearVelocity, omega * maxAngularVelocity), true);
     }
 
     public Translation2d getLinearVelocity(double x, double y) {
