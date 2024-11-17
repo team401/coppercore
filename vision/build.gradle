@@ -3,7 +3,6 @@ import java.text.SimpleDateFormat
 plugins {
 	id "java"
 	id "maven-publish"
-	id "edu.wpi.first.GradleRIO" version "2024.3.2"
 	id "com.peterabeles.gversion" version "1.10"
 	id "com.diffplug.spotless" version "6.24.0"
 }
@@ -29,12 +28,18 @@ compileJava.finalizedBy checkAkitInstall
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
 dependencies {
+	implementation 'edu.wpi.first.wpilibj:wpilibj-java:2024.3.2'
+	implementation 'edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:2024.3.2'
+	implementation 'edu.wpi.first.apriltag:apriltag-java:2024.3.2'
+
 	def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
 	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
 	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:3.2.1"
 
-	implementation wpi.java.deps.wpilib()
-	implementation wpi.java.vendor.java()
+	implementation 'org.littletonrobotics.akit.junction:junction-core:3.2.1'
+
+	implementation 'org.photonvision:photonlib-java:v2025.0.0-alpha-0'
+	implementation 'org.photonvision:photontargeting-java:v2025.0.0-alpha-0'
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
@@ -75,6 +80,10 @@ repositories {
 		}
 	}
 	gradlePluginPortal()
+	maven {
+		name "photonvisionRepositoryReleases"
+		url "https://maven.photonvision.org/releases"
+	}
 }
 
 
