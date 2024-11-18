@@ -51,10 +51,10 @@ public class DriveWithJoysticks extends Command {
 
     /* returns a calculated translation with squared velocity */
     public Translation2d getLinearVelocity(double x, double y) {
-        double[] deadbands = Deadband.twoAxisDeadband(x, y, joystickDeadband); 
+        double[] deadbands = Deadband.twoAxisDeadband(x, y, joystickDeadband);
 
-        double x = deadbands[0], y = deadbands[1];
-        double magnitude = Math.hypot(x, y);
+        double xDeadband = deadbands[0], yDeadband = deadbands[1];
+        double magnitude = Math.hypot(xDeadband, yDeadband);
 
         /* joystick x/y is opposite of field x/y
          * therefore, x and y must be flipped for proper rotation of pose
