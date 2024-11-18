@@ -1,9 +1,12 @@
 package coppercore.vision;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
@@ -11,11 +14,6 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
-
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** A reliable vision subsystem to be used in any robot project */
 public class VisionLocalizer extends SubsystemBase {
@@ -54,10 +52,16 @@ public class VisionLocalizer extends SubsystemBase {
                                     cameraParams[i].robotToCamera()));
 
             if (isSim) {
-                PhotonCameraSim cameraSim = new PhotonCameraSim(cameras[i].getCamera(), cameraParams[i].simCameraProp());
+                PhotonCameraSim cameraSim =
+                        new PhotonCameraSim(
+                                cameras[i].getCamera(), cameraParams[i].simCameraProp());
                 visionSim.addCamera(cameraSim, cameraParams[i].robotToCamera());
             }
         }
+    }
+
+    public void setVisionMeasurementConsumer(Consumer<VisionMeasurement> newVisionMeasurementConsumer) {
+        visionMeasurementConsumer = newVisionMeasurementConsumer;
     }
 
     public void setSimRobotPoseSupplier(Supplier<Pose3d> newSimRobotPoseSupplier) {
