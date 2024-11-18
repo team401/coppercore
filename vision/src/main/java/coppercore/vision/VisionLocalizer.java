@@ -60,7 +60,8 @@ public class VisionLocalizer extends SubsystemBase {
         }
     }
 
-    public void setVisionMeasurementConsumer(Consumer<VisionMeasurement> newVisionMeasurementConsumer) {
+    public void setVisionMeasurementConsumer(
+            Consumer<VisionMeasurement> newVisionMeasurementConsumer) {
         visionMeasurementConsumer = newVisionMeasurementConsumer;
     }
 
