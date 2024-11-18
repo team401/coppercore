@@ -15,18 +15,21 @@ public class DriveWithJoysticks extends Command {
     private CommandJoystick rightJoystick;
     private double maxLinearVelocity;
     private double maxAngularVelocity;
+    private double joystickDeadband;
 
     public DriveWithJoysticks(
             DriveTemplate drive,
             CommandJoystick leftJoystick,
             CommandJoystick rightJoystick,
             double maxLinearVelocity,
-            double maxAngularVelocity) {
+            double maxAngularVelocity,
+            double joystickDeadband) {
         this.drive = drive;
         this.leftJoystick = leftJoystick;
         this.rightJoystick = rightJoystick;
         this.maxLinearVelocity = maxLinearVelocity;
         this.maxAngularVelocity = maxAngularVelocity;
+        this.joystickDeadband = joystickDeadband;
 
         addRequirements(this.drive);
     }
@@ -35,7 +38,7 @@ public class DriveWithJoysticks extends Command {
     public void execute() {
         Translation2d linearSpeeds = getLinearVelocity(-leftJoystick.getX(), -leftJoystick.getY());
 
-        double omega = Deadband.oneAxisDeadband(-rightJoystick.getX(), 0.1);
+        double omega = Deadband.oneAxisDeadband(-rightJoystick.getX(), joystickDeadband);
         omega = Math.copySign(omega * omega, omega);
 
         drive.setGoalSpeeds(
@@ -46,11 +49,19 @@ public class DriveWithJoysticks extends Command {
                 true);
     }
 
+    /* returns a calculated translation with squared velocity */
     public Translation2d getLinearVelocity(double x, double y) {
-        double deadband = Deadband.oneAxisDeadband(Math.hypot(x, y), 0.1);
+        double[] deadbands = Deadband.twoAxisDeadband(x, y, joystickDeadband); 
 
-        Rotation2d direction = new Rotation2d(x, y);
-        double squaredMagnitude = deadband * deadband;
+        double x = deadbands[0], y = deadbands[1];
+        double magnitude = Math.hypot(x, y);
+
+        /* joystick x/y is opposite of field x/y
+         * therefore, x and y must be flipped for proper rotation of pose
+         * BEWARE: not flipping will cause forward on joystick to drive right on field
+         */
+        Rotation2d direction = new Rotation2d(y, x);
+        double squaredMagnitude = magnitude * magnitude;
 
         Translation2d linearVelocity =
                 new Pose2d(new Translation2d(), direction)
