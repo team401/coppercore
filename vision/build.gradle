@@ -39,8 +39,8 @@ dependencies {
 
 	implementation 'org.littletonrobotics.akit.junction:junction-core:3.2.1'
 
-	implementation 'org.photonvision:photonlib-java:v2025.0.0-alpha-0'
-	implementation 'org.photonvision:photontargeting-java:v2025.0.0-alpha-0'
+	implementation 'org.photonvision:photonlib-java:v2024.3.1'
+	implementation 'org.photonvision:photontargeting-java:v2024.3.1'
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
