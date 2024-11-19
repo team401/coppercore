@@ -1,11 +1,11 @@
 package coppercore.controls.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import coppercore.controls.StateMachine;
 import coppercore.controls.StateMachineConfiguration;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class SimpleEnumStateMachineTests {
 
