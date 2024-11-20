@@ -10,13 +10,17 @@ public class StateConfiguration<State, Trigger> {
 
     private List<Transition<State, Trigger>> transitions;
     private State source;
-    private Consumer<Transition> onEntry;
-    private Consumer<Transition> onExit;
+    private Consumer<Transition> onEntryAction;
+    private Consumer<Transition> onExitAction;
+    private Consumer<Transition> transitionAction;
+    private boolean runDefaultTransitionAction = true;
+    private boolean runDefaultEntryAction = true;
+    private boolean runDefaultExitAction = true;
 
     public StateConfiguration(State source) {
         this.source = source;
         // Temp solution
-        transitions = new ArrayList<Transition<State, Trigger>>();
+        transitions = new ArrayList<>();
     }
 
     public StateConfiguration<State, Trigger> permit(Trigger trigger, State destination) {
@@ -85,14 +89,57 @@ public class StateConfiguration<State, Trigger> {
     }
 
     public void runOnEntry(Transition transition) {
-        if (onEntry != null) {
-            onEntry.accept(transition);
+        if (onEntryAction != null) {
+            onEntryAction.accept(transition);
         }
     }
 
     public void runOnExit(Transition transition) {
-        if (onExit != null) {
-            onExit.accept(transition);
+        if (onExitAction != null) {
+            onExitAction.accept(transition);
         }
     }
+
+    public StateConfiguration<State, Trigger> disableDefaultTransitionAction(){
+        this.runDefaultTransitionAction = false;
+        return this;
+    }
+
+    public StateConfiguration<State, Trigger> disableDefualtOnEntry(){
+        this.runDefaultEntryAction = false;
+        return this;
+    }
+
+    public StateConfiguration<State, Trigger> disableDefualtOnExit(){
+        this.runDefaultExitAction = false;
+        return this;
+    }
+
+    public StateConfiguration<State, Trigger> configureOnEntryAction(Consumer<Transition> action){
+        this.onEntryAction = action;
+        return this;
+    }
+
+    public StateConfiguration<State, Trigger> configureOnExitAction(Consumer<Transition> action){
+        this.onExitAction = action;
+        return this;
+    }
+
+    public StateConfiguration<State, Trigger> configureTransitionAction(Consumer<Transition> action){
+        this.transitionAction = action;
+        return this;
+    }
+
+    public boolean doRunDefaultEntryAction(){
+        return runDefaultEntryAction;
+    }
+
+    public boolean doRunDefaultExitAction(){
+        return runDefaultExitAction;
+    }
+
+    public boolean doRunDefaultTransitionAction(){
+        return runDefaultTransitionAction;
+    }
+    
 }

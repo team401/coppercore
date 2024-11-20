@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import coppercore.controls.StateInterface;
+import coppercore.controls.Transition;
 
 public class StateContainerStateMachineTests {
 
@@ -74,8 +75,8 @@ public class StateContainerStateMachineTests {
         stateContainerTestMachineConfig = new StateMachineConfiguration<>();
 
         stateContainerTestMachineConfig
-                .configureDefaultTransitionAction((State state, Transition transition) -> state.onEntry(transition));
-                .addTransitionAction((State state, Transition transition) -> state.onEntry(transition));
+                .configureDefaultEntryAction((testStateContainer state, Transition transition) -> state.onEntry(transition));
+                .configureDefaultTransitionAction((testStateContainer state, Transition transition) -> state.onEntry(transition));
 
 
         //stateContainerTestMachineConfig
@@ -89,10 +90,10 @@ public class StateContainerStateMachineTests {
                 //.parentState(testStateContainer.SOME_STATE) Not in first Implemenation
                 .permit(testEnumTriggers.PREPARE, testStateContainer.READY)
                 .permitInternal(testEnumTriggers.PREPARE, testStateContainer.READY)
-                .addTransitionAction(testStateContainer.IDLE::customTransitionAction)
+                .configureTransitionAction(IdleState::customTransitionAction)
                 .disableDefaultTransitionAction()
-                .addOnEntryAction(testStateContainer.IDLE::customOnEntry)
-                .addOnExitAction(testStateContainer.IDLE::customOnExit)
+                .configureOnEntryAction(IdleState::customOnEntry)
+                .configureOnExitAction(IdleState::customOnExit)
                 .disableDefualtOnEntry()
                 .disableDefualtOnExit();
                 
