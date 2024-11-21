@@ -53,4 +53,8 @@ public class StateMachine<State, Trigger> {
     public TransitionInfo getTransitionInfo() {
         return transitionInfo;
     }
+
+    public boolean inState(State state){
+        return currentState.equals(state);
+    }
 }

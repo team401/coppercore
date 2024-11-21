@@ -3,13 +3,13 @@ package coppercore.controls;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class StateMachineConfiguration<State, Trigger> {
     private Map<State, StateConfiguration<State, Trigger>> stateConfigurations;
-    private Consumer<Transition> onEntryAction;
-    private Consumer<Transition> onExitAction;
-    private Consumer<Transition> transitionAction;
+    private BiConsumer<State, Transition> onEntryAction;
+    private BiConsumer<State, Transition> onExitAction;
+    private BiConsumer<State, Transition> transitionAction;
 
     public StateMachineConfiguration() {
         // temp solution
@@ -54,17 +54,17 @@ public class StateMachineConfiguration<State, Trigger> {
         return transition;
     }
 
-    public StateMachineConfiguration<State, Trigger> configureOnEntryAction(Consumer<Transition> action){
+    public StateMachineConfiguration<State, Trigger> configureDefaultOnEntryAction(BiConsumer<State, Transition> action){
         this.onEntryAction = action;
         return this;
     }
 
-    public StateMachineConfiguration<State, Trigger> configureOnExitAction(Consumer<Transition> action){
+    public StateMachineConfiguration<State, Trigger> configureDefaultOnExitAction(BiConsumer<State, Transition> action){
         this.onExitAction = action;
         return this;
     }
 
-    public StateMachineConfiguration<State, Trigger> configureTransitionAction(Consumer<Transition> action){
+    public StateMachineConfiguration<State, Trigger> configureDefaultTransitionAction(BiConsumer<State, Transition> action){
         this.transitionAction = action;
         return this;
     }

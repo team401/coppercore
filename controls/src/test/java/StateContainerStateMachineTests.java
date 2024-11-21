@@ -1,14 +1,12 @@
 package coppercore.controls.test;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import coppercore.controls.PeriodicStateInterface;
 import coppercore.controls.StateContainer;
 import coppercore.controls.StateMachine;
 import coppercore.controls.StateMachineConfiguration;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import coppercore.controls.StateInterface;
 import coppercore.controls.Transition;
 
 public class StateContainerStateMachineTests {
@@ -75,8 +73,8 @@ public class StateContainerStateMachineTests {
         stateContainerTestMachineConfig = new StateMachineConfiguration<>();
 
         stateContainerTestMachineConfig
-                .configureDefaultEntryAction((testStateContainer state, Transition transition) -> state.onEntry(transition));
-                .configureDefaultTransitionAction((testStateContainer state, Transition transition) -> state.onEntry(transition));
+                .configureDefaultOnEntryAction((testStateContainer state, Transition transition) -> state.getState().onEntry(transition))
+                .configureDefaultTransitionAction((testStateContainer state, Transition transition) -> state.getState().onEntry(transition));
 
 
         //stateContainerTestMachineConfig

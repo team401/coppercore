@@ -100,6 +100,12 @@ public class StateConfiguration<State, Trigger> {
         }
     }
 
+    public void runTransition(Transition transition) {
+        if (transitionAction != null) {
+            transitionAction.accept(transition);
+        }
+    }
+
     public StateConfiguration<State, Trigger> disableDefaultTransitionAction(){
         this.runDefaultTransitionAction = false;
         return this;
