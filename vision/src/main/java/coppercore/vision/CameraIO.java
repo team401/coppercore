@@ -1,6 +1,6 @@
 package coppercore.vision;
 
-import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -8,7 +8,7 @@ public interface CameraIO {
 
     @AutoLog
     public static class CameraIOInputs {
-        public Pose2d latestFieldToRobot = new Pose2d();
+        public Pose3d latestFieldToRobot = new Pose3d();
         public double averageTagDistanceM = 0.0;
         public Rotation2d averageTagYaw = new Rotation2d();
         public int nTags = 0;

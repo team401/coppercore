@@ -76,7 +76,7 @@ public class CameraIOPhoton implements CameraIO {
 
         photonPose.ifPresentOrElse(
                 (pose) -> {
-                    inputs.latestFieldToRobot = pose.estimatedPose.toPose2d();
+                    inputs.latestFieldToRobot = pose.estimatedPose;
                     inputs.nTags = pose.targetsUsed.size();
 
                     inputs.latestTimestampSeconds = this.latestTimestampSeconds;
