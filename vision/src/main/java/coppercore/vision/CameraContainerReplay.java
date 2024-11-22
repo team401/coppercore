@@ -1,6 +1,5 @@
 package coppercore.vision;
 
-import coppercore.vision.CoreVisionConstants.CameraParams;
 import java.util.ArrayList;
 import java.util.List;
 

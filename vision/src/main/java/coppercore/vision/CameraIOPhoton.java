@@ -1,6 +1,6 @@
 package coppercore.vision;
 
-import coppercore.vision.CoreVisionConstants.CameraParams;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -22,26 +22,26 @@ public class CameraIOPhoton implements CameraIO {
 
     private double latestTimestampSeconds = 0.0;
 
-    public CameraIOPhoton(String name, Transform3d robotToCamera) {
-        this(new PhotonCamera(name), robotToCamera);
+    public CameraIOPhoton(String name, AprilTagFieldLayout layout, Transform3d robotToCamera) {
+        this(new PhotonCamera(name), layout, robotToCamera);
     }
 
-    public CameraIOPhoton(PhotonCamera camera, Transform3d robotToCamera) {
+    public CameraIOPhoton(
+            PhotonCamera camera, AprilTagFieldLayout layout, Transform3d robotToCamera) {
         this.camera = camera;
 
         poseEstimator =
                 new PhotonPoseEstimator(
-                        CoreVisionConstants.fieldLayout,
-                        PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                        robotToCamera);
+                        layout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCamera);
     }
 
-    public static CameraIOPhoton fromRealCameraParams(CameraParams params) {
-        return new CameraIOPhoton(params.name(), params.robotToCamera());
+    public static CameraIOPhoton fromRealCameraParams(
+            CameraParams params, AprilTagFieldLayout layout) {
+        return new CameraIOPhoton(params.name(), layout, params.robotToCamera());
     }
 
     public static CameraIOPhoton fromSimCameraParams(
-            CameraParams params, VisionSystemSim sim, boolean stream) {
+            CameraParams params, AprilTagFieldLayout layout, VisionSystemSim sim, boolean stream) {
         PhotonCamera camera = new PhotonCamera(params.name());
 
         SimCameraProperties props = new SimCameraProperties();
@@ -55,7 +55,7 @@ public class CameraIOPhoton implements CameraIO {
         cameraSim.enableRawStream(stream);
         cameraSim.enableProcessedStream(stream);
 
-        return new CameraIOPhoton(camera, params.robotToCamera());
+        return new CameraIOPhoton(camera, layout, params.robotToCamera());
     }
 
     @Override
@@ -91,6 +91,7 @@ public class CameraIOPhoton implements CameraIO {
     }
 
     private static boolean filterPhotonPose(EstimatedRobotPose photonPose) {
+        // TODO: Actual pose rejection
         if (photonPose.targetsUsed.size() < 2) {
             return false;
         }
@@ -98,6 +99,11 @@ public class CameraIOPhoton implements CameraIO {
         Pose3d pose = photonPose.estimatedPose;
         // check that the pose isn't insane
         if (pose.getZ() > 1 || pose.getZ() < -0.1) {
+            return false;
+        }
+
+        if (calculateAverageTagDistance(photonPose)
+                > CoreVisionConstants.maxAcceptedDistanceMeters) {
             return false;
         }
 

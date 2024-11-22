@@ -1,6 +1,6 @@
 package coppercore.vision;
 
-import coppercore.vision.CoreVisionConstants.CameraParams;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -36,12 +36,13 @@ public class CameraContainerSim implements CameraContainer {
 
     public CameraContainerSim(
             List<CameraParams> params,
+            AprilTagFieldLayout layout,
             Pose2d initialPose,
             SwerveDriveKinematics kinematics,
             Supplier<SwerveModuleState[]> getModuleStates) {
         this.getModuleStates = getModuleStates;
 
-        visionSim.addAprilTags(CoreVisionConstants.fieldLayout);
+        visionSim.addAprilTags(layout);
 
         this.kinematics = kinematics;
 
@@ -53,7 +54,9 @@ public class CameraContainerSim implements CameraContainer {
 
         for (CameraParams param : params) {
             cameras.add(
-                    new Camera(param, CameraIOPhoton.fromSimCameraParams(param, visionSim, true)));
+                    new Camera(
+                            param,
+                            CameraIOPhoton.fromSimCameraParams(param, layout, visionSim, true)));
         }
     }
 
