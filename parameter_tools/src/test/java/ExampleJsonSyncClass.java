@@ -1,7 +1,6 @@
-package coppercore.paremeter_tools.test;
+package coppercore.parameter_tools.test;
 
 import coppercore.parameter_tools.JSONSync;
-import coppercore.parameter_tools.JSONExclude;
 
 public class ExampleJsonSyncClass {
 
@@ -13,7 +12,7 @@ public class ExampleJsonSyncClass {
 
     public final String testText = "";
     public final Double testDouble = 0.0;
-    public final Integer testInt = 0;
+    public Integer testInt = 0;
     public final BasicMotorDataHolder motorData = null;
 
     public class BasicMotorDataHolder {
