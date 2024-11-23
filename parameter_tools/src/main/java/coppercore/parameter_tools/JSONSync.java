@@ -1,6 +1,11 @@
 package coppercore.parameter_tools;
 
-import com.google.gson.*;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.LongSerializationPolicy;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
@@ -13,6 +18,19 @@ public class JSONSync<T> {
     private String file;
 
     private final JSONSyncConfig config;
+
+    public boolean isFilePresent() {
+        // TODO
+        return false;
+    }
+
+    public void saveToFile() {
+        saveToFile(file);
+    }
+
+    public void saveToFile(String file) {
+        // TODO
+    }
 
     public T getObject() {
         return instance;
@@ -33,6 +51,10 @@ public class JSONSync<T> {
 
     public void setFile(String newFilePath) {
         file = newFilePath;
+    }
+
+    public String getFile() {
+        return file;
     }
 
     private Gson generateGson() {
@@ -67,7 +89,7 @@ public class JSONSync<T> {
         this.file = file;
     }
 
-    private static record JSONSyncConfig(
+    public static record JSONSyncConfig(
             boolean serializeNulls,
             boolean prettyPrinting,
             boolean excludeFieldsWithoutExposeAnnotation,

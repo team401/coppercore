@@ -14,9 +14,13 @@ plugins {
 repositories {
 	// Use Maven Central for resolving dependencies.
 	mavenCentral()
+	maven {
+		url 'https://frcmaven.wpi.edu/artifactory/release/'
+	}
 }
 
 dependencies {
+	implementation 'edu.wpi.first.wpilibj:wpilibj-java:2024.3.2'
 	// Use JUnit Jupiter for testing.
 	testImplementation libs.junit.jupiter
 
