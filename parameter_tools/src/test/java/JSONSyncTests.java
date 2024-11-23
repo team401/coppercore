@@ -1,4 +1,4 @@
-package coppercore.paremeter_tools.test;
+package coppercore.parameter_tools.test;
 
 import coppercore.parameter_tools.JSONSync;
 import org.junit.jupiter.api.Assertions;
@@ -7,34 +7,37 @@ import org.junit.jupiter.api.Test;
 
 public class JSONSyncTests {
 
-    public void main(String[] args) {
-        JsonSyncLoadDataTest();
-    }
-
     @BeforeEach
     public void TestPrep() {
         ExampleJsonSyncClass.synced =
                 new JSONSync<ExampleJsonSyncClass>(
                         new ExampleJsonSyncClass(),
-                        "filePath",
+                        "C:\\Users\\n"
+                                + "atha\\coppercore\\parameter_tools\\src\\test\\r"
+                                + "esources\\ExampleJsonSyncClass.json",
                         new JSONSync.JSONSyncConfigBuilder().build());
     }
 
-    //@Test
+    @Test
     public void JsonSyncLoadDataTest() {
+        System.out.println("LoadTest");
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
 
         Assertions.assertEquals(10.0, instance.testDouble);
         Assertions.assertEquals(2, instance.testInt);
         Assertions.assertNull(instance.motorData);
+        System.out.println(instance);
+        System.out.println("");
     }
 
-    //@Test
+    @Test
     public void JsonSyncSetFileTest() {
-
+        System.out.println("SetTest");
         ExampleJsonSyncClass.synced.setFile(
-                "filePath");
+                "C:\\Users\\n"
+                        + "atha\\coppercore\\parameter_tools\\src\\test\\r"
+                        + "esources\\SetFileTest.json");
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
 
@@ -44,5 +47,24 @@ public class JSONSyncTests {
         Assertions.assertEquals(-12.3, instance.motorData.minVoltage);
         Assertions.assertEquals(16.4, instance.motorData.maxVoltage);
         Assertions.assertEquals(0.0, instance.motorData.currentVoltage);
+        System.out.println(instance);
+        System.out.println("");
+    }
+
+    @Test
+    public void JsonSyncSaveFileTest() {
+        System.out.println("SaveTest");
+        ExampleJsonSyncClass.synced.loadData();
+        ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
+        System.out.println(instance);
+        System.out.println("\nSaving File\n");
+        instance.testInt = 10;
+        ExampleJsonSyncClass.synced.setFile(
+                "C:\\Users\\n"
+                        + "atha\\coppercore\\parameter_tools\\src\\test\\r"
+                        + "esources\\SaveFileTest.json");
+        ExampleJsonSyncClass.synced.saveData();
+        System.out.println(instance);
+        System.out.println("");
     }
 }
