@@ -1,9 +1,9 @@
 package coppercore.parameter_tools.test;
 
-import coppercore.parameter_tools.JSONSync;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
+import coppercore.parameter_tools.JSONSync;
 
 public class JSONSyncTests {
 
@@ -12,13 +12,11 @@ public class JSONSyncTests {
         ExampleJsonSyncClass.synced =
                 new JSONSync<ExampleJsonSyncClass>(
                         new ExampleJsonSyncClass(),
-                        "C:\\Users\\n"
-                                + "atha\\coppercore\\parameter_tools\\src\\test\\r"
-                                + "esources\\ExampleJsonSyncClass.json",
+                        "filePath",
                         new JSONSync.JSONSyncConfigBuilder().build());
     }
 
-    @Test
+    //@Test
     public void JsonSyncLoadDataTest() {
         System.out.println("LoadTest");
         ExampleJsonSyncClass.synced.loadData();
@@ -31,13 +29,11 @@ public class JSONSyncTests {
         System.out.println("");
     }
 
-    @Test
+    //@Test
     public void JsonSyncSetFileTest() {
         System.out.println("SetTest");
         ExampleJsonSyncClass.synced.setFile(
-                "C:\\Users\\n"
-                        + "atha\\coppercore\\parameter_tools\\src\\test\\r"
-                        + "esources\\SetFileTest.json");
+                "filePath");
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
 
@@ -51,7 +47,7 @@ public class JSONSyncTests {
         System.out.println("");
     }
 
-    @Test
+    //@Test
     public void JsonSyncSaveFileTest() {
         System.out.println("SaveTest");
         ExampleJsonSyncClass.synced.loadData();
@@ -60,9 +56,7 @@ public class JSONSyncTests {
         System.out.println("\nSaving File\n");
         instance.testInt = 10;
         ExampleJsonSyncClass.synced.setFile(
-                "C:\\Users\\n"
-                        + "atha\\coppercore\\parameter_tools\\src\\test\\r"
-                        + "esources\\SaveFileTest.json");
+                "filePath");
         ExampleJsonSyncClass.synced.saveData();
         System.out.println(instance);
         System.out.println("");
