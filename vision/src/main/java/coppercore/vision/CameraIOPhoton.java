@@ -63,7 +63,7 @@ public class CameraIOPhoton implements CameraIO {
         inputs.connected = camera.isConnected();
 
         PhotonPipelineResult result = camera.getLatestResult();
-        if (result.getTimestampSeconds() == latestTimestampSeconds) {
+        if (result.getTimestampSeconds() <= latestTimestampSeconds) {
             inputs.isNewMeasurement = false;
             inputs.wasAccepted = false;
             return;
