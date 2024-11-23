@@ -1,8 +1,15 @@
 package coppercore.parameter_tools;
 
-import com.google.gson.*;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.LongSerializationPolicy;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class JSONSync<T> {
 
@@ -26,9 +33,29 @@ public class JSONSync<T> {
         }
     }
 
+    private FileWriter getFileWriter(String path) {
+        try {
+            return new FileWriter(path);
+        } catch (IOException e) {
+            throw new RuntimeException("IOException " + path, e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public void loadData() {
         instance = gson.fromJson(getFileReader(file), (Class<T>) instance.getClass());
+    }
+
+    public void saveData() {
+        String json = gson.toJson(instance);
+        // System.out.println(json);
+        FileWriter writer = getFileWriter(file);
+        try {
+            writer.write(json);
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException("IOException", e);
+        }
     }
 
     public void setFile(String newFilePath) {
