@@ -13,7 +13,7 @@ public class JSONSyncTests {
                 new JSONSync<ExampleJsonSyncClass>(
                         new ExampleJsonSyncClass(),
                         "filePath",
-                        new JSONSync.JSONSyncConfigBuilder().build());
+                        new JSONSync.JSONSyncConfigBuilder().setPrettyPrinting(true).build());
     }
 
     //@Test
