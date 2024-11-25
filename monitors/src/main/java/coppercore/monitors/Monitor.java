@@ -3,17 +3,40 @@ package coppercore.monitors;
 import java.util.function.BooleanSupplier;
 
 public class Monitor {
-    String name; // Name to log the status of the monitor under, used by MonitoredSubsystem
-    boolean sticky; // Should the monitor still report a fault after conditions return to normal?
-    double timeToFault; // How long the value can be unacceptable before a fault occurs
-    BooleanSupplier isStateValid; // Supplier with which to check whether the value is acceptable
-    Runnable faultCallback; // Function to call when the fault happens
+    /** Name to log the status of the monitor under, used by MonitoredSubsystem */
+    String name;
 
-    double triggeredTime = -1.0; // Timestamp when monitor was first triggered
-    // If this value is less than or equal to zero, the monitor has been triggered for less than 1
+    /** Should the monitor still report a fault after conditions return to normal? */
+    boolean sticky;
+
+    /** How long the value can be unacceptable before a fault occurs */
+    double timeToFault;
+
+    /** Supplier with which to check whether the value is acceptable */
+    BooleanSupplier isStateValid;
+
+    /** Function to call when the fault happens */
+    Runnable faultCallback;
+
+    /**
+     * Timestamp when the monitor was first triggered, or -1.0 if the monitor has been triggered for
+     * less than 1 loop.
+     */
+    double triggeredTime = -1.0;
+
+    // If triggeredTime's value is less than or equal to zero, the monitor has been triggered for
+    // less than 1
     // tick
 
+    /** Whether the value is currently unnacceptable */
     boolean triggered = false; // Is the value currently unnacceptable?
+
+    /**
+     * Whether the monitor has detected a fault
+     *
+     * <p>This means either the monitor has been triggered for the 'time to fault', or the monitor
+     * is sticky and has faulted without being reset.
+     */
     boolean faulted = false; // Has the monitor detected a fault?
 
     /**
