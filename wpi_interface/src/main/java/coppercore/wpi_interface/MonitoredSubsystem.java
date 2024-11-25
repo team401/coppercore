@@ -10,6 +10,8 @@ import org.littletonrobotics.junction.Logger;
 public class MonitoredSubsystem extends SubsystemBase {
     private List<Monitor> registeredMonitors = new ArrayList<Monitor>();
 
+    private boolean loggingEnabled = true;
+
     public void addMonitor(Monitor monitor) {
         registeredMonitors.add(monitor);
     }
@@ -38,10 +40,24 @@ public class MonitoredSubsystem extends SubsystemBase {
                 monitor -> {
                     monitor.periodic(Timer.getFPGATimestamp());
 
-                    Logger.recordOutput(
-                            "monitors/" + monitor.getName() + "/triggered", monitor.isTriggered());
-                    Logger.recordOutput(
-                            "monitors/" + monitor.getName() + "/faulted", monitor.isFaulted());
+                    if (loggingEnabled && monitor.getLoggingEnabled()) {
+                        Logger.recordOutput(
+                                "monitors/" + monitor.getName() + "/triggered",
+                                monitor.isTriggered());
+                        Logger.recordOutput(
+                                "monitors/" + monitor.getName() + "/faulted", monitor.isFaulted());
+                    }
                 });
+    }
+
+    /**
+     * Set whether or not the monitored subsystem should log its monitors. This is enabled by
+     * default, but can be disabled if there are RAM issues stemming from too many strings in
+     * logging.
+     *
+     * @param loggingEnabled
+     */
+    public void setLoggingEnabled(boolean loggingEnabled) {
+        this.loggingEnabled = loggingEnabled;
     }
 }

@@ -19,6 +19,14 @@ public class Monitor {
     Runnable faultCallback;
 
     /**
+     * Should the monitor be logged by the MonitoredSubsystem?
+     *
+     * <p>Changing this value doesn't change the behavior of the monitor, it exists only to tell
+     * MonitoredSubsystem whether or not to log the monitor.
+     */
+    boolean loggingEnabled;
+
+    /**
      * Timestamp when the monitor was first triggered, or -1.0 if the monitor has been triggered for
      * less than 1 loop.
      */
@@ -53,6 +61,8 @@ public class Monitor {
      *     fault is triggered.
      * @param faultCallback a function called on every periodic loop while the monitor is in a
      *     faulted state.
+     * @param loggingEnabled whether or not the monitor should be logged. This value is only used by
+     *     MonitoredSubsystem to enable or disable logging for each monitor.
      * @see MonitorBuilder
      */
     public Monitor(
@@ -60,13 +70,16 @@ public class Monitor {
             boolean sticky,
             BooleanSupplier isStateValid,
             double timeToFault,
-            Runnable faultCallback) {
+            Runnable faultCallback,
+            boolean loggingEnabled) {
         this.name = name;
         this.sticky = sticky;
         this.timeToFault = timeToFault;
         this.isStateValid = isStateValid;
 
         this.faultCallback = faultCallback;
+
+        this.loggingEnabled = loggingEnabled;
     }
 
     /**
@@ -152,6 +165,26 @@ public class Monitor {
     }
 
     /**
+     * Set whether or not the monitor should be logged.
+     *
+     * <p>Changing this value doesn't change the behavior of the monitor, it exists only to tell
+     * MonitoredSubsystem whether or not to log the monitor.
+     */
+    public void setLoggingEnabled(boolean loggingEnabled) {
+        this.loggingEnabled = loggingEnabled;
+    }
+
+    /**
+     * Get whether or not the monitor should be logged.
+     *
+     * <p>Changing this value doesn't change the behavior of the monitor, it exists only to tell
+     * MonitoredSubsystem whether or not to log the monitor.
+     */
+    public boolean getLoggingEnabled() {
+        return loggingEnabled;
+    }
+
+    /**
      * This class is meant to build a fault monitor. Create a builder, then call withName,
      * withStickyness, withTimeToFault, and withIsStateValid, and withFaultCallback to configure its
      * fields. Once every field is configured, call build() to return a shiny new fault monitor.
@@ -164,6 +197,7 @@ public class Monitor {
         BooleanSupplier
                 isStateValid; // Supplier with which to check whether the value is acceptable
         Runnable faultCallback; // Function to call when the fault happens
+        boolean loggingEnabled = true; // Whether or not to log the monitor. Defaults to true.
 
         /**
          * Sets the name of the monitor. This name will be used when the monitor is logged by
@@ -228,13 +262,29 @@ public class Monitor {
         }
 
         /**
+         * Sets whether or not the monitor should be logged.
+         *
+         * <p>This value is only used to tell the MonitoredSubsystem whether or not to log each
+         * monitor. This value defaults to true unless withLoggingEnabled(false) is called on the
+         * builder!
+         *
+         * @param loggingEnabled whether or not the monitor should be logged
+         * @return the monitor builder, so that successive builder calls can be chained.
+         */
+        public MonitorBuilder withLoggingEnabled(boolean loggingEnabled) {
+            this.loggingEnabled = loggingEnabled;
+            return this;
+        }
+
+        /**
          * Instantiates a monitor and returns it. This method should be called after all of the
          * fields of the monitor are configured using with[Field] methods.
          *
          * @return a monitor with the fields set by the builder.
          */
         public Monitor build() {
-            return new Monitor(name, sticky, isStateValid, timeToFault, faultCallback);
+            return new Monitor(
+                    name, sticky, isStateValid, timeToFault, faultCallback, loggingEnabled);
         }
     }
 }
