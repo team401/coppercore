@@ -9,8 +9,9 @@ public class Monitor {
     BooleanSupplier isStateValid; // Supplier with which to check whether the value is acceptable
     Runnable faultCallback; // Function to call when the fault happens
 
-    double triggeredTime = 0.0; // Timestamp when monitor was first triggered
-    // If this value is zero, the monitor has been triggered for less than 1 tick
+    double triggeredTime = -1.0; // Timestamp when monitor was first triggered
+    // If this value is less than or equal to zero, the monitor has been triggered for less than 1
+    // tick
 
     boolean triggered = false; // Is the value currently unnacceptable?
     boolean faulted = false; // Has the monitor detected a fault?
@@ -59,19 +60,30 @@ public class Monitor {
 
         triggered = !isStateValid.getAsBoolean();
         if (triggered) {
-            if (triggeredTime == 0.0) {
+            // If triggered time is less than zero, this means it hasn't been set yet.
+            // Therefore, this is the first loop that the monitor is triggered and we should
+            // store the current timestamp to reference how long it's been triggered for later.
+            if (triggeredTime <= 0.0) {
                 triggeredTime = currentTimeSeconds;
             }
 
-            if (currentTimeSeconds - triggeredTime >= timeToFault) {
-                faulted = true;
-            }
+            // When triggered, the monitor will fault if either:
+            //  - It is already faulted (it can't transition from faulted to non-faulted while
+            // triggered)
+            //  or
+            //  - It has been triggered for the timeToFault.
+            faulted = faulted || ((currentTimeSeconds - triggeredTime) >= timeToFault);
         } else {
             if (!sticky) {
                 faulted = false;
             }
+            // If the monitor isn't triggered, it will only be faulted if it is sticky and already
+            // faulted.
+            faulted = faulted && sticky;
 
-            triggeredTime = 0.0;
+            // Use -1 as a sentinel value to indicate that the triggered time hasn't been stored
+            // yet.
+            triggeredTime = -1.0;
         }
         if (faulted) {
             faultCallback.run();
