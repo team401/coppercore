@@ -3,7 +3,6 @@ import java.text.SimpleDateFormat
 plugins {
 	id "java"
 	id "maven-publish"
-	id "edu.wpi.first.GradleRIO" version "2024.3.2"
 	id "com.peterabeles.gversion" version "1.10"
 	id "com.diffplug.spotless" version "6.24.0"
 }
@@ -16,15 +15,21 @@ java {
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true
 
-configurations.all {
-	exclude group: "edu.wpi.first.wpilibj"
-}
+// configurations.all {
+// 	exclude group: "edu.wpi.first.wpilibj"
+// }
 
 task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
 	mainClass = "org.littletonrobotics.junction.CheckInstall"
 	classpath = sourceSets.main.runtimeClasspath
 }
-compileJava.finalizedBy checkAkitInstall
+
+// In order to allow installation of wpilib packages, the exclusion on line 19 must be disabled
+// However, disabling that exclusion causes advantagekit's install check to fail.
+// Therefore, we must also disable this check.
+// TODO: Figure out how to manually depend on wpilib while still using checkAkitInstall
+// or figure out if it's necessary.
+//compileJava.finalizedBy checkAkitInstall
 
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
@@ -32,9 +37,6 @@ dependencies {
 	def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
 	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
 	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:3.2.1"
-
-	implementation wpi.java.deps.wpilib()
-	implementation wpi.java.vendor.java()
 
 	implementation project(":monitors")
 	implementation 'org.littletonrobotics.akit.junction:junction-core:3.2.1'
