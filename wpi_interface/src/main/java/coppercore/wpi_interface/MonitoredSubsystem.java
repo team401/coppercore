@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
-public class MonitoredSubsystem extends SubsystemBase {
+public abstract class MonitoredSubsystem extends SubsystemBase {
     private List<Monitor> registeredMonitors = new ArrayList<Monitor>();
 
     private boolean loggingEnabled = true;
@@ -33,7 +33,7 @@ public class MonitoredSubsystem extends SubsystemBase {
      * try to be consistent within their own codebases about which responsibilities will be handled
      * by Commands, and which will be handled here.
      */
-    public void monitoredPeriodic() {}
+    public abstract void monitoredPeriodic();
 
     private void runMonitors() {
         registeredMonitors.forEach(
