@@ -48,7 +48,11 @@ public class Camera {
         } else {
             if (numTags > 1) {
                 stdDev = CoreVisionConstants.multiTagStdDev;
+            } else if (numTags == 1 && avgDistanceFromTarget > 4) {
+                return CoreVisionConstants.rejectionStdDev;
             }
+
+            // distance based variance
             stdDev = stdDev.times(1 + (Math.pow(avgDistanceFromTarget, 2) / 30));
         }
         return stdDev;

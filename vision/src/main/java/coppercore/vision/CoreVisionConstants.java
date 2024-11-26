@@ -16,4 +16,5 @@ public final class CoreVisionConstants {
     public static final double maxAcceptedDistanceMeters = 10.0;
     public static final Matrix<N3, N1> singleTagStdDev = VecBuilder.fill(1, 1, 1);
     public static final Matrix<N3, N1> multiTagStdDev = VecBuilder.fill(0.5, 0.5, 0.5);
+    public static final Matrix<N3, N1> rejectionStdDev = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 }

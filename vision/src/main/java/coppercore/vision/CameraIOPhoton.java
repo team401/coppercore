@@ -72,8 +72,6 @@ public class CameraIOPhoton implements CameraIO {
         latestTimestampSeconds = result.getTimestampSeconds();
         Optional<EstimatedRobotPose> photonPose = poseEstimator.update(result);
 
-        photonPose.filter(CameraIOPhoton::filterPhotonPose);
-
         photonPose.ifPresentOrElse(
                 (pose) -> {
                     inputs.latestFieldToRobot = pose.estimatedPose;
@@ -90,25 +88,16 @@ public class CameraIOPhoton implements CameraIO {
                 });
     }
 
-    private static boolean filterPhotonPose(EstimatedRobotPose photonPose) {
-        Pose3d pose = photonPose.estimatedPose;
-        // check that the pose isn't insane
-        if (pose.getZ() > 1 || pose.getZ() < -0.1) {
-            return false;
-        }
+    // NOTE: Can be used in 2025 code just not ready yet
+    // private Optional<EstimatedRobotPose> getEstimatedPose () {
+    //     Optional<EstimatedRobotPose> visionEstimate = Optional.empty();
 
-        double avgDistanceFromTarget = calculateAverageTagDistance(photonPose);
+    //     for (var change : camera.getAllUnreadResults()) {
+    //         visionEstimate = poseEstimator.update(change);
+    //     }
 
-        if (avgDistanceFromTarget > CoreVisionConstants.maxAcceptedDistanceMeters) {
-            return false;
-        }
-
-        if (avgDistanceFromTarget > 4.0 && photonPose.targetsUsed.size() < 2) {
-            return false;
-        }
-
-        return true;
-    }
+    //     return visionEstimate;
+    // }
 
     private static double calculateAverageTagDistance(EstimatedRobotPose pose) {
         double distance = 0.0;
