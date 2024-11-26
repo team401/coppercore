@@ -1,7 +1,6 @@
 package coppercore.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import java.util.Optional;
@@ -99,7 +98,7 @@ public class CameraIOPhoton implements CameraIO {
     //     return visionEstimate;
     // }
 
-    private static double calculateAverageTagDistance(EstimatedRobotPose pose) {
+    private double calculateAverageTagDistance(EstimatedRobotPose pose) {
         double distance = 0.0;
         for (PhotonTrackedTarget target : pose.targetsUsed) {
             var tagPose = poseEstimator.getFieldTags().getTagPose(target.getFiducialId());
@@ -110,7 +109,7 @@ public class CameraIOPhoton implements CameraIO {
                     tagPose.get()
                             .toPose2d()
                             .getTranslation()
-                            .getDistance(pose.get().estimatedPose.toPose2d().getTranslation());
+                            .getDistance(pose.estimatedPose.toPose2d().getTranslation());
         }
         distance /= pose.targetsUsed.size();
 
