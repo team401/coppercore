@@ -4,7 +4,6 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -33,6 +32,7 @@ public class CameraIOPhoton implements CameraIO {
         poseEstimator =
                 new PhotonPoseEstimator(
                         layout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCamera);
+        poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
     }
 
     public static CameraIOPhoton fromRealCameraParams(
@@ -91,19 +91,19 @@ public class CameraIOPhoton implements CameraIO {
     }
 
     private static boolean filterPhotonPose(EstimatedRobotPose photonPose) {
-        // TODO: Actual pose rejection
-        if (photonPose.targetsUsed.size() < 2) {
-            return false;
-        }
-
         Pose3d pose = photonPose.estimatedPose;
         // check that the pose isn't insane
         if (pose.getZ() > 1 || pose.getZ() < -0.1) {
             return false;
         }
 
-        if (calculateAverageTagDistance(photonPose)
-                > CoreVisionConstants.maxAcceptedDistanceMeters) {
+        double avgDistanceFromTarget = calculateAverageTagDistance(photonPose);
+
+        if (avgDistanceFromTarget > CoreVisionConstants.maxAcceptedDistanceMeters) {
+            return false;
+        }
+
+        if (avgDistanceFromTarget > 4.0 && photonPose.targetsUsed.size() < 2) {
             return false;
         }
 
@@ -113,10 +113,15 @@ public class CameraIOPhoton implements CameraIO {
     private static double calculateAverageTagDistance(EstimatedRobotPose pose) {
         double distance = 0.0;
         for (PhotonTrackedTarget target : pose.targetsUsed) {
+            var tagPose = poseEstimator.getFieldTags().getTagPose(target.getFiducialId());
+            if (tagPose.isEmpty()) {
+                continue;
+            }
             distance +=
-                    target.getBestCameraToTarget()
+                    tagPose.get()
+                            .toPose2d()
                             .getTranslation()
-                            .getDistance(new Translation3d());
+                            .getDistance(pose.get().estimatedPose.toPose2d().getTranslation());
         }
         distance /= pose.targetsUsed.size();
 
