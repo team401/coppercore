@@ -1,4 +1,4 @@
-package coppercore.wpi_interface;
+package coppercore.wpilib_interface;
 
 import coppercore.monitors.Monitor;
 import edu.wpi.first.wpilibj.Timer;

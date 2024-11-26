@@ -34,8 +34,8 @@ task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
 dependencies {
-	def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
-	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
+	//def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
+	//annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
 	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:3.2.1"
 
 	implementation project(":monitors")
@@ -43,14 +43,10 @@ dependencies {
 	implementation 'edu.wpi.first.wpilibj:wpilibj-java:2024.3.2'
 	implementation 'edu.wpi.first.wpiutil:wpiutil-java:2024.3.2'
 	implementation 'edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:2024.3.2'
-	implementation 'edu.wpi.first.wpiutil:wpiutil-java:2024.3.2'
 	implementation 'edu.wpi.first.wpiunits:wpiunits-java:2024.3.2'
 	implementation 'edu.wpi.first.wpimath:wpimath-java:2024.3.2'
 
 	implementation project(":math")
-
-	implementation wpi.java.deps.wpilib()
-	implementation wpi.java.vendor.java()
 
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
