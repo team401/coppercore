@@ -18,4 +18,6 @@ public final class CoreVisionConstants {
     public static final Matrix<N3, N1> multiTagStdDev = VecBuilder.fill(0.5, 0.5, 0.5);
     public static final Matrix<N3, N1> rejectionStdDev =
             VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+    public static final double singleTagDistanceCutoff = 4.0;
+    public static final double distanceFactor = 30.0;
 }

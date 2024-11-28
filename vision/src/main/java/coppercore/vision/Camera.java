@@ -45,16 +45,15 @@ public class Camera {
 
         if (numTags == 0) {
             return stdDev;
-        } else {
-            if (numTags > 1) {
+        } else if (numTags > 1) {
                 stdDev = CoreVisionConstants.multiTagStdDev;
-            } else if (numTags == 1 && avgDistanceFromTarget > 4) {
+        } else if (numTags == 1 && avgDistanceFromTarget > CoreVisionConstants.singleTagDistanceCutoff) {
                 return CoreVisionConstants.rejectionStdDev;
-            }
-
-            // distance based variance
-            stdDev = stdDev.times(1 + (Math.pow(avgDistanceFromTarget, 2) / 30));
         }
+
+        // distance based variance
+        stdDev = stdDev.times(1 + (Math.pow(avgDistanceFromTarget, 2) / CoreVisionConstants.distanceFactor));
+
         return stdDev;
     }
 }
