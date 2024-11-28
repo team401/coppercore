@@ -73,11 +73,10 @@ public class CameraIOPhoton implements CameraIO {
 
         photonPose.ifPresentOrElse(
                 (pose) -> {
+                    calculateAverageTagDistance(pose, inputs);
                     inputs.latestFieldToRobot = pose.estimatedPose;
-                    inputs.nTags = pose.targetsUsed.size();
 
                     inputs.latestTimestampSeconds = this.latestTimestampSeconds;
-                    inputs.averageTagDistanceM = calculateAverageTagDistance(pose);
                     inputs.averageTagYaw = calculateAverageTagYaw(pose);
 
                     inputs.wasAccepted = true;
@@ -98,13 +97,15 @@ public class CameraIOPhoton implements CameraIO {
     //     return visionEstimate;
     // }
 
-    private double calculateAverageTagDistance(EstimatedRobotPose pose) {
+    private void calculateAverageTagDistance(EstimatedRobotPose pose, CameraIOInputs inputs) {
         double distance = 0.0;
+        int numTags = 0;
         for (PhotonTrackedTarget target : pose.targetsUsed) {
             var tagPose = poseEstimator.getFieldTags().getTagPose(target.getFiducialId());
             if (tagPose.isEmpty()) {
                 continue;
             }
+            numTags += 1;
             distance +=
                     tagPose.get()
                             .toPose2d()
@@ -113,7 +114,8 @@ public class CameraIOPhoton implements CameraIO {
         }
         distance /= pose.targetsUsed.size();
 
-        return distance;
+        inputs.nTags = numTags;
+        inputs.averageTagDistanceM = distance;
     }
 
     private static Rotation2d calculateAverageTagYaw(EstimatedRobotPose pose) {
