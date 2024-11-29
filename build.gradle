@@ -3,7 +3,7 @@ subprojects {
 	apply plugin: 'maven-publish'
 	apply plugin: 'signing'
 
-	group = 'com.github.team401.coppercore'
+	group = 'io.github.team401.coppercore'
 
 	java { 
 		withJavadocJar()
