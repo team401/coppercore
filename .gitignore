@@ -166,3 +166,7 @@ build
 wpi_interface/src/main/java/frc/robot/BuildConstants.java
 
 **/BuildConstants.java
+
+# Ignore gpg keys
+gpg.key
+gpg.pub

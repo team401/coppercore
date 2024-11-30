@@ -1,76 +1,11 @@
+plugins {
+	id "com.vanniktech.maven.publish" version "0.30.0" apply false
+}
+
 subprojects {
 	apply plugin: 'java'
-	apply plugin: 'maven-publish'
-	apply plugin: 'signing'
-
+	
 	group = 'io.github.team401.coppercore'
-
-	java { 
-		withJavadocJar()
-		withSourcesJar()
-	}
-
-	publishing {
-		publications {
-			mavenJava(MavenPublication) {
-				from components.java
-				groupId project.group
-				artifactId project.name
-				version project.version
-				versionMapping {
-					usage('java-api') {
-						fromResolutionOf('runtimeClasspath')
-					}
-					usage('java-runtime') {
-						fromResolutionResult()
-					}
-				}
-				pom {
-					name = project.name
-					description = 'Core library for FRC Team 401'
-					url = 'http://www.github.com/team401/coppercore'
-					licenses {
-						license {
-							name = 'MIT License'
-							url = 'https://opensource.org/license/mit'
-						}
-					}
-					developers {
-						developer {
-							id = 'aidnem'
-							name = 'Aiden Mathai'
-						}
-						developer {
-							id = 'linglejack'
-							name = 'Jack Lingle'
-						}
-						developer {
-							id = 'avidraccoon'
-							name = 'Nathan Smith'
-						}
-						developer {
-							id = 'minh'
-							name = 'Minh Ngyuen'
-						}
-					}
-				}
-			}
-		}
-		repositories {
-			maven {
-				name = "OSSRH"
-				url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-				credentials {
-					username = System.getenv("MAVEN_USERNAME")
-					password = System.getenv("MAVEN_PASSWORD")
-				}
-			}
-		}
-	}
-
-	// signing {
-	// 	sign publishing.publications.mavenJava
-	// }
 
 	javadoc {
 		if(JavaVersion.current().isJava9Compatible()) {
