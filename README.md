@@ -58,19 +58,14 @@ More information on generating GPG keys can be found [on the Sonatype docs](http
 
 ### Publishing
 
-#### GitHub Actions
+#### Via GitHub Actions
 
 Whenever a release is created on GitHub, the `publish_library` action will automatically publish the released version to the Central Portal. At any time this workflow can be run manually as well.
 
 The `stage_library` GitHub action can be run manually to confirm that the library stages on the Central Portal. This can be used to preview a release to the Central Portal and also to ensure the maven central formatting is followed correctly.
 
-#### Locally
-To stage the package on the Central Portal for future (manual) release, run the following command:
+#### Maven Local
+To publish the package on your computer's local maven (typically `~/.m2/`), run the following command:
 ```
-./gradlew publishToMavenCentral --no-configuration-cache
-```
-
-Or, to automatically stage and publish a version run:
-```
-./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
+./gradlew publishToMavenLocal
 ```

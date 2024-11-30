@@ -127,7 +127,6 @@ mavenPublishing {
 
 	configure(new JavaLibrary(new JavadocJar.Javadoc(), true))
 	publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-	signAllPublications()
 
 	// Project release information.
 	coordinates(group, project.name, version)
