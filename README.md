@@ -13,13 +13,13 @@ Then, you can include any of the following dependencies as you need in your `dep
 ```
 dependencies {
     ...
-    implementation 'io.github.team401.coppercore:controls:VERSION'
-    implementation 'io.github.team401.coppercore:geometry:VERSION'
-	implementation 'io.github.team401.coppercore:math:VERSION'
-	implementation 'io.github.team401.coppercore:monitors:VERSION'
-	implementation 'io.github.team401.coppercore:parameter_tools:VERSION'
-	implementation 'io.github.team401.coppercore:vision:VERSION'
-    implementation 'io.github.team401.coppercore:wpilib_interface:VERSION'
+    implementation "io.github.team401.coppercore:controls:VERSION"
+    implementation "io.github.team401.coppercore:geometry:VERSION"
+	implementation "io.github.team401.coppercore:math:VERSION"
+	implementation "io.github.team401.coppercore:monitors:VERSION"
+	implementation "io.github.team401.coppercore:parameter_tools:VERSION"
+	implementation "io.github.team401.coppercore:vision:VERSION"
+    implementation "io.github.team401.coppercore:wpilib_interface:VERSION"
     ...
 }
 ```
