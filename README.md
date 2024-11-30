@@ -1,7 +1,10 @@
 # coppercore
 
 
-## Maintaining Maven Central Publishing
+## Maven Central
+This project is available on maven central! The instructions below outline how to set this up.
+
+### Secret Keys
 
 In order to publish on Maven Central, multiple secret keys must be maintained. The GPG key and the Sonatype token are independent though, and can be regenerated as needed without updating the other one.
 
@@ -19,6 +22,8 @@ To temporarily set any of these variables locally for testing, you can do the fo
 ```
 $env.ENV_VARIABLE_NAME = "environment-variable-value"
 ```
+
+More information about environment variables can be found [on the docs page of our gradle plugin of choice](https://vanniktech.github.io/gradle-maven-publish-plugin/central/#secrets) for publishing to the Central Portal. 
 
 ### Generating a GPG key
 
@@ -50,3 +55,22 @@ gpg --keyserver keyserver.ubuntu.com KEY-ID
 ```
 
 More information on generating GPG keys can be found [on the Sonatype docs](https://central.sonatype.org/publish/requirements/gpg/) or on the [GitHub docs](https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key).
+
+### Publishing
+
+#### GitHub Actions
+
+Whenever a release is created on GitHub, the `publish_library` action will automatically publish the released version to the Central Portal. At any time this workflow can be run manually as well.
+
+The `stage_library` GitHub action can be run manually to confirm that the library stages on the Central Portal. This can be used to preview a release to the Central Portal and also to ensure the maven central formatting is followed correctly.
+
+#### Locally
+To stage the package on the Central Portal for future (manual) release, run the following command:
+```
+./gradlew publishToMavenCentral --no-configuration-cache
+```
+
+Or, to automatically stage and publish a version run:
+```
+./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
+```
