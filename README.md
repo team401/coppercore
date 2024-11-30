@@ -1,5 +1,29 @@
 # coppercore
 
+## Using this in your project
+To use this in your project, first make sure you have `mavenCentral()` included in your `repositories` block of your `build.gradle`:
+```
+repositories {
+	mavenCentral()
+}
+```
+**Note:** if you are using the maven local distribution, make sure to include `mavenLocal()` in the repositories block as well.
+
+Then, you can include any of the following dependencies as you need in your `dependencies` block of your `build.gradle`:
+```
+dependencies {
+    ...
+    implementation 'io.github.team401.coppercore:controls:VERSION'
+    implementation 'io.github.team401.coppercore:geometry:VERSION'
+	implementation 'io.github.team401.coppercore:math:VERSION'
+	implementation 'io.github.team401.coppercore:monitors:VERSION'
+	implementation 'io.github.team401.coppercore:parameter_tools:VERSION'
+	implementation 'io.github.team401.coppercore:vision:VERSION'
+    implementation 'io.github.team401.coppercore:wpilib_interface:VERSION'
+    ...
+}
+```
+where `VERSION` is available for selection from the GitHub releases or you can look it up [on the central portal](https://central.sonatype.com/search?q=coppercore) directly.
 
 ## Maven Central
 This project is available on maven central! The instructions below outline how to set this up.
