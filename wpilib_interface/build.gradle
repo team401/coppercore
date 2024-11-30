@@ -1,10 +1,13 @@
 import java.text.SimpleDateFormat
+import com.vanniktech.maven.publish.SonatypeHost
+import com.vanniktech.maven.publish.JavaLibrary
+import com.vanniktech.maven.publish.JavadocJar
 
 plugins {
 	id "java"
-	id "maven-publish"
 	id "com.peterabeles.gversion" version "1.10"
 	id "com.diffplug.spotless" version "6.24.0"
+	id "com.vanniktech.maven.publish" version "0.30.0"
 }
 
 java {
@@ -117,3 +120,53 @@ java {
 
 // Automatically format code on build.
 compileJava.dependsOn 'spotlessApply'
+
+
+// Add this to each subproject separately.
+mavenPublishing {
+
+	configure(new JavaLibrary(new JavadocJar.Javadoc(), true))
+	publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+
+	// Project release information.
+	coordinates(group, project.name, version)
+	pom {
+		name = project.name
+		inceptionYear = "2024"
+		description = 'Interface between coppercore and the WPILib'
+		url = 'http://www.github.com/team401/coppercore'
+		licenses {
+			license {
+				name = 'MIT License'
+				url = 'https://opensource.org/license/mit'
+			}
+		}
+		developers {
+			developer {
+				id = 'aidnem'
+				name = 'Aiden Mathai'
+			}
+			developer {
+				id = 'linglejack'
+				name = 'Jack Lingle'
+			}
+			developer {
+				id = 'avidraccoon'
+				name = 'Nathan Smith'
+			}
+			developer {
+				id = 'minhngyuenbhs'
+				name = 'Minh Ngyuen'
+			}
+			developer {
+				id = 'jkleiber'
+				name = 'Justin Kleiber'
+			}
+		}
+		scm {
+			url = "https://github.com/team401/coppercore/"
+			connection = "scm:git:git://github.com/team401/coppercore.git"
+			developerConnection = "scm:git:ssh://git@github.com/team401/coppercore.git"
+		}
+	}
+}
