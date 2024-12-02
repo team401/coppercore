@@ -9,15 +9,15 @@ import org.junit.jupiter.api.Test;
 public class JSONSyncTests {
 
     public static final String DIRECTORY = new File("").getAbsolutePath();
-    public static final String BUILD_DIRECTORY = DIRECTORY + "\\build";
-    public static final String RESOURCE_DIRECTORY = BUILD_DIRECTORY + "\\resources\\test";
+    public static final String BUILD_DIRECTORY = DIRECTORY + "/build";
+    public static final String RESOURCE_DIRECTORY = BUILD_DIRECTORY + "/resources/test";
 
     @BeforeEach
     public void TestPrep() {
         ExampleJsonSyncClass.synced =
                 new JSONSync<ExampleJsonSyncClass>(
                         new ExampleJsonSyncClass(),
-                        RESOURCE_DIRECTORY + "\\ExampleJsonSyncClass.json",
+                        RESOURCE_DIRECTORY + "/ExampleJsonSyncClass.json",
                         new JSONSync.JSONSyncConfigBuilder().setPrettyPrinting(true).build());
     }
 
@@ -33,7 +33,7 @@ public class JSONSyncTests {
 
     @Test
     public void JsonSyncSetFileTest() {
-        ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "\\SetFileTest.json");
+        ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "/SetFileTest.json");
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
 
@@ -50,7 +50,7 @@ public class JSONSyncTests {
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
         instance.testInt = 10;
-        ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "\\SaveFileTest.json");
+        ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "/SaveFileTest.json");
         ExampleJsonSyncClass.synced.saveData();
     }
 }
