@@ -36,13 +36,34 @@ public class JSONSync<T> {
     }
 
     private Gson generateGson() {
-        return new GsonBuilder().serializeNulls().create();
+        ExclusionStrategy strategy =
+                new ExclusionStrategy() {
+                    @Override
+                    public boolean shouldSkipField(FieldAttributes field) {
+                        return (field.getAnnotation(JSONExclude.class) != null);
+                    }
+
+                    @Override
+                    public boolean shouldSkipClass(Class<?> clazz) {
+                        return false;
+                    }
+                };
+
+        GsonBuilder builder = new GsonBuilder();
+        if (this.config.serializeNulls) builder.serializeNulls();
+        if (this.config.prettyPrinting) builder.setPrettyPrinting();
+        if (this.config.excludeFieldsWithoutExposeAnnotation)
+            builder.excludeFieldsWithoutExposeAnnotation();
+        builder.setFieldNamingPolicy(this.config.namingPolicy);
+        builder.setLongSerializationPolicy(this.config.longSerializationPolicy);
+        builder.addDeserializationExclusionStrategy(strategy);
+        return builder.create();
     }
 
     public JSONSync(T instance, String file, JSONSyncConfig config) {
         this.instance = instance;
-        this.gson = generateGson();
         this.config = (config == null) ? new JSONSyncConfigBuilder().build() : config;
+        this.gson = generateGson();
         this.file = file;
     }
 
@@ -51,20 +72,14 @@ public class JSONSync<T> {
             boolean prettyPrinting,
             boolean excludeFieldsWithoutExposeAnnotation,
             FieldNamingPolicy namingPolicy,
-            ToNumberPolicy numberToNumberPolicy,
-            ToNumberPolicy objectToNumberPolicy,
-            LongSerializationPolicy longSerializationPolicy,
-            boolean autoReload) {
+            LongSerializationPolicy longSerializationPolicy) {
         public JSONSyncConfig(JSONSyncConfigBuilder builder) {
             this(
                     builder.serializeNulls,
                     builder.prettyPrinting,
                     builder.excludeFieldsWithoutExposeAnnotation,
                     builder.namingPolicy,
-                    builder.numberToNumberPolicy,
-                    builder.objectToNumberPolicy,
-                    builder.longSerializationPolicy,
-                    builder.autoReload);
+                    builder.longSerializationPolicy);
         }
     }
 
@@ -73,18 +88,8 @@ public class JSONSync<T> {
         public boolean prettyPrinting = false;
         public boolean excludeFieldsWithoutExposeAnnotation = false;
         public FieldNamingPolicy namingPolicy = FieldNamingPolicy.IDENTITY;
-        public ToNumberPolicy numberToNumberPolicy = ToNumberPolicy.DOUBLE;
-        public ToNumberPolicy objectToNumberPolicy = ToNumberPolicy.LAZILY_PARSED_NUMBER;
         public LongSerializationPolicy longSerializationPolicy = LongSerializationPolicy.DEFAULT;
-        public boolean keepOldValuesWhenNotPresent = false;
-        public boolean autoReload = false;
 
-        // public JSONSyncConfigBuilder newInstance(){
-        //    return new JSONSyncConfigBuilder();
-        // }
-        // public JSONSyncConfigBuilder(){
-        //
-        // }
         public JSONSyncConfigBuilder setSerializeNulls(boolean serializeNulls) {
             this.serializeNulls = serializeNulls;
             return this;
@@ -106,30 +111,9 @@ public class JSONSync<T> {
             return this;
         }
 
-        public JSONSyncConfigBuilder setNumberToNumberPolicy(ToNumberPolicy numberToNumberPolicy) {
-            this.numberToNumberPolicy = numberToNumberPolicy;
-            return this;
-        }
-
-        public JSONSyncConfigBuilder setObjectToNumberPolicy(ToNumberPolicy objectToNumberPolicy) {
-            this.objectToNumberPolicy = objectToNumberPolicy;
-            return this;
-        }
-
         public JSONSyncConfigBuilder setLongSerializationPolicy(
                 LongSerializationPolicy longSerializationPolicy) {
             this.longSerializationPolicy = longSerializationPolicy;
-            return this;
-        }
-
-        public JSONSyncConfigBuilder setKeepOldValuesWhenNotPresent(
-                boolean keepOldValuesWhenNotPresent) {
-            this.keepOldValuesWhenNotPresent = keepOldValuesWhenNotPresent;
-            return this;
-        }
-
-        public JSONSyncConfigBuilder setAutoReload(boolean autoReload) {
-            this.autoReload = autoReload;
             return this;
         }
 
