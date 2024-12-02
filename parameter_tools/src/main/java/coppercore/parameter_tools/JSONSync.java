@@ -1,16 +1,15 @@
 package coppercore.parameter_tools;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.LongSerializationPolicy;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class JSONSync<T> {
 
@@ -82,11 +81,10 @@ public class JSONSync<T> {
         if (this.config.prettyPrinting) builder.setPrettyPrinting();
         if (this.config.excludeFieldsWithoutExposeAnnotation)
             builder.excludeFieldsWithoutExposeAnnotation();
-        builder
-            .setFieldNamingPolicy(this.config.namingPolicy)
-            .setLongSerializationPolicy(this.config.longSerializationPolicy)
-            .addDeserializationExclusionStrategy(strategy)
-            .addSerializationExclusionStrategy(strategy);
+        builder.setFieldNamingPolicy(this.config.namingPolicy)
+                .setLongSerializationPolicy(this.config.longSerializationPolicy)
+                .addDeserializationExclusionStrategy(strategy)
+                .addSerializationExclusionStrategy(strategy);
         return builder.create();
     }
 
