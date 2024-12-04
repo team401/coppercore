@@ -27,7 +27,7 @@ public class JSONSyncTests {
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
 
         Assertions.assertEquals(10.0, instance.testDouble);
-        Assertions.assertEquals(2, instance.testInt);
+        Assertions.assertEquals(2, instance.testingIntField);
         Assertions.assertNull(instance.motorData);
     }
 
@@ -38,7 +38,7 @@ public class JSONSyncTests {
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
 
         Assertions.assertEquals(10.0, instance.testDouble);
-        Assertions.assertEquals(2, instance.testInt);
+        Assertions.assertEquals(2, instance.testingIntField);
         Assertions.assertNotNull(instance.motorData);
         Assertions.assertEquals(-12.3, instance.motorData.minVoltage);
         Assertions.assertEquals(16.4, instance.motorData.maxVoltage);
@@ -49,7 +49,7 @@ public class JSONSyncTests {
     public void JsonSyncSaveFileTest() {
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
-        instance.testInt = 10;
+        instance.testingIntField = 10;
         ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "/SaveFileTest.json");
         ExampleJsonSyncClass.synced.saveData();
     }

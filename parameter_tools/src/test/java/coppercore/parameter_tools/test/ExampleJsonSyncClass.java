@@ -1,5 +1,6 @@
 package coppercore.parameter_tools.test;
 
+import coppercore.parameter_tools.JSONName;
 import coppercore.parameter_tools.JSONSync;
 
 public class ExampleJsonSyncClass {
@@ -12,7 +13,10 @@ public class ExampleJsonSyncClass {
 
     public final String testText = "";
     public final Double testDouble = 0.0;
-    public Integer testInt = 0;
+
+    @JSONName("testInt")
+    public Integer testingIntField = 0;
+
     public final BasicMotorDataHolder motorData = null;
 
     public class BasicMotorDataHolder {
@@ -34,7 +38,7 @@ public class ExampleJsonSyncClass {
         return "testText: "
                 + testText
                 + "\ntestInt: "
-                + testInt
+                + testingIntField
                 + "\ntestDouble: "
                 + testDouble
                 + "\nmotorData: "
