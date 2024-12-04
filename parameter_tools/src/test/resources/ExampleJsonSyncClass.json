@@ -1,5 +1,5 @@
 {
-    "testcText": "Hello World",
+    "testText": "Hello World",
     "testDouble": 10.0,
     "testInt": 2
 }
