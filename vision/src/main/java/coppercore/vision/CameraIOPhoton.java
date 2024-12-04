@@ -1,10 +1,8 @@
 package coppercore.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -33,6 +31,7 @@ public class CameraIOPhoton implements CameraIO {
         poseEstimator =
                 new PhotonPoseEstimator(
                         layout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCamera);
+        poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
     }
 
     public static CameraIOPhoton fromRealCameraParams(
@@ -72,15 +71,12 @@ public class CameraIOPhoton implements CameraIO {
         latestTimestampSeconds = result.getTimestampSeconds();
         Optional<EstimatedRobotPose> photonPose = poseEstimator.update(result);
 
-        photonPose.filter(CameraIOPhoton::filterPhotonPose);
-
         photonPose.ifPresentOrElse(
                 (pose) -> {
+                    calculateAverageTagDistance(pose, inputs);
                     inputs.latestFieldToRobot = pose.estimatedPose;
-                    inputs.nTags = pose.targetsUsed.size();
 
                     inputs.latestTimestampSeconds = this.latestTimestampSeconds;
-                    inputs.averageTagDistanceM = calculateAverageTagDistance(pose);
                     inputs.averageTagYaw = calculateAverageTagYaw(pose);
 
                     inputs.wasAccepted = true;
@@ -90,37 +86,36 @@ public class CameraIOPhoton implements CameraIO {
                 });
     }
 
-    private static boolean filterPhotonPose(EstimatedRobotPose photonPose) {
-        // TODO: Actual pose rejection
-        if (photonPose.targetsUsed.size() < 2) {
-            return false;
-        }
+    // NOTE: Can be used in 2025 code just not ready yet
+    // private Optional<EstimatedRobotPose> getEstimatedPose () {
+    //     Optional<EstimatedRobotPose> visionEstimate = Optional.empty();
 
-        Pose3d pose = photonPose.estimatedPose;
-        // check that the pose isn't insane
-        if (pose.getZ() > 1 || pose.getZ() < -0.1) {
-            return false;
-        }
+    //     for (var change : camera.getAllUnreadResults()) {
+    //         visionEstimate = poseEstimator.update(change);
+    //     }
 
-        if (calculateAverageTagDistance(photonPose)
-                > CoreVisionConstants.maxAcceptedDistanceMeters) {
-            return false;
-        }
+    //     return visionEstimate;
+    // }
 
-        return true;
-    }
-
-    private static double calculateAverageTagDistance(EstimatedRobotPose pose) {
+    private void calculateAverageTagDistance(EstimatedRobotPose pose, CameraIOInputs inputs) {
         double distance = 0.0;
+        int numTags = 0;
         for (PhotonTrackedTarget target : pose.targetsUsed) {
+            var tagPose = poseEstimator.getFieldTags().getTagPose(target.getFiducialId());
+            if (tagPose.isEmpty()) {
+                continue;
+            }
+            numTags += 1;
             distance +=
-                    target.getBestCameraToTarget()
+                    tagPose.get()
+                            .toPose2d()
                             .getTranslation()
-                            .getDistance(new Translation3d());
+                            .getDistance(pose.estimatedPose.toPose2d().getTranslation());
         }
         distance /= pose.targetsUsed.size();
 
-        return distance;
+        inputs.nTags = numTags;
+        inputs.averageTagDistanceM = distance;
     }
 
     private static Rotation2d calculateAverageTagYaw(EstimatedRobotPose pose) {

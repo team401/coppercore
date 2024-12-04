@@ -2,7 +2,6 @@ package coppercore.vision;
 
 import coppercore.vision.VisionLocalizer.CameraMeasurement;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import org.littletonrobotics.junction.Logger;
@@ -39,7 +38,27 @@ public class Camera {
     }
 
     public Matrix<N3, N1> getLatestVariance() {
+        Matrix<N3, N1> stdDev = CoreVisionConstants.singleTagStdDev;
         // TODO: Actually calculate variances!
-        return VecBuilder.fill(0.0, 0.0, 0.0);
+        double avgDistanceFromTarget = inputs.averageTagDistanceM;
+        int numTags = inputs.nTags;
+
+        if (numTags == 0) {
+            return stdDev;
+        } else if (numTags > 1) {
+            stdDev = CoreVisionConstants.multiTagStdDev;
+        } else if (numTags == 1
+                && avgDistanceFromTarget > CoreVisionConstants.singleTagDistanceCutoff) {
+            return CoreVisionConstants.rejectionStdDev;
+        }
+
+        // distance based variance
+        stdDev =
+                stdDev.times(
+                        1
+                                + (Math.pow(avgDistanceFromTarget, 2)
+                                        / CoreVisionConstants.distanceFactor));
+
+        return stdDev;
     }
 }
