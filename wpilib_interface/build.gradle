@@ -39,22 +39,26 @@ task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
 dependencies {
 	//def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
 	//annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
-	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:3.2.1"
+
+	def akitVersion = "4.0.0-alpha-1"
+	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitVersion"
 
 	implementation project(":monitors")
-	implementation 'org.littletonrobotics.akit.junction:junction-core:3.2.1'
-	implementation 'edu.wpi.first.wpilibj:wpilibj-java:2024.3.2'
-	implementation 'edu.wpi.first.wpiutil:wpiutil-java:2024.3.2'
-	implementation 'edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:2024.3.2'
-	implementation 'edu.wpi.first.wpiunits:wpiunits-java:2024.3.2'
-	implementation 'edu.wpi.first.wpimath:wpimath-java:2024.3.2'
+	implementation "org.littletonrobotics.akit.junction:junction-core:$akitVersion"
+
+	def wpilibVersion = "2025.1.1-beta-1"
+	implementation "edu.wpi.first.wpilibj:wpilibj-java:$wpilibVersion"
+	implementation "edu.wpi.first.wpiutil:wpiutil-java:$wpilibVersion"
+	implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:$wpilibVersion"
+	implementation "edu.wpi.first.wpiunits:wpiunits-java:$wpilibVersion"
+	implementation "edu.wpi.first.wpimath:wpimath-java:$wpilibVersion"
 
 	implementation project(":math")
 
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation "org.junit.jupiter:junit-jupiter:5.10.1"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 
-	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+	implementation "com.googlecode.json-simple:json-simple:1.1.1"
 }
 
 test {
