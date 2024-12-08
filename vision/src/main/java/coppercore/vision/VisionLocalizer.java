@@ -79,30 +79,14 @@ public class VisionLocalizer extends SubsystemBase {
                         observation.timestamp(),
                         getLatestVariance(observation, cameraIndex));
             }
+            logCameraData(cameraIndex, robotPoses, robotPosesAccepted, robotPosesRejected);
 
-            // Log camera datadata
-            Logger.recordOutput(
-                    "Vision/Camera" + io[cameraIndex].name + "/RobotPoses",
-                    robotPoses.toArray(new Pose3d[robotPoses.size()]));
-            Logger.recordOutput(
-                    "Vision/Camera" + io[cameraIndex].name + "/RobotPosesAccepted",
-                    robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]));
-            Logger.recordOutput(
-                    "Vision/Camera" + io[cameraIndex].name + "/RobotPosesRejected",
-                    robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
             allRobotPoses.addAll(robotPoses);
             allRobotPosesAccepted.addAll(robotPosesAccepted);
             allRobotPosesRejected.addAll(robotPosesRejected);
         }
-        Logger.recordOutput(
-                "Vision/Summary/RobotPoses",
-                allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
-        Logger.recordOutput(
-                "Vision/Summary/RobotPosesAccepted",
-                allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()]));
-        Logger.recordOutput(
-                "Vision/Summary/RobotPosesRejected",
-                allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
+
+        logSummaryData(allRobotPoses, allRobotPosesAccepted, allRobotPosesRejected);
     }
 
     public void setVisionConsumer(VisionConsumer consumer) {
@@ -146,6 +130,38 @@ public class VisionLocalizer extends SubsystemBase {
         }
 
         return stdDev;
+    }
+
+    private void logCameraData(
+            int cameraIndex,
+            List<Pose3d> robotPoses,
+            List<Pose3d> robotPosesAccepted,
+            List<Pose3d> robotPosesRejected) {
+        // Log camera datadata
+        Logger.recordOutput(
+                "Vision/Camera" + io[cameraIndex].name + "/RobotPoses",
+                robotPoses.toArray(new Pose3d[robotPoses.size()]));
+        Logger.recordOutput(
+                "Vision/Camera" + io[cameraIndex].name + "/RobotPosesAccepted",
+                robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]));
+        Logger.recordOutput(
+                "Vision/Camera" + io[cameraIndex].name + "/RobotPosesRejected",
+                robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
+    }
+
+    private void logSummaryData(
+            List<Pose3d> allRbotPoses,
+            List<Pose3d> allRobotPosesAccepted,
+            List<Pose3d> allRobotPosesRejected) {
+        Logger.recordOutput(
+                "Vision/Summary/RobotPoses",
+                allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
+        Logger.recordOutput(
+                "Vision/Summary/RobotPosesAccepted",
+                allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()]));
+        Logger.recordOutput(
+                "Vision/Summary/RobotPosesRejected",
+                allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
     }
 
     @FunctionalInterface
