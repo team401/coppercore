@@ -1,8 +1,8 @@
 package coppercore.parameter_tools;
 
 import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
 import com.google.gson.FieldNamingPolicy;
+import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.LongSerializationPolicy;
@@ -63,28 +63,17 @@ public class JSONSync<T> {
     }
 
     private Gson generateGson() {
-        ExclusionStrategy strategy =
-                new ExclusionStrategy() {
-                    @Override
-                    public boolean shouldSkipField(FieldAttributes field) {
-                        return (field.getAnnotation(JSONExclude.class) != null);
-                    }
-
-                    @Override
-                    public boolean shouldSkipClass(Class<?> clazz) {
-                        return false;
-                    }
-                };
-
+        ExclusionStrategy jsonExcludeStrategy = new JSONExcludeExclusionStrategy();
+        FieldNamingStrategy jsonNameStrategy = new JSONNameNamingStrategy(this.config.namingPolicy);
         GsonBuilder builder = new GsonBuilder();
         if (this.config.serializeNulls) builder.serializeNulls();
         if (this.config.prettyPrinting) builder.setPrettyPrinting();
         if (this.config.excludeFieldsWithoutExposeAnnotation)
             builder.excludeFieldsWithoutExposeAnnotation();
-        builder.setFieldNamingPolicy(this.config.namingPolicy)
+        builder.setFieldNamingStrategy(jsonNameStrategy)
                 .setLongSerializationPolicy(this.config.longSerializationPolicy)
-                .addDeserializationExclusionStrategy(strategy)
-                .addSerializationExclusionStrategy(strategy);
+                .addDeserializationExclusionStrategy(jsonExcludeStrategy)
+                .addSerializationExclusionStrategy(jsonExcludeStrategy);
         return builder.create();
     }
 
