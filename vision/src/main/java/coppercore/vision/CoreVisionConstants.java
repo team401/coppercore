@@ -11,7 +11,7 @@ import edu.wpi.first.math.numbers.N3;
  * per-project.
  */
 public final class CoreVisionConstants {
-    // TODO: Tune this value
+    // TODO: Tune this value.
     // This value mainly exists so that this file stays named CoreVisionConstants.
     public static final double maxAcceptedDistanceMeters = 10.0;
     public static final Matrix<N3, N1> singleTagStdDev = VecBuilder.fill(1, 1, 1);
