@@ -20,4 +20,13 @@ public final class CoreVisionConstants {
             VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     public static final double singleTagDistanceCutoff = 4.0;
     public static final double distanceFactor = 30.0;
+    public static final double maxZCutoff = 1.0;
+
+    // Standard deviation multipliers for each camera
+    // (Adjust to trust some cameras more than others)
+    public static double[] cameraStdDevFactors =
+            new double[] {
+                1.0, // Camera 0
+                1.0 // Camera 1
+            };
 }
