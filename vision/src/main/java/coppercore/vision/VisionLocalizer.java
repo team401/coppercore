@@ -148,7 +148,7 @@ public class VisionLocalizer extends SubsystemBase {
     }
 
     private void logSummaryData(
-            List<Pose3d> allRbotPoses,
+            List<Pose3d> allRobotPoses,
             List<Pose3d> allRobotPosesAccepted,
             List<Pose3d> allRobotPosesRejected) {
         Logger.recordOutput(
