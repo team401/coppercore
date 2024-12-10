@@ -9,6 +9,7 @@ plugins {
 	id "com.peterabeles.gversion" version "1.10"
 	id "com.diffplug.spotless" version "6.24.0"
 	id "com.vanniktech.maven.publish" version "0.30.0"
+		// id "edu.wpi.first.GradleRIO" version "2025.1.1-beta-2"
 }
 
 java {
@@ -23,10 +24,10 @@ configurations.all {
 	// exclude group: "edu.wpi.first.wpilibj"
 }
 
-task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
-	mainClass = "org.littletonrobotics.junction.CheckInstall"
-	classpath = sourceSets.main.runtimeClasspath
-}
+// task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
+// 	mainClass = "org.littletonrobotics.junction.CheckInstall"
+// 	classpath = sourceSets.main.runtimeClasspath
+// }
 // TODO: Figure out why advantagekit won't let us build the project
 //compileJava.finalizedBy checkAkitInstall
 
@@ -37,13 +38,16 @@ dependencies {
 	implementation "edu.wpi.first.wpilibj:wpilibj-java:$wpilibVersion"
 	implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:$wpilibVersion"
 	implementation "edu.wpi.first.apriltag:apriltag-java:$wpilibVersion"
+	implementation "edu.wpi.first.wpiutil:wpiutil-java:$wpilibVersion"
+	implementation "edu.wpi.first.wpiunits:wpiunits-java:$wpilibVersion"
+	implementation "edu.wpi.first.wpimath:wpimath-java:$wpilibVersion"
 
-	//def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
-	//annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
-	def akitVersion = "4.0.0-alpha-1"
-	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitVersion"
-
-	implementation "org.littletonrobotics.akit.junction:junction-core:$akitVersion"
+	// def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
+	// annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
+	def akitVersion = "4.0.0-beta-1"
+	annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitVersion"
+	implementation "org.littletonrobotics.akit:akit-java:$akitVersion"
+	// implementation "org.littletonrobotics.akit:akit-wpilibio:$akitVersion"
 
 	def photonVersion = "v2025.0.0-beta-5"
 	implementation "org.photonvision:photonlib-java:$photonVersion"
@@ -62,6 +66,11 @@ test {
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
 	options.compilerArgs.add '-XDstringConcat=inline'
+}
+
+task(replayWatch, type: JavaExec) {
+	mainClass = "org.littletonrobotics.junction.ReplayWatch"
+	classpath = sourceSets.main.runtimeClasspath
 }
 
 // project.compileJava.dependsOn(createVersionFile)

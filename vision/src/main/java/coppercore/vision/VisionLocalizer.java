@@ -1,5 +1,6 @@
 package coppercore.vision;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -18,10 +19,13 @@ public class VisionLocalizer extends SubsystemBase {
     private final Alert[] disconnectedAlerts;
     // avoid NullPointerExceptions by setting a default no-op
     private VisionConsumer consumer;
+    private AprilTagFieldLayout aprilTagLayout;
 
-    public VisionLocalizer(VisionConsumer consumer, VisionIO... io) {
+    public VisionLocalizer(
+            VisionConsumer consumer, AprilTagFieldLayout aprilTagLayout, VisionIO... io) {
         this.consumer = consumer;
         this.io = io;
+        this.aprilTagLayout = aprilTagLayout;
 
         // Initialize inputs
         this.inputs = new VisionIOInputsAutoLogged[io.length];
@@ -33,9 +37,7 @@ public class VisionLocalizer extends SubsystemBase {
         this.disconnectedAlerts = new Alert[io.length];
         for (int i = 0; i < inputs.length; i++) {
             disconnectedAlerts[i] =
-                    new Alert(
-                            "Vision camera " + io[cameraIndex].name + " is disconnected.",
-                            AlertType.kWarning);
+                    new Alert("Vision camera " + i + " is disconnected.", AlertType.kWarning);
         }
     }
 
@@ -43,7 +45,7 @@ public class VisionLocalizer extends SubsystemBase {
     public void periodic() {
         for (int i = 0; i < io.length; i++) {
             io[i].updateInputs(inputs[i]);
-            Logger.processInputs("Vision/Camera" + io[cameraIndex].name, inputs[i]);
+            Logger.processInputs("Vision/Camera" + i, inputs[i]);
         }
 
         // Initialize logging values
@@ -61,7 +63,7 @@ public class VisionLocalizer extends SubsystemBase {
             List<Pose3d> robotPosesAccepted = new LinkedList<>();
             List<Pose3d> robotPosesRejected = new LinkedList<>();
 
-            for (PoseObservation observation : inputs[cameraIndex].poseObservations) {
+            for (VisionIO.PoseObservation observation : inputs[cameraIndex].poseObservations) {
                 if (rejectPose(observation)) {
                     robotPosesRejected.add(observation.pose());
                     continue;
@@ -88,10 +90,6 @@ public class VisionLocalizer extends SubsystemBase {
         this.consumer = consumer;
     }
 
-    public boolean coprocessorConnected() {
-        return container.getCameras().get(0).isConnected();
-    }
-
     private boolean rejectPose(VisionIO.PoseObservation observation) {
         return observation.tagCount() == 0 // Must have at least one tag
                 || (observation.tagCount() == 1
@@ -99,7 +97,7 @@ public class VisionLocalizer extends SubsystemBase {
                                 > CoreVisionConstants
                                         .singleTagDistanceCutoff) // Cannot be high ambiguity
                 || Math.abs(observation.pose().getZ())
-                        > CoreVisionConstants.maxZError // Must have realistic Z coordinate
+                        > CoreVisionConstants.maxZCutoff // Must have realistic Z coordinate
                 || observation.averageTagDistance() > CoreVisionConstants.maxAcceptedDistanceMeters
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
@@ -139,13 +137,13 @@ public class VisionLocalizer extends SubsystemBase {
             List<Pose3d> robotPosesRejected) {
         // Log camera datadata
         Logger.recordOutput(
-                "Vision/Camera" + io[cameraIndex].name + "/RobotPoses",
+                "Vision/Camera" + cameraIndex + "/RobotPoses",
                 robotPoses.toArray(new Pose3d[robotPoses.size()]));
         Logger.recordOutput(
-                "Vision/Camera" + io[cameraIndex].name + "/RobotPosesAccepted",
+                "Vision/Camera" + cameraIndex + "/RobotPosesAccepted",
                 robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]));
         Logger.recordOutput(
-                "Vision/Camera" + io[cameraIndex].name + "/RobotPosesRejected",
+                "Vision/Camera" + cameraIndex + "/RobotPosesRejected",
                 robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
     }
 
