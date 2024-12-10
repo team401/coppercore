@@ -40,11 +40,10 @@ dependencies {
 	//def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
 	//annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitJson.version"
 
-	def akitVersion = "4.0.0-alpha-1"
-	annotationProcessor "org.littletonrobotics.akit.junction:junction-autolog:$akitVersion"
+	def akitVersion = "4.0.0-beta-1"
+	annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitVersion"
 
 	implementation project(":monitors")
-	implementation "org.littletonrobotics.akit.junction:junction-core:$akitVersion"
 
 	def wpilibVersion = "2025.1.1-beta-1"
 	implementation "edu.wpi.first.wpilibj:wpilibj-java:$wpilibVersion"
