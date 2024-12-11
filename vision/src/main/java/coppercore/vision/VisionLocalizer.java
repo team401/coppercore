@@ -24,12 +24,17 @@ public class VisionLocalizer extends SubsystemBase {
     // avoid NullPointerExceptions by setting a default no-op
     private VisionConsumer consumer;
     private AprilTagFieldLayout aprilTagLayout;
+    private double[] cameraStdDevFactors;
 
     public VisionLocalizer(
-            VisionConsumer consumer, AprilTagFieldLayout aprilTagLayout, VisionIO... io) {
+            VisionConsumer consumer,
+            AprilTagFieldLayout aprilTagLayout,
+            double[] cameraStdDevFactors,
+            VisionIO... io) {
         this.consumer = consumer;
         this.io = io;
         this.aprilTagLayout = aprilTagLayout;
+        this.cameraStdDevFactors = cameraStdDevFactors;
 
         // Initialize inputs
         this.inputs = new VisionIOInputsAutoLogged[io.length];
@@ -127,8 +132,8 @@ public class VisionLocalizer extends SubsystemBase {
                                         / CoreVisionConstants.distanceFactor));
 
         // adjustment based on position of camera
-        if (cameraIndex < CoreVisionConstants.cameraStdDevFactors.length) {
-            stdDev = stdDev.times(CoreVisionConstants.cameraStdDevFactors[cameraIndex]);
+        if (cameraIndex < this.cameraStdDevFactors.length) {
+            stdDev = stdDev.times(this.cameraStdDevFactors[cameraIndex]);
         }
 
         return stdDev;
