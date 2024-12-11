@@ -69,7 +69,7 @@ public class VisionLocalizer extends SubsystemBase {
             List<Pose3d> robotPosesRejected = new LinkedList<>();
 
             for (VisionIO.PoseObservation observation : inputs[cameraIndex].poseObservations) {
-                if (rejectPose(observation)) {
+                if (shouldRejectPose(observation)) {
                     robotPosesRejected.add(observation.pose());
                     continue;
                 }
@@ -95,7 +95,7 @@ public class VisionLocalizer extends SubsystemBase {
         this.consumer = consumer;
     }
 
-    private boolean rejectPose(VisionIO.PoseObservation observation) {
+    private boolean shouldRejectPose(VisionIO.PoseObservation observation) {
         return observation.tagCount() == 0 // Must have at least one tag
                 || (observation.tagCount() == 1
                         && observation.averageTagDistance()
