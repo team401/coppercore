@@ -1,17 +1,18 @@
 package coppercore.parameter_tools;
 
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.FieldNamingStrategy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.LongSerializationPolicy;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldNamingStrategy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 public class JSONSync<T> {
+
+    private final JSONSyncConfig defaultConfig = new JSONSyncConfigBuilder().build();
 
     private final Gson gson;
 
@@ -48,7 +49,6 @@ public class JSONSync<T> {
 
     public void saveData() {
         String json = gson.toJson(instance);
-        // System.out.println(json);
         FileWriter writer = getFileWriter(file);
         try {
             writer.write(json);
@@ -64,14 +64,14 @@ public class JSONSync<T> {
 
     private Gson generateGson() {
         ExclusionStrategy jsonExcludeStrategy = new JSONExcludeExclusionStrategy();
-        FieldNamingStrategy jsonNameStrategy = new JSONNameNamingStrategy(this.config.namingPolicy);
+        FieldNamingStrategy jsonNameStrategy = new JSONNameNamingStrategy(this.config.namingPolicy());
         GsonBuilder builder = new GsonBuilder();
-        if (this.config.serializeNulls) builder.serializeNulls();
-        if (this.config.prettyPrinting) builder.setPrettyPrinting();
-        if (this.config.excludeFieldsWithoutExposeAnnotation)
+        if (this.config.serializeNulls()) builder.serializeNulls();
+        if (this.config.prettyPrinting()) builder.setPrettyPrinting();
+        if (this.config.excludeFieldsWithoutExposeAnnotation())
             builder.excludeFieldsWithoutExposeAnnotation();
         builder.setFieldNamingStrategy(jsonNameStrategy)
-                .setLongSerializationPolicy(this.config.longSerializationPolicy)
+                .setLongSerializationPolicy(this.config.longSerializationPolicy())
                 .addDeserializationExclusionStrategy(jsonExcludeStrategy)
                 .addSerializationExclusionStrategy(jsonExcludeStrategy);
         return builder.create();
@@ -84,58 +84,8 @@ public class JSONSync<T> {
         this.file = file;
     }
 
-    private static record JSONSyncConfig(
-            boolean serializeNulls,
-            boolean prettyPrinting,
-            boolean excludeFieldsWithoutExposeAnnotation,
-            FieldNamingPolicy namingPolicy,
-            LongSerializationPolicy longSerializationPolicy) {
-        public JSONSyncConfig(JSONSyncConfigBuilder builder) {
-            this(
-                    builder.serializeNulls,
-                    builder.prettyPrinting,
-                    builder.excludeFieldsWithoutExposeAnnotation,
-                    builder.namingPolicy,
-                    builder.longSerializationPolicy);
-        }
+    public JSONSync(T instance, String file) {
+
     }
 
-    public static class JSONSyncConfigBuilder {
-        public boolean serializeNulls = false;
-        public boolean prettyPrinting = false;
-        public boolean excludeFieldsWithoutExposeAnnotation = false;
-        public FieldNamingPolicy namingPolicy = FieldNamingPolicy.IDENTITY;
-        public LongSerializationPolicy longSerializationPolicy = LongSerializationPolicy.DEFAULT;
-
-        public JSONSyncConfigBuilder setSerializeNulls(boolean serializeNulls) {
-            this.serializeNulls = serializeNulls;
-            return this;
-        }
-
-        public JSONSyncConfigBuilder setPrettyPrinting(boolean prettyPrinting) {
-            this.prettyPrinting = prettyPrinting;
-            return this;
-        }
-
-        public JSONSyncConfigBuilder setExcludeFieldsWithoutExposeAnnotation(
-                boolean excludeFieldsWithoutExposeAnnotation) {
-            this.excludeFieldsWithoutExposeAnnotation = excludeFieldsWithoutExposeAnnotation;
-            return this;
-        }
-
-        public JSONSyncConfigBuilder setNamingPolicy(FieldNamingPolicy namingPolicy) {
-            this.namingPolicy = namingPolicy;
-            return this;
-        }
-
-        public JSONSyncConfigBuilder setLongSerializationPolicy(
-                LongSerializationPolicy longSerializationPolicy) {
-            this.longSerializationPolicy = longSerializationPolicy;
-            return this;
-        }
-
-        public JSONSyncConfig build() {
-            return new JSONSyncConfig(this);
-        }
-    }
 }

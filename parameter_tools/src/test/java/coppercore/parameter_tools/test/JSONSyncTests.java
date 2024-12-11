@@ -1,10 +1,14 @@
 package coppercore.parameter_tools.test;
 
 import coppercore.parameter_tools.JSONSync;
+
 import java.io.File;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import coppercore.parameter_tools.JSONSyncConfigBuilder;
 
 public class JSONSyncTests {
 
@@ -18,7 +22,7 @@ public class JSONSyncTests {
                 new JSONSync<ExampleJsonSyncClass>(
                         new ExampleJsonSyncClass(),
                         RESOURCE_DIRECTORY + "/ExampleJsonSyncClass.json",
-                        new JSONSync.JSONSyncConfigBuilder().setPrettyPrinting(true).build());
+                        new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
     }
 
     @Test

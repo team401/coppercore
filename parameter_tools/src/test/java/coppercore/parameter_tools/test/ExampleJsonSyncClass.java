@@ -2,6 +2,7 @@ package coppercore.parameter_tools.test;
 
 import coppercore.parameter_tools.JSONName;
 import coppercore.parameter_tools.JSONSync;
+import coppercore.parameter_tools.JSONSyncConfigBuilder;
 
 public class ExampleJsonSyncClass {
 
@@ -9,7 +10,7 @@ public class ExampleJsonSyncClass {
             new JSONSync<ExampleJsonSyncClass>(
                     new ExampleJsonSyncClass(),
                     "filePath",
-                    new JSONSync.JSONSyncConfigBuilder().build());
+                    new JSONSyncConfigBuilder().build());
 
     public final String testText = "";
     public final Double testDouble = 0.0;
