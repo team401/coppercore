@@ -130,7 +130,7 @@ public class VisionLocalizer extends SubsystemBase {
                 stdDev.times(
                         1
                                 + (Math.pow(avgDistanceFromTarget, 2)
-                                        / CoreVisionConstants.distanceFactor));
+                                        / numTags > 0 ? numTags : CoreVisionConstants.distanceFactor));
 
         // adjustment based on position of camera
         if (cameraIndex < this.cameraStdDevFactors.length) {
