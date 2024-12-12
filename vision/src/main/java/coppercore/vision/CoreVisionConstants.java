@@ -1,10 +1,5 @@
 package coppercore.vision;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-
 /**
  * Vision constants for coppercore's internal vision constants. Not to be confused with
  * VisionConstants, which is likely your robot project's local vision constants that are configured

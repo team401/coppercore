@@ -123,8 +123,14 @@ public class VisionLocalizer extends SubsystemBase {
             VisionIO.PoseObservation observation, int cameraIndex) {
         double avgDistanceFromTarget = observation.averageTagDistance();
         int numTags = observation.tagCount();
-        double linearStdDev = CoreVisionConstants.linearStdDevFactor * Math.pow(avgDistanceFromTarget, 2) / numTags;
-        double angularStdDev = CoreVisionConstants.angularStdDevFactor * Math.pow(avgDistanceFromTarget, 2) / numTags;
+        double linearStdDev =
+                CoreVisionConstants.linearStdDevFactor
+                        * Math.pow(avgDistanceFromTarget, 2)
+                        / numTags;
+        double angularStdDev =
+                CoreVisionConstants.angularStdDevFactor
+                        * Math.pow(avgDistanceFromTarget, 2)
+                        / numTags;
 
         // adjustment based on position of camera
         if (cameraIndex < this.cameraStdDevFactors.length) {
