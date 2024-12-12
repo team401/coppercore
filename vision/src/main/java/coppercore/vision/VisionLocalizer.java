@@ -126,11 +126,7 @@ public class VisionLocalizer extends SubsystemBase {
             stdDev = CoreVisionConstants.multiTagStdDev;
         }
         // distance based variance
-        stdDev =
-                stdDev.times(
-                        1
-                                + (Math.pow(avgDistanceFromTarget, 2)
-                                        / numTags > 0 ? numTags : CoreVisionConstants.distanceFactor));
+        stdDev = stdDev.times(1 + (Math.pow(avgDistanceFromTarget, 2) / numTags));
 
         // adjustment based on position of camera
         if (cameraIndex < this.cameraStdDevFactors.length) {
