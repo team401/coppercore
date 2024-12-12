@@ -110,6 +110,7 @@ public class VisionLocalizer extends SubsystemBase {
                 || Math.abs(observation.pose().getZ())
                         > CoreVisionConstants.maxZCutoff // Must have realistic Z coordinate
                 || observation.averageTagDistance() > CoreVisionConstants.maxAcceptedDistanceMeters
+                || observation.ambiguity() > 0.3
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
                 || observation.pose().getX() > aprilTagLayout.getFieldLength()
