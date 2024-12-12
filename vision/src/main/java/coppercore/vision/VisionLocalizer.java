@@ -74,6 +74,7 @@ public class VisionLocalizer extends SubsystemBase {
             List<Pose3d> robotPosesRejected = new LinkedList<>();
 
             for (VisionIO.PoseObservation observation : inputs[cameraIndex].poseObservations) {
+                robotPoses.add(observation.pose());
                 if (shouldRejectPose(observation)) {
                     robotPosesRejected.add(observation.pose());
                     continue;
