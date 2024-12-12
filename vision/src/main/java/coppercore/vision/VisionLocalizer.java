@@ -2,6 +2,7 @@ package coppercore.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
@@ -120,21 +121,18 @@ public class VisionLocalizer extends SubsystemBase {
 
     private Matrix<N3, N1> getLatestVariance(
             VisionIO.PoseObservation observation, int cameraIndex) {
-        Matrix<N3, N1> stdDev = CoreVisionConstants.singleTagStdDev;
         double avgDistanceFromTarget = observation.averageTagDistance();
         int numTags = observation.tagCount();
-        if (numTags > 1) {
-            stdDev = CoreVisionConstants.multiTagStdDev;
-        }
-        // distance based variance
-        stdDev = stdDev.times(1 + (Math.pow(avgDistanceFromTarget, 2) / numTags));
+        double linearStdDev = CoreVisionConstants.linearStdDevFactor * Math.pow(avgDistanceFromTarget, 2) / numTags;
+        double angularStdDev = CoreVisionConstants.angularStdDevFactor * Math.pow(avgDistanceFromTarget, 2) / numTags;
 
         // adjustment based on position of camera
         if (cameraIndex < this.cameraStdDevFactors.length) {
-            stdDev = stdDev.times(this.cameraStdDevFactors[cameraIndex]);
+            linearStdDev *= this.cameraStdDevFactors[cameraIndex];
+            angularStdDev *= this.cameraStdDevFactors[cameraIndex];
         }
 
-        return stdDev;
+        return VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev);
     }
 
     private void logCameraData(
