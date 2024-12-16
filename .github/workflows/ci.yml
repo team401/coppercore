@@ -1,6 +1,10 @@
 name: CI
 
-on: [push, pull_request]
+on: 
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ '**' ]
 
 jobs:
   build-docker:
@@ -41,7 +45,7 @@ jobs:
 
   build-host:
     env: 
-      MACOSX_DEPLOYMENT_TARGET: 12
+      MACOSX_DEPLOYMENT_TARGET: 15
     strategy:
       fail-fast: false
       matrix:
@@ -49,7 +53,7 @@ jobs:
           - os: windows-latest
             artifact-name: Win64
             architecture: x64
-          - os: macos-12
+          - os: macos-15
             artifact-name: macOS
             architecture: x64
           - os: ubuntu-latest
