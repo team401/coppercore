@@ -41,10 +41,6 @@ dependencies {
 
 	implementation "org.littletonrobotics.akit.junction:junction-core:$akitVersion"
 
-	def photonVersion = "v2025.0.0-beta-5"
-	implementation "org.photonvision:photonlib-java:$photonVersion"
-	implementation "org.photonvision:photontargeting-java:$photonVersion"
-
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
@@ -84,10 +80,6 @@ repositories {
 		}
 	}
 	gradlePluginPortal()
-	maven {
-		name "photonvisionRepositoryReleases"
-		url "https://maven.photonvision.org/releases"
-	}
 }
 
 
