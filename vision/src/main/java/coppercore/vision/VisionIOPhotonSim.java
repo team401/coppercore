@@ -8,6 +8,9 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 
+/**
+ * implements vision io throuigh photon vision simulation
+ */
 public class VisionIOPhotonSim extends VisionIOPhotonReal {
     private static VisionSystemSim visionSim;
 
