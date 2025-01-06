@@ -4,6 +4,11 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
+
+/**
+ * Represents an IO wrapper for vision localizer to query. 
+ * This class is responsible for updating camera poses and data
+ */
 public interface VisionIO {
     @AutoLog
     public static class VisionIOInputs {
