@@ -1,5 +1,7 @@
-package coppercore.controls;
+package coppercore.controls.state_machine.state;
 
+import coppercore.controls.state_machine.transition.ConditinalTransition;
+import coppercore.controls.state_machine.transition.Transition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -106,46 +108,46 @@ public class StateConfiguration<State, Trigger> {
         }
     }
 
-    public StateConfiguration<State, Trigger> disableDefaultTransitionAction(){
+    public StateConfiguration<State, Trigger> disableDefaultTransitionAction() {
         this.runDefaultTransitionAction = false;
         return this;
     }
 
-    public StateConfiguration<State, Trigger> disableDefualtOnEntry(){
+    public StateConfiguration<State, Trigger> disableDefualtOnEntry() {
         this.runDefaultEntryAction = false;
         return this;
     }
 
-    public StateConfiguration<State, Trigger> disableDefualtOnExit(){
+    public StateConfiguration<State, Trigger> disableDefualtOnExit() {
         this.runDefaultExitAction = false;
         return this;
     }
 
-    public StateConfiguration<State, Trigger> configureOnEntryAction(Consumer<Transition> action){
+    public StateConfiguration<State, Trigger> configureOnEntryAction(Consumer<Transition> action) {
         this.onEntryAction = action;
         return this;
     }
 
-    public StateConfiguration<State, Trigger> configureOnExitAction(Consumer<Transition> action){
+    public StateConfiguration<State, Trigger> configureOnExitAction(Consumer<Transition> action) {
         this.onExitAction = action;
         return this;
     }
 
-    public StateConfiguration<State, Trigger> configureTransitionAction(Consumer<Transition> action){
+    public StateConfiguration<State, Trigger> configureTransitionAction(
+            Consumer<Transition> action) {
         this.transitionAction = action;
         return this;
     }
 
-    public boolean doRunDefaultEntryAction(){
+    public boolean doRunDefaultEntryAction() {
         return runDefaultEntryAction;
     }
 
-    public boolean doRunDefaultExitAction(){
+    public boolean doRunDefaultExitAction() {
         return runDefaultExitAction;
     }
 
-    public boolean doRunDefaultTransitionAction(){
+    public boolean doRunDefaultTransitionAction() {
         return runDefaultTransitionAction;
     }
-    
 }

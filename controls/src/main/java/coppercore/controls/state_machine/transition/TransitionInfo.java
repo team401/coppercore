@@ -1,4 +1,4 @@
-package coppercore.controls;
+package coppercore.controls.state_machine.transition;
 
 public class TransitionInfo<State, Trigger> {
     private final State currentState;

@@ -1,4 +1,4 @@
-package coppercore.controls;
+package coppercore.controls.state_machine.transition;
 
 import java.util.function.Consumer;
 

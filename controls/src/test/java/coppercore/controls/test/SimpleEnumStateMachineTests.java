@@ -2,8 +2,8 @@ package coppercore.controls.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import coppercore.controls.StateMachine;
-import coppercore.controls.StateMachineConfiguration;
+import coppercore.controls.state_machine.StateMachine;
+import coppercore.controls.state_machine.StateMachineConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

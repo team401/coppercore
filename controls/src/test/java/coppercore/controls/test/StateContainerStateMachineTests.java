@@ -1,28 +1,24 @@
 package coppercore.controls.test;
 
+import coppercore.controls.state_machine.StateMachine;
+import coppercore.controls.state_machine.StateMachineConfiguration;
+import coppercore.controls.state_machine.state.PeriodicStateInterface;
+import coppercore.controls.state_machine.state.StateContainer;
+import coppercore.controls.state_machine.transition.Transition;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import coppercore.controls.PeriodicStateInterface;
-import coppercore.controls.StateContainer;
-import coppercore.controls.StateMachine;
-import coppercore.controls.StateMachineConfiguration;
-import coppercore.controls.Transition;
 
 public class StateContainerStateMachineTests {
 
     static class IdleState implements PeriodicStateInterface {
-        public static void customOnEntry(Transition transition){
+        public static void customOnEntry(
+                Transition<StateContainerStateMachineTests, testEnumTriggers> transition) {}
 
-        }
+        public static void customOnExit(
+                Transition<StateContainerStateMachineTests, testEnumTriggers> transition) {}
 
-        public static void customOnExit(Transition transition){
-            
-        }
-
-        public static void customTransitionAction(Transition transition){
-            
-        }
+        public static void customTransitionAction(
+                Transition<StateContainerStateMachineTests, testEnumTriggers> transition) {}
     }
     ;
 
@@ -51,6 +47,7 @@ public class StateContainerStateMachineTests {
             this.state = state;
         }
 
+        @Override
         public PeriodicStateInterface getState() {
             return state;
         }
@@ -65,7 +62,7 @@ public class StateContainerStateMachineTests {
         ERROR
     }
 
-    public static StateMachineConfiguration<testStateContainer, testEnumTriggers>
+    protected static StateMachineConfiguration<testStateContainer, testEnumTriggers>
             stateContainerTestMachineConfig;
 
     @BeforeAll
@@ -73,19 +70,23 @@ public class StateContainerStateMachineTests {
         stateContainerTestMachineConfig = new StateMachineConfiguration<>();
 
         stateContainerTestMachineConfig
-                .configureDefaultOnEntryAction((testStateContainer state, Transition transition) -> state.getState().onEntry(transition))
-                .configureDefaultTransitionAction((testStateContainer state, Transition transition) -> state.getState().onEntry(transition));
+                .configureDefaultOnEntryAction(
+                        (testStateContainer state, Transition transition) ->
+                                state.getState().onEntry(transition))
+                .configureDefaultTransitionAction(
+                        (testStateContainer state, Transition transition) ->
+                                state.getState().onEntry(transition));
 
+        // stateContainerTestMachineConfig
+        //    .registerBlankParent(testStateContainer.SOME_PARENT_STATE);  Not in first
+        // Implemenation
 
-        //stateContainerTestMachineConfig
-        //    .registerBlankParent(testStateContainer.SOME_PARENT_STATE);  Not in first Implemenation
-    
-        //stateContainerTestMachineConfig
+        // stateContainerTestMachineConfig
         //    .configure(testStateContainer.SOME_STATE);  Not in first Implemenation
 
         stateContainerTestMachineConfig
                 .configure(testStateContainer.IDLE)
-                //.parentState(testStateContainer.SOME_STATE) Not in first Implemenation
+                // .parentState(testStateContainer.SOME_STATE) Not in first Implemenation
                 .permit(testEnumTriggers.PREPARE, testStateContainer.READY)
                 .permitInternal(testEnumTriggers.PREPARE, testStateContainer.READY)
                 .configureTransitionAction(IdleState::customTransitionAction)
@@ -94,7 +95,6 @@ public class StateContainerStateMachineTests {
                 .configureOnExitAction(IdleState::customOnExit)
                 .disableDefualtOnEntry()
                 .disableDefualtOnExit();
-                
 
         stateContainerTestMachineConfig
                 .configure(testStateContainer.READY)
@@ -109,7 +109,6 @@ public class StateContainerStateMachineTests {
                 .configure(testStateContainer.DONE)
                 .permit(testEnumTriggers.PREPARE, testStateContainer.READY)
                 .permit(testEnumTriggers.SHUTDOWN, testStateContainer.SHUTDOWN);
-
     }
 
     @Test
@@ -117,10 +116,12 @@ public class StateContainerStateMachineTests {
         StateMachine<testStateContainer, testEnumTriggers> stateMachine =
                 new StateMachine<>(stateContainerTestMachineConfig, testStateContainer.IDLE);
         testStateContainer stateContainer = stateMachine.getCurrentState();
-        //stateMachine.inState(testStateContainer.SOME_STATE);  Not in first Implemenation //True 
-        stateMachine.inState(testStateContainer.IDLE); //True
-        //stateMachine.inStateExactly(testStateContainer.SOME_STATE);  Not in first Implemenation //False
-        //stateMachine.inState(testStateContainer.SOME_PARENT_STATE);  Not in first Implemenation //False
+        // stateMachine.inState(testStateContainer.SOME_STATE);  Not in first Implemenation //True
+        stateMachine.inState(testStateContainer.IDLE); // True
+        // stateMachine.inStateExactly(testStateContainer.SOME_STATE);  Not in first Implemenation
+        // //False
+        // stateMachine.inState(testStateContainer.SOME_PARENT_STATE);  Not in first Implemenation
+        // //False
         stateContainer.getState().periodic();
     }
 

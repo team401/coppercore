@@ -1,4 +1,6 @@
-package coppercore.controls;
+package coppercore.controls.state_machine.state;
+
+import coppercore.controls.state_machine.transition.Transition;
 
 public interface StateInterface {
 

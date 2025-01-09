@@ -1,12 +1,14 @@
-package coppercore.controls;
+package coppercore.controls.state_machine;
 
+import coppercore.controls.state_machine.state.StateConfiguration;
+import coppercore.controls.state_machine.transition.Transition;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public class StateMachineConfiguration<State, Trigger> {
-    private Map<State, StateConfiguration<State, Trigger>> stateConfigurations;
+    private final Map<State, StateConfiguration<State, Trigger>> stateConfigurations;
     private BiConsumer<State, Transition> onEntryAction;
     private BiConsumer<State, Transition> onExitAction;
     private BiConsumer<State, Transition> transitionAction;
@@ -54,17 +56,20 @@ public class StateMachineConfiguration<State, Trigger> {
         return transition;
     }
 
-    public StateMachineConfiguration<State, Trigger> configureDefaultOnEntryAction(BiConsumer<State, Transition> action){
+    public StateMachineConfiguration<State, Trigger> configureDefaultOnEntryAction(
+            BiConsumer<State, Transition> action) {
         this.onEntryAction = action;
         return this;
     }
 
-    public StateMachineConfiguration<State, Trigger> configureDefaultOnExitAction(BiConsumer<State, Transition> action){
+    public StateMachineConfiguration<State, Trigger> configureDefaultOnExitAction(
+            BiConsumer<State, Transition> action) {
         this.onExitAction = action;
         return this;
     }
 
-    public StateMachineConfiguration<State, Trigger> configureDefaultTransitionAction(BiConsumer<State, Transition> action){
+    public StateMachineConfiguration<State, Trigger> configureDefaultTransitionAction(
+            BiConsumer<State, Transition> action) {
         this.transitionAction = action;
         return this;
     }
