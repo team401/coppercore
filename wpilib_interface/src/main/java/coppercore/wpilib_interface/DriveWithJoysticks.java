@@ -10,12 +10,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 
 public class DriveWithJoysticks extends Command {
-    private DriveTemplate drive;
-    private CommandJoystick leftJoystick;
-    private CommandJoystick rightJoystick;
-    private double maxLinearVelocity;
-    private double maxAngularVelocity;
-    private double joystickDeadband;
+    private final DriveTemplate drive;
+    private final CommandJoystick leftJoystick;
+    private final CommandJoystick rightJoystick;
+    private final double maxLinearVelocity;
+    private final double maxAngularVelocity;
+    private final double joystickDeadband;
 
     public DriveWithJoysticks(
             DriveTemplate drive,
@@ -41,11 +41,13 @@ public class DriveWithJoysticks extends Command {
         double omega = Deadband.oneAxisDeadband(-rightJoystick.getX(), joystickDeadband);
         omega = Math.copySign(omega * omega, omega);
 
-        drive.setGoalSpeeds(
+        ChassisSpeeds speeds =
                 new ChassisSpeeds(
                         linearSpeeds.getX() * maxLinearVelocity,
                         linearSpeeds.getY() * maxLinearVelocity,
-                        omega * maxAngularVelocity));
+                        omega * maxAngularVelocity);
+
+        drive.setGoalSpeeds(speeds);
     }
 
     /* returns a calculated translation with squared velocity */
