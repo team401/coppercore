@@ -45,8 +45,7 @@ public class DriveWithJoysticks extends Command {
                 new ChassisSpeeds(
                         linearSpeeds.getX() * maxLinearVelocity,
                         linearSpeeds.getY() * maxLinearVelocity,
-                        omega * maxAngularVelocity),
-                true);
+                        omega * maxAngularVelocity));
     }
 
     /* returns a calculated translation with squared velocity */
