@@ -1,33 +1,42 @@
 package coppercore.controls.state_machine;
 
-import coppercore.controls.state_machine.state.StateConfiguration;
-import coppercore.controls.state_machine.transition.Transition;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+import coppercore.controls.state_machine.state.StateConfiguration;
+import coppercore.controls.state_machine.transition.Transition;
 
 public class StateMachineConfiguration<State, Trigger> {
     private final Map<State, StateConfiguration<State, Trigger>> stateConfigurations;
-    private BiConsumer<State, Transition> onEntryAction;
-    private BiConsumer<State, Transition> onExitAction;
-    private BiConsumer<State, Transition> transitionAction;
+    private Consumer<Transition<State, Trigger>> onEntryAction;
+    private Consumer<Transition<State, Trigger>> onExitAction;
 
     public StateMachineConfiguration() {
         // temp solution
         stateConfigurations = new HashMap<>();
     }
 
+    /**
+     * Starts configuration of a state returning a StateConfiguration and registers it for the state.
+     * @param state
+     * @return
+     */
     public StateConfiguration<State, Trigger> configure(State source) {
         StateConfiguration<State, Trigger> configuration = stateConfigurations.get(source);
         if (configuration == null) {
             configuration = new StateConfiguration<>(source);
             stateConfigurations.put(source, configuration);
         }
-
         return configuration;
     }
 
+    /**
+     * Gets a StateConfiguration specified by State
+     * @param state
+     * @return
+     */
     public Optional<StateConfiguration<State, Trigger>> getStateConfiguration(State source) {
         Optional<StateConfiguration<State, Trigger>> configurationOptional = Optional.empty();
 
@@ -41,6 +50,12 @@ public class StateMachineConfiguration<State, Trigger> {
         return configurationOptional;
     }
 
+    /**
+     * Gets a Transition defined by State and Trigger
+     * @param state
+     * @param trigger
+     * @return
+     */
     public Optional<Transition<State, Trigger>> getTransition(State state, Trigger trigger) {
         Optional<Transition<State, Trigger>> transition = Optional.empty();
         Optional<StateConfiguration<State, Trigger>> configurationOptional =
@@ -56,21 +71,43 @@ public class StateMachineConfiguration<State, Trigger> {
         return transition;
     }
 
+    /**
+     * Set the default onEntry function.
+     * @param transition
+     */
     public StateMachineConfiguration<State, Trigger> configureDefaultOnEntryAction(
-            BiConsumer<State, Transition> action) {
+            Consumer<Transition<State, Trigger>> action) {
         this.onEntryAction = action;
         return this;
     }
 
+    /**
+     * Set the default onExit function.
+     * @param transition
+     */
     public StateMachineConfiguration<State, Trigger> configureDefaultOnExitAction(
-            BiConsumer<State, Transition> action) {
+            Consumer<Transition<State, Trigger>> action) {
         this.onExitAction = action;
         return this;
     }
 
-    public StateMachineConfiguration<State, Trigger> configureDefaultTransitionAction(
-            BiConsumer<State, Transition> action) {
-        this.transitionAction = action;
-        return this;
+    /**
+     * Method used by statemachine to handle processing on entry of a state.
+     * @param transition
+     */
+    public void runOnEntry(Transition<State, Trigger> transition) {
+        if (onEntryAction != null) {
+            onEntryAction.accept(transition);
+        }
+    }
+
+    /**
+     * Method used by statemachine to handle processing on exiting of a state.
+     * @param transition
+     */
+    public void runOnExit(Transition<State, Trigger> transition) {
+        if (onExitAction != null) {
+            onExitAction.accept(transition);
+        }
     }
 }

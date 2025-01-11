@@ -70,12 +70,12 @@ public class StateContainerStateMachineTests {
         stateContainerTestMachineConfig = new StateMachineConfiguration<>();
 
         stateContainerTestMachineConfig
-                .configureDefaultOnEntryAction(
-                        (testStateContainer state, Transition transition) ->
-                                state.getState().onEntry(transition))
-                .configureDefaultTransitionAction(
-                        (testStateContainer state, Transition transition) ->
-                                state.getState().onEntry(transition));
+                .configureDefaultOnExitAction(
+                        (Transition<testStateContainer, testEnumTriggers> transition) ->
+                                transition.getSource().getState().onEntry(transition))
+                .configureDefaultOnExitAction(
+                        (Transition<testStateContainer, testEnumTriggers> transition) ->
+                                transition.getSource().getState().onExit(transition));
 
         // stateContainerTestMachineConfig
         //    .registerBlankParent(testStateContainer.SOME_PARENT_STATE);  Not in first
@@ -89,8 +89,6 @@ public class StateContainerStateMachineTests {
                 // .parentState(testStateContainer.SOME_STATE) Not in first Implemenation
                 .permit(testEnumTriggers.PREPARE, testStateContainer.READY)
                 .permitInternal(testEnumTriggers.PREPARE, testStateContainer.READY)
-                .configureTransitionAction(IdleState::customTransitionAction)
-                .disableDefaultTransitionAction()
                 .configureOnEntryAction(IdleState::customOnEntry)
                 .configureOnExitAction(IdleState::customOnExit)
                 .disableDefualtOnEntry()

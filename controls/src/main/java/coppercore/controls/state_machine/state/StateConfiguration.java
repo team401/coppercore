@@ -14,8 +14,6 @@ public class StateConfiguration<State, Trigger> {
     private State source;
     private Consumer<Transition> onEntryAction;
     private Consumer<Transition> onExitAction;
-    private Consumer<Transition> transitionAction;
-    private boolean runDefaultTransitionAction = true;
     private boolean runDefaultEntryAction = true;
     private boolean runDefaultExitAction = true;
 
@@ -25,6 +23,13 @@ public class StateConfiguration<State, Trigger> {
         transitions = new ArrayList<>();
     }
 
+    /**
+     * Create Transition between States
+     *
+     * @param trigger
+     * @param destination
+     * @return
+     */
     public StateConfiguration<State, Trigger> permit(Trigger trigger, State destination) {
         if (getFilteredTransition(trigger).isEmpty()) {
             transitions.add(new Transition<>(source, destination, trigger, false));
@@ -32,6 +37,13 @@ public class StateConfiguration<State, Trigger> {
         return this;
     }
 
+    /**
+     * Create Transistion between states without trigger the enter or exit functions.
+     *
+     * @param trigger
+     * @param destination
+     * @return
+     */
     public StateConfiguration<State, Trigger> permitInternal(Trigger trigger, State destination) {
         if (getFilteredTransition(trigger).isEmpty()) {
             transitions.add(new Transition<>(source, destination, trigger, true));
@@ -39,6 +51,15 @@ public class StateConfiguration<State, Trigger> {
         return this;
     }
 
+    /**
+     * Creates a Conditional Transition that only fires if both the right Trigger is fired and the
+     * check lambda evaluates to true
+     *
+     * @param trigger
+     * @param destination
+     * @param check
+     * @return
+     */
     public StateConfiguration<State, Trigger> permitIf(
             Trigger trigger, State destination, BooleanSupplier check) {
         if (getFilteredTransition(trigger).isEmpty()) {
@@ -47,6 +68,16 @@ public class StateConfiguration<State, Trigger> {
         return this;
     }
 
+    /**
+     * Creates a Conditional Internal Transition that only fires if both the right Trigger is fired
+     * and the check lambda evaluates to true. This transition will not trigger the enter or exit
+     * functions.
+     *
+     * @param trigger
+     * @param destination
+     * @param check
+     * @return
+     */
     public StateConfiguration<State, Trigger> permitInternalIf(
             Trigger trigger, State destination, BooleanSupplier check) {
         if (getFilteredTransition(trigger).isEmpty()) {
@@ -102,17 +133,6 @@ public class StateConfiguration<State, Trigger> {
         }
     }
 
-    public void runTransition(Transition transition) {
-        if (transitionAction != null) {
-            transitionAction.accept(transition);
-        }
-    }
-
-    public StateConfiguration<State, Trigger> disableDefaultTransitionAction() {
-        this.runDefaultTransitionAction = false;
-        return this;
-    }
-
     public StateConfiguration<State, Trigger> disableDefualtOnEntry() {
         this.runDefaultEntryAction = false;
         return this;
@@ -133,21 +153,11 @@ public class StateConfiguration<State, Trigger> {
         return this;
     }
 
-    public StateConfiguration<State, Trigger> configureTransitionAction(
-            Consumer<Transition> action) {
-        this.transitionAction = action;
-        return this;
-    }
-
     public boolean doRunDefaultEntryAction() {
         return runDefaultEntryAction;
     }
 
     public boolean doRunDefaultExitAction() {
         return runDefaultExitAction;
-    }
-
-    public boolean doRunDefaultTransitionAction() {
-        return runDefaultTransitionAction;
     }
 }

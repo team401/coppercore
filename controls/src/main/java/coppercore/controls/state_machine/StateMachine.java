@@ -16,7 +16,7 @@ public class StateMachine<State, Trigger> {
     }
 
     /**
-     * Method to transition States based on given trigger.
+     * Method to transition States based on given trigger
      *
      * @param trigger
      */
@@ -35,17 +35,30 @@ public class StateMachine<State, Trigger> {
         }
         transitionInfo.setTransition(transition);
         if (!transition.isInternal()) {
-            // TODO: Make use set actions
             Optional<StateConfiguration<State, Trigger>> currentStateConfigurationOptional =
                     configuration.getStateConfiguration(currentState);
             Optional<StateConfiguration<State, Trigger>> nextStateConfigurationOptional =
                     configuration.getStateConfiguration(transition.getDestination());
             if (currentStateConfigurationOptional.isPresent()) {
-                currentStateConfigurationOptional.get().runOnEntry(transition);
+                StateConfiguration<State, Trigger> config = currentStateConfigurationOptional.get();
+                if (config.doRunDefaultExitAction()) {
+                    configuration.runOnExit(transition);
+                } else {
+                    config.runOnExit(transition);
+                }
+            } else {
+                configuration.runOnExit(transition);
             }
             transition.runAction();
             if (nextStateConfigurationOptional.isPresent()) {
-                nextStateConfigurationOptional.get().runOnExit(transition);
+                StateConfiguration<State, Trigger> config = nextStateConfigurationOptional.get();
+                if (config.doRunDefaultExitAction()) {
+                    configuration.runOnEntry(transition);
+                } else {
+                    config.runOnEntry(transition);
+                }
+            } else {
+                configuration.runOnEntry(transition);
             }
         }
         currentState = transition.getDestination();
