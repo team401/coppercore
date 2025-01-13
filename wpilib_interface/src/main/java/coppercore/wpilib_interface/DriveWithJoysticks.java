@@ -47,7 +47,7 @@ public class DriveWithJoysticks extends Command {
                         linearSpeeds.getY() * maxLinearVelocity,
                         omega * maxAngularVelocity);
 
-        drive.setGoalSpeeds(speeds);
+        drive.setGoalSpeeds(speeds, true);
     }
 
     /* returns a calculated translation with squared velocity */
