@@ -1,6 +1,7 @@
 package coppercore.wpilib_interface;
 
 import coppercore.math.Deadband;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -36,9 +37,14 @@ public class DriveWithJoysticks extends Command {
 
     @Override
     public void execute() {
-        Translation2d linearSpeeds = getLinearVelocity(-leftJoystick.getX(), -leftJoystick.getY());
+        // clamp inputs between 0 and 1 to prevent crazy speeds
+        double leftJoystickX = MathUtil.clamp(leftJoystick.getX(), 0, 1);
+        double leftJoystickY = MathUtil.clamp(leftJoystick.getY(), 0, 1);
+        double rightJoystickX = MathUtil.clamp(rightJoystick.getX(), 0, 1);
 
-        double omega = Deadband.oneAxisDeadband(-rightJoystick.getX(), joystickDeadband);
+        Translation2d linearSpeeds = getLinearVelocity(-leftJoystickX, -leftJoystickY);
+
+        double omega = Deadband.oneAxisDeadband(-rightJoystickX, joystickDeadband);
         omega = Math.copySign(omega * omega, omega);
 
         ChassisSpeeds speeds =
@@ -50,7 +56,14 @@ public class DriveWithJoysticks extends Command {
         drive.setGoalSpeeds(speeds, true);
     }
 
-    /* returns a calculated translation with squared velocity */
+    /**
+     * calculates a translation with squared magnitude
+     * 
+     * @param x represents the x value of velocity
+     * @param y represents the y value of velocity
+     * 
+     *  @return Translation2d with directions of velocity
+     */
     public Translation2d getLinearVelocity(double x, double y) {
         double[] deadbands = Deadband.twoAxisDeadband(x, y, joystickDeadband);
 
