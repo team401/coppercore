@@ -17,6 +17,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+/**
+ * This provides us a way to more easily configure and map various controller inputs dynamically,
+ * allowing for easier customization and flexibility in robotics control systems. It handles both
+ * button mappings and axes, offers integration with multiple controller types, and provides an
+ * error-handling mechanism to ensure smooth operation.
+ */
 public class ControllerJSONReader {
 
     private static HashMap<Integer, CommandGenericHID> controllers;
@@ -26,6 +32,11 @@ public class ControllerJSONReader {
     private static HashMap<String, IntSupplier> pov;
 
     // gets json objects from chosen json file
+    /**
+     * This gets json objects from the chosen json file.
+     *
+     * @param configuration This is the name of the json file.
+     */
     public static void pullConfiguration(String configuration) {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject;
@@ -226,6 +237,12 @@ public class ControllerJSONReader {
     }
 
     // assigns pov intsuppliers to string keys
+    /**
+     * This assigns pov intsuppliers to string keys.
+     *
+     * @param povJSON This is a array that contains the intsuppliers
+     * @return This returns the string keys
+     */
     private static HashMap<String, IntSupplier> setPOV(JSONArray povJSON) {
         HashMap<String, IntSupplier> povList = new HashMap<String, IntSupplier>();
         Iterator<JSONObject> iterator = povJSON.iterator();
@@ -245,7 +262,12 @@ public class ControllerJSONReader {
     }
 
     // methods to get controllers, triggers, axes, povs for robotcontainer use
-
+    /**
+     * This gets the controllers. If the controllers are not generated, then it tells you.
+     * Otherwise, it gives you the controllers.
+     *
+     * @return This returns the controllers.
+     */
     public static HashMap<Integer, CommandGenericHID> getControllers() {
         if (controllers == null) {
             throw new RuntimeException("Controllers not yet generated, run pullConfiguration");
@@ -254,6 +276,12 @@ public class ControllerJSONReader {
         }
     }
 
+    /**
+     * This gets the triggers. If the triggers are not yet generated, then it tells you. Otherwise,
+     * it gives you the triggers.
+     *
+     * @return This returns the triggers.
+     */
     public static HashMap<String, Trigger> getTriggers() {
         if (triggers == null) {
             throw new RuntimeException("Triggers not yet generated, run pullConfiguration");
@@ -262,6 +290,12 @@ public class ControllerJSONReader {
         }
     }
 
+    /**
+     * This gets the axes. If the axes are not generated, then it tells you. Otherwise, it gives you
+     * the axes.
+     *
+     * @return This returns the axes
+     */
     public static HashMap<String, DoubleSupplier> getAxes() {
         if (axes == null) {
             throw new RuntimeException("Axes not yet generated, run pullConfiguration");
@@ -270,6 +304,12 @@ public class ControllerJSONReader {
         }
     }
 
+    /**
+     * This gets the POVs. If the POVs are not generated, then it tells you. Otherwise, it gives you
+     * the POVs.
+     *
+     * @return This returns the POVs
+     */
     public static HashMap<String, IntSupplier> getPOVs() {
         if (pov == null) {
             throw new RuntimeException("POVs not yet generated, run pullConfiguration");
