@@ -123,7 +123,7 @@ public class VisionLocalizer extends SubsystemBase {
     private boolean shouldRejectPose(VisionIO.PoseObservation observation) {
         return observation.tagCount() == 0 // Must have at least one tag
                 || (observation.tagCount() == 1
-                        && observation.ambiguity() > 0.3) // Cannot be high ambiguity if single tag
+                        && observation.ambiguity() > CoreVisionConstants.maxSingleTagAmbiguity) // Cannot be high ambiguity if single tag
                 || Math.abs(observation.pose().getZ())
                         > CoreVisionConstants.maxZCutoff // Must have realistic Z coordinate
                 || observation.averageTagDistance() > CoreVisionConstants.maxAcceptedDistanceMeters
