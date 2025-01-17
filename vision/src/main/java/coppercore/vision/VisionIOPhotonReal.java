@@ -75,6 +75,32 @@ public class VisionIOPhotonReal implements VisionIO {
                                 multitagResult.estimatedPose.ambiguity,
                                 multitagResult.fiducialIDsUsed.size(),
                                 inputs.averageTagDistanceM));
+            } else if (!result.targets.isEmpty()) { // single tag estimation
+                var target = result.targets.get(0);
+
+                var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
+                if(tagPose.isPresent()) {
+                    // find robot pose from location of target
+                    Transform3d fieldToTarget =
+                        new Transform3d(tagPose.get().getTranslation(), tagPose.get().getRotation());
+                    Transform3d cameraToTarget = target.bestCameraToTarget; // transform of best camera view of target (only one camera)
+                    Transform3d fieldToCamera = fieldToTarget.plus(cameraToTarget.inverse()); // take pose of target and transform to find pose of camera
+                    Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse()); // camera to robot transform to find location of center of robot
+                    Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
+
+                    // Add tag ID
+                    tagIds.add((short) target.fiducialId);
+
+                    // Add observation
+                    poseObservations.add(
+                        new PoseObservation(
+                            result.getTimestampSeconds(), // Timestamp
+                            robotPose, // 3D pose estimate
+                            target.poseAmbiguity, // Ambiguity
+                            1, // Tag count
+                            cameraToTarget.getTranslation().getNorm(), // Average tag distance
+                            PoseObservationType.PHOTONVISION)); // Observation type
+                }
             }
         }
 

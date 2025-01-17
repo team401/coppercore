@@ -1,6 +1,7 @@
 package coppercore.wpilib_interface;
 
 import coppercore.math.Deadband;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -10,12 +11,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 
 public class DriveWithJoysticks extends Command {
-    private DriveTemplate drive;
-    private CommandJoystick leftJoystick;
-    private CommandJoystick rightJoystick;
-    private double maxLinearVelocity;
-    private double maxAngularVelocity;
-    private double joystickDeadband;
+    private final DriveTemplate drive;
+    private final CommandJoystick leftJoystick;
+    private final CommandJoystick rightJoystick;
+    private final double maxLinearVelocity;
+    private final double maxAngularVelocity;
+    private final double joystickDeadband;
 
     public DriveWithJoysticks(
             DriveTemplate drive,
@@ -36,20 +37,33 @@ public class DriveWithJoysticks extends Command {
 
     @Override
     public void execute() {
-        Translation2d linearSpeeds = getLinearVelocity(-leftJoystick.getX(), -leftJoystick.getY());
+        // clamp inputs between 0 and 1 to prevent crazy speeds
+        double leftJoystickX = MathUtil.clamp(leftJoystick.getX(), 0, 1);
+        double leftJoystickY = MathUtil.clamp(leftJoystick.getY(), 0, 1);
+        double rightJoystickX = MathUtil.clamp(rightJoystick.getX(), 0, 1);
 
-        double omega = Deadband.oneAxisDeadband(-rightJoystick.getX(), joystickDeadband);
+        Translation2d linearSpeeds = getLinearVelocity(-leftJoystickX, -leftJoystickY);
+
+        double omega = Deadband.oneAxisDeadband(-rightJoystickX, joystickDeadband);
         omega = Math.copySign(omega * omega, omega);
 
-        drive.setGoalSpeeds(
+        ChassisSpeeds speeds =
                 new ChassisSpeeds(
                         linearSpeeds.getX() * maxLinearVelocity,
                         linearSpeeds.getY() * maxLinearVelocity,
-                        omega * maxAngularVelocity),
-                true);
+                        omega * maxAngularVelocity);
+
+        drive.setGoalSpeeds(speeds, true);
     }
 
-    /* returns a calculated translation with squared velocity */
+    /**
+     * calculates a translation with squared magnitude
+     * 
+     * @param x represents the x value of velocity
+     * @param y represents the y value of velocity
+     * 
+     *  @return Translation2d with directions of velocity
+     */
     public Translation2d getLinearVelocity(double x, double y) {
         double[] deadbands = Deadband.twoAxisDeadband(x, y, joystickDeadband);
 
