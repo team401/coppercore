@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
 
 /** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {
@@ -85,24 +86,11 @@ public class VisionIOPhotonReal implements VisionIO {
 
                 var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
                 if (tagPose.isPresent()) {
-                    // find robot pose from location of target
-                    Transform3d fieldToTarget =
-                            new Transform3d(
-                                    tagPose.get().getTranslation(), tagPose.get().getRotation());
-                    Transform3d cameraToTarget =
-                            target.bestCameraToTarget; // transform of best camera view of target
-                    // (only one camera)
-                    Transform3d fieldToCamera =
-                            fieldToTarget.plus(
-                                    cameraToTarget
-                                            .inverse()); // take pose of target and transform to
-                    // find pose of camera
-                    Transform3d fieldToRobot =
-                            fieldToCamera.plus(
-                                    robotToCamera.inverse()); // camera to robot transform to find
-                    // location of center of robot
                     Pose3d robotPose =
-                            new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
+                            PhotonUtils.estimateFieldToRobotAprilTag(
+                                    target.getBestCameraToTarget(),
+                                    aprilTagLayout.getTagPose(target.fiducialId).get(),
+                                    robotToCamera.inverse());
 
                     // Add tag ID
                     tagsSeen.add((short) target.fiducialId);
@@ -114,7 +102,7 @@ public class VisionIOPhotonReal implements VisionIO {
                                     robotPose, // 3D pose estimate
                                     target.poseAmbiguity, // Ambiguity
                                     1, // Tag count
-                                    cameraToTarget
+                                    target.getBestCameraToTarget()
                                             .getTranslation()
                                             .getNorm() // Average tag distance
                                     )); // Observation type
