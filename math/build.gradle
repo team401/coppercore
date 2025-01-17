@@ -53,7 +53,11 @@ dependencies {
 	// This dependency is used internally, and not exposed to consumers on their own compile classpath.
 	implementation libs.guava
 	def wpilibVersion = "2025.1.1-beta-1"
+	implementation "edu.wpi.first.wpilibj:wpilibj-java:$wpilibVersion"
+	implementation "edu.wpi.first.wpiutil:wpiutil-java:$wpilibVersion"
+	implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:$wpilibVersion"
 	implementation "edu.wpi.first.wpiunits:wpiunits-java:$wpilibVersion"
+	implementation "edu.wpi.first.wpimath:wpimath-java:$wpilibVersion"
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
