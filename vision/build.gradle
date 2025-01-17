@@ -29,6 +29,7 @@ repositories {
 		url "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
 	}
 	mavenLocal()
+	mavenCentral()
 }
 
 task(replayWatch, type: JavaExec) {
