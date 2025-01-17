@@ -1,5 +1,6 @@
 package coppercore.vision;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -9,9 +10,7 @@ import java.util.List;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
 
-/**
- * This class implements io using photon vision
- */
+/** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {
     protected final PhotonCamera camera;
     protected final Transform3d robotToCamera;
@@ -28,6 +27,7 @@ public class VisionIOPhotonReal implements VisionIO {
         camera = new PhotonCamera(name);
         this.name = name;
         this.robotToCamera = robotToCamera;
+        this.aprilTagLayout = null;
     }
 
     public void setAprilTaglayout(AprilTagFieldLayout tagLayout) {
@@ -84,28 +84,40 @@ public class VisionIOPhotonReal implements VisionIO {
                 var target = result.targets.get(0);
 
                 var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
-                if(tagPose.isPresent()) {
+                if (tagPose.isPresent()) {
                     // find robot pose from location of target
                     Transform3d fieldToTarget =
-                        new Transform3d(tagPose.get().getTranslation(), tagPose.get().getRotation());
-                    Transform3d cameraToTarget = target.bestCameraToTarget; // transform of best camera view of target (only one camera)
-                    Transform3d fieldToCamera = fieldToTarget.plus(cameraToTarget.inverse()); // take pose of target and transform to find pose of camera
-                    Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse()); // camera to robot transform to find location of center of robot
-                    Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
+                            new Transform3d(
+                                    tagPose.get().getTranslation(), tagPose.get().getRotation());
+                    Transform3d cameraToTarget =
+                            target.bestCameraToTarget; // transform of best camera view of target
+                    // (only one camera)
+                    Transform3d fieldToCamera =
+                            fieldToTarget.plus(
+                                    cameraToTarget
+                                            .inverse()); // take pose of target and transform to
+                    // find pose of camera
+                    Transform3d fieldToRobot =
+                            fieldToCamera.plus(
+                                    robotToCamera.inverse()); // camera to robot transform to find
+                    // location of center of robot
+                    Pose3d robotPose =
+                            new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
 
                     // Add tag ID
                     tagsSeen.add((short) target.fiducialId);
 
                     // Add observation
                     poses.add(
-                        new PoseObservation(
-                            result.getTimestampSeconds(), // Timestamp
-                            robotPose, // 3D pose estimate
-                            target.poseAmbiguity, // Ambiguity
-                            1, // Tag count
-                            cameraToTarget.getTranslation().getNorm() // Average tag distance
-                            )
-                    ) // Observation type
+                            new PoseObservation(
+                                    result.getTimestampSeconds(), // Timestamp
+                                    robotPose, // 3D pose estimate
+                                    target.poseAmbiguity, // Ambiguity
+                                    1, // Tag count
+                                    cameraToTarget
+                                            .getTranslation()
+                                            .getNorm() // Average tag distance
+                                    )); // Observation type
                 }
             }
         }
