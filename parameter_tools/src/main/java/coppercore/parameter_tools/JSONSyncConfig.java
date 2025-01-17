@@ -8,6 +8,7 @@ package coppercore.parameter_tools;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.LongSerializationPolicy;
 
+/** Configuration class for customizing Gson behavior. */
 public record JSONSyncConfig(
         boolean serializeNulls,
         boolean prettyPrinting,
