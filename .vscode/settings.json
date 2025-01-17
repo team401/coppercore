@@ -7,5 +7,6 @@
     "**/.factorypath": true
   },
   "C_Cpp.default.configurationProvider": "vscode-wpilib",
-  "java.compile.nullAnalysis.mode": "automatic"
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.import.gradle.annotationProcessing.enabled": false
 }
