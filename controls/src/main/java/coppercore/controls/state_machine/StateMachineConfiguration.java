@@ -1,12 +1,11 @@
 package coppercore.controls.state_machine;
 
+import coppercore.controls.state_machine.state.StateConfiguration;
+import coppercore.controls.state_machine.transition.Transition;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-
-import coppercore.controls.state_machine.state.StateConfiguration;
-import coppercore.controls.state_machine.transition.Transition;
 
 public class StateMachineConfiguration<State, Trigger> {
     private final Map<State, StateConfiguration<State, Trigger>> stateConfigurations;
@@ -19,8 +18,10 @@ public class StateMachineConfiguration<State, Trigger> {
     }
 
     /**
-     * Starts configuration of a state returning a StateConfiguration and registers it for the state.
-     * @param state
+     * Starts configuration of a state returning a StateConfiguration and registers it for the
+     * state.
+     *
+     * @param source
      * @return
      */
     public StateConfiguration<State, Trigger> configure(State source) {
@@ -34,7 +35,8 @@ public class StateMachineConfiguration<State, Trigger> {
 
     /**
      * Gets a StateConfiguration specified by State
-     * @param state
+     *
+     * @param source
      * @return
      */
     public Optional<StateConfiguration<State, Trigger>> getStateConfiguration(State source) {
@@ -52,6 +54,7 @@ public class StateMachineConfiguration<State, Trigger> {
 
     /**
      * Gets a Transition defined by State and Trigger
+     *
      * @param state
      * @param trigger
      * @return
@@ -73,7 +76,8 @@ public class StateMachineConfiguration<State, Trigger> {
 
     /**
      * Set the default onEntry function.
-     * @param transition
+     *
+     * @param action
      */
     public StateMachineConfiguration<State, Trigger> configureDefaultOnEntryAction(
             Consumer<Transition<State, Trigger>> action) {
@@ -81,10 +85,7 @@ public class StateMachineConfiguration<State, Trigger> {
         return this;
     }
 
-    /**
-     * Set the default onExit function.
-     * @param transition
-     */
+    /** Set the default onExit function. */
     public StateMachineConfiguration<State, Trigger> configureDefaultOnExitAction(
             Consumer<Transition<State, Trigger>> action) {
         this.onExitAction = action;
@@ -93,6 +94,7 @@ public class StateMachineConfiguration<State, Trigger> {
 
     /**
      * Method used by statemachine to handle processing on entry of a state.
+     *
      * @param transition
      */
     public void runOnEntry(Transition<State, Trigger> transition) {
@@ -103,6 +105,7 @@ public class StateMachineConfiguration<State, Trigger> {
 
     /**
      * Method used by statemachine to handle processing on exiting of a state.
+     *
      * @param transition
      */
     public void runOnExit(Transition<State, Trigger> transition) {

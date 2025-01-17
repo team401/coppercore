@@ -53,7 +53,7 @@ public class StateConfiguration<State, Trigger> {
 
     /**
      * Creates a Conditional Transition that only fires if both the right Trigger is fired and the
-     * check lambda evaluates to true
+     * check lambda evaluates to true.
      *
      * @param trigger
      * @param destination
