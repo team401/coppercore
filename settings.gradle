@@ -12,4 +12,4 @@ plugins {
 
 rootProject.name = 'coppercore'
 
-include('geometry', 'wpilib_interface', 'math', 'controls', "parameter_tools", 'vision', 'monitors')
+include('geometry', 'wpilib_interface', 'math', 'controls', "parameter_tools", 'monitors') // Vision isn't published until photonvision 2025.0.0 is released
