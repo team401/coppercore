@@ -16,6 +16,7 @@ public class VisionIOPhotonReal implements VisionIO {
     protected final PhotonCamera camera;
     protected final Transform3d robotToCamera;
     public final String name;
+    public AprilTagFieldLayout aprilTagLayout;
 
     /**
      * Creates a new VisionIOPhotonVision.
@@ -27,6 +28,10 @@ public class VisionIOPhotonReal implements VisionIO {
         camera = new PhotonCamera(name);
         this.name = name;
         this.robotToCamera = robotToCamera;
+    }
+
+    public void setAprilTaglayout(AprilTagFieldLayout tagLayout) {
+        aprilTagLayout = tagLayout;
     }
 
     @Override
@@ -89,17 +94,18 @@ public class VisionIOPhotonReal implements VisionIO {
                     Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
 
                     // Add tag ID
-                    tagIds.add((short) target.fiducialId);
+                    tagsSeen.add((short) target.fiducialId);
 
                     // Add observation
-                    poseObservations.add(
+                    poses.add(
                         new PoseObservation(
                             result.getTimestampSeconds(), // Timestamp
                             robotPose, // 3D pose estimate
                             target.poseAmbiguity, // Ambiguity
                             1, // Tag count
-                            cameraToTarget.getTranslation().getNorm(), // Average tag distance
-                            PoseObservationType.PHOTONVISION)); // Observation type
+                            cameraToTarget.getTranslation().getNorm() // Average tag distance
+                            )
+                    ) // Observation type
                 }
             }
         }

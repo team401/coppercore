@@ -24,15 +24,16 @@ public class VisionLocalizer extends SubsystemBase {
     private final Alert[] disconnectedAlerts;
     // avoid NullPointerExceptions by setting a default no-op
     private VisionConsumer consumer;
-    private AprilTagFieldLayout aprilTagLayout;
+    public AprilTagFieldLayout aprilTagLayout;
     private double[] cameraStdDevFactors;
 
     /**
      * Constructs a new {@Code VisionLocalizer} instance
-     * 
+     *
      * @param consumer functional interface responsible for adding vision measurements to drive pose
      * @param aprilTagLayout the field layout for current year
-     * @param cameraStdDevDactors factors to multiply standard deviation. matches camera index (camera 0 -> index 0 in factors)
+     * @param cameraStdDevDactors factors to multiply standard deviation. matches camera index
+     *     (camera 0 -> index 0 in factors)
      * @param VisionIO io of each camera, using photon vision or sim
      */
     public VisionLocalizer(
@@ -44,6 +45,10 @@ public class VisionLocalizer extends SubsystemBase {
         this.io = io;
         this.aprilTagLayout = aprilTagLayout;
         this.cameraStdDevFactors = cameraStdDevFactors;
+
+        for(int i = 0; i < io.length; i++) {
+            io[i].setAprilTaglayout(aprilTagLayout);
+        }
 
         // Initialize inputs
         this.inputs = new VisionIOInputsAutoLogged[io.length];
@@ -106,24 +111,24 @@ public class VisionLocalizer extends SubsystemBase {
         logSummaryData(allRobotPoses, allRobotPosesAccepted, allRobotPosesRejected);
     }
 
-
-    /** 
-     * sets a {@Link VisionConsumer} for the vision to send estimates to
-     */
+    /** sets a {@Link VisionConsumer} for the vision to send estimates to */
     public void setVisionConsumer(VisionConsumer consumer) {
         this.consumer = consumer;
     }
 
     /***
      * checks if a pose measurement should be consumed
-     * 
+     *
      * @param observation a single observation from a camera
      * @return {@code true} if pose should be rejected due to low tags, high distance, or out of field
      */
     private boolean shouldRejectPose(VisionIO.PoseObservation observation) {
         return observation.tagCount() == 0 // Must have at least one tag
                 || (observation.tagCount() == 1
-                        && observation.ambiguity() > CoreVisionConstants.maxSingleTagAmbiguity) // Cannot be high ambiguity if single tag
+                        && observation.ambiguity()
+                                > CoreVisionConstants
+                                        .maxSingleTagAmbiguity) // Cannot be high ambiguity if
+                // single tag
                 || Math.abs(observation.pose().getZ())
                         > CoreVisionConstants.maxZCutoff // Must have realistic Z coordinate
                 || observation.averageTagDistance() > CoreVisionConstants.maxAcceptedDistanceMeters
@@ -137,8 +142,7 @@ public class VisionLocalizer extends SubsystemBase {
 
     /**
      * calculates how much we should rely on this pose when sending it to vision consumer
-     * 
-     * 
+     *
      * @param observation a pose estimate from a camera
      * @param cameraIndex the index of camera providing observation
      * @return a matrix representing the standard deviation factors
@@ -167,7 +171,7 @@ public class VisionLocalizer extends SubsystemBase {
 
     /**
      * logs individual camera data to advantage kit realOutputs under Vision/camera/index
-     * 
+     *
      * @param cameraIndex index of camera to liog
      * @param robotPoses list of all poses found by camera
      * @param robotPosesAccepted list of poses NOT REJECTED by {@Link shouldRejectPose}
@@ -192,7 +196,7 @@ public class VisionLocalizer extends SubsystemBase {
 
     /**
      * logs summary data to realOutputs via Vision/Summary/
-     * 
+     *
      * @param allRobotPoses list of all poses found by all cameras
      * @param allRobotPosesAccepted list of poses NOT REJECTED by {@Link shouldRejectPose}
      * @param allRobotPosesRejected list of poses REJECTED by {@Link shouldRejectPose}
