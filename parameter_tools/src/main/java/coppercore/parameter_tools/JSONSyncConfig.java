@@ -8,19 +8,18 @@ package coppercore.parameter_tools;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.LongSerializationPolicy;
 
-
 public record JSONSyncConfig(
-    boolean serializeNulls,
-    boolean prettyPrinting,
-    boolean excludeFieldsWithoutExposeAnnotation,
-    FieldNamingPolicy namingPolicy,
-    LongSerializationPolicy longSerializationPolicy) {
+        boolean serializeNulls,
+        boolean prettyPrinting,
+        boolean excludeFieldsWithoutExposeAnnotation,
+        FieldNamingPolicy namingPolicy,
+        LongSerializationPolicy longSerializationPolicy) {
     public JSONSyncConfig(JSONSyncConfigBuilder builder) {
         this(
-            builder.serializeNulls,
-            builder.prettyPrinting,
-            builder.excludeFieldsWithoutExposeAnnotation,
-            builder.namingPolicy,
-            builder.longSerializationPolicy);
+                builder.serializeNulls,
+                builder.prettyPrinting,
+                builder.excludeFieldsWithoutExposeAnnotation,
+                builder.namingPolicy,
+                builder.longSerializationPolicy);
     }
 }

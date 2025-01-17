@@ -1,14 +1,11 @@
 package coppercore.parameter_tools.test;
 
 import coppercore.parameter_tools.JSONSync;
-
+import coppercore.parameter_tools.JSONSyncConfigBuilder;
 import java.io.File;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import coppercore.parameter_tools.JSONSyncConfigBuilder;
 
 /**
  * Unit tests for the {@link JSONSync} class to validate its functionality, including data loading,

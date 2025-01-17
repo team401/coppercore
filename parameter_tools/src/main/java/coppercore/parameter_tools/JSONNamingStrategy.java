@@ -1,22 +1,22 @@
 package coppercore.parameter_tools;
 
-import java.lang.reflect.Field;
-
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.FieldNamingStrategy;
+import java.lang.reflect.Field;
 
-public class JSONNameNamingStrategy implements FieldNamingStrategy {
+public class JSONNamingStrategy implements FieldNamingStrategy {
 
     private FieldNamingPolicy policy = FieldNamingPolicy.IDENTITY;
 
-    public JSONNameNamingStrategy() {}
-    
-    public JSONNameNamingStrategy(FieldNamingPolicy policy) {
+    public JSONNamingStrategy() {}
+
+    public JSONNamingStrategy(FieldNamingPolicy policy) {
         this.policy = policy;
     }
 
     /**
      * This method returns the name of the field given according to the policy.
+     *
      * @return Name
      */
     @Override

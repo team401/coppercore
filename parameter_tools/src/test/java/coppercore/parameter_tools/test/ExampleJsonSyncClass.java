@@ -29,9 +29,7 @@ public class ExampleJsonSyncClass {
      */
     public static JSONSync<ExampleJsonSyncClass> synced =
             new JSONSync<>(
-                    new ExampleJsonSyncClass(),
-                    "filePath",
-                    new JSONSyncConfigBuilder().build());
+                    new ExampleJsonSyncClass(), "filePath", new JSONSyncConfigBuilder().build());
 
     public final String testText = "";
 

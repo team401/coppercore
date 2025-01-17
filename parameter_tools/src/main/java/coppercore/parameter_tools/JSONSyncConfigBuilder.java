@@ -3,7 +3,6 @@ package coppercore.parameter_tools;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.LongSerializationPolicy;
 
-
 public class JSONSyncConfigBuilder {
     public boolean serializeNulls = false;
     public boolean prettyPrinting = false;
