@@ -8,10 +8,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-<<<<<<< HEAD:parameter_tools/src/test/java/coppercore/parameter_tools/test/JSONSyncTests.java
 import coppercore.parameter_tools.JSONSyncConfigBuilder;
 
-=======
 /**
  * Unit tests for the {@link JSONSync} class to validate its functionality, including data loading,
  * file setting, and data saving.
@@ -20,7 +18,6 @@ import coppercore.parameter_tools.JSONSyncConfigBuilder;
  * deserializes objects to and from JSON files. It also verifies that {@link JSONSync} updates files
  * when data changes.
  */
->>>>>>> main:parameter_tools/src/test/java/JSONSyncTests.java
 public class JSONSyncTests {
 
     /** Directory paths for storing and accessing test JSON files. */
