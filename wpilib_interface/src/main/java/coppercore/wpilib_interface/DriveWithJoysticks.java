@@ -75,7 +75,7 @@ public class DriveWithJoysticks extends Command {
          * therefore, x and y must be flipped for proper rotation of pose
          * BEWARE: not flipping will cause forward on joystick to drive right on field
          */
-        Rotation2d direction = new Rotation2d(y, x);
+        Rotation2d direction = new Rotation2d(Math.atan2(y, x));
         double squaredMagnitude = magnitude * magnitude;
 
         Translation2d linearVelocity =
