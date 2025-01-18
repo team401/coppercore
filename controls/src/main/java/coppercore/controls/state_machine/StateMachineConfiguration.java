@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+/** Object to configure State Machine */
 public class StateMachineConfiguration<State, Trigger> {
     private final Map<State, StateConfiguration<State, Trigger>> stateConfigurations;
     private Consumer<Transition<State, Trigger>> onEntryAction;
     private Consumer<Transition<State, Trigger>> onExitAction;
 
+    /** Creates StateMachineConfiuration Object */
     public StateMachineConfiguration() {
         // temp solution
         stateConfigurations = new HashMap<>();
@@ -21,8 +23,8 @@ public class StateMachineConfiguration<State, Trigger> {
      * Starts configuration of a state returning a StateConfiguration and registers it for the
      * state.
      *
-     * @param source
-     * @return
+     * @param source Source State
+     * @return configuration
      */
     public StateConfiguration<State, Trigger> configure(State source) {
         StateConfiguration<State, Trigger> configuration = stateConfigurations.get(source);
@@ -36,8 +38,8 @@ public class StateMachineConfiguration<State, Trigger> {
     /**
      * Gets a StateConfiguration specified by State
      *
-     * @param source
-     * @return
+     * @param source Source State
+     * @return Optional configuration
      */
     public Optional<StateConfiguration<State, Trigger>> getStateConfiguration(State source) {
         Optional<StateConfiguration<State, Trigger>> configurationOptional = Optional.empty();
@@ -55,9 +57,9 @@ public class StateMachineConfiguration<State, Trigger> {
     /**
      * Gets a Transition defined by State and Trigger
      *
-     * @param state
-     * @param trigger
-     * @return
+     * @param state Start state
+     * @param trigger Trigger event
+     * @return Optional of Transition
      */
     public Optional<Transition<State, Trigger>> getTransition(State state, Trigger trigger) {
         Optional<Transition<State, Trigger>> transition = Optional.empty();

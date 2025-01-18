@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
+/** Configures State Machine State behavior */
 public class StateConfiguration<State, Trigger> {
 
     private List<Transition<State, Trigger>> transitions;
@@ -26,9 +27,9 @@ public class StateConfiguration<State, Trigger> {
     /**
      * Create Transition between States
      *
-     * @param trigger
-     * @param destination
-     * @return
+     * @param trigger trigger event
+     * @param destination end state
+     * @return configuration
      */
     public StateConfiguration<State, Trigger> permit(Trigger trigger, State destination) {
         if (getFilteredTransition(trigger).isEmpty()) {
@@ -40,9 +41,9 @@ public class StateConfiguration<State, Trigger> {
     /**
      * Create Transistion between states without trigger the enter or exit functions.
      *
-     * @param trigger
-     * @param destination
-     * @return
+     * @param trigger trigger event
+     * @param destination end state
+     * @return configuration
      */
     public StateConfiguration<State, Trigger> permitInternal(Trigger trigger, State destination) {
         if (getFilteredTransition(trigger).isEmpty()) {
@@ -55,10 +56,10 @@ public class StateConfiguration<State, Trigger> {
      * Creates a Conditional Transition that only fires if both the right Trigger is fired and the
      * check lambda evaluates to true.
      *
-     * @param trigger
-     * @param destination
-     * @param check
-     * @return
+     * @param trigger trigger event
+     * @param destination end state
+     * @param check condition
+     * @return configuration
      */
     public StateConfiguration<State, Trigger> permitIf(
             Trigger trigger, State destination, BooleanSupplier check) {
@@ -73,10 +74,10 @@ public class StateConfiguration<State, Trigger> {
      * and the check lambda evaluates to true. This transition will not trigger the enter or exit
      * functions.
      *
-     * @param trigger
-     * @param destination
-     * @param check
-     * @return
+     * @param trigger trigger event
+     * @param destination end state
+     * @param check condition
+     * @return configuration
      */
     public StateConfiguration<State, Trigger> permitInternalIf(
             Trigger trigger, State destination, BooleanSupplier check) {
@@ -86,6 +87,12 @@ public class StateConfiguration<State, Trigger> {
         return this;
     }
 
+    /**
+     * Returns Transitions that use the trigger event
+     *
+     * @param trigger trigger event
+     * @return list of transitions
+     */
     public List<Transition<State, Trigger>> getTransitions(Trigger trigger) {
         List<Transition<State, Trigger>> matchedTransitions = new ArrayList<>();
         if (trigger == null) return matchedTransitions;
@@ -97,6 +104,12 @@ public class StateConfiguration<State, Trigger> {
         return matchedTransitions;
     }
 
+    /**
+     * Filters Transitions
+     *
+     * @param transitions list of transtions
+     * @return filtered transition
+     */
     private Optional<Transition<State, Trigger>> filterTransitions(
             List<Transition<State, Trigger>> transitions) {
         Optional<Transition<State, Trigger>> returnOptional = Optional.empty();
@@ -117,27 +130,53 @@ public class StateConfiguration<State, Trigger> {
         return returnOptional;
     }
 
+    /**
+     * Gets filtered transition
+     *
+     * @param trigger trigger event
+     * @return transition
+     */
     public Optional<Transition<State, Trigger>> getFilteredTransition(Trigger trigger) {
         return filterTransitions(getTransitions(trigger));
     }
 
+    /**
+     * Runs on entry event
+     *
+     * @param transition trigger event
+     */
     public void runOnEntry(Transition transition) {
         if (onEntryAction != null) {
             onEntryAction.accept(transition);
         }
     }
 
+    /**
+     * Runs on exit event
+     *
+     * @param transition trigger event
+     */
     public void runOnExit(Transition transition) {
         if (onExitAction != null) {
             onExitAction.accept(transition);
         }
     }
 
+    /**
+     * Disables default on entry action
+     *
+     * @return configuration
+     */
     public StateConfiguration<State, Trigger> disableDefualtOnEntry() {
         this.runDefaultEntryAction = false;
         return this;
     }
 
+    /**
+     * Disables default on exit action
+     *
+     * @return configuration
+     */
     public StateConfiguration<State, Trigger> disableDefualtOnExit() {
         this.runDefaultExitAction = false;
         return this;
