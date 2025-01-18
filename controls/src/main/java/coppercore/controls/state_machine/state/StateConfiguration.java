@@ -18,6 +18,11 @@ public class StateConfiguration<State, Trigger> {
     private boolean runDefaultEntryAction = true;
     private boolean runDefaultExitAction = true;
 
+    /**
+     * Creates configuration for how state machine behaves in given State
+     *
+     * @param source Start state
+     */
     public StateConfiguration(State source) {
         this.source = source;
         // Temp solution
@@ -182,20 +187,42 @@ public class StateConfiguration<State, Trigger> {
         return this;
     }
 
+    /**
+     * Sets on entry action
+     *
+     * @param action Action to run onEntry
+     * @return configuration
+     */
     public StateConfiguration<State, Trigger> configureOnEntryAction(Consumer<Transition> action) {
         this.onEntryAction = action;
         return this;
     }
 
+    /**
+     * Sets on exit action
+     *
+     * @param action Action to run onExit
+     * @return configuration
+     */
     public StateConfiguration<State, Trigger> configureOnExitAction(Consumer<Transition> action) {
         this.onExitAction = action;
         return this;
     }
 
+    /**
+     * Returns if in this State the default onEntry Action should run.
+     *
+     * @return do run
+     */
     public boolean doRunDefaultEntryAction() {
         return runDefaultEntryAction;
     }
 
+    /**
+     * Returns if in this State the default onExit Action should run.
+     *
+     * @return do run
+     */
     public boolean doRunDefaultExitAction() {
         return runDefaultExitAction;
     }

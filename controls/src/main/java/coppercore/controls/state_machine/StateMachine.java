@@ -8,11 +8,18 @@ import coppercore.controls.state_machine.transition.Transition;
 import coppercore.controls.state_machine.transition.TransitionInfo;
 import java.util.Optional;
 
+/** Generic State Machine */
 public class StateMachine<State, Trigger> {
     private final StateMachineConfiguration<State, Trigger> configuration;
     private TransitionInfo<State, Trigger> transitionInfo;
     private State currentState;
 
+    /**
+     * Creates a StateMachine in the given state with the given configuration
+     *
+     * @param config The state machine configuration
+     * @param initialState default state
+     */
     public StateMachine(StateMachineConfiguration<State, Trigger> config, State initialState) {
         configuration = config;
         currentState = initialState;
@@ -21,7 +28,7 @@ public class StateMachine<State, Trigger> {
     /**
      * Method to transition States based on given trigger
      *
-     * @param trigger
+     * @param trigger Trigger event to run
      */
     public void fire(Trigger trigger) {
         transitionInfo = new TransitionInfo<>(currentState, trigger);

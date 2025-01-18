@@ -79,7 +79,8 @@ public class StateMachineConfiguration<State, Trigger> {
     /**
      * Set the default onEntry function.
      *
-     * @param action
+     * @param action action to run onEntry
+     * @return configuration
      */
     public StateMachineConfiguration<State, Trigger> configureDefaultOnEntryAction(
             Consumer<Transition<State, Trigger>> action) {
@@ -87,7 +88,12 @@ public class StateMachineConfiguration<State, Trigger> {
         return this;
     }
 
-    /** Set the default onExit function. */
+    /**
+     * Set the default onExit function.
+     *
+     * @param action action to run onExit
+     * @return configuration
+     */
     public StateMachineConfiguration<State, Trigger> configureDefaultOnExitAction(
             Consumer<Transition<State, Trigger>> action) {
         this.onExitAction = action;
@@ -97,7 +103,7 @@ public class StateMachineConfiguration<State, Trigger> {
     /**
      * Method used by statemachine to handle processing on entry of a state.
      *
-     * @param transition
+     * @param transition Transition used
      */
     public void runOnEntry(Transition<State, Trigger> transition) {
         if (onEntryAction != null) {
@@ -108,7 +114,7 @@ public class StateMachineConfiguration<State, Trigger> {
     /**
      * Method used by statemachine to handle processing on exiting of a state.
      *
-     * @param transition
+     * @param transition Transition used
      */
     public void runOnExit(Transition<State, Trigger> transition) {
         if (onExitAction != null) {
