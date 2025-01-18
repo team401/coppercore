@@ -3,6 +3,9 @@ package coppercore.parameter_tools.test;
 import coppercore.parameter_tools.JSONName;
 import coppercore.parameter_tools.JSONSync;
 import coppercore.parameter_tools.JSONSyncConfigBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
 /**
  * Example class to demonstrate the usage of the {@link JSONSync} utility for saving and loading
@@ -39,6 +42,7 @@ public class ExampleJsonSyncClass {
     public Integer testingIntField = 0;
 
     public final BasicMotorDataHolder motorData = null;
+    public final Pose2d pose = new Pose2d(new Translation2d(3.5, 3.2), new Rotation2d(0.47));
 
     /** Nested class to represent motor-related data. */
     public class BasicMotorDataHolder {

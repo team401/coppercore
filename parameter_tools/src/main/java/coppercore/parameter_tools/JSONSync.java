@@ -88,6 +88,7 @@ public class JSONSync<T> {
         ExclusionStrategy jsonExcludeStrategy = new JSONExcludeExclusionStrategy();
         FieldNamingStrategy jsonNameStrategy = new JSONNamingStrategy(this.config.namingPolicy());
         GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapterFactory(new JSONTypeAdapterFactory());
         if (this.config.serializeNulls()) builder.serializeNulls();
         if (this.config.prettyPrinting()) builder.setPrettyPrinting();
         if (this.config.excludeFieldsWithoutExposeAnnotation())
