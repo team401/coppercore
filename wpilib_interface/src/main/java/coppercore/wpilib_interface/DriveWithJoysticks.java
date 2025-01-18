@@ -38,9 +38,9 @@ public class DriveWithJoysticks extends Command {
     @Override
     public void execute() {
         // clamp inputs between 0 and 1 to prevent crazy speeds
-        double leftJoystickX = MathUtil.clamp(leftJoystick.getX(), 0, 1);
-        double leftJoystickY = MathUtil.clamp(leftJoystick.getY(), 0, 1);
-        double rightJoystickX = MathUtil.clamp(rightJoystick.getX(), 0, 1);
+        double leftJoystickX = MathUtil.clamp(leftJoystick.getX(), -1, 1);
+        double leftJoystickY = MathUtil.clamp(leftJoystick.getY(), -1, 1);
+        double rightJoystickX = MathUtil.clamp(rightJoystick.getX(), -1, 1);
 
         Translation2d linearSpeeds = getLinearVelocity(-leftJoystickX, -leftJoystickY);
 
