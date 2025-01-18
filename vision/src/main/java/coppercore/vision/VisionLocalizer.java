@@ -47,7 +47,7 @@ public class VisionLocalizer extends SubsystemBase {
         this.cameraStdDevFactors = cameraStdDevFactors;
 
         for (int i = 0; i < io.length; i++) {
-            io[i].setAprilTaglayout(aprilTagLayout);
+            io[i].setAprilTagLayout(aprilTagLayout);
         }
 
         // Initialize inputs

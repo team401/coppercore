@@ -31,7 +31,12 @@ public class VisionIOPhotonReal implements VisionIO {
         this.aprilTagLayout = null;
     }
 
-    public void setAprilTaglayout(AprilTagFieldLayout tagLayout) {
+    /**
+     * Sets the april tag field layout for single tag pose estimation
+     * 
+     * @param tagLayout the Field layout to use for single tag pose estimation (gathers tag pose)
+     */
+    public void setAprilTagLayout(AprilTagFieldLayout tagLayout) {
         aprilTagLayout = tagLayout;
     }
 

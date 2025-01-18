@@ -33,5 +33,5 @@ public interface VisionIO {
 
     public default void updateInputs(VisionIOInputs inputs) {}
 
-    public default void setAprilTaglayout(AprilTagFieldLayout tagLayout) {}
+    public default void setAprilTagLayout(AprilTagFieldLayout tagLayout) {}
 }
