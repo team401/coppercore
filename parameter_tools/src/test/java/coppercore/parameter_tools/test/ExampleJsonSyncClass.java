@@ -1,6 +1,8 @@
 package coppercore.parameter_tools.test;
 
+import coppercore.parameter_tools.JSONName;
 import coppercore.parameter_tools.JSONSync;
+import coppercore.parameter_tools.JSONSyncConfigBuilder;
 
 /**
  * Example class to demonstrate the usage of the {@link JSONSync} utility for saving and loading
@@ -27,15 +29,14 @@ public class ExampleJsonSyncClass {
      */
     public static JSONSync<ExampleJsonSyncClass> synced =
             new JSONSync<>(
-                    new ExampleJsonSyncClass(),
-                    "filePath",
-                    new JSONSync.JSONSyncConfigBuilder().build());
+                    new ExampleJsonSyncClass(), "filePath", new JSONSyncConfigBuilder().build());
 
     public final String testText = "";
 
     public final Double testDouble = 0.0;
 
-    public Integer testInt = 0;
+    @JSONName("testInt")
+    public Integer testingIntField = 0;
 
     public final BasicMotorDataHolder motorData = null;
 
@@ -64,7 +65,7 @@ public class ExampleJsonSyncClass {
         return "testText: "
                 + testText
                 + "\ntestInt: "
-                + testInt
+                + testingIntField
                 + "\ntestDouble: "
                 + testDouble
                 + "\nmotorData: "
