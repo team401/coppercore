@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+/**
+ * This class makes a hashmap of point and connects it to a bunch of keys. Then it sorts the keys,
+ * gets the extrema and returns the interpolate double of the given keys. If the key is not in the
+ * map, then it finds the interpolate double with the closet key. It then checks for edge cases.
+ */
 public class InterpolateDouble {
     private HashMap<Double, Double> map;
     private ArrayList<Double> sortedKeys;
@@ -14,10 +19,24 @@ public class InterpolateDouble {
     private final double minKey;
     private final double maxKey;
 
+    /**
+     * This makes a HashMap called map, and it adds the minimum possible value and a maximum
+     * possible value
+     *
+     * @param map the HashMap that we are using
+     */
     public InterpolateDouble(HashMap<Double, Double> map) {
         this(map, Double.MIN_VALUE, Double.MAX_VALUE);
     }
 
+    /**
+     * This defines the variables in a way that they are able to be used and then adds all of the
+     * values to the HashMap and sorts them
+     *
+     * @param map the HashMap that we are using
+     * @param minValue the minimum value
+     * @param maxValue the maximum value
+     */
     public InterpolateDouble(HashMap<Double, Double> map, double minValue, double maxValue) {
         this.map = map;
         this.minValue = minValue;
