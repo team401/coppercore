@@ -1,5 +1,6 @@
 package coppercore.vision;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -8,14 +9,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
 
-/**
- * This class implements io using photon vision
- */
+/** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {
     protected final PhotonCamera camera;
     protected final Transform3d robotToCamera;
     public final String name;
+    public AprilTagFieldLayout aprilTagLayout;
 
     /**
      * Creates a new VisionIOPhotonVision.
@@ -27,6 +28,16 @@ public class VisionIOPhotonReal implements VisionIO {
         camera = new PhotonCamera(name);
         this.name = name;
         this.robotToCamera = robotToCamera;
+        this.aprilTagLayout = null;
+    }
+
+    /**
+     * Sets the april tag field layout for single tag pose estimation
+     * 
+     * @param tagLayout the Field layout to use for single tag pose estimation (gathers tag pose)
+     */
+    public void setAprilTagLayout(AprilTagFieldLayout tagLayout) {
+        aprilTagLayout = tagLayout;
     }
 
     @Override
@@ -79,27 +90,27 @@ public class VisionIOPhotonReal implements VisionIO {
                 var target = result.targets.get(0);
 
                 var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
-                if(tagPose.isPresent()) {
-                    // find robot pose from location of target
-                    Transform3d fieldToTarget =
-                        new Transform3d(tagPose.get().getTranslation(), tagPose.get().getRotation());
-                    Transform3d cameraToTarget = target.bestCameraToTarget; // transform of best camera view of target (only one camera)
-                    Transform3d fieldToCamera = fieldToTarget.plus(cameraToTarget.inverse()); // take pose of target and transform to find pose of camera
-                    Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse()); // camera to robot transform to find location of center of robot
-                    Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
+                if (tagPose.isPresent()) {
+                    Pose3d robotPose =
+                            PhotonUtils.estimateFieldToRobotAprilTag(
+                                    target.getBestCameraToTarget(),
+                                    aprilTagLayout.getTagPose(target.fiducialId).get(),
+                                    robotToCamera.inverse());
 
                     // Add tag ID
-                    tagIds.add((short) target.fiducialId);
+                    tagsSeen.add((short) target.fiducialId);
 
                     // Add observation
-                    poseObservations.add(
-                        new PoseObservation(
-                            result.getTimestampSeconds(), // Timestamp
-                            robotPose, // 3D pose estimate
-                            target.poseAmbiguity, // Ambiguity
-                            1, // Tag count
-                            cameraToTarget.getTranslation().getNorm(), // Average tag distance
-                            PoseObservationType.PHOTONVISION)); // Observation type
+                    poses.add(
+                            new PoseObservation(
+                                    result.getTimestampSeconds(), // Timestamp
+                                    robotPose, // 3D pose estimate
+                                    target.poseAmbiguity, // Ambiguity
+                                    1, // Tag count
+                                    target.getBestCameraToTarget()
+                                            .getTranslation()
+                                            .getNorm() // Average tag distance
+                                    )); // Observation type
                 }
             }
         }
