@@ -1,9 +1,8 @@
 package coppercore.parameter_tools.adapters.measure.distance;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.Units;
-
+import edu.wpi.first.units.measure.Distance;
 
 public class JSONDistance extends JSONObject<Distance> {
     double value;
@@ -17,13 +16,13 @@ public class JSONDistance extends JSONObject<Distance> {
 
     @Override
     public Distance toJava() {
-        switch (unit){
+        switch (unit) {
             case "Meter":
                 return Units.Meters.of(value);
             case "Millimeter":
                 return Units.Millimeters.of(value);
             default:
-                throw new RuntimeException(unit+" does not exist");
+                throw new RuntimeException(unit + " does not exist");
         }
     }
 }

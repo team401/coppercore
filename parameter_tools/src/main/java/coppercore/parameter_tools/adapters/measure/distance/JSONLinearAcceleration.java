@@ -2,8 +2,6 @@ package coppercore.parameter_tools.adapters.measure.distance;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.LinearAcceleration;
-import edu.wpi.first.units.Units;
-
 
 public class JSONLinearAcceleration extends JSONObject<LinearAcceleration> {
     double value;
@@ -17,9 +15,9 @@ public class JSONLinearAcceleration extends JSONObject<LinearAcceleration> {
 
     @Override
     public LinearAcceleration toJava() {
-        switch (unit){
+        switch (unit) {
             default:
-                throw new RuntimeException(unit+" does not exist");
+                throw new RuntimeException(unit + " does not exist");
         }
     }
 }

@@ -2,8 +2,6 @@ package coppercore.parameter_tools.adapters.measure.electricity;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.Units;
-
 
 public class JSONCurrent extends JSONObject<Current> {
     double value;
@@ -17,9 +15,9 @@ public class JSONCurrent extends JSONObject<Current> {
 
     @Override
     public Current toJava() {
-        switch (unit){
+        switch (unit) {
             default:
-                throw new RuntimeException(unit+" does not exist");
+                throw new RuntimeException(unit + " does not exist");
         }
     }
 }

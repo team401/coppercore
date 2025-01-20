@@ -2,8 +2,6 @@ package coppercore.parameter_tools.adapters.measure.other;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.Units;
-
 
 public class JSONMass extends JSONObject<Mass> {
     double value;
@@ -17,9 +15,9 @@ public class JSONMass extends JSONObject<Mass> {
 
     @Override
     public Mass toJava() {
-        switch (unit){
+        switch (unit) {
             default:
-                throw new RuntimeException(unit+" does not exist");
+                throw new RuntimeException(unit + " does not exist");
         }
     }
 }

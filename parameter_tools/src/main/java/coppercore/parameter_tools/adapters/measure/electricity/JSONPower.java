@@ -2,7 +2,6 @@ package coppercore.parameter_tools.adapters.measure.electricity;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.Power;
-import edu.wpi.first.units.Units;
 
 public class JSONPower extends JSONObject<Power> {
     double value;
@@ -16,9 +15,9 @@ public class JSONPower extends JSONObject<Power> {
 
     @Override
     public Power toJava() {
-        switch (unit){
+        switch (unit) {
             default:
-                throw new RuntimeException(unit+" does not exist");
+                throw new RuntimeException(unit + " does not exist");
         }
     }
 }

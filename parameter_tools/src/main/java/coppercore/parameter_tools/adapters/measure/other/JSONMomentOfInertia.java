@@ -1,8 +1,8 @@
 package coppercore.parameter_tools.adapters.measure.other;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.MomentOfInertia;
 
 public class JSONMomentOfInertia extends JSONObject<MomentOfInertia> {
     double value;
@@ -16,9 +16,14 @@ public class JSONMomentOfInertia extends JSONObject<MomentOfInertia> {
 
     @Override
     public MomentOfInertia toJava() {
-        switch (unit){
+        switch (unit) {
+            case "KilogramSquareMeters":
+                return Units.KilogramSquareMeters.of(value);
             default:
-                throw new RuntimeException(unit+" does not exist");
+                throw new RuntimeException(
+                        unit
+                                + " does not exist {For this one I have no idea if I did the units"
+                                + " properly}");
         }
     }
 }

@@ -2,7 +2,6 @@ package coppercore.parameter_tools.adapters.measure.other;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.Force;
-import edu.wpi.first.units.Units;
 
 public class JSONForce extends JSONObject<Force> {
     double value;
@@ -16,9 +15,9 @@ public class JSONForce extends JSONObject<Force> {
 
     @Override
     public Force toJava() {
-        switch (unit){
+        switch (unit) {
             default:
-                throw new RuntimeException(unit+" does not exist");
+                throw new RuntimeException(unit + " does not exist");
         }
     }
 }

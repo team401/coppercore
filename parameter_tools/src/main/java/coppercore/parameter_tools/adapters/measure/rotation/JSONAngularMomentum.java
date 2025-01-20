@@ -2,7 +2,6 @@ package coppercore.parameter_tools.adapters.measure.rotation;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.AngularMomentum;
-import edu.wpi.first.units.Units;
 
 public class JSONAngularMomentum extends JSONObject<AngularMomentum> {
     double value;
@@ -16,9 +15,9 @@ public class JSONAngularMomentum extends JSONObject<AngularMomentum> {
 
     @Override
     public AngularMomentum toJava() {
-        switch (unit){
+        switch (unit) {
             default:
-                throw new RuntimeException(unit+" does not exist");
+                throw new RuntimeException(unit + " does not exist");
         }
     }
 }

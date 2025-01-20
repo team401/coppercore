@@ -2,8 +2,6 @@ package coppercore.parameter_tools.adapters.measure.rotation;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.Units;
-
 
 public class JSONAngularAcceleration extends JSONObject<AngularAcceleration> {
     double value;
@@ -17,9 +15,9 @@ public class JSONAngularAcceleration extends JSONObject<AngularAcceleration> {
 
     @Override
     public AngularAcceleration toJava() {
-        switch (unit){
+        switch (unit) {
             default:
-                throw new RuntimeException(unit+" does not exist");
+                throw new RuntimeException(unit + " does not exist");
         }
     }
 }

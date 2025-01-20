@@ -2,8 +2,6 @@ package coppercore.parameter_tools.adapters.measure.other;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.Torque;
-import edu.wpi.first.units.Units;
-
 
 public class JSONTorque extends JSONObject<Torque> {
     double value;
@@ -17,9 +15,9 @@ public class JSONTorque extends JSONObject<Torque> {
 
     @Override
     public Torque toJava() {
-        switch (unit){
+        switch (unit) {
             default:
-                throw new RuntimeException(unit+" does not exist");
+                throw new RuntimeException(unit + " does not exist");
         }
     }
 }

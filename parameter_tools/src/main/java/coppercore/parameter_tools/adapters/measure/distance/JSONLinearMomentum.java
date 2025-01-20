@@ -2,7 +2,6 @@ package coppercore.parameter_tools.adapters.measure.distance;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.LinearMomentum;
-import edu.wpi.first.units.Units;
 
 public class JSONLinearMomentum extends JSONObject<LinearMomentum> {
     double value;
@@ -16,9 +15,9 @@ public class JSONLinearMomentum extends JSONObject<LinearMomentum> {
 
     @Override
     public LinearMomentum toJava() {
-        switch (unit){
+        switch (unit) {
             default:
-                throw new RuntimeException(unit+" does not exist");
+                throw new RuntimeException(unit + " does not exist");
         }
     }
 }
