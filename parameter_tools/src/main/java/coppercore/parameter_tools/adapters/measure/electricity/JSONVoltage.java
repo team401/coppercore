@@ -1,22 +1,22 @@
-package coppercore.parameter_tools.adapters.units.other;
+package coppercore.parameter_tools.adapters.measure.electricity;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.Temperature;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.units.Units;
 
 
-public class JSONTemperature extends JSONObject<Temperature> {
+public class JSONVoltage extends JSONObject<Voltage> {
     double value;
     String unit;
 
-    public JSONTemperature(Temperature measure) {
+    public JSONVoltage(Voltage measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public Temperature toJava() {
+    public Voltage toJava() {
         switch (unit){
             default:
                 throw new RuntimeException(unit+" does not exist");

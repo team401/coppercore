@@ -1,22 +1,22 @@
-package coppercore.parameter_tools.adapters.units.electricity;
+package coppercore.parameter_tools.adapters.measure.other;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.Resistance;
+import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.Units;
 
 
-public class JSONResistance extends JSONObject<Resistance> {
+public class JSONMass extends JSONObject<Mass> {
     double value;
     String unit;
 
-    public JSONResistance(Resistance measure) {
+    public JSONMass(Mass measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public Resistance toJava() {
+    public Mass toJava() {
         switch (unit){
             default:
                 throw new RuntimeException(unit+" does not exist");

@@ -1,4 +1,4 @@
-package coppercore.parameter_tools.adapters.units.distance;
+package coppercore.parameter_tools.adapters.measure.distance;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.Distance;

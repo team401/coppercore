@@ -1,21 +1,22 @@
-package coppercore.parameter_tools.adapters.units.distance;
+package coppercore.parameter_tools.adapters.measure.other;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.LinearMomentum;
+import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.Units;
 
-public class JSONLinearMomentum extends JSONObject<LinearMomentum> {
+
+public class JSONTorque extends JSONObject<Torque> {
     double value;
     String unit;
 
-    public JSONLinearMomentum(LinearMomentum measure) {
+    public JSONTorque(Torque measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public LinearMomentum toJava() {
+    public Torque toJava() {
         switch (unit){
             default:
                 throw new RuntimeException(unit+" does not exist");

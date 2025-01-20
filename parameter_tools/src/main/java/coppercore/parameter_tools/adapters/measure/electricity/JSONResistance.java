@@ -1,22 +1,22 @@
-package coppercore.parameter_tools.adapters.units.other;
+package coppercore.parameter_tools.adapters.measure.electricity;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.Torque;
+import edu.wpi.first.units.measure.Resistance;
 import edu.wpi.first.units.Units;
 
 
-public class JSONTorque extends JSONObject<Torque> {
+public class JSONResistance extends JSONObject<Resistance> {
     double value;
     String unit;
 
-    public JSONTorque(Torque measure) {
+    public JSONResistance(Resistance measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public Torque toJava() {
+    public Resistance toJava() {
         switch (unit){
             default:
                 throw new RuntimeException(unit+" does not exist");

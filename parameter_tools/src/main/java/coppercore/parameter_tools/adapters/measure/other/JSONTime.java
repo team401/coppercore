@@ -1,4 +1,4 @@
-package coppercore.parameter_tools.adapters.units.other;
+package coppercore.parameter_tools.adapters.measure.other;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.Time;
