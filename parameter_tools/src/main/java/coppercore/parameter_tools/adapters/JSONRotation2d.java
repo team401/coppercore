@@ -1,4 +1,4 @@
-package coppercore.parameter_tools.TypeAdapters;
+package coppercore.parameter_tools.adapters;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.math.geometry.Rotation2d;

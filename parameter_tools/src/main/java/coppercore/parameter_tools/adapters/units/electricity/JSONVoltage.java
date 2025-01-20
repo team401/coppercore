@@ -1,21 +1,22 @@
-package coppercore.parameter_tools.TypeAdapters.Units;
+package coppercore.parameter_tools.adapters.units.electricity;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.Force;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.units.Units;
 
-public class JSONForce extends JSONObject<Force> {
+
+public class JSONVoltage extends JSONObject<Voltage> {
     double value;
     String unit;
 
-    public JSONForce(Force measure) {
+    public JSONVoltage(Voltage measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public Force toJava() {
+    public Voltage toJava() {
         switch (unit){
             default:
                 throw new RuntimeException(unit+" does not exist");

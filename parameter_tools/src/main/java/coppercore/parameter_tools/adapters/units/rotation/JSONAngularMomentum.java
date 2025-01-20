@@ -1,22 +1,21 @@
-package coppercore.parameter_tools.TypeAdapters.Units;
+package coppercore.parameter_tools.adapters.units.rotation;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.AngularMomentum;
 import edu.wpi.first.units.Units;
 
-
-public class JSONMass extends JSONObject<Mass> {
+public class JSONAngularMomentum extends JSONObject<AngularMomentum> {
     double value;
     String unit;
 
-    public JSONMass(Mass measure) {
+    public JSONAngularMomentum(AngularMomentum measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public Mass toJava() {
+    public AngularMomentum toJava() {
         switch (unit){
             default:
                 throw new RuntimeException(unit+" does not exist");

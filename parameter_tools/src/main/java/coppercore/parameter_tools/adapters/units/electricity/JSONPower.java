@@ -1,21 +1,21 @@
-package coppercore.parameter_tools.TypeAdapters.Units;
+package coppercore.parameter_tools.adapters.units.electricity;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.LinearMomentum;
+import edu.wpi.first.units.measure.Power;
 import edu.wpi.first.units.Units;
 
-public class JSONLinearMomentum extends JSONObject<LinearMomentum> {
+public class JSONPower extends JSONObject<Power> {
     double value;
     String unit;
 
-    public JSONLinearMomentum(LinearMomentum measure) {
+    public JSONPower(Power measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public LinearMomentum toJava() {
+    public Power toJava() {
         switch (unit){
             default:
                 throw new RuntimeException(unit+" does not exist");

@@ -1,12 +1,13 @@
 package coppercore.parameter_tools;
 
-import coppercore.parameter_tools.TypeAdapters.JSONPose2d;
-import coppercore.parameter_tools.TypeAdapters.JSONRotation2d;
-import coppercore.parameter_tools.TypeAdapters.JSONTranslation2d;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import java.util.HashMap;
+
+import coppercore.parameter_tools.adapters.JSONPose2d;
+import coppercore.parameter_tools.adapters.JSONRotation2d;
+import coppercore.parameter_tools.adapters.JSONTranslation2d;
 
 public class JSONConverter {
     public static final HashMap<Class<?>, Class<? extends JSONObject<?>>> jsonMap = new HashMap<>();

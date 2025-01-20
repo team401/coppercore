@@ -1,27 +1,23 @@
-package coppercore.parameter_tools.TypeAdapters.Units;
+package coppercore.parameter_tools.adapters.units.distance;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.Units;
 
 
-public class JSONTime extends JSONObject<Time> {
+public class JSONLinearAcceleration extends JSONObject<LinearAcceleration> {
     double value;
     String unit;
 
-    public JSONTime(Time measure) {
+    public JSONLinearAcceleration(LinearAcceleration measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public Time toJava() {
+    public LinearAcceleration toJava() {
         switch (unit){
-            case "Second":
-                return Units.Second.of(value);
-            case "Millisecond":
-                return Units.Milliseconds.of(value);
             default:
                 throw new RuntimeException(unit+" does not exist");
         }

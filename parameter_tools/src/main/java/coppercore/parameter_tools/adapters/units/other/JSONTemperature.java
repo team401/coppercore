@@ -1,21 +1,22 @@
-package coppercore.parameter_tools.TypeAdapters.Units;
+package coppercore.parameter_tools.adapters.units.other;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.Units;
 
-public class JSONMomentOfInertia extends JSONObject<MomentOfInertia> {
+
+public class JSONTemperature extends JSONObject<Temperature> {
     double value;
     String unit;
 
-    public JSONMomentOfInertia(MomentOfInertia measure) {
+    public JSONTemperature(Temperature measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public MomentOfInertia toJava() {
+    public Temperature toJava() {
         switch (unit){
             default:
                 throw new RuntimeException(unit+" does not exist");

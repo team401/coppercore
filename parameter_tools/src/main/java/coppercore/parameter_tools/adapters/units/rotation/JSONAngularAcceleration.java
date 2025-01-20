@@ -1,22 +1,22 @@
-package coppercore.parameter_tools.TypeAdapters.Units;
+package coppercore.parameter_tools.adapters.units.rotation;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.Units;
 
 
-public class JSONVoltage extends JSONObject<Voltage> {
+public class JSONAngularAcceleration extends JSONObject<AngularAcceleration> {
     double value;
     String unit;
 
-    public JSONVoltage(Voltage measure) {
+    public JSONAngularAcceleration(AngularAcceleration measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public Voltage toJava() {
+    public AngularAcceleration toJava() {
         switch (unit){
             default:
                 throw new RuntimeException(unit+" does not exist");
