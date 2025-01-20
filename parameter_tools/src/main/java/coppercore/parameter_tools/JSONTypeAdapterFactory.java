@@ -5,6 +5,8 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import coppercore.parameter_tools.adapters.measure.JSONMeasure;
+import edu.wpi.first.units.Measure;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
@@ -35,12 +37,19 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
             @Override
             public void write(JsonWriter out, T value) throws IOException {
                 try {
-                    gson.toJson(
-                            JSONConverter.convert(rawType)
-                                    .getConstructor(rawType)
-                                    .newInstance(value),
-                            JSONConverter.convert(rawType),
-                            out);
+                    Class jsonObject = JSONConverter.convert(rawType);
+                    // This only exists because of Units.
+                    if (jsonObject != JSONMeasure.class) {
+                        gson.toJson(
+                                jsonObject.getConstructor(rawType).newInstance(value),
+                                jsonObject,
+                                out);
+                    } else {
+                        gson.toJson(
+                                jsonObject.getConstructor(Measure.class).newInstance(value),
+                                jsonObject,
+                                out);
+                    }
                 } catch (IllegalAccessException
                         | IllegalArgumentException
                         | InstantiationException
