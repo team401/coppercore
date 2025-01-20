@@ -1,22 +1,22 @@
-package coppercore.parameter_tools.TypeAdapters;
+package coppercore.parameter_tools.TypeAdapters.Units;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.Units;
 
 
-public class JSONLinearAcceleration extends JSONObject<LinearAcceleration> {
+public class JSONAngularAcceleration extends JSONObject<AngularAcceleration> {
     double value;
     String unit;
 
-    public JSONLinearAcceleration(LinearAcceleration measure) {
+    public JSONAngularAcceleration(AngularAcceleration measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public LinearAcceleration toJava() {
+    public AngularAcceleration toJava() {
         switch (unit){
             default:
                 throw new RuntimeException(unit+" does not exist");

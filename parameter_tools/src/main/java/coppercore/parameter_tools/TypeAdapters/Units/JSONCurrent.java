@@ -1,27 +1,23 @@
-package coppercore.parameter_tools.TypeAdapters;
+package coppercore.parameter_tools.TypeAdapters.Units;
 
 import coppercore.parameter_tools.JSONObject;
-import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.Units;
 
 
-public class JSONTime extends JSONObject<Time> {
+public class JSONCurrent extends JSONObject<Current> {
     double value;
     String unit;
 
-    public JSONTime(Time measure) {
+    public JSONCurrent(Current measure) {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
     }
 
     @Override
-    public Time toJava() {
+    public Current toJava() {
         switch (unit){
-            case "Second":
-                return Units.Second.of(value);
-            case "Millisecond":
-                return Units.Milliseconds.of(value);
             default:
                 throw new RuntimeException(unit+" does not exist");
         }

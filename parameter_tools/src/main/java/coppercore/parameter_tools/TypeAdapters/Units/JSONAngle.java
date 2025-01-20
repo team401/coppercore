@@ -1,4 +1,4 @@
-package coppercore.parameter_tools.TypeAdapters;
+package coppercore.parameter_tools.TypeAdapters.Units;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.Angle;

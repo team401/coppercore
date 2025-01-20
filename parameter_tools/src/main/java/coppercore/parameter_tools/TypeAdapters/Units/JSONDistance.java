@@ -1,8 +1,7 @@
-package coppercore.parameter_tools.TypeAdapters;
+package coppercore.parameter_tools.TypeAdapters.Units;
 
 import coppercore.parameter_tools.JSONObject;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.Units;
 
 
