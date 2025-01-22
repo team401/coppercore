@@ -1,8 +1,8 @@
 package coppercore.parameter_tools.test;
 
-import coppercore.parameter_tools.JSONName;
-import coppercore.parameter_tools.JSONSync;
-import coppercore.parameter_tools.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.JSONName;
+import coppercore.parameter_tools.json.JSONSync;
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;

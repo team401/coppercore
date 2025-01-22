@@ -1,7 +1,7 @@
 package coppercore.parameter_tools.test;
 
-import coppercore.parameter_tools.JSONSync;
-import coppercore.parameter_tools.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.JSONSync;
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import java.io.File;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

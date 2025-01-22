@@ -1,6 +1,6 @@
-package coppercore.parameter_tools.adapters.measure;
+package coppercore.parameter_tools.json.adapters.measure;
 
-import coppercore.parameter_tools.JSONObject;
+import coppercore.parameter_tools.json.JSONObject;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 

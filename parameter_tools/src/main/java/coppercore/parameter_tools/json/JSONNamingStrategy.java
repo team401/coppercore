@@ -1,4 +1,4 @@
-package coppercore.parameter_tools;
+package coppercore.parameter_tools.json;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.FieldNamingStrategy;

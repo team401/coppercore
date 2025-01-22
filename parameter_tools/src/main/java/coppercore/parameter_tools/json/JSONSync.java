@@ -1,4 +1,4 @@
-package coppercore.parameter_tools;
+package coppercore.parameter_tools.json;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldNamingStrategy;

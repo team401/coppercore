@@ -1,11 +1,11 @@
-package coppercore.parameter_tools;
+package coppercore.parameter_tools.json;
 
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import coppercore.parameter_tools.adapters.measure.JSONMeasure;
+import coppercore.parameter_tools.json.adapters.measure.JSONMeasure;
 import edu.wpi.first.units.Measure;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

@@ -1,6 +1,6 @@
-package coppercore.parameter_tools.adapters;
+package coppercore.parameter_tools.json.adapters;
 
-import coppercore.parameter_tools.JSONObject;
+import coppercore.parameter_tools.json.JSONObject;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public class JSONRotation2d extends JSONObject<Object> {

@@ -1,10 +1,10 @@
-package coppercore.parameter_tools;
+package coppercore.parameter_tools.json;
 
-import coppercore.parameter_tools.adapters.JSONPose2d;
-import coppercore.parameter_tools.adapters.JSONRotation2d;
-import coppercore.parameter_tools.adapters.JSONTranslation2d;
-import coppercore.parameter_tools.adapters.measure.JSONMeasure;
-import coppercore.parameter_tools.adapters.measure.JSONPer;
+import coppercore.parameter_tools.json.adapters.JSONPose2d;
+import coppercore.parameter_tools.json.adapters.JSONRotation2d;
+import coppercore.parameter_tools.json.adapters.JSONTranslation2d;
+import coppercore.parameter_tools.json.adapters.measure.JSONMeasure;
+import coppercore.parameter_tools.json.adapters.measure.JSONPer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;

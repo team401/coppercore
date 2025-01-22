@@ -1,4 +1,4 @@
-package coppercore.parameter_tools;
+package coppercore.parameter_tools.json;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
