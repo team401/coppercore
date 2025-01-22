@@ -11,12 +11,12 @@ public class EnviromentHandler {
     String defaults;
     String enviroment;
 
-    static EnviromentHandler getEnviromentHandler(){
+    public static EnviromentHandler getEnviromentHandler(){
         return instance;
     }
 
     //Path only used if not loaded
-    static EnviromentHandler getEnviromentHandler(String path){
+    public static EnviromentHandler getEnviromentHandler(String path){
         if (instance == null){
             reloadEnviromentHandler(path);
         }
