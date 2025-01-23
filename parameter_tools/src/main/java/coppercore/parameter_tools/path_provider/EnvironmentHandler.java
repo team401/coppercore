@@ -11,25 +11,25 @@ public class EnvironmentHandler {
     String defaults;
     String environment;
 
-    public static EnvironmentHandler getEnviromentHandler(){
+    public static EnvironmentHandler getEnvironmentHandler(){
         return instance;
     }
 
     //Path only used if not loaded
-    public static EnvironmentHandler getEnviromentHandler(String path){
+    public static EnvironmentHandler getEnvironmentHandler(String path){
         if (instance == null){
-            reloadEnviromentHandler(path);
+            reloadEnvironmentHandler(path);
         }
         return instance;
     }
 
-    static void reloadEnviromentHandler(String path){
+    static void reloadEnvironmentHandler(String path){
         sync.setFile(path);
         instance = sync.getObject();
     }
 
 
-    public EnvironmentPathProvider getEnviromentPathProvider(){
+    public EnvironmentPathProvider getEnvironmentPathProvider(){
         Environment env = null;
         for (int i = 0; i<environments.length; i++){
             if (environments[i].getName() == environment){
