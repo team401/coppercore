@@ -5,17 +5,17 @@ public class Environment {
     String filepath;
     String[] files;
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
-    public String getPath(){
+    public String getPath() {
         return filepath;
     }
 
-    public boolean hasFile(String file){
-        for (int i = 0; i<files.length; i++){
-            if (files[i] == file){
+    public boolean hasFile(String file) {
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].compareTo(file) == 0) {
                 return true;
             }
         }

@@ -4,9 +4,7 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import coppercore.parameter_tools.path_provider.PathProvider;
-
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -42,7 +40,7 @@ public class JSONSync<T> {
     @SuppressWarnings("unchecked")
     public void loadData() {
         String path = file;
-        if (pathProvider != null){
+        if (pathProvider != null) {
             path = pathProvider.resolveReadPath(file);
         }
         instance = gson.fromJson(getFileReader(path), (Class<T>) instance.getClass());
@@ -55,7 +53,7 @@ public class JSONSync<T> {
      */
     public void saveData() {
         String path = file;
-        if (pathProvider != null){
+        if (pathProvider != null) {
             path = pathProvider.resolveReadPath(file);
         }
         String json = gson.toJson(instance);
@@ -96,7 +94,7 @@ public class JSONSync<T> {
         this(instance, file, null, config);
     }
 
-    public JSONSync(T instance, String file, PathProvider provider, JSONSyncConfig config){
+    public JSONSync(T instance, String file, PathProvider provider, JSONSyncConfig config) {
         this.instance = instance;
         this.config = (config == null) ? new JSONSyncConfigBuilder().build() : config;
         this.gson = generateGson();
