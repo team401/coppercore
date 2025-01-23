@@ -1,6 +1,6 @@
 package coppercore.parameter_tools.path_provider;
 
-public class Enviroment {
+public class Environment {
     String name;
     String filepath;
     String[] files;

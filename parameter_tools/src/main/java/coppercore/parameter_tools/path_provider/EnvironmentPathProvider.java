@@ -2,17 +2,17 @@ package coppercore.parameter_tools.path_provider;
 
 import java.io.File;
 
-public class EnviromentPathProvider implements PathProvider{
-    Enviroment enviroment;
+public class EnvironmentPathProvider implements PathProvider{
+    Environment environment;
     String defaults;
     String filepath;
 
-    public EnviromentPathProvider(Enviroment enviroment, String filepath){
-        this(enviroment, filepath, null);
+    public EnvironmentPathProvider(Environment environment, String filepath){
+        this(environment, filepath, null);
     }
 
-    public EnviromentPathProvider(Enviroment enviroment, String filepath, String defaultsPath){
-        this.enviroment = enviroment;
+    public EnvironmentPathProvider(Environment enviroment, String filepath, String defaultsPath){
+        this.environment = enviroment;
         this.defaults = defaultsPath;
         this.filepath = filepath;
     }
@@ -30,12 +30,12 @@ public class EnviromentPathProvider implements PathProvider{
 
     @Override
     public String resolvePath(String file) {
-        if (enviroment.hasFile(file)){
-            return filepath + File.pathSeparator + enviroment.getPath() + File.pathSeparator + file;
+        if (environment.hasFile(file)){
+            return filepath + File.pathSeparator + environment.getPath() + File.pathSeparator + file;
         }
         if (defaults != null){
             return filepath + File.pathSeparator + defaults + File.pathSeparator + file;
         }
-        throw new RuntimeException("Could not find "+file+" in the "+enviroment.getName()+" enviroment");
+        throw new RuntimeException("Could not find "+file+" in the "+environment.getName()+" enviroment");
     }
 }
