@@ -25,6 +25,7 @@ public class EnvironmentHandler {
 
     static void reloadEnvironmentHandler(String path){
         sync.setFile(path);
+        sync.loadData();
         instance = sync.getObject();
     }
 
