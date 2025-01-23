@@ -38,7 +38,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --max-workers 1 ${{ matrix.build-options }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
           path: build/allOutputs
