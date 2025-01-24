@@ -99,7 +99,7 @@ public class VisionLocalizer extends SubsystemBase {
         }
 
         // we can subtract the angle of camera if there is one
-        return Math.sin(tagObserved.tx().minus(new Rotation2d()).getRadians())
+        return tagObserved.distance3D() * Math.sin(tagObserved.tx().minus(new Rotation2d()).getRadians())
                 + crossTrackOffsetMeters;
     }
 
@@ -128,7 +128,7 @@ public class VisionLocalizer extends SubsystemBase {
         }
 
         // we can subtract the angle of camera if there is one
-        return Math.cos(tagObserved.ty().minus(new Rotation2d()).getRadians())
+        return tagObserved.distance3D() * Math.cos(tagObserved.ty().minus(new Rotation2d()).getRadians())
                 + alongTrackOffsetMeters;
     }
 
