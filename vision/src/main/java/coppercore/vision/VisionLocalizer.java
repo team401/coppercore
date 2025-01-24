@@ -5,6 +5,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
@@ -63,6 +64,23 @@ public class VisionLocalizer extends SubsystemBase {
                     new Alert("Vision camera " + i + " is disconnected.", AlertType.kWarning);
         }
     }
+
+      /**
+   * Returns the X angle to the best target, which can be used for simple servoing with vision.
+   *
+   * @param cameraIndex The index of the camera to use.
+   */
+  public Rotation2d getTargetX(int cameraIndex) {
+    return inputs[cameraIndex].latestTargetObservation.tx();
+  }
+
+  public double getDistanceErrorToTag(int tagId, int desiredCameraIndex) {
+    if(desiredCameraIndex >= inputs.length) {
+        return - 1;
+    }
+
+    for(VisionIO.PoseObservation observation : inputs[desiredCameraIndex].poseObservations)
+  }
 
     /** Periodically updates the camera data and processes new measurements. */
     @Override

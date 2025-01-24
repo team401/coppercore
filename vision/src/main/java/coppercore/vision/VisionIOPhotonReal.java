@@ -100,7 +100,7 @@ public class VisionIOPhotonReal implements VisionIO {
                     // Add tag ID
                     tagsSeen.add((short) target.fiducialId);
 
-                    // Add observation
+                    // Add pose observation
                     poses.add(
                             new PoseObservation(
                                     result.getTimestampSeconds(), // Timestamp
@@ -110,7 +110,10 @@ public class VisionIOPhotonReal implements VisionIO {
                                     target.getBestCameraToTarget()
                                             .getTranslation()
                                             .getNorm() // Average tag distance
-                                    )); // Observation type
+                                    ));
+
+                    // set latest single tag observation
+                    inputs.latestSingleTagObservation = new SingleTagObservation(target.fiducialId, result.getTimestampSeconds(), target.getBestCameraToTarget().getTranslation().getNorm(), new Rotation2d(target.getYaw()), new Rotation2d(target.getPitch()));
                 }
             }
         }
