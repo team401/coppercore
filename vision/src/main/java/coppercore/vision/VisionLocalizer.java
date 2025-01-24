@@ -1,5 +1,6 @@
 package coppercore.vision;
 
+import coppercore.vision.VisionIO.SingleTagObservation;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -14,8 +15,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
-
-import coppercore.vision.VisionIO.SingleTagObservation;
 
 /**
  * Localizes the robot using camera measurements. Periodically updates camera data and allows for
@@ -78,13 +77,14 @@ public class VisionLocalizer extends SubsystemBase {
 
     /**
      * calculates the strafing required for drive to be in line with a specific tag + offset
-     * 
+     *
      * @param tagId desired tag to align to
      * @param desiredCameraIndex camera to use for measurements
      * @param crossTrackOffsetmeters how much to offset horizontal distance by
      * @return cross track error from tag + offset
      */
-    public double getCrossTrackDistanceErrorToTag(int tagId, int desiredCameraIndex, double crossTrackOffsetMeters) {
+    public double getCrossTrackDistanceErrorToTag(
+            int tagId, int desiredCameraIndex, double crossTrackOffsetMeters) {
         // camera not in vision
         if (desiredCameraIndex >= inputs.length) {
             return -1;
@@ -94,24 +94,26 @@ public class VisionLocalizer extends SubsystemBase {
 
         // if tag id doesn't match, we assume we don't have that tag in view
         // therefore, no distance can be observed
-        if(tagObserved.tagId() != tagId) {
+        if (tagObserved.tagId() != tagId) {
             return -1;
         }
 
         // we can subtract the angle of camera if there is one
-        return Math.sin(tagObserved.tx().minus(new Rotation2d()).getRadians()) + crossTrackOffsetMeters;
+        return Math.sin(tagObserved.tx().minus(new Rotation2d()).getRadians())
+                + crossTrackOffsetMeters;
     }
 
-
     /**
-     * calculates the forward / reverse required for drive to be in line with a specific tag + offset
-     * 
+     * calculates the forward / reverse required for drive to be in line with a specific tag +
+     * offset
+     *
      * @param tagId desired tag to align to
      * @param desiredCameraIndex camera to use for measurements
      * @param alongTrackOffsetMeters offset to prevent vision from calculating into tag
      * @return along track error from tag + offset
      */
-    public double getAlongTrackDistanceErrorToTag(int tagId, int desiredCameraIndex, double alongTrackOffsetMeters) {
+    public double getAlongTrackDistanceErrorToTag(
+            int tagId, int desiredCameraIndex, double alongTrackOffsetMeters) {
         // camera not in vision
         if (desiredCameraIndex >= inputs.length) {
             return -1;
@@ -121,12 +123,13 @@ public class VisionLocalizer extends SubsystemBase {
 
         // if tag id doesn't match, we assume we don't have that tag in view
         // therefore, no distance can be observed
-        if(tagObserved.tagId() != tagId) {
+        if (tagObserved.tagId() != tagId) {
             return -1;
         }
 
         // we can subtract the angle of camera if there is one
-        return Math.cos(tagObserved.ty().minus(new Rotation2d()).getRadians()) + alongTrackOffsetMeters;
+        return Math.cos(tagObserved.ty().minus(new Rotation2d()).getRadians())
+                + alongTrackOffsetMeters;
     }
 
     /** Periodically updates the camera data and processes new measurements. */
