@@ -15,6 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
+import coppercore.vision.VisionIO.SingleTagObservation;
+
 /**
  * Localizes the robot using camera measurements. Periodically updates camera data and allows for
  * custom handling of new measurements.
@@ -65,22 +67,67 @@ public class VisionLocalizer extends SubsystemBase {
         }
     }
 
-      /**
-   * Returns the X angle to the best target, which can be used for simple servoing with vision.
-   *
-   * @param cameraIndex The index of the camera to use.
-   */
-  public Rotation2d getTargetX(int cameraIndex) {
-    return inputs[cameraIndex].latestTargetObservation.tx();
-  }
-
-  public double getDistanceErrorToTag(int tagId, int desiredCameraIndex) {
-    if(desiredCameraIndex >= inputs.length) {
-        return - 1;
+    /**
+     * Returns the X angle to the best target, which can be used for simple servoing with vision.
+     *
+     * @param cameraIndex The index of the camera to use.
+     */
+    public Rotation2d getTargetX(int cameraIndex) {
+        return inputs[cameraIndex].latestTargetObservation.tx();
     }
 
-    for(VisionIO.PoseObservation observation : inputs[desiredCameraIndex].poseObservations)
-  }
+    /**
+     * calculates the strafing required for drive to be in line with a specific tag + offset
+     * 
+     * @param tagId desired tag to align to
+     * @param desiredCameraIndex camera to use for measurements
+     * @param crossTrackOffsetmeters how much to offset horizontal distance by
+     * @return cross track error from tag + offset
+     */
+    public double getCrossTrackDistanceErrorToTag(int tagId, int desiredCameraIndex, double crossTrackOffsetMeters) {
+        // camera not in vision
+        if (desiredCameraIndex >= inputs.length) {
+            return -1;
+        }
+
+        SingleTagObservation tagObserved = inputs[desiredCameraIndex].latestSingleTagObservation;
+
+        // if tag id doesn't match, we assume we don't have that tag in view
+        // therefore, no distance can be observed
+        if(tagObserved.tagId() != tagId) {
+            return -1;
+        }
+
+        // we can subtract the angle of camera if there is one
+        return Math.sin(tagObserved.tx().minus(new Rotation2d()).getRadians()) + crossTrackOffsetMeters;
+    }
+
+
+    /**
+     * calculates the forward / reverse required for drive to be in line with a specific tag + offset
+     * 
+     * @param tagId desired tag to align to
+     * @param desiredCameraIndex camera to use for measurements
+     * @param alongTrackOffsetMeters offset to prevent vision from calculating into tag
+     * @return along track error from tag + offset
+     */
+    public double getAlongTrackDistanceErrorToTag(int tagId, int desiredCameraIndex, double alongTrackOffsetMeters) {
+        // camera not in vision
+        if (desiredCameraIndex >= inputs.length) {
+            return -1;
+        }
+
+        SingleTagObservation tagObserved = inputs[desiredCameraIndex].latestSingleTagObservation;
+
+        // if tag id doesn't match, we assume we don't have that tag in view
+        // therefore, no distance can be observed
+        if(tagObserved.tagId() != tagId) {
+            return -1;
+        }
+
+        // we can subtract the angle of camera if there is one
+        return Math.cos(tagObserved.ty().minus(new Rotation2d()).getRadians()) + alongTrackOffsetMeters;
+    }
 
     /** Periodically updates the camera data and processes new measurements. */
     @Override

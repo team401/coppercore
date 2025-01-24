@@ -33,7 +33,7 @@ public class VisionIOPhotonReal implements VisionIO {
 
     /**
      * Sets the april tag field layout for single tag pose estimation
-     * 
+     *
      * @param tagLayout the Field layout to use for single tag pose estimation (gathers tag pose)
      */
     public void setAprilTagLayout(AprilTagFieldLayout tagLayout) {
@@ -113,7 +113,13 @@ public class VisionIOPhotonReal implements VisionIO {
                                     ));
 
                     // set latest single tag observation
-                    inputs.latestSingleTagObservation = new SingleTagObservation(target.fiducialId, result.getTimestampSeconds(), target.getBestCameraToTarget().getTranslation().getNorm(), new Rotation2d(target.getYaw()), new Rotation2d(target.getPitch()));
+                    inputs.latestSingleTagObservation =
+                            new SingleTagObservation(
+                                    target.fiducialId,
+                                    result.getTimestampSeconds(),
+                                    target.getBestCameraToTarget().getTranslation().getNorm(),
+                                    new Rotation2d(target.getYaw()),
+                                    new Rotation2d(target.getPitch()));
                 }
             }
         }
