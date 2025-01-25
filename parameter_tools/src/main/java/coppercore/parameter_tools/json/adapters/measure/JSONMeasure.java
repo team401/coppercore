@@ -144,7 +144,7 @@ public class JSONMeasure extends JSONObject<Measure> {
             case "VoltsPerRadianPerSecond":
                 return Units.VoltsPerRadianPerSecond.of(value);
             case "VoltsPerRadianPerSecondSquared":
-                return Units.VoltsPerRadianPerSecondSquared.of(value); 
+                return Units.VoltsPerRadianPerSecondSquared.of(value);
             default:
                 throw new RuntimeException(unit + " does not exist");
         }

@@ -27,7 +27,6 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
-
 import java.util.HashMap;
 
 public class JSONConverter {
