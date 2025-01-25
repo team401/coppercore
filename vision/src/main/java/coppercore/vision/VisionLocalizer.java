@@ -28,13 +28,13 @@ public class VisionLocalizer extends SubsystemBase {
     private double[] cameraStdDevFactors;
 
     /**
-     * Constructs a new {@Code VisionLocalizer} instance
+     * Constructs a new VisionLocalizer instance
      *
      * @param consumer functional interface responsible for adding vision measurements to drive pose
      * @param aprilTagLayout the field layout for current year
-     * @param cameraStdDevDactors factors to multiply standard deviation. matches camera index
+     * @param cameraStdDevFactors factors to multiply standard deviation. matches camera index
      *     (camera 0 -> index 0 in factors)
-     * @param VisionIO io of each camera, using photon vision or sim
+     * @param io of each camera, using photon vision or sim
      */
     public VisionLocalizer(
             VisionConsumer consumer,
@@ -111,7 +111,7 @@ public class VisionLocalizer extends SubsystemBase {
         logSummaryData(allRobotPoses, allRobotPosesAccepted, allRobotPosesRejected);
     }
 
-    /** sets a {@Link VisionConsumer} for the vision to send estimates to */
+    /** sets a VisionConsumer for the vision to send estimates to */
     public void setVisionConsumer(VisionConsumer consumer) {
         this.consumer = consumer;
     }
@@ -120,7 +120,7 @@ public class VisionLocalizer extends SubsystemBase {
      * checks if a pose measurement should be consumed
      *
      * @param observation a single observation from a camera
-     * @return {@code true} if pose should be rejected due to low tags, high distance, or out of field
+     * @return true if pose should be rejected due to low tags, high distance, or out of field
      */
     private boolean shouldRejectPose(VisionIO.PoseObservation observation) {
         return observation.tagCount() == 0 // Must have at least one tag
@@ -174,8 +174,8 @@ public class VisionLocalizer extends SubsystemBase {
      *
      * @param cameraIndex index of camera to liog
      * @param robotPoses list of all poses found by camera
-     * @param robotPosesAccepted list of poses NOT REJECTED by {@Link shouldRejectPose}
-     * @param robotPosesRejected list of poses REJECTED by {@Link shouldRejectPose}
+     * @param robotPosesAccepted list of poses NOT REJECTED by shouldRejectPose
+     * @param robotPosesRejected list of poses REJECTED by shouldRejectPose
      */
     private void logCameraData(
             int cameraIndex,
@@ -198,8 +198,8 @@ public class VisionLocalizer extends SubsystemBase {
      * logs summary data to realOutputs via Vision/Summary/
      *
      * @param allRobotPoses list of all poses found by all cameras
-     * @param allRobotPosesAccepted list of poses NOT REJECTED by {@Link shouldRejectPose}
-     * @param allRobotPosesRejected list of poses REJECTED by {@Link shouldRejectPose}
+     * @param allRobotPosesAccepted list of poses NOT REJECTED by shouldRejectPose
+     * @param allRobotPosesRejected list of poses REJECTED by shouldRejectPose
      */
     private void logSummaryData(
             List<Pose3d> allRobotPoses,

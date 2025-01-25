@@ -4,6 +4,7 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import coppercore.parameter_tools.path_provider.PathProvider;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -15,11 +16,12 @@ import java.io.IOException;
  */
 public class JSONSync<T> {
 
-    private final JSONSyncConfig defaultConfig = new JSONSyncConfigBuilder().build();
+    private static final JSONSyncConfig defaultConfig = new JSONSyncConfigBuilder().build();
     private final Gson gson; // Gson instance for serialization and deserialization
     private T instance; // The object being synchronized
     private String file; // File path for the JSON file
     private final JSONSyncConfig config; // Configuration for Gson
+    private final PathProvider pathProvider;
 
     /**
      * Retrieves the object synchronized with the JSON file.
@@ -37,7 +39,11 @@ public class JSONSync<T> {
      */
     @SuppressWarnings("unchecked")
     public void loadData() {
-        instance = gson.fromJson(getFileReader(file), (Class<T>) instance.getClass());
+        String path = file;
+        if (pathProvider != null) {
+            path = pathProvider.resolveReadPath(file);
+        }
+        instance = gson.fromJson(getFileReader(path), (Class<T>) instance.getClass());
     }
 
     /**
@@ -46,8 +52,12 @@ public class JSONSync<T> {
      * @throws RuntimeException if the JSON file cannot be written.
      */
     public void saveData() {
+        String path = file;
+        if (pathProvider != null) {
+            path = pathProvider.resolveReadPath(file);
+        }
         String json = gson.toJson(instance);
-        FileWriter writer = getFileWriter(file);
+        FileWriter writer = getFileWriter(path);
         try {
             writer.write(json);
             writer.close();
@@ -65,6 +75,14 @@ public class JSONSync<T> {
         file = newFilePath;
     }
 
+    public JSONSync(T instance, String file) {
+        this(instance, file, null, defaultConfig);
+    }
+
+    public JSONSync(T instance, String file, PathProvider provider) {
+        this(instance, file, provider, defaultConfig);
+    }
+
     /**
      * Constructs a new JSONSync instance.
      *
@@ -73,10 +91,15 @@ public class JSONSync<T> {
      * @param config Configuration for the Gson instance; uses defaults if null.
      */
     public JSONSync(T instance, String file, JSONSyncConfig config) {
+        this(instance, file, null, config);
+    }
+
+    public JSONSync(T instance, String file, PathProvider provider, JSONSyncConfig config) {
         this.instance = instance;
         this.config = (config == null) ? new JSONSyncConfigBuilder().build() : config;
         this.gson = generateGson();
         this.file = file;
+        this.pathProvider = provider;
     }
 
     /**
