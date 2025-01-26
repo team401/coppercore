@@ -76,18 +76,19 @@ public class VisionLocalizer extends SubsystemBase {
     }
 
     /**
-     * calculates the strafing required for drive to be in line with a specific tag + offset
+     * calculates the strafing and forward / reverse required for drive to be in line with a specific tag + offset
      *
      * @param tagId desired tag to align to
      * @param desiredCameraIndex camera to use for measurements
      * @param crossTrackOffsetmeters how much to offset horizontal distance by
-     * @return cross track error from tag + offset
+     * @param alongTrackOffsetMeters how much to offset along track distance by (if camera is pushed into robot, not aligned with bumper)
+     * @return a distance to tag with validity
      */
-    public double getCrossTrackDistanceErrorToTag(
-            int tagId, int desiredCameraIndex, double crossTrackOffsetMeters) {
+    public DistanceToTag getDistanceErrorToTag(
+            int tagId, int desiredCameraIndex, double crossTrackOffsetMeters, double alongTrackOffsetMeters) {
         // camera not in vision
         if (desiredCameraIndex >= inputs.length) {
-            return -1;
+            return new DistanceToTag(0, 0, false);
         }
 
         SingleTagObservation tagObserved = inputs[desiredCameraIndex].latestSingleTagObservation;
@@ -95,41 +96,17 @@ public class VisionLocalizer extends SubsystemBase {
         // if tag id doesn't match, we assume we don't have that tag in view
         // therefore, no distance can be observed
         if (tagObserved.tagId() != tagId) {
-            return -1;
+            return new DistanceToTag(0, 0, false);
         }
 
-        // we can subtract the angle of camera if there is one
-        return tagObserved.distance3D() * Math.sin(tagObserved.tx().minus(new Rotation2d()).getRadians())
-                + crossTrackOffsetMeters;
-    }
+        // get part of 3d distance lying on xy plane
+        double distanceXYPlane = tagObserved.distance3D() * Math.cos(tagObserved.ty().getRadians());
 
-    /**
-     * calculates the forward / reverse required for drive to be in line with a specific tag +
-     * offset
-     *
-     * @param tagId desired tag to align to
-     * @param desiredCameraIndex camera to use for measurements
-     * @param alongTrackOffsetMeters offset to prevent vision from calculating into tag
-     * @return along track error from tag + offset
-     */
-    public double getAlongTrackDistanceErrorToTag(
-            int tagId, int desiredCameraIndex, double alongTrackOffsetMeters) {
-        // camera not in vision
-        if (desiredCameraIndex >= inputs.length) {
-            return -1;
-        }
-
-        SingleTagObservation tagObserved = inputs[desiredCameraIndex].latestSingleTagObservation;
-
-        // if tag id doesn't match, we assume we don't have that tag in view
-        // therefore, no distance can be observed
-        if (tagObserved.tagId() != tagId) {
-            return -1;
-        }
-
-        // we can subtract the angle of camera if there is one
-        return tagObserved.distance3D() * Math.cos(tagObserved.ty().minus(new Rotation2d()).getRadians())
-                + alongTrackOffsetMeters;
+        // calculate strafe and forward distances required to get to tag
+        double crossTrackDistance = distanceXYPlane * Math.sin(tagObserved.tx().minus(new Rotation2d()).getRadians()) + crossTrackOffsetMeters;
+        double alongTrackDistance = distanceXYPlane * Math.cos(tagObserved.tx().minus(new Rotation2d()).getRadians()) + alongTrackOffsetMeters;
+        
+        return new DistanceToTag(crossTrackDistance, alongTrackDistance, true);
     }
 
     /** Periodically updates the camera data and processes new measurements. */
@@ -291,4 +268,6 @@ public class VisionLocalizer extends SubsystemBase {
                 double timestampSeconds,
                 Matrix<N3, N1> visionMeasurementStdDevs);
     }
+
+    public static record DistanceToTag(double crossTrackDistance, double alongTrackDistance, boolean isValid) {};
 }
