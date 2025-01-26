@@ -20,6 +20,7 @@ public interface VisionIO {
                 new SingleTagObservation(0, 0, 0, new Rotation2d(), new Rotation2d());
         public int[] tagIds = new int[0];
         public double averageTagDistanceM = 0;
+        public boolean hasMultitagResult = false;
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */

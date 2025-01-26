@@ -63,6 +63,7 @@ public class VisionIOPhotonReal implements VisionIO {
 
             // add pose
             if (result.multitagResult.isPresent()) {
+                inputs.hasMultitagResult = true;
                 var multitagResult = result.multitagResult.get();
 
                 // convert pose from field to camera -> field to robot
@@ -87,6 +88,7 @@ public class VisionIOPhotonReal implements VisionIO {
                                 multitagResult.fiducialIDsUsed.size(),
                                 inputs.averageTagDistanceM));
             } else if (!result.targets.isEmpty()) { // single tag estimation
+                inputs.hasMultitagResult = false;
                 var target = result.targets.get(0);
 
                 var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
