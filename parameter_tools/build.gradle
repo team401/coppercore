@@ -7,14 +7,33 @@ plugins {
 	id 'java-library'
 	id "com.diffplug.spotless" version "6.24.0"
 	id "com.vanniktech.maven.publish" version "0.30.0"
+	id "com.peterabeles.gversion" version "1.10"
 }
 
 repositories {
 	// Use Maven Central for resolving dependencies.
 	mavenCentral()
+	mavenLocal()
+	maven {
+		url 'https://frcmaven.wpi.edu/artifactory/release/'
+	}
+	maven {
+		// AdvantageKit maven repository
+		url "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
+	}
+	gradlePluginPortal()
+}
+
+task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
+	mainClass = "org.littletonrobotics.junction.CheckInstall"
+	classpath = sourceSets.main.runtimeClasspath
 }
 
 dependencies {
+	def akitVersion = "4.0.0"
+	annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitVersion"
+	implementation "org.littletonrobotics.akit:akit-java:$akitVersion"
+
 	// Use JUnit Jupiter for testing.
 	testImplementation libs.junit.jupiter
 
@@ -29,8 +48,10 @@ dependencies {
 
 }
 
+
 // Apply a specific Java toolchain to ease working on different environments.
 java {
+
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
