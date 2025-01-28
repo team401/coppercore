@@ -6,7 +6,7 @@ import com.google.gson.LongSerializationPolicy;
 /** Builder class for creating a JSONSyncConfig instance. */
 public class JSONSyncConfigBuilder {
     public boolean serializeNulls = false;
-    public boolean prettyPrinting = false;
+    public boolean prettyPrinting = true;
     public boolean excludeFieldsWithoutExposeAnnotation = false;
     public FieldNamingPolicy namingPolicy = FieldNamingPolicy.IDENTITY;
     public LongSerializationPolicy longSerializationPolicy = LongSerializationPolicy.DEFAULT;
