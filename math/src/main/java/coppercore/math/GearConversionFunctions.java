@@ -1,9 +1,9 @@
 package coppercore.math;
 
-import static edu.wpi.first.units.Units.*;
+import edu.first.wpilib.units.Distance;
 
 public class GearConversionFunctions {
-    public static double pitchDiameterFrom3mmPulley(int teeth) {
+    public static Distance pitchDiameterFrom3mmPulley(int teeth) {
         teeth = Math.abs(teeth);
         Distance pitchDiameter = Millimeters.of(3 * teeth / ((double) Math.PI));
         return pitchDiameter;
