@@ -75,6 +75,17 @@ public class VisionLocalizer extends SubsystemBase {
         return inputs[cameraIndex].latestTargetObservation.tx();
     }
 
+    public boolean hasMultitagResult() {
+        boolean hasResult = false;
+        for (VisionIOInputsAutoLogged input : inputs) {
+            if(input.hasMultitagResult) {
+                hasResult = true;
+            }
+        }
+
+        return hasResult;
+    }
+
     /**
      * calculates the strafing and forward / reverse required for drive to be in line with a
      * specific tag + offset
