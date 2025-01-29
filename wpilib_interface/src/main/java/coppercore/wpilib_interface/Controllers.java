@@ -1,8 +1,8 @@
 package coppercore.wpilib_interface;
 
-import coppercore.parameter_tools.JSONExclude;
-import coppercore.parameter_tools.JSONSync;
-import coppercore.parameter_tools.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.JSONExclude;
+import coppercore.parameter_tools.json.JSONSync;
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;

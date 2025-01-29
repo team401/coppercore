@@ -1,20 +1,18 @@
 package coppercore.parameter_tools.path_provider;
 
-import coppercore.parameter_tools.JSONExclude;
-import coppercore.parameter_tools.JSONSync;
-import coppercore.parameter_tools.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.JSONSync;
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import java.io.File;
 
 public class EnvironmentHandler {
     static JSONSync<EnvironmentHandler> sync =
             new JSONSync<>(new EnvironmentHandler(), "", new JSONSyncConfigBuilder().build());
     static EnvironmentHandler instance;
+    static String filepath;
 
     Environment[] environments;
     String defaults;
     String environment;
-
-    @JSONExclude static String filepath;
 
     public static EnvironmentHandler getEnvironmentHandler() {
         return instance;
