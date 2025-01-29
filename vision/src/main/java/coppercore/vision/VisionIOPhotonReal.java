@@ -33,7 +33,7 @@ public class VisionIOPhotonReal implements VisionIO {
 
     /**
      * Sets the april tag field layout for single tag pose estimation
-     * 
+     *
      * @param tagLayout the Field layout to use for single tag pose estimation (gathers tag pose)
      */
     public void setAprilTagLayout(AprilTagFieldLayout tagLayout) {
@@ -63,6 +63,7 @@ public class VisionIOPhotonReal implements VisionIO {
 
             // add pose
             if (result.multitagResult.isPresent()) {
+                inputs.hasMultitagResult = true;
                 var multitagResult = result.multitagResult.get();
 
                 // convert pose from field to camera -> field to robot
@@ -87,6 +88,7 @@ public class VisionIOPhotonReal implements VisionIO {
                                 multitagResult.fiducialIDsUsed.size(),
                                 inputs.averageTagDistanceM));
             } else if (!result.targets.isEmpty()) { // single tag estimation
+                inputs.hasMultitagResult = false;
                 var target = result.targets.get(0);
 
                 var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
@@ -100,7 +102,7 @@ public class VisionIOPhotonReal implements VisionIO {
                     // Add tag ID
                     tagsSeen.add((short) target.fiducialId);
 
-                    // Add observation
+                    // Add pose observation
                     poses.add(
                             new PoseObservation(
                                     result.getTimestampSeconds(), // Timestamp
@@ -110,7 +112,16 @@ public class VisionIOPhotonReal implements VisionIO {
                                     target.getBestCameraToTarget()
                                             .getTranslation()
                                             .getNorm() // Average tag distance
-                                    )); // Observation type
+                                    ));
+
+                    // set latest single tag observation
+                    inputs.latestSingleTagObservation =
+                            new SingleTagObservation(
+                                    target.fiducialId,
+                                    result.getTimestampSeconds(),
+                                    target.getBestCameraToTarget().getTranslation().getNorm(),
+                                    new Rotation2d(target.getYaw()),
+                                    new Rotation2d(target.getPitch()));
                 }
             }
         }

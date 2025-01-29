@@ -16,8 +16,11 @@ public interface VisionIO {
         public TargetObservation latestTargetObservation =
                 new TargetObservation(new Rotation2d(), new Rotation2d());
         public PoseObservation[] poseObservations = new PoseObservation[0];
+        public SingleTagObservation latestSingleTagObservation =
+                new SingleTagObservation(0, 0, 0, new Rotation2d(), new Rotation2d());
         public int[] tagIds = new int[0];
         public double averageTagDistanceM = 0;
+        public boolean hasMultitagResult = false;
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */
@@ -30,6 +33,10 @@ public interface VisionIO {
             double ambiguity,
             int tagCount,
             double averageTagDistance) {}
+
+    public static record SingleTagObservation(
+            int tagId, double timestamp, double distance3D, Rotation2d tx, Rotation2d ty) {}
+    ;
 
     public default void updateInputs(VisionIOInputs inputs) {}
 
