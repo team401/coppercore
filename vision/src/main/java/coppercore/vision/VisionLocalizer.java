@@ -76,16 +76,21 @@ public class VisionLocalizer extends SubsystemBase {
     }
 
     /**
-     * calculates the strafing and forward / reverse required for drive to be in line with a specific tag + offset
+     * calculates the strafing and forward / reverse required for drive to be in line with a
+     * specific tag + offset
      *
      * @param tagId desired tag to align to
      * @param desiredCameraIndex camera to use for measurements
-     * @param crossTrackOffsetmeters how much to offset horizontal distance by
-     * @param alongTrackOffsetMeters how much to offset along track distance by (if camera is pushed into robot, not aligned with bumper)
+     * @param crossTrackOffsetMeters how much to offset horizontal distance by
+     * @param alongTrackOffsetMeters how much to offset along track distance by (if camera is pushed
+     *     into robot, not aligned with bumper)
      * @return a distance to tag with validity
      */
     public DistanceToTag getDistanceErrorToTag(
-            int tagId, int desiredCameraIndex, double crossTrackOffsetMeters, double alongTrackOffsetMeters) {
+            int tagId,
+            int desiredCameraIndex,
+            double crossTrackOffsetMeters,
+            double alongTrackOffsetMeters) {
         // camera not in vision
         if (desiredCameraIndex >= inputs.length) {
             return new DistanceToTag(0, 0, false);
@@ -103,9 +108,13 @@ public class VisionLocalizer extends SubsystemBase {
         double distanceXYPlane = tagObserved.distance3D() * Math.cos(tagObserved.ty().getRadians());
 
         // calculate strafe and forward distances required to get to tag
-        double crossTrackDistance = distanceXYPlane * Math.sin(tagObserved.tx().minus(new Rotation2d()).getRadians()) + crossTrackOffsetMeters;
-        double alongTrackDistance = distanceXYPlane * Math.cos(tagObserved.tx().minus(new Rotation2d()).getRadians()) + alongTrackOffsetMeters;
-        
+        double crossTrackDistance =
+                distanceXYPlane * Math.sin(tagObserved.tx().minus(new Rotation2d()).getRadians())
+                        + crossTrackOffsetMeters;
+        double alongTrackDistance =
+                distanceXYPlane * Math.cos(tagObserved.tx().minus(new Rotation2d()).getRadians())
+                        + alongTrackOffsetMeters;
+
         return new DistanceToTag(crossTrackDistance, alongTrackDistance, true);
     }
 
@@ -269,5 +278,7 @@ public class VisionLocalizer extends SubsystemBase {
                 Matrix<N3, N1> visionMeasurementStdDevs);
     }
 
-    public static record DistanceToTag(double crossTrackDistance, double alongTrackDistance, boolean isValid) {};
+    public static record DistanceToTag(
+            double crossTrackDistance, double alongTrackDistance, boolean isValid) {}
+    ;
 }
