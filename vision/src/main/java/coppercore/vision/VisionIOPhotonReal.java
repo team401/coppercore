@@ -79,6 +79,17 @@ public class VisionIOPhotonReal implements VisionIO {
                 }
                 inputs.averageTagDistanceM = totalTagDistance / result.targets.size();
 
+                var target = result.getBestTarget();
+
+                // set latest single tag observation
+                inputs.latestSingleTagObservation =
+                        new SingleTagObservation(
+                                target.fiducialId,
+                                result.getTimestampSeconds(),
+                                target.getBestCameraToTarget().getTranslation().getNorm(),
+                                new Rotation2d(target.getYaw()),
+                                new Rotation2d(target.getPitch()));
+
                 tagsSeen.addAll(multitagResult.fiducialIDsUsed);
                 poses.add(
                         new PoseObservation(
@@ -87,7 +98,8 @@ public class VisionIOPhotonReal implements VisionIO {
                                 multitagResult.estimatedPose.ambiguity,
                                 multitagResult.fiducialIDsUsed.size(),
                                 inputs.averageTagDistanceM));
-            } else if (!result.targets.isEmpty()) { // single tag estimation
+            }
+            if (!result.targets.isEmpty()) { // single tag estimation
                 inputs.hasMultitagResult = false;
                 var target = result.targets.get(0);
 

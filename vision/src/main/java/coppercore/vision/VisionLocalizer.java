@@ -78,7 +78,7 @@ public class VisionLocalizer extends SubsystemBase {
     public boolean hasMultitagResult() {
         boolean hasResult = false;
         for (VisionIOInputsAutoLogged input : inputs) {
-            if(input.hasMultitagResult) {
+            if (input.hasMultitagResult) {
                 hasResult = true;
             }
         }
