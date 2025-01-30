@@ -75,6 +75,18 @@ public class VisionLocalizer extends SubsystemBase {
         return inputs[cameraIndex].latestTargetObservation.tx();
     }
 
+    public boolean hasMultitagResult() {
+        boolean hasResult = false;
+        for (VisionIOInputsAutoLogged input : inputs) {
+            if (input.hasMultitagResult) {
+                hasResult = true;
+                break;
+            }
+        }
+
+        return hasResult;
+    }
+
     /**
      * calculates the strafing and forward / reverse required for drive to be in line with a
      * specific tag + offset
@@ -96,11 +108,19 @@ public class VisionLocalizer extends SubsystemBase {
             return new DistanceToTag(0, 0, false);
         }
 
-        SingleTagObservation tagObserved = inputs[desiredCameraIndex].latestSingleTagObservation;
+        SingleTagObservation tagObserved = null;
 
-        // if tag id doesn't match, we assume we don't have that tag in view
-        // therefore, no distance can be observed
-        if (tagObserved.tagId() != tagId) {
+        if (inputs[desiredCameraIndex].hasMultitagResult) {
+            for (SingleTagObservation obs : inputs[desiredCameraIndex].singleTagObservations) {
+                if (obs.tagId() == tagId) {
+                    tagObserved = obs;
+                    break;
+                }
+            }
+        } else if (inputs[desiredCameraIndex].singleTagObservations.length != 0
+                && inputs[desiredCameraIndex].singleTagObservations[0].tagId() == tagId) {
+            tagObserved = inputs[desiredCameraIndex].singleTagObservations[0];
+        } else {
             return new DistanceToTag(0, 0, false);
         }
 
