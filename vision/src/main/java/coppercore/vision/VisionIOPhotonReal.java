@@ -46,6 +46,7 @@ public class VisionIOPhotonReal implements VisionIO {
 
         Set<Short> tagsSeen = new HashSet<>();
         List<PoseObservation> poses = new LinkedList<>();
+        List<SingleTagObservation> singleTagObservations = new LinkedList<>();
 
         // loop through all results to find pose and targets observed
         for (var result : camera.getAllUnreadResults()) {
@@ -66,6 +67,17 @@ public class VisionIOPhotonReal implements VisionIO {
                 inputs.hasMultitagResult = true;
                 var multitagResult = result.multitagResult.get();
 
+                // add observation for each tag
+                for (var target : result.getTargets()) {
+                    singleTagObservations.add(
+                            new SingleTagObservation(
+                                    target.getFiducialId(),
+                                    result.getTimestampSeconds(),
+                                    target.getBestCameraToTarget().getTranslation().getNorm(),
+                                    new Rotation2d(target.getYaw()),
+                                    new Rotation2d(target.getPitch())));
+                }
+
                 // convert pose from field to camera -> field to robot
                 Transform3d fieldToCamera = multitagResult.estimatedPose.best;
                 Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse());
@@ -78,17 +90,6 @@ public class VisionIOPhotonReal implements VisionIO {
                     totalTagDistance += target.bestCameraToTarget.getTranslation().getNorm();
                 }
                 inputs.averageTagDistanceM = totalTagDistance / result.targets.size();
-
-                var target = result.getBestTarget();
-
-                // set latest single tag observation
-                inputs.latestSingleTagObservation =
-                        new SingleTagObservation(
-                                target.fiducialId,
-                                result.getTimestampSeconds(),
-                                target.getBestCameraToTarget().getTranslation().getNorm(),
-                                new Rotation2d(target.getYaw()),
-                                new Rotation2d(target.getPitch()));
 
                 tagsSeen.addAll(multitagResult.fiducialIDsUsed);
                 poses.add(
@@ -127,13 +128,13 @@ public class VisionIOPhotonReal implements VisionIO {
                                     ));
 
                     // set latest single tag observation
-                    inputs.latestSingleTagObservation =
+                    singleTagObservations.add(
                             new SingleTagObservation(
                                     target.fiducialId,
                                     result.getTimestampSeconds(),
                                     target.getBestCameraToTarget().getTranslation().getNorm(),
                                     new Rotation2d(target.getYaw()),
-                                    new Rotation2d(target.getPitch()));
+                                    new Rotation2d(target.getPitch())));
                 }
             }
         }
@@ -150,6 +151,11 @@ public class VisionIOPhotonReal implements VisionIO {
         for (int id : tagsSeen) {
             inputs.tagIds[i] = id;
             i++;
+        }
+
+        inputs.singleTagObservations = new SingleTagObservation[singleTagObservations.size()];
+        for (int j = 0; j < singleTagObservations.size(); j++) {
+            inputs.singleTagObservations[j] = singleTagObservations.get(j);
         }
     }
 }
