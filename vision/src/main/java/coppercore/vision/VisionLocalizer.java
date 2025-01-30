@@ -80,6 +80,7 @@ public class VisionLocalizer extends SubsystemBase {
         for (VisionIOInputsAutoLogged input : inputs) {
             if (input.hasMultitagResult) {
                 hasResult = true;
+                break;
             }
         }
 
