@@ -18,6 +18,14 @@ public class StateConfiguration<State, Trigger> {
     private boolean runDefaultEntryAction = true;
     private boolean runDefaultExitAction = true;
 
+    public boolean hasEntryAction() {
+        return (this.onEntryAction != null);
+    }
+
+    public boolean hasExitAction() {
+        return (this.onExitAction != null);
+    }
+
     /**
      * Creates configuration for how state machine behaves in given State
      *
@@ -32,7 +40,7 @@ public class StateConfiguration<State, Trigger> {
     /**
      * Create Transition between States
      *
-     * @param trigger trigger event
+     * @param trigger     trigger event
      * @param destination end state
      * @return configuration
      */
@@ -44,9 +52,10 @@ public class StateConfiguration<State, Trigger> {
     }
 
     /**
-     * Create Transistion between states without trigger the enter or exit functions.
+     * Create Transistion between states without trigger the enter or exit
+     * functions.
      *
-     * @param trigger trigger event
+     * @param trigger     trigger event
      * @param destination end state
      * @return configuration
      */
@@ -58,12 +67,13 @@ public class StateConfiguration<State, Trigger> {
     }
 
     /**
-     * Creates a Conditional Transition that only fires if both the right Trigger is fired and the
+     * Creates a Conditional Transition that only fires if both the right Trigger is
+     * fired and the
      * check lambda evaluates to true.
      *
-     * @param trigger trigger event
+     * @param trigger     trigger event
      * @param destination end state
-     * @param check condition
+     * @param check       condition
      * @return configuration
      */
     public StateConfiguration<State, Trigger> permitIf(
@@ -75,13 +85,15 @@ public class StateConfiguration<State, Trigger> {
     }
 
     /**
-     * Creates a Conditional Internal Transition that only fires if both the right Trigger is fired
-     * and the check lambda evaluates to true. This transition will not trigger the enter or exit
+     * Creates a Conditional Internal Transition that only fires if both the right
+     * Trigger is fired
+     * and the check lambda evaluates to true. This transition will not trigger the
+     * enter or exit
      * functions.
      *
-     * @param trigger trigger event
+     * @param trigger     trigger event
      * @param destination end state
-     * @param check condition
+     * @param check       condition
      * @return configuration
      */
     public StateConfiguration<State, Trigger> permitInternalIf(
@@ -100,7 +112,8 @@ public class StateConfiguration<State, Trigger> {
      */
     public List<Transition<State, Trigger>> getTransitions(Trigger trigger) {
         List<Transition<State, Trigger>> matchedTransitions = new ArrayList<>();
-        if (trigger == null) return matchedTransitions;
+        if (trigger == null)
+            return matchedTransitions;
         for (Transition<State, Trigger> transition : transitions) {
             if (trigger.equals(transition.getTrigger())) {
                 matchedTransitions.add(transition);
