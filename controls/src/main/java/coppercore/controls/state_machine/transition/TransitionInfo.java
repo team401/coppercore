@@ -7,12 +7,13 @@ public class TransitionInfo<State, Trigger> {
     private final Trigger trigger;
     private boolean failed = false;
     private Transition<State, Trigger> transition;
+    private boolean isInternal;
 
     /**
      * Creates Information Object
      *
      * @param currentState current state
-     * @param trigger trigger that was fired
+     * @param trigger      trigger that was fired
      */
     public TransitionInfo(State currentState, Trigger trigger) {
         this.currentState = currentState;
@@ -35,6 +36,9 @@ public class TransitionInfo<State, Trigger> {
      */
     public void setTransition(Transition<State, Trigger> transition) {
         targetState = transition.getDestination();
+        if (transition != null) {
+            isInternal = transition.isInternal();
+        }
         this.transition = transition;
     }
 
@@ -77,6 +81,10 @@ public class TransitionInfo<State, Trigger> {
     /** Sets transition to failed */
     public void fail() {
         failed = true;
+    }
+
+    public boolean wasInternal() {
+        return this.isInternal;
     }
 
     /**
