@@ -61,6 +61,7 @@ public class StateMachine<State, Trigger> {
                 configuration.runOnExit(transition);
             }
             transition.runAction();
+            currentState = transition.getDestination();
             if (nextStateConfigurationOptional.isPresent()) {
                 StateConfiguration<State, Trigger> config = nextStateConfigurationOptional.get();
                 if (config.doRunDefaultExitAction()) {
@@ -73,8 +74,9 @@ public class StateMachine<State, Trigger> {
             } else {
                 configuration.runOnEntry(transition);
             }
+        } else {
+            currentState = transition.getDestination();
         }
-        currentState = transition.getDestination();
     }
 
     /**
