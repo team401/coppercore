@@ -13,7 +13,7 @@ public class TransitionInfo<State, Trigger> {
      * Creates Information Object
      *
      * @param currentState current state
-     * @param trigger      trigger that was fired
+     * @param trigger trigger that was fired
      */
     public TransitionInfo(State currentState, Trigger trigger) {
         this.currentState = currentState;

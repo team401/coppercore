@@ -17,7 +17,7 @@ public class StateMachine<State, Trigger> {
     /**
      * Creates a StateMachine in the given state with the given configuration
      *
-     * @param config       The state machine configuration
+     * @param config The state machine configuration
      * @param initialState default state
      */
     public StateMachine(StateMachineConfiguration<State, Trigger> config, State initialState) {
@@ -32,7 +32,8 @@ public class StateMachine<State, Trigger> {
      */
     public void fire(Trigger trigger) {
         transitionInfo = new TransitionInfo<>(currentState, trigger);
-        Optional<Transition<State, Trigger>> transitionOptional = configuration.getTransition(currentState, trigger);
+        Optional<Transition<State, Trigger>> transitionOptional =
+                configuration.getTransition(currentState, trigger);
         if (transitionOptional.isEmpty()) {
             transitionInfo.fail();
             return;
@@ -44,13 +45,13 @@ public class StateMachine<State, Trigger> {
         }
         transitionInfo.setTransition(transition);
         if (!transition.isInternal()) {
-            Optional<StateConfiguration<State, Trigger>> currentStateConfigurationOptional = configuration
-                    .getStateConfiguration(currentState);
-            Optional<StateConfiguration<State, Trigger>> nextStateConfigurationOptional = configuration
-                    .getStateConfiguration(transition.getDestination());
+            Optional<StateConfiguration<State, Trigger>> currentStateConfigurationOptional =
+                    configuration.getStateConfiguration(currentState);
+            Optional<StateConfiguration<State, Trigger>> nextStateConfigurationOptional =
+                    configuration.getStateConfiguration(transition.getDestination());
             if (currentStateConfigurationOptional.isPresent()) {
                 StateConfiguration<State, Trigger> config = currentStateConfigurationOptional.get();
-                if (config.doRunDefaultExitAction()) {
+                if (config.doRunDefaultExitAction() && configuration.hasExitAction()) {
                     configuration.runOnExit(transition);
                 } else if (config.hasExitAction()) {
                     config.runOnExit(transition);
@@ -64,7 +65,7 @@ public class StateMachine<State, Trigger> {
             currentState = transition.getDestination();
             if (nextStateConfigurationOptional.isPresent()) {
                 StateConfiguration<State, Trigger> config = nextStateConfigurationOptional.get();
-                if (config.doRunDefaultExitAction()) {
+                if (config.doRunDefaultExitAction() && configuration.hasEntryAction()) {
                     configuration.runOnEntry(transition);
                 } else if (config.hasEntryAction()) {
                     config.runOnEntry(transition);
@@ -97,10 +98,7 @@ public class StateMachine<State, Trigger> {
         }
     }
 
-    /**
-     * Runs states Period if is periodic (This method is for if state is in
-     * Container)
-     */
+    /** Runs states Period if is periodic (This method is for if state is in Container) */
     public void periodicContainer() {
         if (currentState instanceof StateContainer) {
             StateInterface state = ((StateContainer) currentState).getState();
