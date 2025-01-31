@@ -1,8 +1,6 @@
 package coppercore.geometry;
 
-/** 
- * This class makes a line and checks if a point is on that line and how long the line is. 
-*/
+/** This class makes a line and checks if a point is on that line and how long the line is. */
 public class Line {
     private double x1;
     private double y1;
@@ -10,7 +8,8 @@ public class Line {
     private double y2;
 
     /**
-     *  This makes the x and y values for the two points that make up the line.
+     * This makes the x and y values for the two points that make up the line.
+     *
      * @param x1 x-position of point 1
      * @param y1
      * @param x2
