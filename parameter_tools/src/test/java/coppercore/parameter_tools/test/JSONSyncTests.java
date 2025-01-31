@@ -1,7 +1,7 @@
 package coppercore.parameter_tools.test;
 
-import coppercore.parameter_tools.JSONSync;
-import coppercore.parameter_tools.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.JSONSync;
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import java.io.File;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +46,8 @@ public class JSONSyncTests {
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
         Assertions.assertEquals(10.0, instance.testDouble, "testDouble should be 10.0");
         Assertions.assertEquals(2, instance.testingIntField, "testInt should be 2");
+        Assertions.assertEquals(
+                0.47, instance.pose.getRotation().getRadians(), "rotation radians should be 0.47");
         Assertions.assertNull(instance.motorData, "motorData should be null");
     }
 

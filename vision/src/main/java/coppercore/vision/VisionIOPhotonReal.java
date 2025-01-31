@@ -1,5 +1,6 @@
 package coppercore.vision;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -8,14 +9,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
 
-/**
- * This class implements io using photon vision
- */
+/** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {
     protected final PhotonCamera camera;
     protected final Transform3d robotToCamera;
     public final String name;
+    public AprilTagFieldLayout aprilTagLayout;
 
     /**
      * Creates a new VisionIOPhotonVision.
@@ -27,6 +28,16 @@ public class VisionIOPhotonReal implements VisionIO {
         camera = new PhotonCamera(name);
         this.name = name;
         this.robotToCamera = robotToCamera;
+        this.aprilTagLayout = null;
+    }
+
+    /**
+     * Sets the april tag field layout for single tag pose estimation
+     *
+     * @param tagLayout the Field layout to use for single tag pose estimation (gathers tag pose)
+     */
+    public void setAprilTagLayout(AprilTagFieldLayout tagLayout) {
+        aprilTagLayout = tagLayout;
     }
 
     @Override
@@ -35,6 +46,7 @@ public class VisionIOPhotonReal implements VisionIO {
 
         Set<Short> tagsSeen = new HashSet<>();
         List<PoseObservation> poses = new LinkedList<>();
+        List<SingleTagObservation> singleTagObservations = new LinkedList<>();
 
         // loop through all results to find pose and targets observed
         for (var result : camera.getAllUnreadResults()) {
@@ -52,7 +64,19 @@ public class VisionIOPhotonReal implements VisionIO {
 
             // add pose
             if (result.multitagResult.isPresent()) {
+                inputs.hasMultitagResult = true;
                 var multitagResult = result.multitagResult.get();
+
+                // add observation for each tag
+                for (var target : result.getTargets()) {
+                    singleTagObservations.add(
+                            new SingleTagObservation(
+                                    target.getFiducialId(),
+                                    result.getTimestampSeconds(),
+                                    target.getBestCameraToTarget().getTranslation().getNorm(),
+                                    new Rotation2d(target.getYaw()),
+                                    new Rotation2d(target.getPitch())));
+                }
 
                 // convert pose from field to camera -> field to robot
                 Transform3d fieldToCamera = multitagResult.estimatedPose.best;
@@ -75,31 +99,42 @@ public class VisionIOPhotonReal implements VisionIO {
                                 multitagResult.estimatedPose.ambiguity,
                                 multitagResult.fiducialIDsUsed.size(),
                                 inputs.averageTagDistanceM));
-            } else if (!result.targets.isEmpty()) { // single tag estimation
+            }
+            if (!result.targets.isEmpty()) { // single tag estimation
+                inputs.hasMultitagResult = false;
                 var target = result.targets.get(0);
 
                 var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
-                if(tagPose.isPresent()) {
-                    // find robot pose from location of target
-                    Transform3d fieldToTarget =
-                        new Transform3d(tagPose.get().getTranslation(), tagPose.get().getRotation());
-                    Transform3d cameraToTarget = target.bestCameraToTarget; // transform of best camera view of target (only one camera)
-                    Transform3d fieldToCamera = fieldToTarget.plus(cameraToTarget.inverse()); // take pose of target and transform to find pose of camera
-                    Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse()); // camera to robot transform to find location of center of robot
-                    Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
+                if (tagPose.isPresent()) {
+                    Pose3d robotPose =
+                            PhotonUtils.estimateFieldToRobotAprilTag(
+                                    target.getBestCameraToTarget(),
+                                    aprilTagLayout.getTagPose(target.fiducialId).get(),
+                                    robotToCamera.inverse());
 
                     // Add tag ID
-                    tagIds.add((short) target.fiducialId);
+                    tagsSeen.add((short) target.fiducialId);
 
-                    // Add observation
-                    poseObservations.add(
-                        new PoseObservation(
-                            result.getTimestampSeconds(), // Timestamp
-                            robotPose, // 3D pose estimate
-                            target.poseAmbiguity, // Ambiguity
-                            1, // Tag count
-                            cameraToTarget.getTranslation().getNorm(), // Average tag distance
-                            PoseObservationType.PHOTONVISION)); // Observation type
+                    // Add pose observation
+                    poses.add(
+                            new PoseObservation(
+                                    result.getTimestampSeconds(), // Timestamp
+                                    robotPose, // 3D pose estimate
+                                    target.poseAmbiguity, // Ambiguity
+                                    1, // Tag count
+                                    target.getBestCameraToTarget()
+                                            .getTranslation()
+                                            .getNorm() // Average tag distance
+                                    ));
+
+                    // set latest single tag observation
+                    singleTagObservations.add(
+                            new SingleTagObservation(
+                                    target.fiducialId,
+                                    result.getTimestampSeconds(),
+                                    target.getBestCameraToTarget().getTranslation().getNorm(),
+                                    new Rotation2d(target.getYaw()),
+                                    new Rotation2d(target.getPitch())));
                 }
             }
         }
@@ -116,6 +151,11 @@ public class VisionIOPhotonReal implements VisionIO {
         for (int id : tagsSeen) {
             inputs.tagIds[i] = id;
             i++;
+        }
+
+        inputs.singleTagObservations = new SingleTagObservation[singleTagObservations.size()];
+        for (int j = 0; j < singleTagObservations.size(); j++) {
+            inputs.singleTagObservations[j] = singleTagObservations.get(j);
         }
     }
 }
