@@ -130,10 +130,10 @@ public class VisionLocalizer extends SubsystemBase {
         // calculate strafe and forward distances required to get to tag
         double crossTrackDistance =
                 distanceXYPlane * Math.sin(tagObserved.tx().minus(new Rotation2d()).getRadians())
-                        + crossTrackOffsetMeters;
+                        - crossTrackOffsetMeters;
         double alongTrackDistance =
                 distanceXYPlane * Math.cos(tagObserved.tx().minus(new Rotation2d()).getRadians())
-                        + alongTrackOffsetMeters;
+                        - alongTrackOffsetMeters;
 
         return new DistanceToTag(crossTrackDistance, alongTrackDistance, true);
     }
