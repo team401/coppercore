@@ -38,9 +38,9 @@ public class DriveWithJoysticks extends Command {
     @Override
     public void execute() {
         // clamp inputs between 0 and 1 to prevent crazy speeds
-        double leftJoystickX = MathUtil.clamp(leftJoystick.getX(), 0, 1);
-        double leftJoystickY = MathUtil.clamp(leftJoystick.getY(), 0, 1);
-        double rightJoystickX = MathUtil.clamp(rightJoystick.getX(), 0, 1);
+        double leftJoystickX = MathUtil.clamp(leftJoystick.getX(), -1, 1);
+        double leftJoystickY = MathUtil.clamp(leftJoystick.getY(), -1, 1);
+        double rightJoystickX = MathUtil.clamp(rightJoystick.getX(), -1, 1);
 
         Translation2d linearSpeeds = getLinearVelocity(-leftJoystickX, -leftJoystickY);
 
@@ -58,11 +58,10 @@ public class DriveWithJoysticks extends Command {
 
     /**
      * calculates a translation with squared magnitude
-     * 
+     *
      * @param x represents the x value of velocity
      * @param y represents the y value of velocity
-     * 
-     *  @return Translation2d with directions of velocity
+     * @return Translation2d with directions of velocity
      */
     public Translation2d getLinearVelocity(double x, double y) {
         double[] deadbands = Deadband.twoAxisDeadband(x, y, joystickDeadband);
@@ -75,7 +74,7 @@ public class DriveWithJoysticks extends Command {
          * therefore, x and y must be flipped for proper rotation of pose
          * BEWARE: not flipping will cause forward on joystick to drive right on field
          */
-        Rotation2d direction = new Rotation2d(y, x);
+        Rotation2d direction = new Rotation2d(Math.atan2(x, y));
         double squaredMagnitude = magnitude * magnitude;
 
         Translation2d linearVelocity =

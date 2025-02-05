@@ -1,6 +1,7 @@
 package coppercore.parameter_tools.test;
 
-import coppercore.parameter_tools.JSONSync;
+import coppercore.parameter_tools.json.JSONSync;
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import java.io.File;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +33,7 @@ public class JSONSyncTests {
                 new JSONSync<>(
                         new ExampleJsonSyncClass(),
                         RESOURCE_DIRECTORY + "/ExampleJsonSyncClass.json",
-                        new JSONSync.JSONSyncConfigBuilder().setPrettyPrinting(true).build());
+                        new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
     }
 
     /**
@@ -43,9 +44,10 @@ public class JSONSyncTests {
     public void JsonSyncLoadDataTest() {
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
-
         Assertions.assertEquals(10.0, instance.testDouble, "testDouble should be 10.0");
-        Assertions.assertEquals(2, instance.testInt, "testInt should be 2");
+        Assertions.assertEquals(2, instance.testingIntField, "testInt should be 2");
+        Assertions.assertEquals(
+                0.47, instance.pose.getRotation().getRadians(), "rotation radians should be 0.47");
         Assertions.assertNull(instance.motorData, "motorData should be null");
     }
 
@@ -58,9 +60,8 @@ public class JSONSyncTests {
         ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "/SetFileTest.json");
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
-
         Assertions.assertEquals(10.0, instance.testDouble, "testDouble should be 10.0");
-        Assertions.assertEquals(2, instance.testInt, "testInt should be 2");
+        Assertions.assertEquals(2, instance.testingIntField, "testInt should be 2");
         Assertions.assertNotNull(instance.motorData, "motorData should not be null");
         Assertions.assertEquals(-12.3, instance.motorData.minVoltage, "minVoltage should be -12.3");
         Assertions.assertEquals(16.4, instance.motorData.maxVoltage, "maxVoltage should be 16.4");
@@ -76,7 +77,7 @@ public class JSONSyncTests {
     public void JsonSyncSaveFileTest() {
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
-        instance.testInt = 10; // Modify a value in the object
+        instance.testingIntField = 10;
         ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "/SaveFileTest.json");
         ExampleJsonSyncClass.synced.saveData();
     }
