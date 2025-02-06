@@ -45,7 +45,7 @@ public class StateConfiguration<State, Trigger> {
      * @return configuration
      */
     public StateConfiguration<State, Trigger> permit(Trigger trigger, State destination) {
-        if (getFilteredTransition(trigger).isEmpty()) {
+        if (getFilteredTransition(trigger, true).isEmpty()) {
             transitions.add(new Transition<>(source, destination, trigger, false));
         }
         return this;
@@ -59,7 +59,7 @@ public class StateConfiguration<State, Trigger> {
      * @return configuration
      */
     public StateConfiguration<State, Trigger> permitInternal(Trigger trigger, State destination) {
-        if (getFilteredTransition(trigger).isEmpty()) {
+        if (getFilteredTransition(trigger, true).isEmpty()) {
             transitions.add(new Transition<>(source, destination, trigger, true));
         }
         return this;
@@ -76,7 +76,7 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permitIf(
             Trigger trigger, State destination, BooleanSupplier check) {
-        if (getFilteredTransition(trigger).isEmpty()) {
+        if (getFilteredTransition(trigger, true).isEmpty()) {
             transitions.add(new ConditinalTransition<>(source, destination, trigger, check, false));
         }
         return this;
@@ -94,7 +94,7 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permitInternalIf(
             Trigger trigger, State destination, BooleanSupplier check) {
-        if (getFilteredTransition(trigger).isEmpty()) {
+        if (getFilteredTransition(trigger, true).isEmpty()) {
             transitions.add(new ConditinalTransition<>(source, destination, trigger, check, true));
         }
         return this;
@@ -124,11 +124,14 @@ public class StateConfiguration<State, Trigger> {
      * @return filtered transition
      */
     private Optional<Transition<State, Trigger>> filterTransitions(
-            List<Transition<State, Trigger>> transitions) {
+            List<Transition<State, Trigger>> transitions, boolean excludeConditionals) {
         Optional<Transition<State, Trigger>> returnOptional = Optional.empty();
         boolean conditinal = false;
         for (Transition<State, Trigger> transition : transitions) {
             if (transition instanceof ConditinalTransition) {
+                if (excludeConditionals){
+                    continue;
+                }
                 if (conditinal
                         && ((ConditinalTransition<State, Trigger>) transition).isCheckTrue()) {
                     return Optional.empty();
@@ -150,7 +153,7 @@ public class StateConfiguration<State, Trigger> {
      * @return transition
      */
     public Optional<Transition<State, Trigger>> getFilteredTransition(Trigger trigger) {
-        return filterTransitions(getTransitions(trigger));
+        return filterTransitions(getTransitions(trigger), false);
     }
 
     /**
