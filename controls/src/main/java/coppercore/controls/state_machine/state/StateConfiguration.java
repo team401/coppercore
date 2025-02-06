@@ -132,7 +132,7 @@ public class StateConfiguration<State, Trigger> {
                 if (conditinal
                         && ((ConditinalTransition<State, Trigger>) transition).isCheckTrue()) {
                     return Optional.empty();
-                } else if ((ConditinalTransition<State, Trigger>) transition).isCheckTrue()) {
+                } else if (((ConditinalTransition<State, Trigger>) transition).isCheckTrue()) {
                     returnOptional = Optional.of(transition);
                     conditinal = true;
                 }
