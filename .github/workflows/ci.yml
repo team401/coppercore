@@ -77,3 +77,6 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build -Pbuildalldesktop
+
+      - name: Publish to Maven Local
+        run: ./gradlew publishToMavenLocal

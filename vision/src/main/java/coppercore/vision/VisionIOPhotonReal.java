@@ -74,6 +74,7 @@ public class VisionIOPhotonReal implements VisionIO {
                                     target.getFiducialId(),
                                     result.getTimestampSeconds(),
                                     target.getBestCameraToTarget().getTranslation().getNorm(),
+                                    target.getBestCameraToTarget(),
                                     new Rotation2d(target.getYaw()),
                                     new Rotation2d(target.getPitch())));
                 }
@@ -133,8 +134,9 @@ public class VisionIOPhotonReal implements VisionIO {
                                     target.fiducialId,
                                     result.getTimestampSeconds(),
                                     target.getBestCameraToTarget().getTranslation().getNorm(),
-                                    new Rotation2d(target.getYaw()),
-                                    new Rotation2d(target.getPitch())));
+                                    target.getBestCameraToTarget(),
+                                    new Rotation2d(Math.toRadians(target.getYaw())),
+                                    new Rotation2d(Math.toRadians(target.getPitch()))));
                 }
             }
         }
