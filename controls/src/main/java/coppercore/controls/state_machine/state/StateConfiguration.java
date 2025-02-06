@@ -157,6 +157,16 @@ public class StateConfiguration<State, Trigger> {
     }
 
     /**
+     * Gets filtered transition
+     *
+     * @param trigger trigger event
+     * @return transition
+     */
+    public Optional<Transition<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals) {
+        return filterTransitions(getTransitions(trigger), excludeConditionals);
+    }
+
+    /**
      * Runs on entry event
      *
      * @param transition trigger event
