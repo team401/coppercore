@@ -6,13 +6,25 @@ import coppercore.controls.state_machine.state.StateContainer;
 import coppercore.controls.state_machine.state.StateInterface;
 import coppercore.controls.state_machine.transition.Transition;
 import coppercore.controls.state_machine.transition.TransitionInfo;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import java.util.Optional;
 
 /** Generic State Machine */
-public class StateMachine<State, Trigger> {
+public class StateMachine<State extends Enum, Trigger extends Enum> {
     private final StateMachineConfiguration<State, Trigger> configuration;
     private TransitionInfo<State, Trigger> transitionInfo;
     private State currentState;
+
+    private boolean debugging;
+
+    private StringPublisher statePublisher;
+    private StringPublisher eventPublisher;
+
+    public StateMachine(StateMachineConfiguration<State, Trigger> config, State initialState) {
+        this(config, initialState, false);
+    }
 
     /**
      * Creates a StateMachine in the given state with the given configuration
@@ -20,9 +32,20 @@ public class StateMachine<State, Trigger> {
      * @param config The state machine configuration
      * @param initialState default state
      */
-    public StateMachine(StateMachineConfiguration<State, Trigger> config, State initialState) {
+    public StateMachine(
+            StateMachineConfiguration<State, Trigger> config,
+            State initialState,
+            boolean debugging) {
         configuration = config;
         currentState = initialState;
+        this.debugging = debugging;
+        if (debugging) {
+            NetworkTableInstance inst = NetworkTableInstance.getDefault();
+            NetworkTable table = inst.getTable("StateMachine");
+            statePublisher = table.getStringTopic("State").publish();
+            eventPublisher = table.getStringTopic("Event").publish();
+            statePublisher.set(initialState.name());
+        }
     }
 
     /**
@@ -72,6 +95,10 @@ public class StateMachine<State, Trigger> {
             }
         }
         currentState = transition.getDestination();
+        if (debugging) {
+            statePublisher.set(currentState.name());
+            eventPublisher.set(trigger.name());
+        }
     }
 
     /**
