@@ -2,6 +2,7 @@
 
 package coppercore.wpilib_interface.tuning;
 
+import coppercore.controls.Tunable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -31,13 +32,13 @@ public class TuneG extends Command {
 
     @Override
     public void execute() {
-        subsystem.setVolts(kG, slot);
+        subsystem.setOutput(kG, slot);
         kG += 0.001;
     }
 
     @Override
     public void end(boolean interrupted) {
-        subsystem.setVolts(0.0, slot);
+        subsystem.setOutput(0.0, slot);
         SmartDashboard.putNumber("Test-Mode/kG", kG - kS);
     }
 

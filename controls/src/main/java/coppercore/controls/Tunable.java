@@ -7,7 +7,7 @@ public interface Tunable {
 
     public double getConversionFactor(int slot);
 
-    public void setVolts(double volts, int slot);
+    public void setOutput(double output, int slot);
 
     public void setPID(double p, double i, double d, int slot);
 

@@ -2,6 +2,7 @@
 
 package coppercore.wpilib_interface.tuning;
 
+import coppercore.controls.Tunable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 public class TuneV extends Command {
     private Tunable subsystem;
 
-    private double volts;
+    private double output;
 
     private int slot;
     private double conversionFactor;
@@ -23,9 +24,9 @@ public class TuneV extends Command {
     double average = 0;
     double vel = 0;
 
-    public TuneV(Tunable subsystem, double volts, int slot) {
+    public TuneV(Tunable subsystem, double output, int slot) {
         this.subsystem = subsystem;
-        this.volts = volts;
+        this.output = output;
         this.slot = slot;
         this.kS = SmartDashboard.getNumber("Test-Mode/kS", 0);
         this.pastkV = SmartDashboard.getNumber("Test-Mode/kV", 0);
@@ -38,7 +39,7 @@ public class TuneV extends Command {
     @Override
     public void initialize() {
         SmartDashboard.putBoolean("Test-Mode/Ended", false);
-        subsystem.setVolts(volts, slot);
+        subsystem.setOutput(output, slot);
         velocities = new ArrayList<Double>();
     }
 
@@ -54,7 +55,7 @@ public class TuneV extends Command {
     @Override
     public void end(boolean interrupted) {
         SmartDashboard.putBoolean("Test-Mode/Ended", true);
-        subsystem.setVolts(0.0, slot);
+        subsystem.setOutput(0.0, slot);
 
         for (double v : velocities) {
             average += v;
@@ -62,7 +63,7 @@ public class TuneV extends Command {
 
         average /= velocities.size();
 
-        SmartDashboard.putNumber("Test-Mode/kV", ((volts - kS) / average) + pastkV);
+        SmartDashboard.putNumber("Test-Mode/kV", ((output - kS) / average) + pastkV);
     }
 
     @Override

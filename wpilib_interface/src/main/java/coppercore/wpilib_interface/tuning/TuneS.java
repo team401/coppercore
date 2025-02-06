@@ -2,6 +2,7 @@
 
 package coppercore.wpilib_interface.tuning;
 
+import coppercore.controls.Tunable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -12,7 +13,7 @@ public class TuneS extends Command {
 
     double startPosition;
 
-    double appliedVolts;
+    double appliedOutput;
 
     public TuneS(Tunable subsystem, int slot) {
         this.subsystem = subsystem;
@@ -24,19 +25,19 @@ public class TuneS extends Command {
     @Override
     public void initialize() {
         startPosition = subsystem.getPosition(slot);
-        appliedVolts = 0;
+        appliedOutput = 0;
     }
 
     @Override
     public void execute() {
-        subsystem.setVolts(appliedVolts, slot);
-        appliedVolts += 0.001;
+        subsystem.setOutput(appliedOutput, slot);
+        appliedOutput += 0.001;
     }
 
     @Override
     public void end(boolean interrupted) {
-        subsystem.setVolts(0.0, slot);
-        SmartDashboard.putNumber("Test-Mode/kS", appliedVolts);
+        subsystem.setOutput(0.0, slot);
+        SmartDashboard.putNumber("Test-Mode/kS", appliedOutput);
     }
 
     @Override

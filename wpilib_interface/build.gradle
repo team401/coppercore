@@ -42,6 +42,7 @@ dependencies {
 	implementation project(":monitors")
 	implementation project(":math")
 	implementation project(":parameter_tools")
+	implementation project(":controls")
 
 	annotationProcessor wpi.java.deps.wpilibAnnotations()
 	implementation wpi.java.deps.wpilib()
