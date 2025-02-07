@@ -13,6 +13,14 @@ public class StateMachineConfiguration<State, Trigger> {
     private Consumer<Transition<State, Trigger>> onEntryAction;
     private Consumer<Transition<State, Trigger>> onExitAction;
 
+    public boolean hasEntryAction() {
+        return (this.onEntryAction != null);
+    }
+
+    public boolean hasExitAction() {
+        return (this.onExitAction != null);
+    }
+
     /** Creates StateMachineConfiuration Object */
     public StateMachineConfiguration() {
         // temp solution
