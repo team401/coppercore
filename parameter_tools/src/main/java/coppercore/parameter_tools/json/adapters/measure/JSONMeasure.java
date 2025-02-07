@@ -13,7 +13,6 @@ public class JSONMeasure extends JSONObject<Measure> {
         super(measure);
         value = measure.magnitude();
         unit = measure.unit().name();
-        System.out.println(value + " " + unit);
     }
 
     @Override
