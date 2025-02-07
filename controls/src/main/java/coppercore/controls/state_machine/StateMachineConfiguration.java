@@ -8,10 +8,13 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /** Object to configure State Machine */
-public class StateMachineConfiguration<State, Trigger> {
+@SuppressWarnings("rawtypes")
+public class StateMachineConfiguration<State extends Enum, Trigger extends Enum> {
     private final Map<State, StateConfiguration<State, Trigger>> stateConfigurations;
     private Consumer<Transition<State, Trigger>> onEntryAction;
     private Consumer<Transition<State, Trigger>> onExitAction;
+
+    private final StateMachineStructure structure = new StateMachineStructure();
 
     /** Creates StateMachineConfiuration Object */
     public StateMachineConfiguration() {
@@ -32,6 +35,7 @@ public class StateMachineConfiguration<State, Trigger> {
             configuration = new StateConfiguration<>(source);
             stateConfigurations.put(source, configuration);
         }
+        structure.addState(source.name(), configuration.structure);
         return configuration;
     }
 
