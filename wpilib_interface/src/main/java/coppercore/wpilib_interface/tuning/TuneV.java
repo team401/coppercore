@@ -19,11 +19,9 @@ import java.util.ArrayList;
  * <p>Outputs its findings to SmartDashboard Test-Mode/kV and to console.
  */
 public class TuneV extends Command {
-    private Tunable subsystem;
+    private Tunable mechanism;
 
     private double output;
-
-    private int slot;
 
     private ArrayList<AngularVelocity> velocities;
 
@@ -39,15 +37,13 @@ public class TuneV extends Command {
     /**
      * Automatically tune kV for a system
      *
-     * @param subsystem The Tunable subsystem to tune
+     * @param mechanism The Tunable mechanism/subsystem to tune
      * @param output What output to apply (volts for voltage control, amps for an FOC system)
      * @param maxPos What position to drive to before stopping the command
-     * @param slot The slot of the mechanism to tune
      */
-    public TuneV(Tunable subsystem, double output, Angle maxPos, int slot) {
-        this.subsystem = subsystem;
+    public TuneV(Tunable mechanism, double output, Angle maxPos) {
+        this.mechanism = mechanism;
         this.output = output;
-        this.slot = slot;
         this.kS = SmartDashboard.getNumber("Test-Mode/kS", 0);
         this.pastkV = SmartDashboard.getNumber("Test-Mode/kV", 0);
 
@@ -59,13 +55,13 @@ public class TuneV extends Command {
     @Override
     public void initialize() {
         SmartDashboard.putBoolean("Test-Mode/Ended", false);
-        subsystem.setOutput(output, slot);
+        mechanism.setOutput(output);
         velocities = new ArrayList<AngularVelocity>();
     }
 
     @Override
     public void execute() {
-        vel = subsystem.getVelocity(slot);
+        vel = mechanism.getVelocity();
         SmartDashboard.putNumber("Test-Mode/VelocityRotPerSec", vel.in(RotationsPerSecond));
         // if (Math.abs(subsystem.getPosition(slot)) < 0.6 * conversionFactor) {
         velocities.add(vel);
@@ -75,7 +71,7 @@ public class TuneV extends Command {
     @Override
     public void end(boolean interrupted) {
         SmartDashboard.putBoolean("Test-Mode/Ended", true);
-        subsystem.setOutput(0.0, slot);
+        mechanism.setOutput(0.0);
 
         for (AngularVelocity v : velocities) {
             average.mut_plus(v);
@@ -93,6 +89,6 @@ public class TuneV extends Command {
 
     @Override
     public boolean isFinished() {
-        return subsystem.getPosition(slot).gt(maxPos);
+        return mechanism.getPosition().gt(maxPos);
     }
 }

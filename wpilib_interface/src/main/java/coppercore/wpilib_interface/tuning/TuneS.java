@@ -13,9 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * <p>Outputs its findings to SmartDashboard Test-Mode/kS and to console.
  */
 public class TuneS extends Command {
-    private Tunable subsystem;
-
-    private int slot;
+    private Tunable mechanism;
 
     Angle startPosition;
 
@@ -26,14 +24,12 @@ public class TuneS extends Command {
     /**
      * Create a command to automatically tune kS for a tunable system
      *
-     * @param subsystem The subsystem to tune
+     * @param mechanism The mechanism or subsystem to tune
      * @param motionThreshold An AngularVelocity, what velocity must be detected for the system to
      *     be considered to be 'moving'
-     * @param slot The slot of the mechanism in the subsystem to tune
      */
-    public TuneS(Tunable subsystem, AngularVelocity motionThreshold, int slot) {
-        this.subsystem = subsystem;
-        this.slot = slot;
+    public TuneS(Tunable mechanism, AngularVelocity motionThreshold) {
+        this.mechanism = mechanism;
 
         this.threshold = motionThreshold;
 
@@ -42,19 +38,19 @@ public class TuneS extends Command {
 
     @Override
     public void initialize() {
-        startPosition = subsystem.getPosition(slot);
+        startPosition = mechanism.getPosition();
         appliedOutput = 0;
     }
 
     @Override
     public void execute() {
-        subsystem.setOutput(appliedOutput, slot);
+        mechanism.setOutput(appliedOutput);
         appliedOutput += 0.001;
     }
 
     @Override
     public void end(boolean interrupted) {
-        subsystem.setOutput(0.0, slot);
+        mechanism.setOutput(0.0);
         SmartDashboard.putNumber("Test-Mode/kS", appliedOutput);
         System.out.println("=====");
         System.out.println("  TuneS: kS = " + appliedOutput);
@@ -63,6 +59,6 @@ public class TuneS extends Command {
 
     @Override
     public boolean isFinished() {
-        return subsystem.getVelocity(slot).gt(threshold);
+        return mechanism.getVelocity().gt(threshold);
     }
 }
