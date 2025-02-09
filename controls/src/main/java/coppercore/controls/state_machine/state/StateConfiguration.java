@@ -1,16 +1,14 @@
 package coppercore.controls.state_machine.state;
 
+import coppercore.controls.state_machine.StateStructure;
+import coppercore.controls.state_machine.TransitionStructure;
 import coppercore.controls.state_machine.transition.ConditinalTransition;
 import coppercore.controls.state_machine.transition.Transition;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-
-import coppercore.controls.state_machine.StateStructure;
-import coppercore.controls.state_machine.TransitionStructure;
 
 /** Configures State Machine State behavior */
 public class StateConfiguration<State extends Enum, Trigger extends Enum> {
@@ -23,6 +21,10 @@ public class StateConfiguration<State extends Enum, Trigger extends Enum> {
     private boolean runDefaultExitAction = true;
 
     public StateStructure structure = new StateStructure();
+
+    public List<Transition<State, Trigger>> getAllTransitions() {
+        return transitions;
+    }
 
     /**
      * Creates configuration for how state machine behaves in given State
@@ -45,7 +47,8 @@ public class StateConfiguration<State extends Enum, Trigger extends Enum> {
     public StateConfiguration<State, Trigger> permit(Trigger trigger, State destination) {
         if (getFilteredTransition(trigger).isEmpty()) {
             transitions.add(new Transition<>(source, destination, trigger, false));
-            structure.addTransition(trigger.name(), new TransitionStructure("normal", destination.name()));
+            structure.addTransition(
+                    trigger.name(), new TransitionStructure("normal", destination.name()));
         }
         return this;
     }
@@ -60,6 +63,8 @@ public class StateConfiguration<State extends Enum, Trigger extends Enum> {
     public StateConfiguration<State, Trigger> permitInternal(Trigger trigger, State destination) {
         if (getFilteredTransition(trigger).isEmpty()) {
             transitions.add(new Transition<>(source, destination, trigger, true));
+            structure.addTransition(
+                    trigger.name(), new TransitionStructure("internal", destination.name()));
         }
         return this;
     }
@@ -77,6 +82,9 @@ public class StateConfiguration<State extends Enum, Trigger extends Enum> {
             Trigger trigger, State destination, BooleanSupplier check) {
         if (getFilteredTransition(trigger).isEmpty()) {
             transitions.add(new ConditinalTransition<>(source, destination, trigger, check, false));
+            structure.addTransition(
+                    trigger.name(),
+                    new TransitionStructure("internalConditional", destination.name()));
         }
         return this;
     }
@@ -95,6 +103,8 @@ public class StateConfiguration<State extends Enum, Trigger extends Enum> {
             Trigger trigger, State destination, BooleanSupplier check) {
         if (getFilteredTransition(trigger).isEmpty()) {
             transitions.add(new ConditinalTransition<>(source, destination, trigger, check, true));
+            structure.addTransition(
+                    trigger.name(), new TransitionStructure("conditional", destination.name()));
         }
         return this;
     }

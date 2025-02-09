@@ -22,6 +22,10 @@ public class StateMachineConfiguration<State extends Enum, Trigger extends Enum>
         stateConfigurations = new HashMap<>();
     }
 
+    public StateMachineStructure getStructure() {
+        return structure;
+    }
+
     /**
      * Starts configuration of a state returning a StateConfiguration and registers it for the
      * state.

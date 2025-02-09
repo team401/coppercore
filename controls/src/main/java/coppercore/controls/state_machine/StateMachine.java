@@ -8,7 +8,10 @@ import coppercore.controls.state_machine.transition.Transition;
 import coppercore.controls.state_machine.transition.TransitionInfo;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringArrayPublisher;
 import edu.wpi.first.networktables.StringPublisher;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /** Generic State Machine */
@@ -19,8 +22,17 @@ public class StateMachine<State extends Enum, Trigger extends Enum> {
 
     private boolean debugging;
 
+    private String[] lastEvents = new String[0];
+    private final List<String> eventList = new ArrayList<>();
     private StringPublisher statePublisher;
-    private StringPublisher eventPublisher;
+    private StringPublisher triggerPublisher;
+    private StringPublisher structurePublisher;
+    private StringArrayPublisher eventPublisher;
+    private StringArrayPublisher secondaryEventPublisher;
+
+    public void addEvent(StateMachineEvent event) {
+        eventList.add(event.getJsonString());
+    }
 
     public StateMachine(StateMachineConfiguration<State, Trigger> config, State initialState) {
         this(config, initialState, false);
@@ -38,13 +50,36 @@ public class StateMachine<State extends Enum, Trigger extends Enum> {
             boolean debugging) {
         configuration = config;
         currentState = initialState;
+        config.getStateConfiguration(currentState)
+                .ifPresent(
+                        (StateConfiguration<State, Trigger> stateConfiguration) -> {
+                            List<Transition<State, Trigger>> transitions =
+                                    stateConfiguration.getAllTransitions();
+                            if (!transitions.isEmpty()) {
+                                Trigger transitionTrigger = transitions.get(0).getTrigger();
+                                @SuppressWarnings("unchecked")
+                                Trigger[] possibleTriggers =
+                                        (Trigger[])
+                                                transitionTrigger
+                                                        .getDeclaringClass()
+                                                        .getEnumConstants();
+                                StateMachineStructure structure = config.getStructure();
+                                for (Trigger trigger : possibleTriggers) {
+                                    structure.addTrigger(trigger.name());
+                                }
+                            }
+                        });
         this.debugging = debugging;
         if (debugging) {
             NetworkTableInstance inst = NetworkTableInstance.getDefault();
             NetworkTable table = inst.getTable("StateMachine");
             statePublisher = table.getStringTopic("State").publish();
-            eventPublisher = table.getStringTopic("Event").publish();
+            triggerPublisher = table.getStringTopic("Trigger").publish();
+            structurePublisher = table.getStringTopic("Structure").publish();
+            eventPublisher = table.getStringArrayTopic("Events").publish();
+            secondaryEventPublisher = table.getStringArrayTopic("SecondaryEvents").publish();
             statePublisher.set(initialState.name());
+            structurePublisher.set(config.getStructure().getJSONString());
         }
     }
 
@@ -97,7 +132,14 @@ public class StateMachine<State extends Enum, Trigger extends Enum> {
         currentState = transition.getDestination();
         if (debugging) {
             statePublisher.set(currentState.name());
-            eventPublisher.set(trigger.name());
+            triggerPublisher.set(trigger.name());
+            addEvent(
+                    new StateMachineEvent(
+                            "fire",
+                            new FireEventData(
+                                    transitionInfo.getCurrentState().name(),
+                                    transitionInfo.getTargetState().name(),
+                                    transitionInfo.getTrigger().name())));
         }
     }
 
@@ -116,6 +158,9 @@ public class StateMachine<State extends Enum, Trigger extends Enum> {
             ((PeriodicStateInterface) currentState).periodic();
         } else {
             periodicContainer();
+        }
+        if (debugging) {
+            debugPeriodic();
         }
     }
 
@@ -155,5 +200,17 @@ public class StateMachine<State extends Enum, Trigger extends Enum> {
      */
     public boolean inState(State state) {
         return currentState.equals(state);
+    }
+
+    public void debugPeriodic() {
+        secondaryEventPublisher.set(lastEvents);
+        lastEvents = new String[eventList.size()];
+        int index = 0;
+        for (String event : eventList) {
+            lastEvents[index] = event;
+            index++;
+        }
+        eventPublisher.set(lastEvents);
+        eventList.clear();
     }
 }
