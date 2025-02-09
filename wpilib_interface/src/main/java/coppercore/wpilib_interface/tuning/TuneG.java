@@ -21,14 +21,20 @@ public class TuneG extends Command {
     double kG;
     double kS;
 
+    private final double rampUpSpeed;
+
     /**
      * Create a command to automatically characterize kG for a Tunable system
      *
      * @param mechanism The Tunable mechanism/subsystem to tune
+     * @param rampUpSpeed How much to increase the applied output by per loop. 0.001 is very precise
+     *     but very slow.
      */
-    public TuneG(Tunable mechanism, int slot) {
+    public TuneG(Tunable mechanism, double rampUpSpeed) {
         this.mechanism = mechanism;
         this.kS = SmartDashboard.getNumber("Test-Mode/kS", 0);
+
+        this.rampUpSpeed = rampUpSpeed;
 
         // this.withTimeout(5); TODO: Maybe add?
     }
@@ -42,7 +48,7 @@ public class TuneG extends Command {
     @Override
     public void execute() {
         mechanism.setOutput(kG);
-        kG += 0.001;
+        kG += rampUpSpeed;
     }
 
     @Override

@@ -18,6 +18,7 @@ public class TuneS extends Command {
     Angle startPosition;
 
     double appliedOutput;
+    private final double rampUpSpeed;
 
     AngularVelocity threshold;
 
@@ -27,11 +28,15 @@ public class TuneS extends Command {
      * @param mechanism The mechanism or subsystem to tune
      * @param motionThreshold An AngularVelocity, what velocity must be detected for the system to
      *     be considered to be 'moving'
+     * @param rampUpSpeed How much to increase the applied output by per loop. 0.001 is very precise
+     *     but very slow.
      */
-    public TuneS(Tunable mechanism, AngularVelocity motionThreshold) {
+    public TuneS(Tunable mechanism, AngularVelocity motionThreshold, double rampUpSpeed) {
         this.mechanism = mechanism;
 
         this.threshold = motionThreshold;
+
+        this.rampUpSpeed = rampUpSpeed;
 
         // this.withTimeout(5); TODO: Maybe add?
     }
@@ -45,7 +50,7 @@ public class TuneS extends Command {
     @Override
     public void execute() {
         mechanism.setOutput(appliedOutput);
-        appliedOutput += 0.001;
+        appliedOutput += rampUpSpeed;
     }
 
     @Override
