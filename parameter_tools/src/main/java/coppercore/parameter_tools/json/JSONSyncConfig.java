@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 
-package coppercore.parameter_tools;
+package coppercore.parameter_tools.json;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.LongSerializationPolicy;

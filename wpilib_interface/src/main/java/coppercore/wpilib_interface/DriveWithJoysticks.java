@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import java.util.function.Supplier;
 
 /**
  * This class allows us to be able to drive with the controller joysticks and get the linear
@@ -16,8 +17,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
  */
 public class DriveWithJoysticks extends Command {
     private final DriveTemplate drive;
-    private final CommandJoystick leftJoystick;
-    private final CommandJoystick rightJoystick;
+    private final Supplier<Double> driveXSupplier;
+    private final Supplier<Double> driveYSupplier;
+    private final Supplier<Double> rotationSupplier;
     private final double maxLinearVelocity;
     private final double maxAngularVelocity;
     private final double joystickDeadband;
@@ -40,8 +42,33 @@ public class DriveWithJoysticks extends Command {
             double maxAngularVelocity,
             double joystickDeadband) {
         this.drive = drive;
-        this.leftJoystick = leftJoystick;
-        this.rightJoystick = rightJoystick;
+        this.driveXSupplier = () -> leftJoystick.getX();
+        this.driveYSupplier = () -> leftJoystick.getY();
+        this.rotationSupplier = () -> rightJoystick.getX();
+
+        this.maxLinearVelocity = maxLinearVelocity;
+        this.maxAngularVelocity = maxAngularVelocity;
+        this.joystickDeadband = joystickDeadband;
+
+        addRequirements(this.drive);
+    }
+
+    public DriveWithJoysticks(
+            DriveTemplate drive,
+            Supplier<Double> driveXSupplier,
+            Supplier<Double> driveYSupplier,
+            Supplier<Double> rotationSupplier,
+            double maxLinearVelocity,
+            double maxAngularVelocity,
+            double joystickDeadband) {
+
+        this.drive = drive;
+
+        this.driveXSupplier = driveXSupplier;
+        this.driveYSupplier = driveYSupplier;
+
+        this.rotationSupplier = rotationSupplier;
+
         this.maxLinearVelocity = maxLinearVelocity;
         this.maxAngularVelocity = maxAngularVelocity;
         this.joystickDeadband = joystickDeadband;
@@ -56,9 +83,9 @@ public class DriveWithJoysticks extends Command {
     @Override
     public void execute() {
         // clamp inputs between 0 and 1 to prevent crazy speeds
-        double leftJoystickX = MathUtil.clamp(leftJoystick.getX(), 0, 1);
-        double leftJoystickY = MathUtil.clamp(leftJoystick.getY(), 0, 1);
-        double rightJoystickX = MathUtil.clamp(rightJoystick.getX(), 0, 1);
+        double leftJoystickX = MathUtil.clamp(driveXSupplier.get(), -1, 1);
+        double leftJoystickY = MathUtil.clamp(driveYSupplier.get(), -1, 1);
+        double rightJoystickX = MathUtil.clamp(rotationSupplier.get(), -1, 1);
 
         Translation2d linearSpeeds = getLinearVelocity(-leftJoystickX, -leftJoystickY);
 
@@ -74,13 +101,13 @@ public class DriveWithJoysticks extends Command {
         drive.setGoalSpeeds(speeds, true);
     }
 
-    /* returns a calculated translation with squared velocity */
     /**
-     * This returns a calculated translation with squared velocity
-     *
-     * @param x This is the linear velocity on the x-axis
-     * @param y This is the linear velocity on the y-axis
-     * @return This returns the linear velocity
+     * calculates a translation with squared magnitude
+     * 
+     * @param x represents the x value of velocity
+     * @param y represents the y value of velocity
+     * 
+     *  @return Translation2d with directions of velocity
      */
     public Translation2d getLinearVelocity(double x, double y) {
         double[] deadbands = Deadband.twoAxisDeadband(x, y, joystickDeadband);
@@ -93,7 +120,7 @@ public class DriveWithJoysticks extends Command {
          * therefore, x and y must be flipped for proper rotation of pose
          * BEWARE: not flipping will cause forward on joystick to drive right on field
          */
-        Rotation2d direction = new Rotation2d(y, x);
+        Rotation2d direction = new Rotation2d(Math.atan2(x, y));
         double squaredMagnitude = magnitude * magnitude;
 
         Translation2d linearVelocity =
