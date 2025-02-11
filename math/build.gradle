@@ -7,11 +7,13 @@ plugins {
 	id 'java-library'
 	id "com.diffplug.spotless" version "6.24.0"
 	id "com.vanniktech.maven.publish" version "0.30.0"
+	id "edu.wpi.first.GradleRIO" version "2025.2.1"
 }
 
 repositories {
 	// Use Maven Central for resolving dependencies.
 	mavenCentral()
+
 }
 
 spotless {
@@ -42,17 +44,22 @@ compileJava.dependsOn 'spotlessApply'
 
 
 dependencies {
-	// Use JUnit Jupiter for testing.
-	testImplementation libs.junit.jupiter
+	annotationProcessor wpi.java.deps.wpilibAnnotations()
+	implementation wpi.java.deps.wpilib()
+	implementation wpi.java.vendor.java()
 
+	nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+	nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
+	simulationDebug wpi.sim.enableDebug()
+
+	nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
+	nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
+	simulationRelease wpi.sim.enableRelease()
+
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-	// This dependency is exported to consumers, that is to say found on their compile classpath.
-	api libs.commons.math3
-
-	// This dependency is used internally, and not exposed to consumers on their own compile classpath.
-	implementation libs.guava
 }
+
 
 // Apply a specific Java toolchain to ease working on different environments.
 java {
