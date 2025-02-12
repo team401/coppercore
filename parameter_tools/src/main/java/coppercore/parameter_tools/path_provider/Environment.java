@@ -1,9 +1,10 @@
 package coppercore.parameter_tools.path_provider;
 
+import java.io.File;
+
 public class Environment {
     String name;
     String filepath;
-    String[] files;
 
     public String getName() {
         return name;
@@ -13,12 +14,8 @@ public class Environment {
         return filepath;
     }
 
-    public boolean hasFile(String file) {
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].compareTo(file) == 0) {
-                return true;
-            }
-        }
-        return false;
+    public boolean hasFile(String basePath, String file) {
+        File f = new File(basePath + filepath + file);
+        return f.exists() && !f.isDirectory();
     }
 }
