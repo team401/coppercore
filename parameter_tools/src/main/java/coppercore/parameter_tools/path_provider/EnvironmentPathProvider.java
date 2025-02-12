@@ -24,7 +24,6 @@ public class EnvironmentPathProvider implements PathProvider {
         }
     }
 
-
     @Override
     public String resolvePath(String file) {
         String path = filepath + File.separator + environment.getPath() + File.separator + file;
