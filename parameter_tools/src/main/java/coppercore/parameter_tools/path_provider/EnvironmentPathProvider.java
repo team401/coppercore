@@ -24,26 +24,15 @@ public class EnvironmentPathProvider implements PathProvider {
         }
     }
 
+
     @Override
     public String resolvePath(String file) {
-        if (environment.hasFile(filepath, file)) {
-            return filepath + File.separator + environment.getPath() + File.separator + file;
+        String path = filepath + File.separator + environment.getPath() + File.separator + file;
+
+        if (!environment.hasFile(filepath, file) && defaults != null) {
+            path = filepath + File.separator + defaults + File.separator + file;
         }
 
-        if (defaults != null) {
-            return filepath + File.separator + defaults + File.separator + file;
-        }
-
-        throw new RuntimeException(
-                "Could not find "
-                        + file
-                        + " in the "
-                        + environment.getName()
-                        + " environment at path "
-                        + filepath
-                        + File.separator
-                        + environment.getPath()
-                        + File.separator
-                        + file);
+        return filepath + File.separator + environment.getPath() + File.separator + file;
     }
 }
