@@ -32,6 +32,6 @@ public class EnvironmentPathProvider implements PathProvider {
             path = filepath + File.separator + defaults + File.separator + file;
         }
 
-        return filepath + File.separator + environment.getPath() + File.separator + file;
+        return path;
     }
 }
