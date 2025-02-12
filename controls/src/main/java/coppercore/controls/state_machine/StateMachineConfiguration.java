@@ -16,6 +16,15 @@ public class StateMachineConfiguration<State extends Enum, Trigger extends Enum>
 
     private final StateMachineStructure structure = new StateMachineStructure();
 
+    public boolean hasEntryAction() {
+        return (this.onEntryAction != null);
+    }
+
+    public boolean hasExitAction() {
+        return (this.onExitAction != null);
+    }
+
+
     /** Creates StateMachineConfiuration Object */
     public StateMachineConfiguration() {
         // temp solution

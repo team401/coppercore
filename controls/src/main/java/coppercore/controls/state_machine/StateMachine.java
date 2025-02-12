@@ -109,25 +109,32 @@ public class StateMachine<State extends Enum, Trigger extends Enum> {
                     configuration.getStateConfiguration(transition.getDestination());
             if (currentStateConfigurationOptional.isPresent()) {
                 StateConfiguration<State, Trigger> config = currentStateConfigurationOptional.get();
-                if (config.doRunDefaultExitAction()) {
+                if (config.doRunDefaultExitAction() && configuration.hasExitAction()) {
                     configuration.runOnExit(transition);
-                } else {
+                } else if (config.hasExitAction()) {
                     config.runOnExit(transition);
+                } else {
+                    runOnExit(transition);
                 }
             } else {
                 configuration.runOnExit(transition);
             }
             transition.runAction();
+            currentState = transition.getDestination();
             if (nextStateConfigurationOptional.isPresent()) {
                 StateConfiguration<State, Trigger> config = nextStateConfigurationOptional.get();
-                if (config.doRunDefaultExitAction()) {
+                if (config.doRunDefaultExitAction() && configuration.hasEntryAction()) {
                     configuration.runOnEntry(transition);
-                } else {
+                } else if (config.hasEntryAction()) {
                     config.runOnEntry(transition);
+                } else {
+                    runOnEntry(transition);
                 }
             } else {
                 configuration.runOnEntry(transition);
             }
+        } else {
+            currentState = transition.getDestination();
         }
         currentState = transition.getDestination();
         if (debugging) {
@@ -170,6 +177,40 @@ public class StateMachine<State extends Enum, Trigger extends Enum> {
             StateInterface state = ((StateContainer) currentState).getState();
             if (state instanceof PeriodicStateInterface) {
                 ((PeriodicStateInterface) state).periodic();
+            }
+        }
+    }
+
+    private void runOnEntry(Transition transition) {
+        if (currentState instanceof StateInterface) {
+            ((StateInterface) currentState).onEntry(transition);
+        } else {
+            runOnEntryContainer(transition);
+        }
+    }
+
+    private void runOnEntryContainer(Transition transition) {
+        if (currentState instanceof StateContainer) {
+            StateInterface state = ((StateContainer) currentState).getState();
+            if (state instanceof StateInterface) {
+                ((StateInterface) state).onEntry(transition);
+            }
+        }
+    }
+
+    private void runOnExit(Transition transition) {
+        if (currentState instanceof StateInterface) {
+            ((StateInterface) currentState).onEntry(transition);
+        } else {
+            runOnExitContainer(transition);
+        }
+    }
+
+    private void runOnExitContainer(Transition transition) {
+        if (currentState instanceof StateContainer) {
+            StateInterface state = ((StateContainer) currentState).getState();
+            if (state instanceof StateInterface) {
+                ((StateInterface) state).onExit(transition);
             }
         }
     }
