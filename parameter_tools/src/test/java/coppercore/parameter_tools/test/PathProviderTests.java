@@ -5,7 +5,6 @@
 
 package coppercore.parameter_tools.test;
 
-import coppercore.parameter_tools.json.JSONHandler;
 import coppercore.parameter_tools.path_provider.EnvironmentHandler;
 import coppercore.parameter_tools.path_provider.EnvironmentPathProvider;
 import java.io.File;
@@ -20,15 +19,12 @@ import org.junit.jupiter.api.Test;
 public class PathProviderTests {
 
     private static UnitTestingPathProvider pathProvider;
-    private static PathProviderTestData blank;
-    private JSONHandler jsonHandler;
     private EnvironmentHandler environmentHandler;
     private EnvironmentPathProvider testPathProvider;
 
     @BeforeAll
     public static void TestPrep() {
         pathProvider = new UnitTestingPathProvider().getDirectory("PathProviderTests");
-        blank = new PathProviderTestData();
     }
 
     @BeforeEach
@@ -36,29 +32,34 @@ public class PathProviderTests {
         environmentHandler =
                 EnvironmentHandler.getEnvironmentHandler(pathProvider.resolvePath("config.json"));
         testPathProvider = environmentHandler.getEnvironmentPathProvider();
-        settupJsonHandler();
-    }
-
-    public void settupJsonHandler() {
-        jsonHandler = new JSONHandler(environmentHandler.getEnvironmentPathProvider());
     }
 
     @Test
     public void getReadPathNormalBehaviorTest() {
-        PathProviderTestData data = jsonHandler.getObject(blank, "NormalFile.json");
-        Assertions.assertEquals("Test Value 1", data.getTestValue());
+        Assertions.assertEquals(
+                pathProvider.getFullPath()
+                        + File.separator
+                        + "normal"
+                        + File.separator
+                        + "NormalFile.json",
+                testPathProvider.resolveReadPath("NormalFile.json"));
     }
 
     @Test
     public void getReadPathDefualtingBehaviorTest() {
-        PathProviderTestData data = jsonHandler.getObject(blank, "DefaultFile.json");
-        Assertions.assertEquals("Test Value 2", data.getTestValue());
+        Assertions.assertEquals(
+                pathProvider.getFullPath()
+                        + File.separator
+                        + "defaults"
+                        + File.separator
+                        + "DefaultFile.json",
+                testPathProvider.resolveReadPath("DefaultFile.json"));
     }
 
     @Test
     public void getReadPathMissingBehaviorTest() {
         try {
-            jsonHandler.getObject(blank, "RandomNoneExistantFile.json");
+            testPathProvider.resolveReadPath("RandomNoneExistantFile.json");
             Assertions.fail("Should throw error about file missing");
         } catch (Exception e) {
             Assertions.assertEquals(
