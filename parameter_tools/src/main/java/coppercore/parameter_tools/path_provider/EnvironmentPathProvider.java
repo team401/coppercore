@@ -13,16 +13,16 @@ public class EnvironmentPathProvider implements PathProvider {
         this.filepath = filepath;
     }
 
+    /**
+     * Find path for file for the current enviroment. If File does not exist then it returns the
+     * desired location for the file to be made in.
+     */
     @Override
     public String resolveWritePath(String file) {
         return resolvePath(file, environment.getDefaultToEnvironment());
     }
 
-    /**
-     * Gets path to file
-     *
-     * @exception RuntimException This will throw an error if the file does not exist
-     */
+    /** Gets path to file This will throw an error if the file does not exist */
     @Override
     public String resolveReadPath(String file) {
         String path = resolvePath(file, environment.getDefaultToEnvironment());
@@ -34,11 +34,19 @@ public class EnvironmentPathProvider implements PathProvider {
         }
     }
 
+    /**
+     * Find path for file for the current enviroment. If File does not exist then it returns the
+     * desired location for the file to be made in.
+     */
     @Override
     public String resolvePath(String file) {
         return resolvePath(file, false);
     }
 
+    /**
+     * Find path for file for the current enviroment. If File does not exist then it returns the
+     * desired location for the file to be made in.
+     */
     public String resolvePath(String file, boolean defaultToEnvironment) {
         String path = filepath + File.separator + environment.getPath() + File.separator + file;
 
