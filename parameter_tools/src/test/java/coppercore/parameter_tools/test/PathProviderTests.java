@@ -118,4 +118,17 @@ public class PathProviderTests {
                         + "CustomFile.json",
                 testPathProvider.resolveWritePath("CustomFile.json"));
     }
+
+    @Test
+    public void defaultingToEnvironmentPathTest() {
+        environmentHandler = environmentHandler.setEnvironment("defaulting");
+        testPathProvider = environmentHandler.getEnvironmentPathProvider();
+        Assertions.assertEquals(
+                pathProvider.getFullPath()
+                        + File.separator
+                        + "defaulting"
+                        + File.separator
+                        + "RandomNoneExistantFile.json",
+                testPathProvider.resolveWritePath("RandomNoneExistantFile.json"));
+    }
 }

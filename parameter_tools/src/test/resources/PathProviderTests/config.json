@@ -11,6 +11,10 @@
       {
         "name": "custom_path",
         "filepath": "custom"
+      },
+      {
+        "name": "defaulting",
+        "defaultToEnvironment": true
       }
     ]
   }
