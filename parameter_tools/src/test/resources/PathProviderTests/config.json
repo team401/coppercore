@@ -1,0 +1,17 @@
+{
+    "environment": "normal",
+    "defaults": "defaults",
+    "environments": [
+      {
+        "name": "defaults"
+      },
+      {
+        "name": "normal"
+      },
+      {
+        "name": "custom_path",
+        "filepath": "custom"
+      }
+    ]
+  }
+  

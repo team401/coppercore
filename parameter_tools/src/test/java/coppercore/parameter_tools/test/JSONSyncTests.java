@@ -1,11 +1,11 @@
 package coppercore.parameter_tools.test;
 
-import coppercore.parameter_tools.json.JSONSync;
-import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
-import java.io.File;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import coppercore.parameter_tools.json.JSONSync;
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 
 /**
  * Unit tests for the {@link JSONSync} class to validate its functionality, including data loading,
@@ -17,12 +17,6 @@ import org.junit.jupiter.api.Test;
  */
 public class JSONSyncTests {
 
-    /** Directory paths for storing and accessing test JSON files. */
-    public static final String DIRECTORY = new File("").getAbsolutePath();
-
-    public static final String BUILD_DIRECTORY = DIRECTORY + "/build";
-    public static final String RESOURCE_DIRECTORY = BUILD_DIRECTORY + "/resources/test";
-
     /**
      * Prepares a new {@link JSONSync} instance with a predefined configuration and file path before
      * each test.
@@ -32,7 +26,8 @@ public class JSONSyncTests {
         ExampleJsonSyncClass.synced =
                 new JSONSync<>(
                         new ExampleJsonSyncClass(),
-                        RESOURCE_DIRECTORY + "/ExampleJsonSyncClass.json",
+                        "ExampleJsonSyncClass.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
     }
 
@@ -57,7 +52,7 @@ public class JSONSyncTests {
      */
     @Test
     public void JsonSyncSetFileTest() {
-        ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "/SetFileTest.json");
+        ExampleJsonSyncClass.synced.setFile("SetFileTest.json");
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
         Assertions.assertEquals(10.0, instance.testDouble, "testDouble should be 10.0");
@@ -78,7 +73,7 @@ public class JSONSyncTests {
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
         instance.testingIntField = 10;
-        ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "/SaveFileTest.json");
+        ExampleJsonSyncClass.synced.setFile("SaveFileTest.json");
         ExampleJsonSyncClass.synced.saveData();
     }
 }

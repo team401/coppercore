@@ -26,10 +26,10 @@ public class EnvironmentPathProvider implements PathProvider {
 
     @Override
     public String resolvePath(String file) {
-        String path = filepath + File.separator + environment.getPath() + File.separator + file;
+        String path = filepath + File.pathSeparator + environment.getPath() + File.pathSeparator + file;
 
         if (!environment.hasFile(filepath, file) && defaults != null) {
-            path = filepath + File.separator + defaults + File.separator + file;
+            path = filepath + File.pathSeparator + defaults + File.pathSeparator + file;
         }
 
         return path;

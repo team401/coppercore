@@ -15,7 +15,7 @@ public class Environment {
     }
 
     public boolean hasFile(String basePath, String file) {
-        File f = new File(basePath + File.separator + filepath + File.separator + file);
+        File f = new File(basePath + File.pathSeparator + filepath + File.pathSeparator + file);
         return f.exists() && !f.isDirectory();
     }
 }
