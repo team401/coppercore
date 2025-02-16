@@ -2,6 +2,9 @@
 
 package coppercore.wpilib_interface.tuning;
 
+import static edu.wpi.first.units.Units.Rotations;
+
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,18 +26,32 @@ public class TuneG extends Command {
 
     private final double rampUpSpeed;
 
+    private final MedianFilter positionFilter;
+
+    private final double movementThreshold;
+
+    private double filteredPosition;
+
     /**
      * Create a command to automatically characterize kG for a Tunable system
      *
      * @param mechanism The Tunable mechanism/subsystem to tune
      * @param rampUpSpeed How much to increase the applied output by per loop. 0.001 is very precise
      *     but very slow.
+     * @param filterWindow Filter window for the position median filter
+     * @param movementThreshold How much the system must move before it is considered "having
+     *     moved", in rotations
      */
-    public TuneG(Tunable mechanism, double rampUpSpeed) {
+    public TuneG(
+            Tunable mechanism, double rampUpSpeed, int filterWindow, double movementThreshold) {
         this.mechanism = mechanism;
         this.kS = SmartDashboard.getNumber("Test-Mode/kS", 0);
 
         this.rampUpSpeed = rampUpSpeed;
+
+        positionFilter = new MedianFilter(filterWindow);
+
+        this.movementThreshold = movementThreshold;
 
         // this.withTimeout(5); TODO: Maybe add?
     }
@@ -47,6 +64,8 @@ public class TuneG extends Command {
 
     @Override
     public void execute() {
+        filteredPosition = positionFilter.calculate(mechanism.getPosition().in(Rotations));
+
         mechanism.setOutput(kG);
         kG += rampUpSpeed;
     }
@@ -64,6 +83,6 @@ public class TuneG extends Command {
     public boolean isFinished() {
         // This used to check if position was greater than abs(startPosition) - 0.1, if things break
         // maybe try this again
-        return mechanism.getPosition().gt(startPosition);
+        return filteredPosition > (startPosition.in(Rotations) + movementThreshold);
     }
 }
