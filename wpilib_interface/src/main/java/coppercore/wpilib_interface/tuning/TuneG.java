@@ -34,6 +34,8 @@ public class TuneG extends Command {
 
     /**
      * Create a command to automatically characterize kG for a Tunable system
+     * 
+     * <p> WARNING: this command is very finicky and doesn't seem to function properly. We recommend using a TuneS to tune your kG, or tuning it manually
      *
      * @param mechanism The Tunable mechanism/subsystem to tune
      * @param rampUpSpeed How much to increase the applied output by per loop. 0.001 is very precise
