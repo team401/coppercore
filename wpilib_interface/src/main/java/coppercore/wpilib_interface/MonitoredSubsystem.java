@@ -7,11 +7,22 @@ import java.util.ArrayList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
+/**
+ * This class simplifies the process of monitoring the health and status of subsystems within the
+ * robot. It does this by adding monitors and overriding the monitoredPeriodic() method. With this
+ * we can track conditions and automatically react to faults while keeping our code clean and
+ * organized. The logging feature also helps with debugging.
+ */
 public abstract class MonitoredSubsystem extends SubsystemBase {
     private List<Monitor> registeredMonitors = new ArrayList<Monitor>();
 
     private boolean loggingEnabled = true;
 
+    /**
+     * This adds a monitor and overrides the periodic monitored system
+     *
+     * @param monitor This is the monitor to be added
+     */
     public void addMonitor(Monitor monitor) {
         registeredMonitors.add(monitor);
     }
@@ -55,7 +66,7 @@ public abstract class MonitoredSubsystem extends SubsystemBase {
      * default, but can be disabled if there are RAM issues stemming from too many strings in
      * logging.
      *
-     * @param loggingEnabled
+     * @param loggingEnabled This enables or turns off logging
      */
     public void setLoggingEnabled(boolean loggingEnabled) {
         this.loggingEnabled = loggingEnabled;
