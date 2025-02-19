@@ -26,7 +26,7 @@ public class MonitorTests {
 
         Monitor exampleMonitor =
                 new Monitor.MonitorBuilder()
-                        .withName("exampleMonitor")
+                        .withAlertText("exampleMonitor")
                         .withStickyness(false)
                         .withIsStateValidSupplier(() -> getIsStateValid())
                         .withTimeToFault(1.0)
@@ -72,7 +72,7 @@ public class MonitorTests {
 
         Monitor exampleMonitor =
                 new Monitor.MonitorBuilder()
-                        .withName("exampleMonitor")
+                        .withAlertText("exampleMonitor")
                         .withStickyness(true)
                         .withIsStateValidSupplier(() -> getIsStateValid())
                         .withTimeToFault(1.0)

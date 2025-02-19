@@ -190,14 +190,17 @@ public class Monitor {
      * fields. Once every field is configured, call build() to return a shiny new fault monitor.
      */
     public static class MonitorBuilder {
-        String name; // Name to log the status of the monitor under
-        boolean sticky; // Should the monitor still report a fault after conditions return to
+        protected String name; // Name to log the status of the monitor under
+        protected boolean
+                sticky; // Should the monitor still report a fault after conditions return to
         // normal?
-        double timeToFault; // How long the value can be unacceptable before a fault occurs
-        BooleanSupplier
+        protected double
+                timeToFault; // How long the value can be unacceptable before a fault occurs
+        protected BooleanSupplier
                 isStateValid; // Supplier with which to check whether the value is acceptable
-        Runnable faultCallback; // Function to call when the fault happens
-        boolean loggingEnabled = true; // Whether or not to log the monitor. Defaults to true.
+        protected Runnable faultCallback; // Function to call when the fault happens
+        protected boolean loggingEnabled =
+                true; // Whether or not to log the monitor. Defaults to true.
 
         /**
          * Sets the name of the monitor. This name will be used when the monitor is logged by
@@ -207,7 +210,7 @@ public class Monitor {
          *     can be used for manual logging outside of a MonitoredSubsystem.
          * @return the monitor builder, so that successive builder calls can be chained
          */
-        public MonitorBuilder withName(String name) {
+        public MonitorBuilder withAlertText(String name) {
             this.name = name;
             return this;
         }
