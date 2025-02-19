@@ -2,6 +2,12 @@ package coppercore.monitors;
 
 import java.util.function.BooleanSupplier;
 
+/**
+ * This class detects faults with monitors. It checks if they are sticky or nonsticky, if it is non-
+ * sticky the monitor does not report the fault after conditions return to normal, otherwise it
+ * does. It finds faults by checking for how long they are occur and the invalid state. It can
+ * optionally log fault occurances. It also provides a convinient way to configure a monitor object.
+ */
 public class Monitor {
     /** Name to log the status of the monitor under, used by MonitoredSubsystem */
     String name;
@@ -169,6 +175,8 @@ public class Monitor {
      *
      * <p>Changing this value doesn't change the behavior of the monitor, it exists only to tell
      * MonitoredSubsystem whether or not to log the monitor.
+     *
+     * @param loggingEnabled whether or not or monitor should be logged.
      */
     public void setLoggingEnabled(boolean loggingEnabled) {
         this.loggingEnabled = loggingEnabled;
@@ -179,6 +187,8 @@ public class Monitor {
      *
      * <p>Changing this value doesn't change the behavior of the monitor, it exists only to tell
      * MonitoredSubsystem whether or not to log the monitor.
+     *
+     * @return Whether or not logging should be enabled
      */
     public boolean getLoggingEnabled() {
         return loggingEnabled;

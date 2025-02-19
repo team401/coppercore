@@ -76,6 +76,17 @@ public class LoggedTunableNumber implements DoubleSupplier {
     }
 
     /**
+     * Update the value of the LoggedTunableNumber by publishing a new value to smartdashboard
+     *
+     * <p>This value will not be available from getAsDouble() (and isChanged) until the next cycle.
+     *
+     * @param newValue The new value to publish
+     */
+    public void setValue(double newValue) {
+        dashboardNumber.set(newValue);
+    }
+
+    /**
      * Checks whether the number has changed since our last check
      *
      * @param id Unique identifier for the caller to avoid conflicts when shared between multiple

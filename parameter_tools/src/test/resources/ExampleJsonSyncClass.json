@@ -1,5 +1,8 @@
 {
     "testText": "Hello World",
     "testDouble": 10.0,
-    "testInt": 2
+    "testInt": 2,
+    "rotation": {
+        "radians": 1.0
+    }
 }
