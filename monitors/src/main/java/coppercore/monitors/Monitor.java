@@ -220,7 +220,7 @@ public class Monitor {
          *     can be used for manual logging outside of a MonitoredSubsystem.
          * @return the monitor builder, so that successive builder calls can be chained
          */
-        public MonitorBuilder withAlertText(String name) {
+        public MonitorBuilder withName(String name) {
             this.name = name;
             return this;
         }

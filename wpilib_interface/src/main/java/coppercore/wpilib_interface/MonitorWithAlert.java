@@ -105,7 +105,7 @@ public class MonitorWithAlert extends Monitor {
          *
          * @return a MonitorWithAlert with the fields set by the builder.
          */
-        public Monitor build() {
+        public MonitorWithAlert build() {
             return new MonitorWithAlert(
                     name,
                     sticky,
