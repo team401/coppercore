@@ -24,7 +24,7 @@ public class MonitorWithAlert extends Monitor {
      *     faulted state.
      * @param loggingEnabled whether or not the monitor should be logged. This value is only used by
      *     MonitoredSubsystem to enable or disable logging for each monitor.
-     * @param group The group to display the alert under, e.g. Scoring
+     * @param group The group to display the alert under, e.g. "Alerts"
      * @param alertText the text to display in the persistent alert
      * @param alertType the type of the alert, e.g. AlertType.kWarning
      * @see MonitorWithAlertBuilder
@@ -41,7 +41,7 @@ public class MonitorWithAlert extends Monitor {
             AlertType alertType) {
         super(name, sticky, isStateValid, timeToFault, faultCallback, loggingEnabled);
 
-        alert = new Alert(group, name, alertType);
+        alert = new Alert(group, alertText, alertType);
     }
 
     /**
@@ -58,15 +58,58 @@ public class MonitorWithAlert extends Monitor {
     }
 
     public static class MonitorWithAlertBuilder extends MonitorBuilder {
-        String group;
+        String group = "Alerts";
         String alertText;
         AlertType alertType;
+
+        @Override
+        public MonitorWithAlertBuilder withName(String name) {
+            super.withName(name);
+            return this;
+        }
+
+        @Override
+        public MonitorWithAlertBuilder withStickyness(boolean sticky) {
+            super.withStickyness(sticky);
+
+            return this;
+        }
+
+        @Override
+        public MonitorWithAlertBuilder withTimeToFault(double timeToFault) {
+            super.withTimeToFault(timeToFault);
+
+            return this;
+        }
+
+        @Override
+        public MonitorWithAlertBuilder withIsStateValidSupplier(BooleanSupplier isStateValid) {
+            super.withIsStateValidSupplier(isStateValid);
+
+            return this;
+        }
+
+        @Override
+        public MonitorWithAlertBuilder withFaultCallback(Runnable faultCallback) {
+            super.withFaultCallback(faultCallback);
+
+            return this;
+        }
+
+        @Override
+        public MonitorWithAlertBuilder withLoggingEnabled(boolean loggingEnabled) {
+            super.withLoggingEnabled(loggingEnabled);
+
+            return this;
+        }
 
         /**
          * Sets the group of the monitor. The monitor's persistent alert will be logged under this
          * group.
          *
-         * @param group the group to place the alert into, e.g. Scoring
+         * <p>This group should be "Alerts", otherwise the alert won't display properly in elastic!
+         *
+         * @param group the group to place the alert into. Defaults to "Alerts"
          * @return the monitor builder, so that successive builder calls can be chained
          */
         public MonitorWithAlertBuilder withGroup(String group) {
