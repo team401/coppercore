@@ -1,8 +1,8 @@
 package coppercore.math;
 
-public class CachedData {
+public class CachedData<Type> {
 
-    private double value;
+    private Type value;
     private int writeCount;
     private int maxWrites;
     private long lastUpdateTime;
@@ -28,26 +28,26 @@ public class CachedData {
         if (isTimeBased) {
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastUpdateTime >= staleTime) {
-                value = 0;  // Reset value if time has expired
+                value = null;  // Reset value if time has expired
             }
         } else {
             writeCount++;
             if (writeCount >= maxWrites) {
-                value = 0;  // Reset value if write count has exceeded
+                value = null;  // Reset value if write count has exceeded
             }
         }
     }
 
     // Write a new signal value
-    public void write(double signal) {
-        if (signal != 0) {
+    public void write(Type signal) {
+        if (signal != null) {
             value = signal;
             reset(); // Resetting the expiration count or time
         }
     }
 
     // Read the cached value, returning null if the cache is stale
-    public Double read() {
+    public Type read() {
         if (isStale()) {
             return null;  // Return null if the data is stale
         }
