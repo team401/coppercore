@@ -1,9 +1,6 @@
 package coppercore.math.test;
 
 import coppercore.math.CachedData;
-
-import java.util.concurrent.ForkJoinPool.ManagedBlocker;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -25,11 +22,12 @@ public class CachedDataTest {
         Assertions.assertTrue(data.isStale());
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes"})
     @Test
     public void readTest() {
-        CachedData data= new CachedData(0);
-        CachedData.write("ez");
-        Assertions.assertEquals(data.read(), "Something");
+        CachedData data = new CachedData(10);
+        data.update();
+        data.write("real");
+        Assertions.assertEquals(data.read(), "real");
     }
 }

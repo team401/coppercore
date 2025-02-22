@@ -30,8 +30,7 @@ public class CachedData<Type> {
             if (currentTime - lastUpdateTime >= staleTime) {
                 value = null; // Reset value if time has expired
             }
-        } 
-        else {
+        } else {
             writeCount++;
             if (writeCount >= maxWrites) {
                 value = null; // Reset value if write count has exceeded
@@ -60,8 +59,7 @@ public class CachedData<Type> {
         if (isTimeBased) {
             long currentTime = System.currentTimeMillis();
             return currentTime - lastUpdateTime >= staleTime; // Check if time has passed
-        } 
-        else {
+        } else {
             return writeCount >= maxWrites; // Check if the write count has exceeded
         }
     }
@@ -69,10 +67,10 @@ public class CachedData<Type> {
     // Reset the expiration tracking
     private void reset() {
         if (isTimeBased) {
-            lastUpdateTime = System.currentTimeMillis(); // Reset the last update time for time-based
+            lastUpdateTime =
+                    System.currentTimeMillis(); // Reset the last update time for time-based
             // expiration
-        } 
-        else {
+        } else {
             writeCount = 0; // Reset the write count for write-based expiration
         }
     }
