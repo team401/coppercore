@@ -1,13 +1,12 @@
 package coppercore.controls.state_machine.state;
 
+import coppercore.controls.state_machine.transition.ConditinalTransition;
+import coppercore.controls.state_machine.transition.Transition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-
-import coppercore.controls.state_machine.transition.ConditinalTransition;
-import coppercore.controls.state_machine.transition.Transition;
 
 /** Configures State Machine State behavior */
 public class StateConfiguration<State, Trigger> {
@@ -125,12 +124,14 @@ public class StateConfiguration<State, Trigger> {
      * @return filtered transition
      */
     private Optional<Transition<State, Trigger>> filterTransitions(
-            List<Transition<State, Trigger>> transitions, boolean excludeConditionals, boolean excludeNormal) {
+            List<Transition<State, Trigger>> transitions,
+            boolean excludeConditionals,
+            boolean excludeNormal) {
         Optional<Transition<State, Trigger>> returnOptional = Optional.empty();
         boolean conditinal = false;
         for (Transition<State, Trigger> transition : transitions) {
             if (transition instanceof ConditinalTransition) {
-                if (excludeConditionals){
+                if (excludeConditionals) {
                     continue;
                 }
                 if (conditinal
@@ -141,7 +142,7 @@ public class StateConfiguration<State, Trigger> {
                     conditinal = true;
                 }
             } else if (!conditinal) {
-                if (excludeNormal){
+                if (excludeNormal) {
                     continue;
                 }
                 returnOptional = Optional.of(transition);
@@ -149,9 +150,6 @@ public class StateConfiguration<State, Trigger> {
         }
         return returnOptional;
     }
-
-
-
 
     /**
      * Gets filtered transition
@@ -169,7 +167,8 @@ public class StateConfiguration<State, Trigger> {
      * @param trigger trigger event
      * @return transition
      */
-    public Optional<Transition<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals) {
+    public Optional<Transition<State, Trigger>> getFilteredTransition(
+            Trigger trigger, boolean excludeConditionals) {
         return filterTransitions(getTransitions(trigger), excludeConditionals, false);
     }
 
@@ -179,7 +178,8 @@ public class StateConfiguration<State, Trigger> {
      * @param trigger trigger event
      * @return transition
      */
-    public Optional<Transition<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals, boolean excludeNormal) {
+    public Optional<Transition<State, Trigger>> getFilteredTransition(
+            Trigger trigger, boolean excludeConditionals, boolean excludeNormal) {
         return filterTransitions(getTransitions(trigger), excludeConditionals, excludeNormal);
     }
 
