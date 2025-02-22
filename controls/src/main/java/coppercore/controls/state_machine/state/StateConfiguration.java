@@ -1,12 +1,13 @@
 package coppercore.controls.state_machine.state;
 
-import coppercore.controls.state_machine.transition.ConditinalTransition;
-import coppercore.controls.state_machine.transition.Transition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+
+import coppercore.controls.state_machine.transition.ConditinalTransition;
+import coppercore.controls.state_machine.transition.Transition;
 
 /** Configures State Machine State behavior */
 public class StateConfiguration<State, Trigger> {
@@ -17,6 +18,14 @@ public class StateConfiguration<State, Trigger> {
     private Consumer<Transition> onExitAction;
     private boolean runDefaultEntryAction = true;
     private boolean runDefaultExitAction = true;
+
+    public boolean hasEntryAction() {
+        return (this.onEntryAction != null);
+    }
+
+    public boolean hasExitAction() {
+        return (this.onExitAction != null);
+    }
 
     /**
      * Creates configuration for how state machine behaves in given State
@@ -37,7 +46,7 @@ public class StateConfiguration<State, Trigger> {
      * @return configuration
      */
     public StateConfiguration<State, Trigger> permit(Trigger trigger, State destination) {
-        if (getFilteredTransition(trigger).isEmpty()) {
+        if (getFilteredTransition(trigger, true).isEmpty()) {
             transitions.add(new Transition<>(source, destination, trigger, false));
         }
         return this;
@@ -51,7 +60,7 @@ public class StateConfiguration<State, Trigger> {
      * @return configuration
      */
     public StateConfiguration<State, Trigger> permitInternal(Trigger trigger, State destination) {
-        if (getFilteredTransition(trigger).isEmpty()) {
+        if (getFilteredTransition(trigger, true).isEmpty()) {
             transitions.add(new Transition<>(source, destination, trigger, true));
         }
         return this;
@@ -68,7 +77,7 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permitIf(
             Trigger trigger, State destination, BooleanSupplier check) {
-        if (getFilteredTransition(trigger).isEmpty()) {
+        if (getFilteredTransition(trigger, true, true).isEmpty()) {
             transitions.add(new ConditinalTransition<>(source, destination, trigger, check, false));
         }
         return this;
@@ -86,7 +95,7 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permitInternalIf(
             Trigger trigger, State destination, BooleanSupplier check) {
-        if (getFilteredTransition(trigger).isEmpty()) {
+        if (getFilteredTransition(trigger, true, true).isEmpty()) {
             transitions.add(new ConditinalTransition<>(source, destination, trigger, check, true));
         }
         return this;
@@ -116,24 +125,33 @@ public class StateConfiguration<State, Trigger> {
      * @return filtered transition
      */
     private Optional<Transition<State, Trigger>> filterTransitions(
-            List<Transition<State, Trigger>> transitions) {
+            List<Transition<State, Trigger>> transitions, boolean excludeConditionals, boolean excludeNormal) {
         Optional<Transition<State, Trigger>> returnOptional = Optional.empty();
         boolean conditinal = false;
         for (Transition<State, Trigger> transition : transitions) {
             if (transition instanceof ConditinalTransition) {
+                if (excludeConditionals){
+                    continue;
+                }
                 if (conditinal
                         && ((ConditinalTransition<State, Trigger>) transition).isCheckTrue()) {
                     return Optional.empty();
-                } else {
+                } else if (((ConditinalTransition<State, Trigger>) transition).isCheckTrue()) {
                     returnOptional = Optional.of(transition);
                     conditinal = true;
                 }
             } else if (!conditinal) {
+                if (excludeNormal){
+                    continue;
+                }
                 returnOptional = Optional.of(transition);
             }
         }
         return returnOptional;
     }
+
+
+
 
     /**
      * Gets filtered transition
@@ -142,7 +160,27 @@ public class StateConfiguration<State, Trigger> {
      * @return transition
      */
     public Optional<Transition<State, Trigger>> getFilteredTransition(Trigger trigger) {
-        return filterTransitions(getTransitions(trigger));
+        return filterTransitions(getTransitions(trigger), false, false);
+    }
+
+    /**
+     * Gets filtered transition
+     *
+     * @param trigger trigger event
+     * @return transition
+     */
+    public Optional<Transition<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals) {
+        return filterTransitions(getTransitions(trigger), excludeConditionals, false);
+    }
+
+    /**
+     * Gets filtered transition
+     *
+     * @param trigger trigger event
+     * @return transition
+     */
+    public Optional<Transition<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals, boolean excludeNormal) {
+        return filterTransitions(getTransitions(trigger), excludeConditionals, excludeNormal);
     }
 
     /**

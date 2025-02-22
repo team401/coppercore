@@ -7,11 +7,11 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-name: Publish package to the Maven Central Repository
+name: Stage on Maven Central
 on:
   workflow_dispatch:
 jobs:
-  publish:
+  stage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
