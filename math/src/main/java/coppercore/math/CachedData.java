@@ -28,12 +28,13 @@ public class CachedData<Type> {
         if (isTimeBased) {
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastUpdateTime >= staleTime) {
-                value = null;  // Reset value if time has expired
+                value = null; // Reset value if time has expired
             }
-        } else {
+        } 
+        else {
             writeCount++;
             if (writeCount >= maxWrites) {
-                value = null;  // Reset value if write count has exceeded
+                value = null; // Reset value if write count has exceeded
             }
         }
     }
@@ -49,28 +50,30 @@ public class CachedData<Type> {
     // Read the cached value, returning null if the cache is stale
     public Type read() {
         if (isStale()) {
-            return null;  // Return null if the data is stale
+            return null; // Return null if the data is stale
         }
-        return value;  // Return the cached value
+        return value; // Return the cached value
     }
 
     // Check if the cache has expired (is stale)
     public boolean isStale() {
         if (isTimeBased) {
             long currentTime = System.currentTimeMillis();
-            return currentTime - lastUpdateTime >= staleTime;  // Check if time has passed
-        } else {
-            return writeCount >= maxWrites;  // Check if the write count has exceeded
+            return currentTime - lastUpdateTime >= staleTime; // Check if time has passed
+        } 
+        else {
+            return writeCount >= maxWrites; // Check if the write count has exceeded
         }
     }
 
     // Reset the expiration tracking
     private void reset() {
         if (isTimeBased) {
-            lastUpdateTime = System.currentTimeMillis();  // Reset the last update time for time-based expiration
-        } else {
-            writeCount = 0;  // Reset the write count for write-based expiration
+            lastUpdateTime = System.currentTimeMillis(); // Reset the last update time for time-based
+            // expiration
+        } 
+        else {
+            writeCount = 0; // Reset the write count for write-based expiration
         }
     }
 }
-
