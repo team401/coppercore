@@ -1,16 +1,17 @@
 package coppercore.controls.test;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import coppercore.controls.state_machine.StateMachine;
 import coppercore.controls.state_machine.StateMachineConfiguration;
 import coppercore.controls.state_machine.state.PeriodicStateInterface;
 import coppercore.controls.state_machine.state.StateContainer;
 import coppercore.controls.state_machine.transition.Transition;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 public class StateContainerStateMachineTests {
 
-    static class IdleState implements PeriodicStateInterface {
+    static class IdleState implements PeriodicStateInterface<testStateContainer, testEnumTriggers> {
         public static void customOnEntry(
                 Transition<StateContainerStateMachineTests, testEnumTriggers> transition) {}
 
@@ -22,16 +23,16 @@ public class StateContainerStateMachineTests {
     }
     ;
 
-    static class ReadyState implements PeriodicStateInterface {}
+    static class ReadyState implements PeriodicStateInterface<testStateContainer, testEnumTriggers> {}
     ;
 
-    static class WaitingState implements PeriodicStateInterface {}
+    static class WaitingState implements PeriodicStateInterface<testStateContainer, testEnumTriggers> {}
     ;
 
-    static class DoneState implements PeriodicStateInterface {}
+    static class DoneState implements PeriodicStateInterface<testStateContainer, testEnumTriggers> {}
     ;
 
-    static class ShutdownState implements PeriodicStateInterface {}
+    static class ShutdownState implements PeriodicStateInterface<testStateContainer, testEnumTriggers> {}
     ;
 
     static enum testStateContainer implements StateContainer {
@@ -41,14 +42,14 @@ public class StateContainerStateMachineTests {
         DONE(new DoneState()),
         SHUTDOWN(new ShutdownState());
 
-        private final PeriodicStateInterface state;
+        private final PeriodicStateInterface<testStateContainer, testEnumTriggers> state;
 
-        testStateContainer(PeriodicStateInterface state) {
+        testStateContainer(PeriodicStateInterface<testStateContainer, testEnumTriggers> state) {
             this.state = state;
         }
 
         @Override
-        public PeriodicStateInterface getState() {
+        public PeriodicStateInterface<testStateContainer, testEnumTriggers> getState() {
             return state;
         }
     }
