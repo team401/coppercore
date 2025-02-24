@@ -2,17 +2,17 @@ package coppercore.math;
 
 public class CachedData<Type> {
 
-    private Type value;
-    private int writeCount;
-    private int maxWrites;
-    private long lastUpdateTime;
-    private long staleTime;
-    private boolean isTimeBased;
+    private Type value = null;
+    private int writeCount = 0;
+    private int maxWrites = 5;
+    private double lastUpdateTime = 0.0;
+    private double staleTime = -1.0;
+    private boolean isTimeBased = true;
 
     // Constructor for Time-based expiration
     public CachedData(double staleTime, double change) {
         this.isTimeBased = true;
-        this.staleTime = (long) (staleTime * 1000); // Convert seconds to milliseconds
+        this.staleTime = staleTime * 1000; // Convert seconds to milliseconds
         this.lastUpdateTime = System.currentTimeMillis();
     }
 
@@ -26,7 +26,7 @@ public class CachedData<Type> {
     // Update the value based on the change (for both time and write-based mechanisms)
     public void update() {
         if (isTimeBased) {
-            long currentTime = System.currentTimeMillis();
+            double currentTime = System.currentTimeMillis();
             if (currentTime - lastUpdateTime >= staleTime) {
                 value = null; // Reset value if time has expired
             }
@@ -48,16 +48,14 @@ public class CachedData<Type> {
 
     // Read the cached value, returning null if the cache is stale
     public Type read() {
-        if (isStale()) {
-            return null; // Return null if the data is stale
-        }
+        update();
         return value; // Return the cached value
     }
 
     // Check if the cache has expired (is stale)
     public boolean isStale() {
         if (isTimeBased) {
-            long currentTime = System.currentTimeMillis();
+            double currentTime = System.currentTimeMillis();
             return currentTime - lastUpdateTime >= staleTime; // Check if time has passed
         } else {
             return writeCount >= maxWrites; // Check if the write count has exceeded
