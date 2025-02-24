@@ -36,5 +36,7 @@ public class CachedDataTest {
         Assertions.assertEquals(data.read(), 100);
         data.write(true);
         Assertions.assertEquals(data.read(), true);
+        data.write(false);
+        Assertions.assertEquals(data.read(), false);
     }
 }
