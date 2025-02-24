@@ -26,8 +26,15 @@ public class CachedDataTest {
     @Test
     public void readTest() {
         CachedData data = new CachedData(10);
-        data.update();
         data.write("real");
         Assertions.assertEquals(data.read(), "real");
+        // data.write(null);
+        // Assertions.assertEquals(data.read(), null);
+        data.write("fake");
+        Assertions.assertEquals(data.read(), "fake");
+        data.write(100);
+        Assertions.assertEquals(data.read(), 100);
+        data.write(true);
+        Assertions.assertEquals(data.read(), true);
     }
 }
