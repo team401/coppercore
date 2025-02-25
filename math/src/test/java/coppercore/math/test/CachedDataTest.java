@@ -1,8 +1,10 @@
 package coppercore.math.test;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Millimeters;
 
 import coppercore.math.CachedData;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -46,5 +48,11 @@ public class CachedDataTest {
         // 6
         data.write(Millimeters.of(5));
         Assertions.assertEquals(data.read(), Millimeters.of(5));
+        // 7
+        data.write(Inches.of(5));
+        Assertions.assertEquals(data.read(), Inches.of(5));
+        // 8
+        data.write(List.of(1, 0, 0, 0, 1, -1));
+        Assertions.assertEquals(data.read(), List.of(1, 0, 0, 0, 1, -1));
     }
 }
