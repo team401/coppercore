@@ -23,37 +23,66 @@ public class CachedDataTest {
     @Test
     public void isStaleTest2() {
         CachedData data = new CachedData(0);
-        Assertions.assertTrue(data.isStale());
+        Assertions.assertFalse(data.isStale());
+    }
+
+    @Test
+    public void isStaleTest3() {
+        CachedData data = new CachedData(1, 0.0);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Assertions.assertFalse(data.isStale());
     }
 
     @SuppressWarnings({"rawtypes"})
     @Test
     public void readTest() {
         CachedData data = new CachedData(10);
-        // 1
         data.write("real");
         Assertions.assertEquals(data.read(), "real");
-        // 2
         data.write("fake");
         Assertions.assertEquals(data.read(), "fake");
-        // 3
         data.write(100);
         Assertions.assertEquals(data.read(), 100);
-        // 4
         data.write(true);
         Assertions.assertEquals(data.read(), true);
-        // 5
         data.write(false);
         Assertions.assertEquals(data.read(), false);
-        // 6
         data.write(Millimeters.of(5));
         Assertions.assertEquals(data.read(), Millimeters.of(5));
-        // 7
         data.write(Inches.of(5));
         Assertions.assertEquals(data.read(), Inches.of(5));
-        // 8
         data.write(List.of(1, 0, 0, 0, 1, -1));
         Assertions.assertEquals(data.read(), List.of(1, 0, 0, 0, 1, -1));
-        
+        data.write(-100);
+        Assertions.assertEquals(data.read(), -100);
+        data.write(0);
+        Assertions.assertEquals(data.read(), 0);
+        data.write(100);
+        Assertions.assertEquals(data.read(), 100);
+        Assertions.assertEquals(data.read(), 100);
+        Assertions.assertEquals(data.read(), 100);
+        Assertions.assertEquals(data.read(), 100);
+        Assertions.assertEquals(data.read(), 100);
+        Assertions.assertEquals(data.read(), 100);
+        Assertions.assertEquals(data.read(), 100);
+        Assertions.assertEquals(data.read(), 100);
+        Assertions.assertEquals(data.read(), 100);
+        Assertions.assertEquals(data.read(), 100);
+        Assertions.assertEquals(data.read(), null);
+    }
+
+    @Test
+    public void readTest2() {
+        CachedData data = new CachedData(1, 0.0);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Assertions.assertEquals(data.read(), null);
     }
 }
