@@ -32,7 +32,8 @@ public class CachedData<Type> {
             }
         } else {
             readCount++;
-            if (readCount >= maxReads) {
+            System.out.println(readCount);
+            if (readCount > maxReads) {
                 value = null; // Reset value if read count has exceeded
             }
         }
@@ -58,7 +59,7 @@ public class CachedData<Type> {
             double currentTime = System.currentTimeMillis();
             return currentTime - lastUpdateTime >= staleTime; // Check if time has passed
         } else {
-            return readCount >= maxReads; // Check if the read count has exceeded
+            return readCount > maxReads; // Check if the read count has exceeded
         }
     }
 
