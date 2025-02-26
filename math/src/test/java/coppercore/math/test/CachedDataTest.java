@@ -54,5 +54,6 @@ public class CachedDataTest {
         // 8
         data.write(List.of(1, 0, 0, 0, 1, -1));
         Assertions.assertEquals(data.read(), List.of(1, 0, 0, 0, 1, -1));
+        
     }
 }

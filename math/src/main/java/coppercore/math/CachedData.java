@@ -3,8 +3,8 @@ package coppercore.math;
 public class CachedData<Type> {
 
     private Type value = null;
-    private int writeCount = 0;
-    private int maxWrites = 5;
+    private int readCount = 0;
+    private int maxReads = 5;
     private double lastUpdateTime = 0.0;
     private double staleTime = -1.0;
     private boolean isTimeBased = true;
@@ -16,14 +16,14 @@ public class CachedData<Type> {
         this.lastUpdateTime = System.currentTimeMillis();
     }
 
-    // Constructor for WriteCount-based expiration
-    public CachedData(int maxWrites) {
+    // Constructor for readCount-based expiration
+    public CachedData(int maxReads) {
         this.isTimeBased = false;
-        this.maxWrites = maxWrites;
-        this.writeCount = 0;
+        this.maxReads = maxReads;
+        this.readCount = 0;
     }
 
-    // Update the value based on the change (for both time and write-based mechanisms)
+    // Update the value based on the change (for both time and read-based mechanisms)
     public void update() {
         if (isTimeBased) {
             double currentTime = System.currentTimeMillis();
@@ -31,9 +31,9 @@ public class CachedData<Type> {
                 value = null; // Reset value if time has expired
             }
         } else {
-            writeCount++;
-            if (writeCount >= maxWrites) {
-                value = null; // Reset value if write count has exceeded
+            readCount++;
+            if (readCount >= maxReads) {
+                value = null; // Reset value if read count has exceeded
             }
         }
     }
@@ -58,7 +58,7 @@ public class CachedData<Type> {
             double currentTime = System.currentTimeMillis();
             return currentTime - lastUpdateTime >= staleTime; // Check if time has passed
         } else {
-            return writeCount >= maxWrites; // Check if the write count has exceeded
+            return readCount >= maxReads; // Check if the read count has exceeded
         }
     }
 
@@ -69,7 +69,7 @@ public class CachedData<Type> {
                     System.currentTimeMillis(); // Reset the last update time for time-based
             // expiration
         } else {
-            writeCount = 0; // Reset the write count for write-based expiration
+            readCount = 0; // Reset the read count for read-based expiration
         }
     }
 }
