@@ -87,6 +87,11 @@ public class VisionLocalizer extends SubsystemBase {
         return hasResult;
     }
 
+    /**
+     * boolean that checks whether  or not a coprocessor is connected like the BeeLink
+     *
+     * @return camera inputs are connected
+     */
     public boolean coprocessorConnected() {
         return inputs[0].connected;
     }
