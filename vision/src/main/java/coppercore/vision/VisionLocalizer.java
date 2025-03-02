@@ -87,6 +87,10 @@ public class VisionLocalizer extends SubsystemBase {
         return hasResult;
     }
 
+    public boolean coprocessorConnected() {
+        return inputs[0].connected;
+    }
+
     /**
      * calculates the strafing and forward / reverse required for drive to be in line with a
      * specific tag + offset
