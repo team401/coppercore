@@ -11,30 +11,58 @@ import org.junit.jupiter.api.Test;
 public class CachedDataTest {
     @Test
     public void isStaleTest() {
-        CachedData data = new CachedData(1, 0.0);
+        CachedData<Integer> data = new CachedData<>(1.0);
         try {
-            Thread.sleep(2000);
+            for (int i = 0; i<7; i++){
+                Thread.sleep(100);
+                Assertions.assertFalse(data.isStale());
+            }
+            Thread.sleep(500); // Room for error in Thread.sleep
+            Assertions.assertTrue(data.isStale());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Assertions.assertTrue(data.isStale());
     }
 
     @Test
     public void isStaleTest2() {
-        CachedData data = new CachedData(0);
-        Assertions.assertFalse(data.isStale());
+        CachedData<Integer> data = new CachedData<>(5);
+        for (int i = 0; i<5; i++){
+            Assertions.assertFalse(data.isStale());
+            data.read();
+        }
+        date.read();
+        Assertions.assertTrue(data.isStale());
+        
+        // Second Test
+        data = new CachedData<>(20);
+        // 20 reads
+        for (int i = 0; i<20; i++){
+            Assertions.assertFalse(data.isStale());
+            data.read();
+        }
+        data.read();
+        Assertions.assertTrue(data.isStale());
+        //Ensure stale remains true
+        for (int i = 0; i<10; i++){
+            data.read();
+            Assertions.assertTrue(data.isStale());
+        }
     }
 
     @Test
     public void isStaleTest3() {
-        CachedData data = new CachedData(1, 0.0);
+        CachedData<Integer> data = new CachedData<>(0.5);
         try {
-            Thread.sleep(500);
+            for (int i = 0; i<5; i++){
+                Thread.sleep(50);
+                Assertions.assertFalse(data.isStale());
+            }
+            Thread.sleep(500); // Room for error in Thread.sleep
+            Assertions.assertTrue(data.isStale());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Assertions.assertFalse(data.isStale());
     }
 
     @SuppressWarnings({"rawtypes"})
