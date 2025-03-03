@@ -24,18 +24,9 @@ public class CachedData<Type> {
     }
 
     // Update the value based on the change (for both time and read-based mechanisms)
-    public void update() {
-        if (isTimeBased) {
-            double currentTime = System.currentTimeMillis();
-            if (currentTime - lastUpdateTime >= staleTime) {
-                value = null; // Reset value if time has expired
-            }
-        } else {
-            readCount++;
-            System.out.println(readCount);
-            if (readCount > maxReads) {
-                value = null; // Reset value if read count has exceeded
-            }
+    private void update() {
+        if (isStale()){
+            value = null;
         }
     }
 
@@ -50,6 +41,7 @@ public class CachedData<Type> {
     // Read the cached value, returning null if the cache is stale
     public Type read() {
         update();
+        readCount++;
         return value; // Return the cached value
     }
 
