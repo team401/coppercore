@@ -105,7 +105,7 @@ public class CachedDataTest {
 
     @Test
     public void readTest2() {
-        CachedData data = new CachedData(1, 0.0);
+        CachedData data = new CachedData(1);
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
