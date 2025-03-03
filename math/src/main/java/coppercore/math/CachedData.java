@@ -10,7 +10,7 @@ public class CachedData<Type> {
     private boolean isTimeBased = true;
 
     // Constructor for Time-based expiration
-    public CachedData(double staleTime, double change) {
+    public CachedData(double staleTime) {
         this.isTimeBased = true;
         this.staleTime = staleTime * 1000; // Convert seconds to milliseconds
         this.lastUpdateTime = System.currentTimeMillis();
