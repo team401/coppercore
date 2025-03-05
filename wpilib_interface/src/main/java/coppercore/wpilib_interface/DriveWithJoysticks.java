@@ -103,11 +103,10 @@ public class DriveWithJoysticks extends Command {
 
     /**
      * calculates a translation with squared magnitude
-     * 
+     *
      * @param x represents the x value of velocity
      * @param y represents the y value of velocity
-     * 
-     *  @return Translation2d with directions of velocity
+     * @return Translation2d with directions of velocity
      */
     public Translation2d getLinearVelocity(double x, double y) {
         double[] deadbands = Deadband.twoAxisDeadband(x, y, joystickDeadband);
