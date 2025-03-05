@@ -25,7 +25,7 @@ public class CachedData<Type> {
 
     // Update the value based on the change (for both time and read-based mechanisms)
     private void update() {
-        if (isStale()){
+        if (isStale()) {
             value = null;
         }
     }
@@ -51,7 +51,7 @@ public class CachedData<Type> {
             double currentTime = System.currentTimeMillis();
             return currentTime - lastUpdateTime >= staleTime; // Check if time has passed
         } else {
-            return readCount > maxReads; // Check if the read count has exceeded
+            return readCount >= maxReads; // Check if the read count has exceeded
         }
     }
 
