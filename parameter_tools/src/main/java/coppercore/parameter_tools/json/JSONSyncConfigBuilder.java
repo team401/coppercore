@@ -9,8 +9,8 @@ public class JSONSyncConfigBuilder {
     public boolean prettyPrinting = true;
     public boolean excludeFieldsWithoutExposeAnnotation = false;
     public boolean primitiveChecking = true;
-    public boolean primitiveCheckPrintAlert = false;
-    public boolean primitiveCheckCrash = false;
+    public boolean primitiveCheckPrintAlert = true;
+    public boolean primitiveCheckCrash = true;
     public FieldNamingPolicy namingPolicy = FieldNamingPolicy.IDENTITY;
     public LongSerializationPolicy longSerializationPolicy = LongSerializationPolicy.DEFAULT;
 
