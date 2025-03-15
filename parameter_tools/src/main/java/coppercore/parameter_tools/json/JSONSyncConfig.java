@@ -14,13 +14,19 @@ public record JSONSyncConfig(
         boolean prettyPrinting,
         boolean excludeFieldsWithoutExposeAnnotation,
         FieldNamingPolicy namingPolicy,
-        LongSerializationPolicy longSerializationPolicy) {
+        LongSerializationPolicy longSerializationPolicy,
+        boolean primitiveChecking,
+        boolean primitiveCheckPrintAlert,
+        boolean primitiveCheckCrash) {
     public JSONSyncConfig(JSONSyncConfigBuilder builder) {
         this(
                 builder.serializeNulls,
                 builder.prettyPrinting,
                 builder.excludeFieldsWithoutExposeAnnotation,
                 builder.namingPolicy,
-                builder.longSerializationPolicy);
+                builder.longSerializationPolicy,
+                builder.primitiveChecking,
+                builder.primitiveCheckPrintAlert,
+                builder.primitiveCheckCrash);
     }
 }

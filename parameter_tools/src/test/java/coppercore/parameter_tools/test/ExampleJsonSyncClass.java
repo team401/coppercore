@@ -45,7 +45,7 @@ public class ExampleJsonSyncClass {
     public final Double testDouble = 0.0;
 
     @JSONName("testInt")
-    public Integer testingIntField = 0;
+    public int testingIntField = 0;
 
     public Angle angle = Units.Degree.of(340.0);
 

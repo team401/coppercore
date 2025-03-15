@@ -1,21 +1,50 @@
 package coppercore.parameter_tools.json;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
 import coppercore.parameter_tools.json.adapters.measure.JSONMeasure;
 import edu.wpi.first.units.Measure;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 public class JSONTypeAdapterFactory implements TypeAdapterFactory {
+
+    private JSONSyncConfig config = new JSONSyncConfigBuilder().build();
+    
+    public JSONTypeAdapterFactory(JSONSyncConfig config){
+        this.config = config;
+    }
 
     @Override
     public <T> TypeAdapter<T> create(Gson gson, com.google.gson.reflect.TypeToken<T> type) {
         @SuppressWarnings("unchecked")
         Class<T> rawType = (Class<T>) type.getRawType();
+        System.out.println(type.getRawType());
+        System.out.println(type.getRawType() == int.class);
+        if (config.primitiveChecking()){
+            if (type.getRawType() == int.class
+            || type.getRawType() == double.class
+            || type.getRawType() == float.class
+            || type.getRawType() == long.class
+            || type.getRawType() == short.class
+            || type.getRawType() == char.class
+            || type.getRawType() == byte.class
+            || type.getRawType() == boolean.class) {
+                if (config.primitiveCheckPrintAlert()){
+                    Thread thread = new Thread(new JSONPrimativeErrorAlert() {});
+                    thread.start();
+                }
+                if (config.primitiveCheckCrash()){
+                    throw new RuntimeException("You used primitive");
+                }
+            }
+        }
+        
         if (!JSONConverter.has(rawType)) {
             return null;
         }
