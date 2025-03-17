@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 public class CachedDataTest {
     @Test
     public void isStaleTest() {
-        CachedData<Integer> data = new CachedData<>(1.0);
+        CachedData<Integer> data = new CachedData<>(1.5);
         for (int i = 0; i < 7; i++) {
             try {
                 Thread.sleep(100);
@@ -59,7 +59,7 @@ public class CachedDataTest {
 
     @Test
     public void isStaleTest3() {
-        CachedData<Integer> data = new CachedData<>(0.5);
+        CachedData<Integer> data = new CachedData<>(1.5);
         for (int i = 0; i < 5; i++) {
                 try {
                     Thread.sleep(50);
