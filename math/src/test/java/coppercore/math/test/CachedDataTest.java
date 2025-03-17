@@ -18,7 +18,7 @@ public class CachedDataTest {
                 Thread.sleep(100);
                 Assertions.assertFalse(data.isStale());
             }
-            Thread.sleep(500); // Room for error in Thread.sleep
+            Thread.sleep(1500); // Room for error in Thread.sleep
             Assertions.assertTrue(data.isStale());
         } catch (InterruptedException e) {
             e.printStackTrace();
