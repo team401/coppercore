@@ -13,16 +13,22 @@ public class CachedDataTest {
     @Test
     public void isStaleTest() {
         CachedData<Integer> data = new CachedData<>(1.0);
-        try {
-            for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 7; i++) {
+            try {
                 Thread.sleep(100);
-                Assertions.assertFalse(data.isStale());
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
-            Thread.sleep(1500); // Room for error in Thread.sleep
-            Assertions.assertTrue(data.isStale());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            Assertions.assertFalse(data.isStale());
         }
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } // Room for error in Thread.sleep
+        Assertions.assertTrue(data.isStale());
     }
 
     @Test
@@ -54,16 +60,22 @@ public class CachedDataTest {
     @Test
     public void isStaleTest3() {
         CachedData<Integer> data = new CachedData<>(0.5);
-        try {
-            for (int i = 0; i < 5; i++) {
-                Thread.sleep(50);
+        for (int i = 0; i < 5; i++) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 Assertions.assertFalse(data.isStale());
             }
             Thread.sleep(500); // Room for error in Thread.sleep
             Assertions.assertTrue(data.isStale());
         } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
-        }
+        } // Room for error in Thread.sleep
+        Assertions.assertTrue(data.isStale());
     }
 
     @SuppressWarnings({"rawtypes"})
