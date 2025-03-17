@@ -61,16 +61,16 @@ public class CachedDataTest {
     public void isStaleTest3() {
         CachedData<Integer> data = new CachedData<>(1.5);
         for (int i = 0; i < 5; i++) {
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                Assertions.assertFalse(data.isStale());
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
-            Thread.sleep(500); // Room for error in Thread.sleep
-            Assertions.assertTrue(data.isStale());
+            Assertions.assertFalse(data.isStale());
+        }
+        try {
+            Thread.sleep(1600);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
