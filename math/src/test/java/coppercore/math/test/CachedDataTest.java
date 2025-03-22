@@ -111,7 +111,7 @@ public class CachedDataTest {
     @Test
     public void readTestTrue2() {
         CachedData data = new CachedData(3);
-        CachedData.write(-100);
+        data.write(-100);
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
@@ -131,7 +131,7 @@ public class CachedDataTest {
     }
     @Test
     public void readTestNull2() {
-        CachedData<String> stringData = new CachedData<>(10);
+        CachedData<Integer> integerData = new CachedData<>(10);
         integerData.write(100);
         for (int i = 0; i < 10; i++) {
             Assertions.assertEquals(integerData.read(), 100);
