@@ -80,7 +80,7 @@ public class CachedDataTest {
 
     @SuppressWarnings({"rawtypes"})
     @Test
-    public void readTest() {
+    public void readTestTrue() {
         CachedData<String> stringData = new CachedData<>(10);
         stringData.write("real");
         Assertions.assertEquals(stringData.read(), "real");
@@ -106,15 +106,20 @@ public class CachedDataTest {
         Assertions.assertEquals(integerData.read(), -100);
         integerData.write(0);
         Assertions.assertEquals(integerData.read(), 0);
-        integerData.write(100);
-        for (int i = 0; i < 10; i++) {
-            Assertions.assertEquals(integerData.read(), 100);
-        }
-        Assertions.assertEquals(integerData.read(), null);
     }
 
     @Test
-    public void readTest2() {
+    public void readTestTrue2() {
+        CachedData data = new CachedData(3);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Assertions.assertEquals(data.read(), null);
+    }
+    @Test
+    public void readTestNull() {
         CachedData data = new CachedData(1);
         try {
             Thread.sleep(2000);
@@ -122,5 +127,14 @@ public class CachedDataTest {
             e.printStackTrace();
         }
         Assertions.assertEquals(data.read(), null);
+    }
+    @Test
+    public void readTestNull2() {
+        CachedData<String> stringData = new CachedData<>(10);
+        integerData.write(100);
+        for (int i = 0; i < 10; i++) {
+            Assertions.assertEquals(integerData.read(), 100);
+        }
+        Assertions.assertEquals(integerData.read(), null);
     }
 }
