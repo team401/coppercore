@@ -111,12 +111,13 @@ public class CachedDataTest {
     @Test
     public void readTestTrue2() {
         CachedData data = new CachedData(3);
+        CachedData.write(-100);
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Assertions.assertEquals(data.read(), null);
+        Assertions.assertEquals(data.read(), -100);
     }
     @Test
     public void readTestNull() {
