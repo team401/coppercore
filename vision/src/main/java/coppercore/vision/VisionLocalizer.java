@@ -88,7 +88,7 @@ public class VisionLocalizer extends SubsystemBase {
     }
 
     /**
-     * boolean that checks whether  or not a coprocessor is connected like the BeeLink
+     * boolean that checks whether or not a coprocessor is connected like the BeeLink
      *
      * @return camera inputs are connected
      */
@@ -102,13 +102,13 @@ public class VisionLocalizer extends SubsystemBase {
     }
 
     /**
-     * 
      * @param camera
      * @return specific camera input is connected
      */
     public boolean coprocessorConnected(int camera) {
         return inputs[camera].connected;
     }
+
     /**
      * calculates the strafing and forward / reverse required for drive to be in line with a
      * specific tag + offset
