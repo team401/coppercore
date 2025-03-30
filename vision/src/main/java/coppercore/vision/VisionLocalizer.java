@@ -14,6 +14,9 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.management.RuntimeErrorException;
+
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -88,13 +91,31 @@ public class VisionLocalizer extends SubsystemBase {
     }
 
     /**
-     * boolean that checks whether  or not a coprocessor is connected like the BeeLink
+     * boolean that checks whether or not a coprocessor is connected like the BeeLink
      *
      * @return camera inputs are connected
      */
     public boolean coprocessorConnected() {
-        return inputs[0].connected;
+        for (VisionIOInputsAutoLogged input : inputs) {
+            if (!input.connected) {
+                return false;
+            }
+        }
+        return true;
     }
+
+    /**
+     * @param camera
+     * @return specific camera input is connected
+     */
+    public boolean coprocessorConnected(int camera) {
+        if (camera < 0 || camera >= inputs.length) {
+            throw new IllegalArgumentException("Camera index out of bounds" + camera);
+        }
+        
+        return inputs[camera].connected;
+    }
+    
 
     /**
      * calculates the strafing and forward / reverse required for drive to be in line with a
