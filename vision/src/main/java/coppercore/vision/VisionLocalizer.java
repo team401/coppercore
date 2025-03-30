@@ -93,9 +93,22 @@ public class VisionLocalizer extends SubsystemBase {
      * @return camera inputs are connected
      */
     public boolean coprocessorConnected() {
-        return inputs[0].connected;
+        for (VisionIOInputsAutoLogged input : inputs) {
+            if (!input.connected) {
+                return false;
+            }
+        }
+        return true;
     }
 
+    /**
+     * 
+     * @param camera
+     * @return specific camera input is connected
+     */
+    public boolean coprocessorConnected(int camera) {
+        return inputs[camera].connected;
+    }
     /**
      * calculates the strafing and forward / reverse required for drive to be in line with a
      * specific tag + offset
