@@ -2,6 +2,7 @@ package coppercore.parameter_tools.json;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.FieldNamingStrategy;
+import edu.wpi.first.units.Measure;
 import java.lang.reflect.Field;
 
 public class JSONNamingStrategy implements FieldNamingStrategy {
@@ -25,14 +26,10 @@ public class JSONNamingStrategy implements FieldNamingStrategy {
         JSONName annotation = field.getAnnotation(JSONName.class);
         Class<?> type = field.getType();
         if (config.primitiveChecking()) {
-            if (type == int.class
-                    || type == double.class
-                    || type == float.class
-                    || type == long.class
-                    || type == short.class
-                    || type == char.class
-                    || type == byte.class
-                    || type == boolean.class) {
+
+            if (type.isPrimitive()
+                    && !(Measure.class.isAssignableFrom(field.getDeclaringClass())
+                            && field.getDeclaringClass().isRecord())) {
                 if (config.primitiveCheckPrintAlert()) {
                     Thread thread = new Thread(new JSONPrimitiveErrorAlert() {});
                     thread.start();
