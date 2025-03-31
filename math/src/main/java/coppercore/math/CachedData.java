@@ -42,7 +42,10 @@ public class CachedData<Type> {
         }
     }
     
-    /**This is used to write a new signal value(A new cache)*/
+    /**
+    This is used to write a new signal value(A new cache).
+    @param signal this is the signal that is being sent.
+    */
     // Write a new signal value
     public void write(Type signal) {
         if (signal != null) {
