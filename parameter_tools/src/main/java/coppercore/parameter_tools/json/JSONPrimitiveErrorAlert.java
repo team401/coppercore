@@ -1,6 +1,6 @@
 package coppercore.parameter_tools.json;
 
-public interface JSONPrimativeErrorAlert extends Runnable {
+public interface JSONPrimitiveErrorAlert extends Runnable {
 
     @Override
     public default void run() {
