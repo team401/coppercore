@@ -31,8 +31,19 @@ public class JSONNamingStrategy implements FieldNamingStrategy {
                     && !(Measure.class.isAssignableFrom(field.getDeclaringClass())
                             && field.getDeclaringClass().isRecord())) {
                 if (config.primitiveCheckPrintAlert()) {
-                    Thread thread = new Thread(new JSONPrimitiveErrorAlert() {});
-                    thread.start();
+                    System.out.println(
+                        "You used primitive: "
+                                    + "Class: "
+                                    + field.getDeclaringClass().getName()
+                                    + " Field name: "
+                                    + field.getName()
+                                    + " Type: "
+                                    + type.getName()
+                                    + " GenericType: "
+                                    + field.getGenericType().getTypeName()
+                                    + " SuperClass: "
+                                    + field.getDeclaringClass().getSuperclass().getName());
+                    );
                 }
                 if (config.primitiveCheckCrash()) {
                     throw new RuntimeException(
