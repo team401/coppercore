@@ -44,7 +44,6 @@ public class JSONNamingStrategy implements FieldNamingStrategy {
                                     + field.getGenericType().getTypeName()
                                     + " SuperClass: "
                                     + field.getDeclaringClass().getSuperclass().getName());
-                    );
                     (new Throwable()).printStackTrace(System.out);
                 }
                 if (config.primitiveCheckCrash()) {
