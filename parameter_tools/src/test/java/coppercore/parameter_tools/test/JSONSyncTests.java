@@ -33,7 +33,10 @@ public class JSONSyncTests {
                 new JSONSync<>(
                         new ExampleJsonSyncClass(),
                         RESOURCE_DIRECTORY + "/ExampleJsonSyncClass.json",
-                        new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
+                        new JSONSyncConfigBuilder()
+                                .setPrettyPrinting(true)
+                                .settupPolymorphAdapter(ExampleJsonSyncClass.Action.class)
+                                .build());
     }
 
     /**
@@ -49,6 +52,13 @@ public class JSONSyncTests {
         Assertions.assertEquals(
                 0.47, instance.pose.getRotation().getRadians(), "rotation radians should be 0.47");
         Assertions.assertNull(instance.motorData, "motorData should be null");
+        Assertions.assertEquals(instance.actions.size(), 2);
+        Assertions.assertEquals(
+                instance.actions.get(0) instanceof ExampleJsonSyncClass.Start, true);
+        Assertions.assertEquals(
+                instance.actions.get(1) instanceof ExampleJsonSyncClass.Finish, true);
+        Assertions.assertEquals(
+                ((ExampleJsonSyncClass.Start) instance.actions.get(0)).isDebug(), true);
     }
 
     /**

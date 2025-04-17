@@ -1,6 +1,4 @@
-package coppercore.parameter_tools.json;
-
-import java.util.HashMap;
+package coppercore.parameter_tools.json.helpers;
 
 import coppercore.parameter_tools.json.adapters.JSONPose2d;
 import coppercore.parameter_tools.json.adapters.JSONRotation2d;
@@ -29,6 +27,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
+import java.util.HashMap;
 
 public class JSONConverter {
     public static final HashMap<Class<?>, Class<? extends JSONObject<?>>> jsonMap = new HashMap<>();
@@ -63,7 +62,7 @@ public class JSONConverter {
         System.out.println(clazz);
         try {
             return (Class<? extends JSONObject<T>>) jsonMap.get(clazz);
-        } catch (ClassCastException e) { 
+        } catch (ClassCastException e) {
             System.out.println("Error");
             System.err.println("No JsonObject for " + clazz.getName());
             throw e;

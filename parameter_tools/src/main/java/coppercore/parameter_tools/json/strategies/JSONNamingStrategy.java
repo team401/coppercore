@@ -1,7 +1,8 @@
-package coppercore.parameter_tools.json;
+package coppercore.parameter_tools.json.strategies;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.FieldNamingStrategy;
+import coppercore.parameter_tools.json.annotations.JSONName;
 import java.lang.reflect.Field;
 
 public class JSONNamingStrategy implements FieldNamingStrategy {
