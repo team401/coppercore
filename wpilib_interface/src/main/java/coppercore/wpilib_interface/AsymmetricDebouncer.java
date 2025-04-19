@@ -1,3 +1,5 @@
+package coppercore.wpilib_interface;
+
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 
