@@ -35,7 +35,7 @@ public class JSONSyncTests {
                         RESOURCE_DIRECTORY + "/ExampleJsonSyncClass.json",
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
-                                .settupPolymorphAdapter(ExampleJsonSyncClass.Action.class)
+                                .setUpPolymorphAdapter(ExampleJsonSyncClass.Action.class)
                                 .build());
     }
 

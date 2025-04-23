@@ -94,7 +94,7 @@ public class JSONSyncConfigBuilder {
         return this;
     }
 
-    public <T> JSONSyncConfigBuilder settupPolymorphAdapter(Class<T> clazz) {
+    public <T> JSONSyncConfigBuilder setUpPolymorphAdapter(Class<T> clazz) {
         return addJsonDeserializer(clazz, new PolymorphDeserializer<>());
     }
 
