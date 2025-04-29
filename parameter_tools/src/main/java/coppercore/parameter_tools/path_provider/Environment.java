@@ -5,7 +5,9 @@ import java.io.File;
 public class Environment {
     private String name;
     private String filepath;
-    private Boolean defaultToEnvironment;
+
+    @SuppressWarnings("FieldMayBeFinal")
+    private Boolean defaultToEnvironment = null;
 
     public String getName() {
         return name;
@@ -20,10 +22,7 @@ public class Environment {
         return f.exists() && !f.isDirectory();
     }
 
-    public boolean getDefaultToEnvironment() {
-        if (defaultToEnvironment == null) {
-            return false;
-        }
+    public Boolean getDefaultToEnvironment() {
         return defaultToEnvironment;
     }
 }

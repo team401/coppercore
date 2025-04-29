@@ -100,7 +100,7 @@ public class PathProviderTests {
         Assertions.assertEquals(
                 pathProvider.getFullPath()
                         + File.separator
-                        + "defaults"
+                        + "normal"
                         + File.separator
                         + "RandomNoneExistantFile.json",
                 testPathProvider.resolveWritePath("RandomNoneExistantFile.json"));
