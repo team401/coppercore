@@ -14,7 +14,7 @@
       },
       {
         "name": "defaulting",
-        "defaultToEnviromentOnMissingFile": true
+        "defaultToEnvironment": true
       }
     ]
   }
