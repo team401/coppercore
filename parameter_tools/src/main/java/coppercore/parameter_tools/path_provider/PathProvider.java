@@ -11,12 +11,4 @@ public interface PathProvider {
     }
 
     String resolvePath(String file);
-
-    default String resolvePath(String file, boolean write) {
-        if (write) {
-            return resolveWritePath(file);
-        } else {
-            return resolveReadPath(file);
-        }
-    }
 }

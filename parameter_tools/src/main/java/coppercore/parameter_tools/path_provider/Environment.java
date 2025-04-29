@@ -1,24 +1,28 @@
 package coppercore.parameter_tools.path_provider;
 
+import java.io.File;
+
 public class Environment {
-    String name;
-    String filepath;
-    String[] files;
+    private String name;
+    private String filepath;
+
+    @SuppressWarnings("FieldMayBeFinal")
+    private Boolean defaultToEnvironment = null;
 
     public String getName() {
         return name;
     }
 
     public String getPath() {
-        return filepath;
+        return (filepath != null) ? filepath : name;
     }
 
-    public boolean hasFile(String file) {
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].compareTo(file) == 0) {
-                return true;
-            }
-        }
-        return false;
+    public boolean hasFile(String basePath, String file) {
+        File f = new File(basePath + File.separator + getPath() + File.separator + file);
+        return f.exists() && !f.isDirectory();
+    }
+
+    public Boolean getDefaultToEnvironment() {
+        return defaultToEnvironment;
     }
 }
