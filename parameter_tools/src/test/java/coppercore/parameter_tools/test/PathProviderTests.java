@@ -5,13 +5,15 @@
 
 package coppercore.parameter_tools.test;
 
-import coppercore.parameter_tools.path_provider.EnvironmentHandler;
-import coppercore.parameter_tools.path_provider.EnvironmentPathProvider;
 import java.io.File;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import coppercore.parameter_tools.path_provider.EnvironmentHandler;
+import coppercore.parameter_tools.path_provider.EnvironmentPathProvider;
 
 /**
  * @author avidraccoon
@@ -59,16 +61,16 @@ public class PathProviderTests {
     @Test
     public void getReadPathMissingBehaviorTest() {
         try {
-            testPathProvider.resolveReadPath("RandomNoneExistantFile.json");
+            testPathProvider.resolveReadPath("RandomNoneExistentFile.json");
             Assertions.fail("Should throw error about file missing");
         } catch (Exception e) {
             Assertions.assertEquals(
-                    "RandomNoneExistantFile.json does not exist at "
+                    "RandomNoneExistentFile.json does not exist at "
                             + pathProvider.getFullPath()
                             + File.separator
                             + "defaults"
                             + File.separator
-                            + "RandomNoneExistantFile.json",
+                            + "RandomNoneExistentFile.json",
                     e.getMessage());
         }
     }
@@ -102,8 +104,8 @@ public class PathProviderTests {
                         + File.separator
                         + "normal"
                         + File.separator
-                        + "RandomNoneExistantFile.json",
-                testPathProvider.resolveWritePath("RandomNoneExistantFile.json"));
+                        + "RandomNoneExistentFile.json",
+                testPathProvider.resolveWritePath("RandomNoneExistentFile.json"));
     }
 
     @Test
@@ -128,7 +130,7 @@ public class PathProviderTests {
                         + File.separator
                         + "defaulting"
                         + File.separator
-                        + "RandomNoneExistantFile.json",
-                testPathProvider.resolveWritePath("RandomNoneExistantFile.json"));
+                        + "RandomNoneExistentFile.json",
+                testPathProvider.resolveWritePath("RandomNoneExistentFile.json"));
     }
 }
