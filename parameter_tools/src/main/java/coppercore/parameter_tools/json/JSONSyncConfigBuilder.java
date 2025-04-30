@@ -1,7 +1,15 @@
 package coppercore.parameter_tools.json;
 
 import com.google.gson.FieldNamingPolicy;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonSerializer;
 import com.google.gson.LongSerializationPolicy;
+import com.google.gson.TypeAdapter;
+import com.google.gson.TypeAdapterFactory;
+import coppercore.parameter_tools.json.adapters.PolymorphDeserializer;
+import edu.wpi.first.math.Pair;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Builder class for creating a JSONSyncConfig instance. */
 public class JSONSyncConfigBuilder {
@@ -13,6 +21,8 @@ public class JSONSyncConfigBuilder {
     public boolean primitiveCheckCrash = true;
     public FieldNamingPolicy namingPolicy = FieldNamingPolicy.IDENTITY;
     public LongSerializationPolicy longSerializationPolicy = LongSerializationPolicy.DEFAULT;
+    private List<Pair<Class, Object>> typeAdapters = new ArrayList<>();
+    private List<TypeAdapterFactory> typeAdapterFactories = new ArrayList<>();
 
     /**
      * Sets whether null fields should be serialized.
@@ -71,13 +81,40 @@ public class JSONSyncConfigBuilder {
         return this;
     }
 
+    public <T> JSONSyncConfigBuilder addJsonDeserializer(
+            Class<T> clazz, JsonDeserializer<T> adapter) {
+        typeAdapters.add(new Pair<>(clazz, adapter));
+        return this;
+    }
+
+    public <T> JSONSyncConfigBuilder addJsonSerializer(Class<T> clazz, JsonSerializer<T> adapter) {
+        typeAdapters.add(new Pair<>(clazz, adapter));
+        return this;
+    }
+
+    public <T> JSONSyncConfigBuilder addJsonTypeAdapter(Class<T> clazz, TypeAdapter<T> adapter) {
+        typeAdapters.add(new Pair<>(clazz, adapter));
+        return this;
+    }
+
+    public <T> JSONSyncConfigBuilder setUpPolymorphAdapter(Class<T> clazz) {
+        return addJsonDeserializer(clazz, new PolymorphDeserializer<>());
+    }
+
     /**
      * Builds the configuration object.
      *
      * @return A JSONSyncConfig instance.
      */
     public JSONSyncConfig build() {
-        return new JSONSyncConfig(this);
+        return new JSONSyncConfig(
+                serializeNulls,
+                prettyPrinting,
+                excludeFieldsWithoutExposeAnnotation,
+                namingPolicy,
+                longSerializationPolicy,
+                typeAdapters,
+                typeAdapterFactories);
     }
 
     public void setPrimitiveChecking(boolean primitiveChecking) {

@@ -1,6 +1,6 @@
 package coppercore.parameter_tools.json.adapters;
 
-import coppercore.parameter_tools.json.JSONObject;
+import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;

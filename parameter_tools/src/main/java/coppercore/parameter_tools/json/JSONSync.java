@@ -4,7 +4,11 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapterFactory;
+import coppercore.parameter_tools.json.strategies.JSONExcludeExclusionStrategy;
+import coppercore.parameter_tools.json.strategies.JSONNamingStrategy;
 import coppercore.parameter_tools.path_provider.PathProvider;
+import edu.wpi.first.math.Pair;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -121,6 +125,12 @@ public class JSONSync<T> {
                 .setLongSerializationPolicy(this.config.longSerializationPolicy())
                 .addDeserializationExclusionStrategy(jsonExcludeStrategy)
                 .addSerializationExclusionStrategy(jsonExcludeStrategy);
+        for (TypeAdapterFactory factory : this.config.typeAdapterFactories()) {
+            builder.registerTypeAdapterFactory(factory);
+        }
+        for (Pair<Class, Object> pair : this.config.typeAdapters()) {
+            builder.registerTypeAdapter(pair.getFirst(), pair.getSecond());
+        }
         return builder.create();
     }
 

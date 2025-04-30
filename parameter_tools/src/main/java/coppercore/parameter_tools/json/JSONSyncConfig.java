@@ -5,8 +5,13 @@
 
 package coppercore.parameter_tools.json;
 
+import java.util.List;
+
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.LongSerializationPolicy;
+import com.google.gson.TypeAdapterFactory;
+
+import edu.wpi.first.math.Pair;
 
 /** Configuration class for customizing Gson behavior. */
 public record JSONSyncConfig(
@@ -15,18 +20,5 @@ public record JSONSyncConfig(
         boolean excludeFieldsWithoutExposeAnnotation,
         FieldNamingPolicy namingPolicy,
         LongSerializationPolicy longSerializationPolicy,
-        boolean primitiveChecking,
-        boolean primitiveCheckPrintAlert,
-        boolean primitiveCheckCrash) {
-    public JSONSyncConfig(JSONSyncConfigBuilder builder) {
-        this(
-                builder.serializeNulls,
-                builder.prettyPrinting,
-                builder.excludeFieldsWithoutExposeAnnotation,
-                builder.namingPolicy,
-                builder.longSerializationPolicy,
-                builder.primitiveChecking,
-                builder.primitiveCheckPrintAlert,
-                builder.primitiveCheckCrash);
-    }
-}
+        List<Pair<Class, Object>> typeAdapters,
+        List<TypeAdapterFactory> typeAdapterFactories) {}
