@@ -4,6 +4,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.FieldNamingStrategy;
 import edu.wpi.first.units.Measure;
 import java.lang.reflect.Field;
+import java.lang.Throwable;
 
 public class JSONNamingStrategy implements FieldNamingStrategy {
 
@@ -31,8 +32,19 @@ public class JSONNamingStrategy implements FieldNamingStrategy {
                     && !(Measure.class.isAssignableFrom(field.getDeclaringClass())
                             && field.getDeclaringClass().isRecord())) {
                 if (config.primitiveCheckPrintAlert()) {
-                    Thread thread = new Thread(new JSONPrimitiveErrorAlert() {});
-                    thread.start();
+                    System.out.println(
+                        "You used primitive: "
+                                    + "Class: "
+                                    + field.getDeclaringClass().getName()
+                                    + " Field name: "
+                                    + field.getName()
+                                    + " Type: "
+                                    + type.getName()
+                                    + " GenericType: "
+                                    + field.getGenericType().getTypeName()
+                                    + " SuperClass: "
+                                    + field.getDeclaringClass().getSuperclass().getName());
+                    (new Throwable()).printStackTrace(System.out);
                 }
                 if (config.primitiveCheckCrash()) {
                     throw new RuntimeException(
