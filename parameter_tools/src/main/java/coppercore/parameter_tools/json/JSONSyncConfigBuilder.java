@@ -113,6 +113,9 @@ public class JSONSyncConfigBuilder {
                 excludeFieldsWithoutExposeAnnotation,
                 namingPolicy,
                 longSerializationPolicy,
+                primitiveChecking,
+                primitiveCheckPrintAlert,
+                primitiveCheckCrash,
                 typeAdapters,
                 typeAdapterFactories);
     }

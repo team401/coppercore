@@ -1,7 +1,5 @@
 package coppercore.parameter_tools.test;
 
-import java.util.List;
-
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.json.annotations.JSONName;
@@ -12,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import java.util.List;
 
 /**
  * Example class to demonstrate the usage of the {@link JSONSync} utility for saving and loading

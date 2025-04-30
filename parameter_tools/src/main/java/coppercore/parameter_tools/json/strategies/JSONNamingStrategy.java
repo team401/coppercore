@@ -1,19 +1,21 @@
 package coppercore.parameter_tools.json.strategies;
 
-import java.lang.reflect.Field;
-
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.FieldNamingStrategy;
-
+import coppercore.parameter_tools.json.JSONSyncConfig;
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.json.annotations.JSONName;
+import edu.wpi.first.units.Measure;
+import java.lang.reflect.Field;
 
 public class JSONNamingStrategy implements FieldNamingStrategy {
 
     private FieldNamingPolicy policy = FieldNamingPolicy.IDENTITY;
+    private JSONSyncConfig config = new JSONSyncConfigBuilder().build();
 
     public JSONNamingStrategy() {}
 
-    public JSONNamingStrategy(FieldNamingPolicy policy) {
+    public JSONNamingStrategy(FieldNamingPolicy policy, JSONSyncConfig config) {
         this.policy = policy;
     }
 
@@ -25,6 +27,43 @@ public class JSONNamingStrategy implements FieldNamingStrategy {
     @Override
     public String translateName(Field field) {
         JSONName annotation = field.getAnnotation(JSONName.class);
+        Class<?> type = field.getType();
+        if (config.primitiveChecking()) {
+
+            if (type.isPrimitive()
+                    && !(Measure.class.isAssignableFrom(field.getDeclaringClass())
+                            && field.getDeclaringClass().isRecord())) {
+                if (config.primitiveCheckPrintAlert()) {
+                    System.out.println(
+                            "You used primitive: "
+                                    + "Class: "
+                                    + field.getDeclaringClass().getName()
+                                    + " Field name: "
+                                    + field.getName()
+                                    + " Type: "
+                                    + type.getName()
+                                    + " GenericType: "
+                                    + field.getGenericType().getTypeName()
+                                    + " SuperClass: "
+                                    + field.getDeclaringClass().getSuperclass().getName());
+                    (new Throwable()).printStackTrace(System.out);
+                }
+                if (config.primitiveCheckCrash()) {
+                    throw new RuntimeException(
+                            "You used primitive: "
+                                    + "Class: "
+                                    + field.getDeclaringClass().getName()
+                                    + " Field name: "
+                                    + field.getName()
+                                    + " Type: "
+                                    + type.getName()
+                                    + " GenericType: "
+                                    + field.getGenericType().getTypeName()
+                                    + " SuperClass: "
+                                    + field.getDeclaringClass().getSuperclass().getName());
+                }
+            }
+        }
         if (annotation != null) {
             return annotation.value();
         }
