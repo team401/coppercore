@@ -24,24 +24,33 @@ public class JSONHandler {
         this.path_provider = path_provider;
     }
 
-    public <T> T getObject(T blankObject, String filename) {
-        JSONSync<T> sync;
-        if (path_provider != null) {
-            sync = new JSONSync<>(blankObject, filename, path_provider, config);
-        } else {
-            sync = new JSONSync<>(blankObject, filename, config);
+    public <T> JSONSync<T> getJsonSync(T blankObject, String filename, PathProvider pathProvider, JSONSyncConfig config){
+        if (pathProvider == null){
+            return new JSONSync<>(blankObject, filename, config);
         }
+        return new JSONSync<>(blankObject, filename, path_provider, config);
+    }  
+
+    public <T> JSONSync<T> getJsonSync(T blankObject, String filename, PathProvider pathProvider){
+        return getJsonSync(blankObject, filename, path_provider, config);
+    }
+
+    public <T> JSONSync<T> getJsonSync(T blankObject, String filename, JSONSyncConfig config){
+        return getJsonSync(blankObject, filename, path_provider, config);
+    }
+
+    public <T> JSONSync<T> getJsonSync(T blankObject, String filename){
+        return getJsonSync(blankObject, filename, path_provider, config);
+    }
+
+    public <T> T getObject(T blankObject, String filename) {
+        JSONSync<T> sync = getJsonSync(blankObject, filename);
         sync.loadData();
         return sync.getObject();
     }
 
     public <T> void saveObject(T object, String filename) {
-        JSONSync<T> sync;
-        if (path_provider != null) {
-            sync = new JSONSync<>(object, filename, path_provider, config);
-        } else {
-            sync = new JSONSync<>(object, filename, config);
-        }
+        JSONSync<T> sync = getJsonSync(object, filename);
         sync.saveData();
     }
 }

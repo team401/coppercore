@@ -15,7 +15,7 @@ public class EnvironmentPathProvider implements PathProvider {
     }
 
     /**
-     * Find path for file for the current enviroment. If File does not exist then it returns the
+     * Find path for file for the current environment. If File does not exist then it returns the
      * desired location for the file to be made in.
      */
     @Override
@@ -40,7 +40,7 @@ public class EnvironmentPathProvider implements PathProvider {
     }
 
     /**
-     * Find path for file for the current enviroment. If File does not exist then it returns the
+     * Find path for file for the current environment. If File does not exist then it returns the
      * desired location for the file to be made in.
      */
     @Override
@@ -49,7 +49,7 @@ public class EnvironmentPathProvider implements PathProvider {
     }
 
     /**
-     * Find path for file for the current enviroment. If File does not exist then it returns the
+     * Find path for file for the current environment. If File does not exist then it returns the
      * desired location for the file to be made in.
      */
     public String resolvePath(String file, boolean defaultToEnvironment) {
