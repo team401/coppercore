@@ -1,4 +1,4 @@
-package coppercore.parameter_tools.json;
+package coppercore.parameter_tools.json.helpers;
 
 import coppercore.parameter_tools.json.adapters.JSONPose2d;
 import coppercore.parameter_tools.json.adapters.JSONRotation2d;

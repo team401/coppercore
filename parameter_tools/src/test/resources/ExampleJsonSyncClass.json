@@ -4,5 +4,19 @@
     "testInt": 2,
     "rotation": {
         "radians": 1.0
-    }
+    },
+    "actions": [
+        {
+            "debug": true,
+            "printMessage": false,
+            "message": "LoadingTest",
+            "type": "start"
+        },
+        {
+            "reason": "Random Reason",
+            "printMessage": true,
+            "message": "Testing123",
+            "type": "finish"
+        }
+    ]
 }
