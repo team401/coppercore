@@ -1,10 +1,5 @@
 package coppercore.wpilib_interface;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
-
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.json.adapters.JSONExclude;
@@ -12,6 +7,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import java.util.List;
+import java.util.Map;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
 
 public class Controllers {
     public Map<String, Integer> buttonShorthands;
