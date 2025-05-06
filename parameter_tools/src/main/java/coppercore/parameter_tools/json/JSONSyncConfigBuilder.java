@@ -16,6 +16,9 @@ public class JSONSyncConfigBuilder {
     public boolean serializeNulls = false;
     public boolean prettyPrinting = true;
     public boolean excludeFieldsWithoutExposeAnnotation = false;
+    public boolean primitiveChecking = true;
+    public boolean primitiveCheckPrintAlert = false;
+    public boolean primitiveCheckCrash = true;
     public FieldNamingPolicy namingPolicy = FieldNamingPolicy.IDENTITY;
     public LongSerializationPolicy longSerializationPolicy = LongSerializationPolicy.DEFAULT;
     private List<Pair<Class, Object>> typeAdapters = new ArrayList<>();
@@ -110,7 +113,22 @@ public class JSONSyncConfigBuilder {
                 excludeFieldsWithoutExposeAnnotation,
                 namingPolicy,
                 longSerializationPolicy,
+                primitiveChecking,
+                primitiveCheckPrintAlert,
+                primitiveCheckCrash,
                 typeAdapters,
                 typeAdapterFactories);
+    }
+
+    public void setPrimitiveChecking(boolean primitiveChecking) {
+        this.primitiveChecking = primitiveChecking;
+    }
+
+    public void setPrimitiveCheckPrintAlert(boolean primitiveCheckPrintAlert) {
+        this.primitiveCheckPrintAlert = primitiveCheckPrintAlert;
+    }
+
+    public void setPrimitiveCheckCrash(boolean primitiveCheckCrash) {
+        this.primitiveCheckCrash = primitiveCheckCrash;
     }
 }

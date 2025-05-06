@@ -113,9 +113,10 @@ public class JSONSync<T> {
      */
     private Gson generateGson() {
         ExclusionStrategy jsonExcludeStrategy = new JSONExcludeExclusionStrategy();
-        FieldNamingStrategy jsonNameStrategy = new JSONNamingStrategy(this.config.namingPolicy());
+        FieldNamingStrategy jsonNameStrategy =
+                new JSONNamingStrategy(this.config.namingPolicy(), this.config);
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(new JSONTypeAdapterFactory());
+        builder.registerTypeAdapterFactory(new JSONTypeAdapterFactory(this.config));
         if (this.config.serializeNulls()) builder.serializeNulls();
         if (this.config.prettyPrinting()) builder.setPrettyPrinting();
         if (this.config.excludeFieldsWithoutExposeAnnotation())

@@ -29,6 +29,7 @@ public class JSONSyncTests {
      */
     @BeforeEach
     public void TestPrep() {
+        System.out.println("\\/");
         ExampleJsonSyncClass.synced =
                 new JSONSync<>(
                         new ExampleJsonSyncClass(),
