@@ -53,6 +53,7 @@ public class JSONPrimitiveCheckStrategy {
         // TODO: Find less specific way of fixing this problem (Hopefully before merge if I can
         // figure it out)
         // NOTE: To view problem being specified look at the comment at the bottom of the file.
+        // POTENTIAL SOLUTION: Might be able to hook this up to JSONConverter.java
         if (Measure.class.isAssignableFrom(field.getDeclaringClass())
                 && field.getDeclaringClass().isRecord()) {
             return;
