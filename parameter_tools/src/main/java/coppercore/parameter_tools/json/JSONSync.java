@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
 import coppercore.parameter_tools.json.strategies.JSONExcludeExclusionStrategy;
 import coppercore.parameter_tools.json.strategies.JSONNamingStrategy;
+import coppercore.parameter_tools.json.strategies.JSONPrimitiveCheckStrategy;
 import coppercore.parameter_tools.path_provider.PathProvider;
 import edu.wpi.first.math.Pair;
 import java.io.FileNotFoundException;
@@ -115,6 +116,9 @@ public class JSONSync<T> {
         ExclusionStrategy jsonExcludeStrategy = new JSONExcludeExclusionStrategy();
         FieldNamingStrategy jsonNameStrategy =
                 new JSONNamingStrategy(this.config.namingPolicy(), this.config);
+        // Add primitive checking
+        jsonNameStrategy =
+                JSONPrimitiveCheckStrategy.checkForPrimitives(jsonNameStrategy, this.config);
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapterFactory(new JSONTypeAdapterFactory(this.config));
         if (this.config.serializeNulls()) builder.serializeNulls();
