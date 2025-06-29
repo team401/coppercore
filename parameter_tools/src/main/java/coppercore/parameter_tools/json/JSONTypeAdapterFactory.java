@@ -24,8 +24,7 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
     public <T> TypeAdapter<T> create(Gson gson, com.google.gson.reflect.TypeToken<T> type) {
         @SuppressWarnings("unchecked")
         Class<T> rawType = (Class<T>) type.getRawType();
-        System.out.println(rawType.getName());
-        System.out.println(rawType.getCanonicalName());
+
         if (!JSONConverter.has(rawType)) {
             return null;
         }
