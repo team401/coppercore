@@ -37,9 +37,9 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
             @Override
             public void write(JsonWriter out, T value) throws IOException {
                 try {
-                    Class jsonObject = JSONConverter.convert(rawType);
+                    Class<? extends JSONObject<T>> jsonObject = JSONConverter.convert(rawType);
                     // This only exists because of Units.
-                    if (jsonObject != JSONMeasure.class) {
+                    if (!JSONMeasure.class.isAssignableFrom(jsonObject)) {
                         gson.toJson(
                                 jsonObject.getConstructor(rawType).newInstance(value),
                                 jsonObject,

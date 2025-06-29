@@ -1,14 +1,12 @@
 package coppercore.parameter_tools.test;
 
+import coppercore.parameter_tools.path_provider.EnvironmentHandler;
+import coppercore.parameter_tools.path_provider.EnvironmentPathProvider;
 import java.io.File;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import coppercore.parameter_tools.path_provider.EnvironmentHandler;
-import coppercore.parameter_tools.path_provider.EnvironmentPathProvider;
 
 /**
  * @author avidraccoon

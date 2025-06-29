@@ -24,22 +24,23 @@ public class JSONHandler {
         this.path_provider = path_provider;
     }
 
-    public <T> JSONSync<T> getJsonSync(T blankObject, String filename, PathProvider pathProvider, JSONSyncConfig config){
-        if (pathProvider == null){
+    public <T> JSONSync<T> getJsonSync(
+            T blankObject, String filename, PathProvider pathProvider, JSONSyncConfig config) {
+        if (pathProvider == null) {
             return new JSONSync<>(blankObject, filename, config);
         }
         return new JSONSync<>(blankObject, filename, path_provider, config);
-    }  
+    }
 
-    public <T> JSONSync<T> getJsonSync(T blankObject, String filename, PathProvider pathProvider){
+    public <T> JSONSync<T> getJsonSync(T blankObject, String filename, PathProvider pathProvider) {
         return getJsonSync(blankObject, filename, path_provider, config);
     }
 
-    public <T> JSONSync<T> getJsonSync(T blankObject, String filename, JSONSyncConfig config){
+    public <T> JSONSync<T> getJsonSync(T blankObject, String filename, JSONSyncConfig config) {
         return getJsonSync(blankObject, filename, path_provider, config);
     }
 
-    public <T> JSONSync<T> getJsonSync(T blankObject, String filename){
+    public <T> JSONSync<T> getJsonSync(T blankObject, String filename) {
         return getJsonSync(blankObject, filename, path_provider, config);
     }
 
