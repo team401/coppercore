@@ -8,6 +8,13 @@ public class EnvironmentPathProvider implements PathProvider {
     String defaults;
     String filepath;
 
+    /**
+     * Constructor for EnvironmentPathProvider.
+     *
+     * @param environment the environment to use for path resolution
+     * @param filepath the base file path where the environment files are located
+     * @param defaultsPath the default path to use if the file does not exist in the environment
+     */
     public EnvironmentPathProvider(Environment environment, String filepath, String defaultsPath) {
         this.environment = environment;
         this.defaults = defaultsPath;
