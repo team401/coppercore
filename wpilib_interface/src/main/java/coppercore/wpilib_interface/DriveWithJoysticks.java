@@ -12,27 +12,33 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import java.util.function.Supplier;
 
 /**
- * This class allows us to be able to drive with the controller joysticks and get the linear
- * velocity along with controlling it. It also allows us to get the goal speeds.
+ * A command to control a drivetrain using joysticks as input.
+ *
+ * <p>This command squares the magnitude of the inputs for more precise low-speed control.
  */
 public class DriveWithJoysticks extends Command {
     private final DriveTemplate drive;
     private final Supplier<Double> driveXSupplier;
     private final Supplier<Double> driveYSupplier;
     private final Supplier<Double> rotationSupplier;
-    private final double maxLinearVelocity;
-    private final double maxAngularVelocity;
+    private double maxLinearVelocity;
+    private double maxAngularVelocity;
     private final double joystickDeadband;
 
     /**
-     * This defines a couple of variables that are to be used to help drive with the joysticks.
+     * Initialize a DriveWithJoysticks command using CommandJoysticks for input.
      *
-     * @param drive This is the drive subsystem supplied by the robot project
-     * @param leftJoystick This controls the left joystick
-     * @param rightJoystick This controls the right joystick
-     * @param maxLinearVelocity This sets the maximum linear velocity
-     * @param maxAngularVelocity This sets the maximum angular velocity
-     * @param joystickDeadband This sets the deadband of the joysticks
+     * <p>If using a controller that does not support CommandJoystick, there is an alternate
+     * initializer that accepts suppliers.
+     *
+     * @param drive The drive subsystem supplied by the robot project.
+     * @param leftJoystick The left (translation/strafe) joystick.
+     * @param rightJoystick The right (steer) joystick.
+     * @param maxLinearVelocity Maximum driving velocity, which will be commanded when joystick is
+     *     fully deflected. In m/s.
+     * @param maxAngularVelocity Maximum steering velocity, which will be commanded when steer
+     *     joystick is fully deflected. In rad/s.
+     * @param joystickDeadband Deadband to apply to the joystick inputs.
      */
     public DriveWithJoysticks(
             DriveTemplate drive,
@@ -53,6 +59,26 @@ public class DriveWithJoysticks extends Command {
         addRequirements(this.drive);
     }
 
+    /**
+     * Initialize a DriveWithJoysticks command using suppliers for input.
+     *
+     * <p>If using a controller that supports CommandJoystick, there is an alternate initializer
+     * that accepts CommandJoystick objects.
+     *
+     * @param drive The Drive subsystem supplied by the robot project.
+     * @param driveXSupplier A double supplier supplying the X axis of the strafe. joystick. This is
+     *     the left/right drive control as viewed from the top of the joystick, NOT the X axis in
+     *     robot coordinates.
+     * @param driveYSupplier A double supplier supplying the Y axis of the strafe joystick. This is
+     *     the up/down drive control as viewed from the top of the joystick, NOT the Y axis in robot
+     *     coordinates.
+     * @param rotationSupplier A double supplier supplying the steer axis input.
+     * @param maxLinearVelocity Maximum driving velocity, which will be commanded when joystick is
+     *     fully deflected. In m/s.
+     * @param maxAngularVelocity Maximum steering velocity, which will be commanded when steer
+     *     joystick is fully deflected. In rad/s.
+     * @param joystickDeadband Deadband to apply to the joystick inputs.
+     */
     public DriveWithJoysticks(
             DriveTemplate drive,
             Supplier<Double> driveXSupplier,
@@ -115,7 +141,8 @@ public class DriveWithJoysticks extends Command {
         double yDeadband = deadbands[1];
         double magnitude = Math.hypot(xDeadband, yDeadband);
 
-        /* joystick x/y is opposite of field x/y
+        /*
+         * joystick x/y is opposite of field x/y
          * therefore, x and y must be flipped for proper rotation of pose
          * BEWARE: not flipping will cause forward on joystick to drive right on field
          */
@@ -128,5 +155,16 @@ public class DriveWithJoysticks extends Command {
                         .getTranslation();
 
         return linearVelocity;
+    }
+
+    /**
+     * Update the maximum linear and angular velocities.
+     *
+     * @param maxLinearVelocity The new maximum allowed linear velocity in m/s.
+     * @param maxAngularVelocity The new maximum allowed angular velocity in rad/s.
+     */
+    public void setMaxSpeeds(double maxLinearVelocity, double maxAngularVelocity) {
+        this.maxLinearVelocity = maxLinearVelocity;
+        this.maxAngularVelocity = maxAngularVelocity;
     }
 }
