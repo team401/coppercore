@@ -119,6 +119,7 @@ public class CachedDataTest {
         }
         Assertions.assertEquals(data.read(), -100);
     }
+
     @Test
     public void readTestNull() {
         CachedData data = new CachedData(1);
@@ -129,6 +130,7 @@ public class CachedDataTest {
         }
         Assertions.assertEquals(data.read(), null);
     }
+
     @Test
     public void readTestNull2() {
         CachedData<Integer> integerData = new CachedData<>(10);
