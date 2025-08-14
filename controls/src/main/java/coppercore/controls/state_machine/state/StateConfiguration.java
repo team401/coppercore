@@ -2,6 +2,7 @@ package coppercore.controls.state_machine.state;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
@@ -24,6 +25,20 @@ public class StateConfiguration<State, Trigger> {
         this.source = source;
         // Temp solution
         transitions = new ArrayList<>();
+    }
+
+    public StateConfiguration<State, Trigger> permit(Transition<State, Trigger> transition) {
+        if (!source.equals(transition.getSource())) {
+            throw new RuntimeException("Transition Source must Be same as transition is permitted from");
+        }
+        if (Objects.isNull(transition.getDestination())) {
+            throw new RuntimeException("Transition Destination must not be null");
+        }
+        if (Objects.isNull(transition.getTrigger())) {
+            throw new RuntimeException("Transition Trigger must not be null");
+        }
+        transitions.add(transition);
+        return this;
     }
 
     /**
