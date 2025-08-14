@@ -11,12 +11,12 @@ public class Transition<State, Trigger> extends TransitionBase<State, Trigger> {
         super(source, destination, trigger);
     }
 
-    public TransitionBase<State, Trigger> disableOnEntry(){
+    public Transition<State, Trigger> disableOnEntry(){
         this.runOnEntry = false;
         return this;
     }
 
-    public TransitionBase<State, Trigger> disableOnExit(){
+    public Transition<State, Trigger> disableOnExit(){
         this.runOnExit = false;
         return this;
     }

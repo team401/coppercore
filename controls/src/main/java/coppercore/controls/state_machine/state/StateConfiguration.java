@@ -49,10 +49,8 @@ public class StateConfiguration<State, Trigger> {
      * @return configuration
      */
     public StateConfiguration<State, Trigger> permit(Trigger trigger, State destination) {
-        if (getFilteredTransition(trigger, true).isEmpty()) {
-            Transition<State, Trigger> transition = new Transition<>(source, destination, trigger);
-            transitions.add(transition);
-        }
+        TransitionBase<State, Trigger> transition = new Transition<>(source, destination, trigger);
+        transitions.add(transition);
         return this;
     }
 
@@ -64,12 +62,10 @@ public class StateConfiguration<State, Trigger> {
      * @return configuration
      */
     public StateConfiguration<State, Trigger> permitInternal(Trigger trigger, State destination) {
-        if (getFilteredTransition(trigger, true).isEmpty()) {
-            Transition<State, Trigger> transition = new Transition<>(source, destination, trigger);
-            transition.disableOnEntry();
-            transition.disableOnExit();
-            transitions.add(transition);
-        }
+        TransitionBase<State, Trigger> transition = new Transition<>(source, destination, trigger)
+            .disableOnEntry()
+            .disableOnExit();
+        transitions.add(transition);
         return this;
     }
 
@@ -84,10 +80,8 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permitIf(
             Trigger trigger, State destination, BooleanSupplier check) {
-        if (getFilteredTransition(trigger, true, true).isEmpty()) {
-            ConditionalTransition<State, Trigger> transition = new ConditionalTransition<>(source, destination, trigger, check);
-            transitions.add(transition);
-        }
+        TransitionBase<State, Trigger> transition = new ConditionalTransition<>(source, destination, trigger, check);
+        transitions.add(transition);
         return this;
     }
 
@@ -103,12 +97,10 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permitInternalIf(
             Trigger trigger, State destination, BooleanSupplier check) {
-        if (getFilteredTransition(trigger, true, true).isEmpty()) {
-            ConditionalTransition<State, Trigger> transition = new ConditionalTransition<>(source, destination, trigger, check);
-            transition.disableOnEntry();
-            transition.disableOnExit();
-            transitions.add(transition);
-        }
+        TransitionBase<State, Trigger> transition = new ConditionalTransition<>(source, destination, trigger, check)
+            .disableOnEntry()
+            .disableOnExit();
+        transitions.add(transition);
         return this;
     }
 
@@ -119,49 +111,25 @@ public class StateConfiguration<State, Trigger> {
      * @return list of transitions
      */
     public List<TransitionBase<State, Trigger>> getTransitions(Trigger trigger) {
-        List<TransitionBase<State, Trigger>> matchedTransitions = new ArrayList<>();
-        if (trigger == null) return matchedTransitions;
-        for (TransitionBase<State, Trigger> transition : transitions) {
-            if (trigger.equals(transition.getTrigger())) {
-                matchedTransitions.add(transition);
-            }
-        }
-        return matchedTransitions;
+        if (Objects.isNull(trigger)) return new ArrayList<>();
+        return transitions.stream()
+            .filter((TransitionBase<State, Trigger> transition) -> trigger.equals(transition.getTrigger()))
+            .toList();
     }
 
     /**
      * Filters Transitions
      *
-     * @param transitions list of transtions
+     * @param transitions list of transitions
      * @return filtered transition
      */
     private Optional<TransitionBase<State, Trigger>> filterTransitions(
-            List<TransitionBase<State, Trigger>> transitions, boolean excludeConditionals, boolean excludeNormal) {
+            List<TransitionBase<State, Trigger>> transitions) {
         Optional<TransitionBase<State, Trigger>> returnOptional = Optional.empty();
-        boolean conditinal = false;
         int highest_priority = Integer.MIN_VALUE;
         for (TransitionBase<State, Trigger> transition : transitions) {
             int priority = transition.getPriority();
-            if (priority > highest_priority) {
-                returnOptional = Optional.of(transition);
-            }
-
-            // TODO: Code can't be removed yet need to remember why was had excludes
-            if (transition instanceof ConditionalTransition) {
-                if (excludeConditionals){
-                    continue;
-                }
-                if (conditinal
-                        && ((ConditionalTransition<State, Trigger>) transition).isCheckTrue()) {
-                    return Optional.empty();
-                } else if (((ConditionalTransition<State, Trigger>) transition).isCheckTrue()) {
-                    returnOptional = Optional.of(transition);
-                    conditinal = true;
-                }
-            } else if (!conditinal) {
-                if (excludeNormal){
-                    continue;
-                }
+            if (priority > highest_priority && transition.canTransition()) {
                 returnOptional = Optional.of(transition);
             }
         }
@@ -178,27 +146,7 @@ public class StateConfiguration<State, Trigger> {
      * @return transition
      */
     public Optional<TransitionBase<State, Trigger>> getFilteredTransition(Trigger trigger) {
-        return filterTransitions(getTransitions(trigger), false, false);
-    }
-
-    /**
-     * Gets filtered transition
-     *
-     * @param trigger trigger event
-     * @return transition
-     */
-    public Optional<TransitionBase<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals) {
-        return filterTransitions(getTransitions(trigger), excludeConditionals, false);
-    }
-
-    /**
-     * Gets filtered transition
-     *
-     * @param trigger trigger event
-     * @return transition
-     */
-    public Optional<TransitionBase<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals, boolean excludeNormal) {
-        return filterTransitions(getTransitions(trigger), excludeConditionals, excludeNormal);
+        return filterTransitions(getTransitions(trigger));
     }
     
 }
