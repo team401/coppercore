@@ -7,7 +7,6 @@ public class TransitionBase<State, Trigger> {
     private State source;
     private State destination;
     private Trigger trigger;
-    private Consumer<TransitionBase<State, Trigger>> action;
     private boolean internalTransition;
 
     /**
@@ -71,13 +70,6 @@ public class TransitionBase<State, Trigger> {
      */
     public boolean canTransition() {
         return true;
-    }
-
-    /** Runs transition action */
-    public void runAction() {
-        if (action != null) {
-            action.accept(this);
-        }
     }
 
     /**

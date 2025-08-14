@@ -3,7 +3,6 @@ package coppercore.controls.state_machine;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import coppercore.controls.state_machine.state.StateConfiguration;
 import coppercore.controls.state_machine.transition.TransitionBase;
@@ -11,16 +10,6 @@ import coppercore.controls.state_machine.transition.TransitionBase;
 /** Object to configure State Machine */
 public class StateMachineConfiguration<State, Trigger> {
     private final Map<State, StateConfiguration<State, Trigger>> stateConfigurations;
-    private Consumer<TransitionBase<State, Trigger>> onEntryAction;
-    private Consumer<TransitionBase<State, Trigger>> onExitAction;
-
-    public boolean hasEntryAction() {
-        return (this.onEntryAction != null);
-    }
-
-    public boolean hasExitAction() {
-        return (this.onExitAction != null);
-    }
 
     /** Creates StateMachineConfiuration Object */
     public StateMachineConfiguration() {
@@ -83,51 +72,5 @@ public class StateMachineConfiguration<State, Trigger> {
         }
 
         return transition;
-    }
-
-    /**
-     * Set the default onEntry function.
-     *
-     * @param action action to run onEntry
-     * @return configuration
-     */
-    public StateMachineConfiguration<State, Trigger> configureDefaultOnEntryAction(
-            Consumer<TransitionBase<State, Trigger>> action) {
-        this.onEntryAction = action;
-        return this;
-    }
-
-    /**
-     * Set the default onExit function.
-     *
-     * @param action action to run onExit
-     * @return configuration
-     */
-    public StateMachineConfiguration<State, Trigger> configureDefaultOnExitAction(
-            Consumer<TransitionBase<State, Trigger>> action) {
-        this.onExitAction = action;
-        return this;
-    }
-
-    /**
-     * Method used by statemachine to handle processing on entry of a state.
-     *
-     * @param transition Transition used
-     */
-    public void runOnEntry(TransitionBase<State, Trigger> transition) {
-        if (onEntryAction != null) {
-            onEntryAction.accept(transition);
-        }
-    }
-
-    /**
-     * Method used by statemachine to handle processing on exiting of a state.
-     *
-     * @param transition Transition used
-     */
-    public void runOnExit(TransitionBase<State, Trigger> transition) {
-        if (onExitAction != null) {
-            onExitAction.accept(transition);
-        }
     }
 }

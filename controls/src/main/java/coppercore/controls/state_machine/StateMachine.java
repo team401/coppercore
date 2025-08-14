@@ -3,7 +3,6 @@ package coppercore.controls.state_machine;
 import java.util.Optional;
 
 import coppercore.controls.state_machine.state.StateBase;
-import coppercore.controls.state_machine.state.StateConfiguration;
 import coppercore.controls.state_machine.transition.TransitionBase;
 import coppercore.controls.state_machine.transition.TransitionInfo;
 
@@ -47,36 +46,9 @@ public class StateMachine<State extends StateBase<State, Trigger>, Trigger> {
         // TODO: Make the Transition generate the transition info.
         transitionInfo.setTransition(transition);
         if (!transition.isInternal()) {
-            Optional<StateConfiguration<State, Trigger>> currentStateConfigurationOptional =
-                    configuration.getStateConfiguration(currentState);
-            Optional<StateConfiguration<State, Trigger>> nextStateConfigurationOptional =
-                    configuration.getStateConfiguration(transition.getDestination());
-            if (currentStateConfigurationOptional.isPresent()) {
-                StateConfiguration<State, Trigger> config = currentStateConfigurationOptional.get();
-                if (config.doRunDefaultExitAction() && configuration.hasExitAction()) {
-                    configuration.runOnExit(transition);
-                } else if (config.hasExitAction()) {
-                    config.runOnExit(transition);
-                } else {
-                    runOnExit(transition);
-                }
-            } else {
-                configuration.runOnExit(transition);
-            }
-            transition.runAction();
+            runOnExit(transition);
             currentState = transition.getDestination();
-            if (nextStateConfigurationOptional.isPresent()) {
-                StateConfiguration<State, Trigger> config = nextStateConfigurationOptional.get();
-                if (config.doRunDefaultExitAction() && configuration.hasEntryAction()) {
-                    configuration.runOnEntry(transition);
-                } else if (config.hasEntryAction()) {
-                    config.runOnEntry(transition);
-                } else {
-                    runOnEntry(transition);
-                }
-            } else {
-                configuration.runOnEntry(transition);
-            }
+            runOnEntry(transition);
         } else {
             currentState = transition.getDestination();
         }

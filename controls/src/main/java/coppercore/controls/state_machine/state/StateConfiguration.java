@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 import coppercore.controls.state_machine.transition.TransitionBase;
 import coppercore.controls.state_machine.transition.transitions.ConditionalTransition;
@@ -13,19 +12,7 @@ import coppercore.controls.state_machine.transition.transitions.ConditionalTrans
 public class StateConfiguration<State, Trigger> {
 
     private List<TransitionBase<State, Trigger>> transitions;
-    private State source;
-    private Consumer<TransitionBase> onEntryAction;
-    private Consumer<TransitionBase> onExitAction;
-    private boolean runDefaultEntryAction = true;
-    private boolean runDefaultExitAction = true;
-
-    public boolean hasEntryAction() {
-        return (this.onEntryAction != null);
-    }
-
-    public boolean hasExitAction() {
-        return (this.onExitAction != null);
-    }
+    private final State source;
 
     /**
      * Creates configuration for how state machine behaves in given State
@@ -182,86 +169,5 @@ public class StateConfiguration<State, Trigger> {
     public Optional<TransitionBase<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals, boolean excludeNormal) {
         return filterTransitions(getTransitions(trigger), excludeConditionals, excludeNormal);
     }
-
-    /**
-     * Runs on entry event
-     *
-     * @param transition trigger event
-     */
-    public void runOnEntry(TransitionBase transition) {
-        if (onEntryAction != null) {
-            onEntryAction.accept(transition);
-        }
-    }
-
-    /**
-     * Runs on exit event
-     *
-     * @param transition trigger event
-     */
-    public void runOnExit(TransitionBase transition) {
-        if (onExitAction != null) {
-            onExitAction.accept(transition);
-        }
-    }
-
-    /**
-     * Disables default on entry action
-     *
-     * @return configuration
-     */
-    public StateConfiguration<State, Trigger> disableDefualtOnEntry() {
-        this.runDefaultEntryAction = false;
-        return this;
-    }
-
-    /**
-     * Disables default on exit action
-     *
-     * @return configuration
-     */
-    public StateConfiguration<State, Trigger> disableDefualtOnExit() {
-        this.runDefaultExitAction = false;
-        return this;
-    }
-
-    /**
-     * Sets on entry action
-     *
-     * @param action Action to run onEntry
-     * @return configuration
-     */
-    public StateConfiguration<State, Trigger> configureOnEntryAction(Consumer<TransitionBase> action) {
-        this.onEntryAction = action;
-        return this;
-    }
-
-    /**
-     * Sets on exit action
-     *
-     * @param action Action to run onExit
-     * @return configuration
-     */
-    public StateConfiguration<State, Trigger> configureOnExitAction(Consumer<TransitionBase> action) {
-        this.onExitAction = action;
-        return this;
-    }
-
-    /**
-     * Returns if in this State the default onEntry Action should run.
-     *
-     * @return do run
-     */
-    public boolean doRunDefaultEntryAction() {
-        return runDefaultEntryAction;
-    }
-
-    /**
-     * Returns if in this State the default onExit Action should run.
-     *
-     * @return do run
-     */
-    public boolean doRunDefaultExitAction() {
-        return runDefaultExitAction;
-    }
+    
 }
