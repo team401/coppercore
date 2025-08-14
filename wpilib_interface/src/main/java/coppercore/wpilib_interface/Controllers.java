@@ -7,7 +7,7 @@ import java.util.function.IntSupplier;
 
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
-import coppercore.parameter_tools.json.adapters.JSONExclude;
+import coppercore.parameter_tools.json.annotations.JSONExclude;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
