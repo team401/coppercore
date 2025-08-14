@@ -1,13 +1,11 @@
 package coppercore.controls.state_machine.transition;
 
-import java.util.function.Consumer;
-
 /** Data holder for transition */
-public class TransitionBase<State, Trigger> {
-    private State source;
-    private State destination;
-    private Trigger trigger;
-    private boolean internalTransition;
+public abstract class TransitionBase<State, Trigger> {
+    private final State source;
+    private final State destination;
+    private final Trigger trigger;
+
 
     /**
      * Creates Transition Data Object
@@ -15,25 +13,12 @@ public class TransitionBase<State, Trigger> {
      * @param source Transition Source
      * @param destination Transition Destination
      * @param trigger Transition Trigger
-     */
-    public TransitionBase(State source, State destination, Trigger trigger) {
-        this(source, destination, trigger, false);
-    }
-
-    /**
-     * Creates Transition Data Object
-     *
-     * @param source Transition Source
-     * @param destination Transition Destination
-     * @param trigger Transition Trigger
-     * @param internalTransition is Interal Transition
      */
     public TransitionBase(
-            State source, State destination, Trigger trigger, boolean internalTransition) {
+            State source, State destination, Trigger trigger) {
         this.source = source;
         this.destination = destination;
         this.trigger = trigger;
-        this.internalTransition = internalTransition;
     }
 
     /**
@@ -73,20 +58,19 @@ public class TransitionBase<State, Trigger> {
     }
 
     /**
-     * Returns if the transition fires the on enter and exit actions.
-     *
-     * @return internal
-     */
-    public boolean isInternal() {
-        return internalTransition;
-    }
-
-    /**
      * Checks if it is entering the same state it is already in.
      *
      * @return reentrant
      */
     public boolean isReentrant() {
         return source != null && source.equals(trigger);
+    }
+
+    public boolean runOnEntry() {
+        return true;
+    }
+
+    public boolean runOnExit() {
+        return true;
     }
 }

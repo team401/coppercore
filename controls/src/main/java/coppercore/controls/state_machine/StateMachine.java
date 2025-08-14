@@ -45,12 +45,12 @@ public class StateMachine<State extends StateBase<State, Trigger>, Trigger> {
         }
         // TODO: Make the Transition generate the transition info.
         transitionInfo.setTransition(transition);
-        if (!transition.isInternal()) {
+        if (transition.runOnExit()) {
             runOnExit(transition);
-            currentState = transition.getDestination();
+        }
+        currentState = transition.getDestination();
+        if (transition.runOnEntry()) {
             runOnEntry(transition);
-        } else {
-            currentState = transition.getDestination();
         }
     }
 

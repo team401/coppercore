@@ -7,6 +7,7 @@ import java.util.function.BooleanSupplier;
 
 import coppercore.controls.state_machine.transition.TransitionBase;
 import coppercore.controls.state_machine.transition.transitions.ConditionalTransition;
+import coppercore.controls.state_machine.transition.transitions.Transition;
 
 /** Configures State Machine State behavior */
 public class StateConfiguration<State, Trigger> {
@@ -34,7 +35,8 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permit(Trigger trigger, State destination) {
         if (getFilteredTransition(trigger, true).isEmpty()) {
-            transitions.add(new TransitionBase<>(source, destination, trigger, false));
+            Transition<State, Trigger> transition = new Transition<>(source, destination, trigger);
+            transitions.add(transition);
         }
         return this;
     }
@@ -48,7 +50,10 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permitInternal(Trigger trigger, State destination) {
         if (getFilteredTransition(trigger, true).isEmpty()) {
-            transitions.add(new TransitionBase<>(source, destination, trigger, true));
+            Transition<State, Trigger> transition = new Transition<>(source, destination, trigger);
+            transition.disableOnEntry();
+            transition.disableOnExit();
+            transitions.add(transition);
         }
         return this;
     }
@@ -65,7 +70,8 @@ public class StateConfiguration<State, Trigger> {
     public StateConfiguration<State, Trigger> permitIf(
             Trigger trigger, State destination, BooleanSupplier check) {
         if (getFilteredTransition(trigger, true, true).isEmpty()) {
-            transitions.add(new ConditionalTransition<>(source, destination, trigger, check, false));
+            ConditionalTransition<State, Trigger> transition = new ConditionalTransition<>(source, destination, trigger, check);
+            transitions.add(transition);
         }
         return this;
     }
@@ -83,7 +89,10 @@ public class StateConfiguration<State, Trigger> {
     public StateConfiguration<State, Trigger> permitInternalIf(
             Trigger trigger, State destination, BooleanSupplier check) {
         if (getFilteredTransition(trigger, true, true).isEmpty()) {
-            transitions.add(new ConditionalTransition<>(source, destination, trigger, check, true));
+            ConditionalTransition<State, Trigger> transition = new ConditionalTransition<>(source, destination, trigger, check);
+            transition.disableOnEntry();
+            transition.disableOnExit();
+            transitions.add(transition);
         }
         return this;
     }
