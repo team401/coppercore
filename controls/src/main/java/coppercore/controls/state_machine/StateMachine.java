@@ -1,15 +1,14 @@
 package coppercore.controls.state_machine;
 
-import coppercore.controls.state_machine.state.PeriodicStateInterface;
-import coppercore.controls.state_machine.state.StateConfiguration;
-import coppercore.controls.state_machine.state.StateContainer;
-import coppercore.controls.state_machine.state.StateInterface;
-import coppercore.controls.state_machine.transition.Transition;
-import coppercore.controls.state_machine.transition.TransitionInfo;
 import java.util.Optional;
 
+import coppercore.controls.state_machine.state.StateBase;
+import coppercore.controls.state_machine.state.StateConfiguration;
+import coppercore.controls.state_machine.transition.TransitionBase;
+import coppercore.controls.state_machine.transition.TransitionInfo;
+
 /** Generic State Machine */
-public class StateMachine<State, Trigger> {
+public class StateMachine<State extends StateBase<State, Trigger>, Trigger> {
     private final StateMachineConfiguration<State, Trigger> configuration;
     private TransitionInfo<State, Trigger> transitionInfo;
     private State currentState;
@@ -32,17 +31,20 @@ public class StateMachine<State, Trigger> {
      */
     public void fire(Trigger trigger) {
         transitionInfo = new TransitionInfo<>(currentState, trigger);
-        Optional<Transition<State, Trigger>> transitionOptional =
+        Optional<TransitionBase<State, Trigger>> transitionOptional =
                 configuration.getTransition(currentState, trigger);
+        // Fail the transition if no transition available
         if (transitionOptional.isEmpty()) {
             transitionInfo.fail();
             return;
         }
-        Transition<State, Trigger> transition = transitionOptional.get();
+        TransitionBase<State, Trigger> transition = transitionOptional.get();
+        // Fail the transition if is not a legal transition
         if (!transition.canTransition()) {
             transitionInfo.fail();
             return;
         }
+        // TODO: Make the Transition generate the transition info.
         transitionInfo.setTransition(transition);
         if (!transition.isInternal()) {
             Optional<StateConfiguration<State, Trigger>> currentStateConfigurationOptional =
@@ -91,55 +93,15 @@ public class StateMachine<State, Trigger> {
 
     /** Runs states Period if is periodic */
     public void periodic() {
-        if (currentState instanceof PeriodicStateInterface) {
-            ((PeriodicStateInterface) currentState).periodic();
-        } else {
-            periodicContainer();
-        }
+        currentState.periodic();
     }
 
-    /** Runs states Period if is periodic (This method is for if state is in Container) */
-    public void periodicContainer() {
-        if (currentState instanceof StateContainer) {
-            StateInterface state = ((StateContainer) currentState).getState();
-            if (state instanceof PeriodicStateInterface) {
-                ((PeriodicStateInterface) state).periodic();
-            }
-        }
+    private void runOnEntry(TransitionBase<State, Trigger> transition) {
+        currentState.onEntry(transition);
     }
 
-    private void runOnEntry(Transition transition) {
-        if (currentState instanceof StateInterface) {
-            ((StateInterface) currentState).onEntry(transition);
-        } else {
-            runOnEntryContainer(transition);
-        }
-    }
-
-    private void runOnEntryContainer(Transition transition) {
-        if (currentState instanceof StateContainer) {
-            StateInterface state = ((StateContainer) currentState).getState();
-            if (state instanceof StateInterface) {
-                ((StateInterface) state).onEntry(transition);
-            }
-        }
-    }
-
-    private void runOnExit(Transition transition) {
-        if (currentState instanceof StateInterface) {
-            ((StateInterface) currentState).onEntry(transition);
-        } else {
-            runOnExitContainer(transition);
-        }
-    }
-
-    private void runOnExitContainer(Transition transition) {
-        if (currentState instanceof StateContainer) {
-            StateInterface state = ((StateContainer) currentState).getState();
-            if (state instanceof StateInterface) {
-                ((StateInterface) state).onExit(transition);
-            }
-        }
+    private void runOnExit(TransitionBase<State, Trigger> transition) {
+        currentState.onExit(transition);
     }
 
     /**

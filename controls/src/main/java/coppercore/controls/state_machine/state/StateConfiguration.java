@@ -6,16 +6,16 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
-import coppercore.controls.state_machine.transition.ConditinalTransition;
-import coppercore.controls.state_machine.transition.Transition;
+import coppercore.controls.state_machine.transition.TransitionBase;
+import coppercore.controls.state_machine.transition.transitions.ConditionalTransition;
 
 /** Configures State Machine State behavior */
 public class StateConfiguration<State, Trigger> {
 
-    private List<Transition<State, Trigger>> transitions;
+    private List<TransitionBase<State, Trigger>> transitions;
     private State source;
-    private Consumer<Transition> onEntryAction;
-    private Consumer<Transition> onExitAction;
+    private Consumer<TransitionBase> onEntryAction;
+    private Consumer<TransitionBase> onExitAction;
     private boolean runDefaultEntryAction = true;
     private boolean runDefaultExitAction = true;
 
@@ -47,7 +47,7 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permit(Trigger trigger, State destination) {
         if (getFilteredTransition(trigger, true).isEmpty()) {
-            transitions.add(new Transition<>(source, destination, trigger, false));
+            transitions.add(new TransitionBase<>(source, destination, trigger, false));
         }
         return this;
     }
@@ -61,7 +61,7 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permitInternal(Trigger trigger, State destination) {
         if (getFilteredTransition(trigger, true).isEmpty()) {
-            transitions.add(new Transition<>(source, destination, trigger, true));
+            transitions.add(new TransitionBase<>(source, destination, trigger, true));
         }
         return this;
     }
@@ -78,7 +78,7 @@ public class StateConfiguration<State, Trigger> {
     public StateConfiguration<State, Trigger> permitIf(
             Trigger trigger, State destination, BooleanSupplier check) {
         if (getFilteredTransition(trigger, true, true).isEmpty()) {
-            transitions.add(new ConditinalTransition<>(source, destination, trigger, check, false));
+            transitions.add(new ConditionalTransition<>(source, destination, trigger, check, false));
         }
         return this;
     }
@@ -96,7 +96,7 @@ public class StateConfiguration<State, Trigger> {
     public StateConfiguration<State, Trigger> permitInternalIf(
             Trigger trigger, State destination, BooleanSupplier check) {
         if (getFilteredTransition(trigger, true, true).isEmpty()) {
-            transitions.add(new ConditinalTransition<>(source, destination, trigger, check, true));
+            transitions.add(new ConditionalTransition<>(source, destination, trigger, check, true));
         }
         return this;
     }
@@ -107,10 +107,10 @@ public class StateConfiguration<State, Trigger> {
      * @param trigger trigger event
      * @return list of transitions
      */
-    public List<Transition<State, Trigger>> getTransitions(Trigger trigger) {
-        List<Transition<State, Trigger>> matchedTransitions = new ArrayList<>();
+    public List<TransitionBase<State, Trigger>> getTransitions(Trigger trigger) {
+        List<TransitionBase<State, Trigger>> matchedTransitions = new ArrayList<>();
         if (trigger == null) return matchedTransitions;
-        for (Transition<State, Trigger> transition : transitions) {
+        for (TransitionBase<State, Trigger> transition : transitions) {
             if (trigger.equals(transition.getTrigger())) {
                 matchedTransitions.add(transition);
             }
@@ -124,19 +124,19 @@ public class StateConfiguration<State, Trigger> {
      * @param transitions list of transtions
      * @return filtered transition
      */
-    private Optional<Transition<State, Trigger>> filterTransitions(
-            List<Transition<State, Trigger>> transitions, boolean excludeConditionals, boolean excludeNormal) {
-        Optional<Transition<State, Trigger>> returnOptional = Optional.empty();
+    private Optional<TransitionBase<State, Trigger>> filterTransitions(
+            List<TransitionBase<State, Trigger>> transitions, boolean excludeConditionals, boolean excludeNormal) {
+        Optional<TransitionBase<State, Trigger>> returnOptional = Optional.empty();
         boolean conditinal = false;
-        for (Transition<State, Trigger> transition : transitions) {
-            if (transition instanceof ConditinalTransition) {
+        for (TransitionBase<State, Trigger> transition : transitions) {
+            if (transition instanceof ConditionalTransition) {
                 if (excludeConditionals){
                     continue;
                 }
                 if (conditinal
-                        && ((ConditinalTransition<State, Trigger>) transition).isCheckTrue()) {
+                        && ((ConditionalTransition<State, Trigger>) transition).isCheckTrue()) {
                     return Optional.empty();
-                } else if (((ConditinalTransition<State, Trigger>) transition).isCheckTrue()) {
+                } else if (((ConditionalTransition<State, Trigger>) transition).isCheckTrue()) {
                     returnOptional = Optional.of(transition);
                     conditinal = true;
                 }
@@ -159,7 +159,7 @@ public class StateConfiguration<State, Trigger> {
      * @param trigger trigger event
      * @return transition
      */
-    public Optional<Transition<State, Trigger>> getFilteredTransition(Trigger trigger) {
+    public Optional<TransitionBase<State, Trigger>> getFilteredTransition(Trigger trigger) {
         return filterTransitions(getTransitions(trigger), false, false);
     }
 
@@ -169,7 +169,7 @@ public class StateConfiguration<State, Trigger> {
      * @param trigger trigger event
      * @return transition
      */
-    public Optional<Transition<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals) {
+    public Optional<TransitionBase<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals) {
         return filterTransitions(getTransitions(trigger), excludeConditionals, false);
     }
 
@@ -179,7 +179,7 @@ public class StateConfiguration<State, Trigger> {
      * @param trigger trigger event
      * @return transition
      */
-    public Optional<Transition<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals, boolean excludeNormal) {
+    public Optional<TransitionBase<State, Trigger>> getFilteredTransition(Trigger trigger, boolean excludeConditionals, boolean excludeNormal) {
         return filterTransitions(getTransitions(trigger), excludeConditionals, excludeNormal);
     }
 
@@ -188,7 +188,7 @@ public class StateConfiguration<State, Trigger> {
      *
      * @param transition trigger event
      */
-    public void runOnEntry(Transition transition) {
+    public void runOnEntry(TransitionBase transition) {
         if (onEntryAction != null) {
             onEntryAction.accept(transition);
         }
@@ -199,7 +199,7 @@ public class StateConfiguration<State, Trigger> {
      *
      * @param transition trigger event
      */
-    public void runOnExit(Transition transition) {
+    public void runOnExit(TransitionBase transition) {
         if (onExitAction != null) {
             onExitAction.accept(transition);
         }
@@ -231,7 +231,7 @@ public class StateConfiguration<State, Trigger> {
      * @param action Action to run onEntry
      * @return configuration
      */
-    public StateConfiguration<State, Trigger> configureOnEntryAction(Consumer<Transition> action) {
+    public StateConfiguration<State, Trigger> configureOnEntryAction(Consumer<TransitionBase> action) {
         this.onEntryAction = action;
         return this;
     }
@@ -242,7 +242,7 @@ public class StateConfiguration<State, Trigger> {
      * @param action Action to run onExit
      * @return configuration
      */
-    public StateConfiguration<State, Trigger> configureOnExitAction(Consumer<Transition> action) {
+    public StateConfiguration<State, Trigger> configureOnExitAction(Consumer<TransitionBase> action) {
         this.onExitAction = action;
         return this;
     }

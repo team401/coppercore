@@ -3,11 +3,11 @@ package coppercore.controls.state_machine.transition;
 import java.util.function.Consumer;
 
 /** Data holder for transition */
-public class Transition<State, Trigger> {
+public class TransitionBase<State, Trigger> {
     private State source;
     private State destination;
     private Trigger trigger;
-    private Consumer<Transition> action;
+    private Consumer<TransitionBase<State, Trigger>> action;
     private boolean internalTransition;
 
     /**
@@ -17,7 +17,7 @@ public class Transition<State, Trigger> {
      * @param destination Transition Destination
      * @param trigger Transition Trigger
      */
-    public Transition(State source, State destination, Trigger trigger) {
+    public TransitionBase(State source, State destination, Trigger trigger) {
         this(source, destination, trigger, false);
     }
 
@@ -29,7 +29,7 @@ public class Transition<State, Trigger> {
      * @param trigger Transition Trigger
      * @param internalTransition is Interal Transition
      */
-    public Transition(
+    public TransitionBase(
             State source, State destination, Trigger trigger, boolean internalTransition) {
         this.source = source;
         this.destination = destination;

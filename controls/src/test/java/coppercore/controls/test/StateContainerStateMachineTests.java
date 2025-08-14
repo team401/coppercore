@@ -2,53 +2,53 @@ package coppercore.controls.test;
 
 import coppercore.controls.state_machine.StateMachine;
 import coppercore.controls.state_machine.StateMachineConfiguration;
-import coppercore.controls.state_machine.state.PeriodicStateInterface;
-import coppercore.controls.state_machine.state.StateContainer;
-import coppercore.controls.state_machine.transition.Transition;
+import coppercore.controls.state_machine.state.PeriodicStateBase;
+import coppercore.controls.state_machine.state.StateContainerBase;
+import coppercore.controls.state_machine.transition.TransitionBase;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class StateContainerStateMachineTests {
 
-    static class IdleState implements PeriodicStateInterface {
+    static class IdleState implements PeriodicStateBase {
         public static void customOnEntry(
-                Transition<StateContainerStateMachineTests, testEnumTriggers> transition) {}
+                TransitionBase<StateContainerStateMachineTests, testEnumTriggers> transition) {}
 
         public static void customOnExit(
-                Transition<StateContainerStateMachineTests, testEnumTriggers> transition) {}
+                TransitionBase<StateContainerStateMachineTests, testEnumTriggers> transition) {}
 
         public static void customTransitionAction(
-                Transition<StateContainerStateMachineTests, testEnumTriggers> transition) {}
+                TransitionBase<StateContainerStateMachineTests, testEnumTriggers> transition) {}
     }
     ;
 
-    static class ReadyState implements PeriodicStateInterface {}
+    static class ReadyState implements PeriodicStateBase {}
     ;
 
-    static class WaitingState implements PeriodicStateInterface {}
+    static class WaitingState implements PeriodicStateBase {}
     ;
 
-    static class DoneState implements PeriodicStateInterface {}
+    static class DoneState implements PeriodicStateBase {}
     ;
 
-    static class ShutdownState implements PeriodicStateInterface {}
+    static class ShutdownState implements PeriodicStateBase {}
     ;
 
-    static enum testStateContainer implements StateContainer {
+    static enum testStateContainer implements StateContainerBase {
         IDLE(new IdleState()),
         READY(new ReadyState()),
         WAITING(new WaitingState()),
         DONE(new DoneState()),
         SHUTDOWN(new ShutdownState());
 
-        private final PeriodicStateInterface state;
+        private final PeriodicStateBase state;
 
-        testStateContainer(PeriodicStateInterface state) {
+        testStateContainer(PeriodicStateBase state) {
             this.state = state;
         }
 
         @Override
-        public PeriodicStateInterface getState() {
+        public PeriodicStateBase getState() {
             return state;
         }
     }
@@ -71,10 +71,10 @@ public class StateContainerStateMachineTests {
 
         stateContainerTestMachineConfig
                 .configureDefaultOnExitAction(
-                        (Transition<testStateContainer, testEnumTriggers> transition) ->
+                        (TransitionBase<testStateContainer, testEnumTriggers> transition) ->
                                 transition.getSource().getState().onEntry(transition))
                 .configureDefaultOnExitAction(
-                        (Transition<testStateContainer, testEnumTriggers> transition) ->
+                        (TransitionBase<testStateContainer, testEnumTriggers> transition) ->
                                 transition.getSource().getState().onExit(transition));
 
         // stateContainerTestMachineConfig

@@ -6,7 +6,7 @@ public class TransitionInfo<State, Trigger> {
     private State targetState;
     private final Trigger trigger;
     private boolean failed = false;
-    private Transition<State, Trigger> transition;
+    private TransitionBase<State, Trigger> transition;
     private boolean isInternal;
 
     /**
@@ -34,7 +34,7 @@ public class TransitionInfo<State, Trigger> {
      *
      * @param transition Transition
      */
-    public void setTransition(Transition<State, Trigger> transition) {
+    public void setTransition(TransitionBase<State, Trigger> transition) {
         targetState = transition.getDestination();
         if (transition != null) {
             isInternal = transition.isInternal();
@@ -74,7 +74,7 @@ public class TransitionInfo<State, Trigger> {
      *
      * @return trastition
      */
-    public Transition getTransition() {
+    public TransitionBase getTransition() {
         return transition;
     }
 

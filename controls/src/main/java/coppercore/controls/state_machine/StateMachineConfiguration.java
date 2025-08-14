@@ -1,17 +1,18 @@
 package coppercore.controls.state_machine;
 
-import coppercore.controls.state_machine.state.StateConfiguration;
-import coppercore.controls.state_machine.transition.Transition;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import coppercore.controls.state_machine.state.StateConfiguration;
+import coppercore.controls.state_machine.transition.TransitionBase;
+
 /** Object to configure State Machine */
 public class StateMachineConfiguration<State, Trigger> {
     private final Map<State, StateConfiguration<State, Trigger>> stateConfigurations;
-    private Consumer<Transition<State, Trigger>> onEntryAction;
-    private Consumer<Transition<State, Trigger>> onExitAction;
+    private Consumer<TransitionBase<State, Trigger>> onEntryAction;
+    private Consumer<TransitionBase<State, Trigger>> onExitAction;
 
     public boolean hasEntryAction() {
         return (this.onEntryAction != null);
@@ -69,14 +70,14 @@ public class StateMachineConfiguration<State, Trigger> {
      * @param trigger Trigger event
      * @return Optional of Transition
      */
-    public Optional<Transition<State, Trigger>> getTransition(State state, Trigger trigger) {
-        Optional<Transition<State, Trigger>> transition = Optional.empty();
+    public Optional<TransitionBase<State, Trigger>> getTransition(State state, Trigger trigger) {
+        Optional<TransitionBase<State, Trigger>> transition = Optional.empty();
         Optional<StateConfiguration<State, Trigger>> configurationOptional =
                 getStateConfiguration(state);
 
         if (configurationOptional.isPresent()) {
             StateConfiguration<State, Trigger> configuration = configurationOptional.get();
-            Optional<Transition<State, Trigger>> transitionOptional =
+            Optional<TransitionBase<State, Trigger>> transitionOptional =
                     configuration.getFilteredTransition(trigger);
             transition = transition.or(() -> transitionOptional);
         }
@@ -91,7 +92,7 @@ public class StateMachineConfiguration<State, Trigger> {
      * @return configuration
      */
     public StateMachineConfiguration<State, Trigger> configureDefaultOnEntryAction(
-            Consumer<Transition<State, Trigger>> action) {
+            Consumer<TransitionBase<State, Trigger>> action) {
         this.onEntryAction = action;
         return this;
     }
@@ -103,7 +104,7 @@ public class StateMachineConfiguration<State, Trigger> {
      * @return configuration
      */
     public StateMachineConfiguration<State, Trigger> configureDefaultOnExitAction(
-            Consumer<Transition<State, Trigger>> action) {
+            Consumer<TransitionBase<State, Trigger>> action) {
         this.onExitAction = action;
         return this;
     }
@@ -113,7 +114,7 @@ public class StateMachineConfiguration<State, Trigger> {
      *
      * @param transition Transition used
      */
-    public void runOnEntry(Transition<State, Trigger> transition) {
+    public void runOnEntry(TransitionBase<State, Trigger> transition) {
         if (onEntryAction != null) {
             onEntryAction.accept(transition);
         }
@@ -124,7 +125,7 @@ public class StateMachineConfiguration<State, Trigger> {
      *
      * @param transition Transition used
      */
-    public void runOnExit(Transition<State, Trigger> transition) {
+    public void runOnExit(TransitionBase<State, Trigger> transition) {
         if (onExitAction != null) {
             onExitAction.accept(transition);
         }
