@@ -70,7 +70,7 @@ public class TransitionInfo<State, Trigger> {
      *
      * @return trastition
      */
-    public TransitionBase getTransition() {
+    public TransitionBase<State, Trigger> getTransition() {
         return transition;
     }
 

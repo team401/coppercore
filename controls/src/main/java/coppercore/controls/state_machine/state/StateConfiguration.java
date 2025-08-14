@@ -12,7 +12,7 @@ import coppercore.controls.state_machine.transition.transitions.Transition;
 /** Configures State Machine State behavior */
 public class StateConfiguration<State, Trigger> {
 
-    private List<TransitionBase<State, Trigger>> transitions;
+    private final List<TransitionBase<State, Trigger>> transitions;
     private final State source;
 
     /**
@@ -124,7 +124,14 @@ public class StateConfiguration<State, Trigger> {
             List<TransitionBase<State, Trigger>> transitions, boolean excludeConditionals, boolean excludeNormal) {
         Optional<TransitionBase<State, Trigger>> returnOptional = Optional.empty();
         boolean conditinal = false;
+        int highest_priority = Integer.MIN_VALUE;
         for (TransitionBase<State, Trigger> transition : transitions) {
+            int priority = transition.getPriority();
+            if (priority > highest_priority) {
+                returnOptional = Optional.of(transition);
+            }
+
+            // TODO: Code can't be removed yet need to remember why was had excludes
             if (transition instanceof ConditionalTransition) {
                 if (excludeConditionals){
                     continue;

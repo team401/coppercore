@@ -5,7 +5,7 @@ public abstract class TransitionBase<State, Trigger> {
     private final State source;
     private final State destination;
     private final Trigger trigger;
-    private int priority;
+    protected int priority;
 
 
     /**
@@ -63,6 +63,10 @@ public abstract class TransitionBase<State, Trigger> {
      */
     public boolean canTransition() {
         return true;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 
     /**
