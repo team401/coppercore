@@ -1,4 +1,4 @@
-package coppercore.parameter_tools.json;
+package coppercore.parameter_tools.json.helpers;
 
 /**
  * A base class for JSON objects that can be converted to a Java object of type T.
