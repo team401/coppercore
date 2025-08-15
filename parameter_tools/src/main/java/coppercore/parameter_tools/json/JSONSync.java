@@ -58,7 +58,7 @@ public class JSONSync<T> {
     public void saveData() {
         String path = file;
         if (pathProvider != null) {
-            path = pathProvider.resolveReadPath(file);
+            path = pathProvider.resolveWritePath(file);
         }
         String json = gson.toJson(instance);
         FileWriter writer = getFileWriter(path);

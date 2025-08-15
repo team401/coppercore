@@ -57,9 +57,12 @@ public class JSONConverter {
         jsonMap.put(Per.class, JSONPer.class);
     }
 
+    public static void addConversion(Class<?> clazz, Class<? extends JSONObject<?>> jsonClazz) {
+        jsonMap.put(clazz, jsonClazz);
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> Class<? extends JSONObject<T>> convert(Class<T> clazz) {
-        System.out.println(clazz);
         try {
             return (Class<? extends JSONObject<T>>) jsonMap.get(clazz);
         } catch (ClassCastException e) {

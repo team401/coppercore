@@ -2,43 +2,83 @@ package coppercore.parameter_tools.path_provider;
 
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.annotations.JSONExclude;
 import java.io.File;
 
+/**
+ * Handles the loading and management of environments from a JSON file. Provides methods to retrieve
+ * the current environment and its associated path.
+ *
+ * warning To avoid dsync inside application, the same environment handler should be used across
+ * the application. Unless if it is desired to have different environments for different parts
+ * of the application.
+ */
 public class EnvironmentHandler {
-    static JSONSync<EnvironmentHandler> sync =
+    // TODO: Switch to using JSONHandler
+    // Singleton instance for JSON synchronization
+    private static final JSONSync<EnvironmentHandler> sync =
             new JSONSync<>(new EnvironmentHandler(), "", new JSONSyncConfigBuilder().build());
-    static EnvironmentHandler instance;
-    static String filepath;
 
-    Environment[] environments;
-    String defaults;
-    String environment;
+    @JSONExclude private String filepath;
+    private Environment[] environments;
+    private String defaults;
+    private String environment;
 
-    public static EnvironmentHandler getEnvironmentHandler() {
-        return instance;
-    }
+    /**
+     * Private constructor to prevent instantiation. Use the static method getEnvironmentHandler to
+     * obtain an instance.
+     */
+    private EnvironmentHandler() {}
 
-    // Path only used if not loaded
+    /**
+     * Retrieves an instance of EnvironmentHandler, loading data from the specified JSON file.
+     *
+     * @param path the path to the JSON file containing environment data
+     * @return an instance of EnvironmentHandler with loaded environments
+     */
     public static EnvironmentHandler getEnvironmentHandler(String path) {
-        if (instance == null) {
-            reloadEnvironmentHandler(path);
-        }
-        return instance;
-    }
-
-    static void reloadEnvironmentHandler(String path) {
         sync.setFile(path);
         sync.loadData();
-        instance = sync.getObject();
+        EnvironmentHandler instance = sync.getObject();
 
-        filepath = new File(path).getParent();
+        instance.filepath = new File(path).getParent();
+
+        return instance;
     }
 
+    /**
+     * Retrieves the current instance of EnvironmentHandler.
+     *
+     * @return the current instance of EnvironmentHandler
+     */
+    public EnvironmentHandler reload() {
+        return getEnvironmentHandler(filepath);
+    }
+
+    /**
+     * Sets the current environment.
+     *
+     * @param environment
+     * @return
+     */
+    public EnvironmentHandler setEnvironment(String environment) {
+        this.environment = environment;
+        return this;
+    }
+
+    /**
+     * Retrieves a EnvironmentPathProvider for the specified environment. If no matching environment
+     * is found, a RuntimeException is thrown.
+     *
+     * @return an instance of EnvironmentPathProvider for the matching environment and file path
+     * @throws RuntimeException if the specified environment is not found in the list of
+     *     environments.
+     */
     public EnvironmentPathProvider getEnvironmentPathProvider() {
         Environment env = null;
-        for (int i = 0; i < environments.length; i++) {
-            if (environments[i].getName().compareTo(environment) == 0) {
-                env = environments[i];
+        for (Environment environment1 : environments) {
+            if (environment1.getName().compareTo(environment) == 0) {
+                env = environment1;
             }
         }
         if (env == null) {
