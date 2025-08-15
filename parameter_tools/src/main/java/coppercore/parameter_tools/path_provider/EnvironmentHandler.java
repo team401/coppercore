@@ -9,9 +9,9 @@ import java.io.File;
  * Handles the loading and management of environments from a JSON file. Provides methods to retrieve
  * the current environment and its associated path.
  *
- * @warning To avoid dsync inside application, the same environment handler should be used across
- *     the application. Unless if it is desired to have different environments for different parts
- *     of the application.
+ * warning To avoid dsync inside application, the same environment handler should be used across
+ * the application. Unless if it is desired to have different environments for different parts
+ * of the application.
  */
 public class EnvironmentHandler {
     // TODO: Switch to using JSONHandler
