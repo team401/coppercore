@@ -3,8 +3,8 @@ package coppercore.parameter_tools.path_provider;
 import java.io.File;
 
 /**
- * Represents an environment with a name and a file path.
- * Provides methods to retrieve the name, path, and check for the existence of a file.
+ * Represents an environment with a name and a file path. Provides methods to retrieve the name,
+ * path, and check for the existence of a file.
  */
 public class Environment {
     private String name;
@@ -15,6 +15,7 @@ public class Environment {
 
     /**
      * Returns the name of the environment.
+     *
      * @return the name of the environment
      */
     public String getName() {
@@ -23,6 +24,7 @@ public class Environment {
 
     /**
      * Returns the file path of the environment.
+     *
      * @return the file path, or the name if not set
      */
     public String getPath() {
@@ -31,6 +33,7 @@ public class Environment {
 
     /**
      * Checks if it contains file
+     *
      * @param basePath path to file inside environment
      * @param file file to environment
      * @return if it has the file
@@ -42,6 +45,7 @@ public class Environment {
 
     /**
      * Return if it has a defined default location
+     *
      * @return defined defaultToEnvironment value
      */
     public Boolean getDefaultToEnvironment() {

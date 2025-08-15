@@ -1,14 +1,17 @@
 package coppercore.parameter_tools.path_provider;
 
-import coppercore.parameter_tools.json.annotations.JSONExclude;
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.annotations.JSONExclude;
 import java.io.File;
 
 /**
- * Handles the loading and management of environments from a JSON file.
- * Provides methods to retrieve the current environment and its associated path.
- * @warning To avoid dsync inside application, the same environment handler should be used across the application. Unless if it is desired to have different environments for different parts of the application.
+ * Handles the loading and management of environments from a JSON file. Provides methods to retrieve
+ * the current environment and its associated path.
+ *
+ * @warning To avoid dsync inside application, the same environment handler should be used across
+ *     the application. Unless if it is desired to have different environments for different parts
+ *     of the application.
  */
 public class EnvironmentHandler {
     // TODO: Switch to using JSONHandler
@@ -22,8 +25,8 @@ public class EnvironmentHandler {
     private String environment;
 
     /**
-     * Private constructor to prevent instantiation.
-     * Use the static method getEnvironmentHandler to obtain an instance.
+     * Private constructor to prevent instantiation. Use the static method getEnvironmentHandler to
+     * obtain an instance.
      */
     private EnvironmentHandler() {}
 
@@ -54,22 +57,22 @@ public class EnvironmentHandler {
 
     /**
      * Sets the current environment.
+     *
      * @param environment
      * @return
-    */
+     */
     public EnvironmentHandler setEnvironment(String environment) {
         this.environment = environment;
         return this;
     }
 
     /**
-     * Retrieves a EnvironmentPathProvider for the specified environment.
-     *  If no matching environment is found, a RuntimeException is thrown.
+     * Retrieves a EnvironmentPathProvider for the specified environment. If no matching environment
+     * is found, a RuntimeException is thrown.
      *
-     * @return an instance of EnvironmentPathProvider for the
-     *         matching environment and file path
-     * @throws RuntimeException if the specified environment is not found in the list
-     *                          of environments.
+     * @return an instance of EnvironmentPathProvider for the matching environment and file path
+     * @throws RuntimeException if the specified environment is not found in the list of
+     *     environments.
      */
     public EnvironmentPathProvider getEnvironmentPathProvider() {
         Environment env = null;

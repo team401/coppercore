@@ -27,7 +27,10 @@ public class JSONSyncTests {
                         new ExampleJsonSyncClass(),
                         "ExampleJsonSyncClass.json",
                         new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
-                        new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
+                        new JSONSyncConfigBuilder()
+                                .setPrettyPrinting(true)
+                                .setUpPolymorphAdapter(ExampleJsonSyncClass.Action.class)
+                                .build());
     }
 
     /**
