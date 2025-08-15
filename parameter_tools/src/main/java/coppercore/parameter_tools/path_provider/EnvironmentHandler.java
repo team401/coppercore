@@ -1,6 +1,6 @@
 package coppercore.parameter_tools.path_provider;
 
-import coppercore.parameter_tools.json.JSONExclude;
+import coppercore.parameter_tools.json.annotations.JSONExclude;
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import java.io.File;
