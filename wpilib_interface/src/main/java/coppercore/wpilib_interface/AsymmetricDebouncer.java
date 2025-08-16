@@ -3,6 +3,10 @@ package coppercore.wpilib_interface;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 
+/**
+ * An asymmetric debouncer: debounces both the rising and falling edge and allows for having
+ * different rise and fall times.
+ */
 public class AsymmetricDebouncer {
     private final Debouncer riseDebouncer;
     private final Debouncer fallDebouncer;
