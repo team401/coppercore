@@ -138,6 +138,13 @@ class AsymmetricDebouncerTests {
      * that:
      *
      * <ul>
+     *   <li>Initializes to false
+     *   <li>Doesn't rise in under 1.0s
+     *   <li>A single 'false'' signal resets rise time
+     *   <li>Rises after >= 1.0s of 'true' signal
+     *   <li>Doesn't fall in under 1.5s
+     *   <li>A single 'true' signal resets fall time
+     *   <li>Falls after >= 1.5s of 'false' signal
      * </ul>
      */
     @Test
