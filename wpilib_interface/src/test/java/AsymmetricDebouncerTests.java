@@ -17,7 +17,7 @@ class AsymmetricDebouncerTests {
         setMockTimeSeconds(0.0);
     }
 
-    /** Disabler mock time in case some other test requires the real time */
+    /** Disables mock time in case some other test requires the real time */
     @AfterEach
     @SuppressWarnings("unused")
     void disableMockTime() {
@@ -140,7 +140,7 @@ class AsymmetricDebouncerTests {
      * <ul>
      *   <li>Initializes to false
      *   <li>Doesn't rise in under 1.0s
-     *   <li>A single 'false'' signal resets rise time
+     *   <li>A single 'false' signal resets rise time
      *   <li>Rises after >= 1.0s of 'true' signal
      *   <li>Doesn't fall in under 1.5s
      *   <li>A single 'true' signal resets fall time
