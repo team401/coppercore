@@ -2,8 +2,10 @@ package coppercore.math;
 
 import edu.wpi.first.math.MathSharedStore;
 
-/** This class is used to keep track of the cached data as the code updates faster than the camera.*/
-public class CachedData<Type> {  
+/**
+ * This class is used to keep track of the cached data as the code updates faster than the camera.
+ */
+public class CachedData<Type> {
 
     private Type value = null;
     private int readCount = 0;
@@ -21,7 +23,7 @@ public class CachedData<Type> {
     public CachedData(double staleTime) {
         this.isTimeBased = true;
         this.staleTime = staleTime * 1000; // Convert seconds to milliseconds
-        this.lastUpdateTime = MathSharedStore.getTimestamp();
+        this.lastUpdateTime = MathSharedStore.getTimestamp() * 1000;
     }
 
     /**
@@ -77,7 +79,7 @@ public class CachedData<Type> {
     // Check if the cache has expired (is stale)
     public boolean isStale() {
         if (isTimeBased) {
-            double currentTime = MathSharedStore.getTimestamp();
+            double currentTime = MathSharedStore.getTimestamp() * 1000;
             return currentTime - lastUpdateTime >= staleTime; // Check if time has passed
         } else {
             return readCount >= maxReads; // Check if the read count has exceeded
@@ -89,7 +91,8 @@ public class CachedData<Type> {
     private void reset() {
         if (isTimeBased) {
             lastUpdateTime =
-                    MathSharedStore.getTimestamp(); // Reset the last update time for time-based
+                    MathSharedStore.getTimestamp()
+                            * 1000; // Reset the last update time for time-based
             // expiration
         } else {
             readCount = 0; // Reset the read count for read-based expiration

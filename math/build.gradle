@@ -72,6 +72,8 @@ tasks.named('test') {
 	// Use JUnit Platform for unit tests.
 	useJUnitPlatform()
 }
+// injects the JNI extraction dir into java.library.path for tests.
+wpi.java.configureTestTasks(test)
 
 compileJava.dependsOn 'spotlessApply'
 
