@@ -1,13 +1,14 @@
 package coppercore.parameter_tools.json.strategies;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.FieldNamingStrategy;
+
 import coppercore.parameter_tools.json.JSONSyncConfig;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.json.annotations.JSONName;
-import edu.wpi.first.units.Measure;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
 public class JSONPrimitiveCheckStrategy {
 
@@ -48,14 +49,8 @@ public class JSONPrimitiveCheckStrategy {
             return;
         }
 
-        // Check if is immutable measure
-        // WARNING: Not sure if this should actually be throwing a error or not.
-        // TODO: Find less specific way of fixing this problem (Hopefully before merge if I can
-        // figure it out)
-        // NOTE: To view problem being specified look at the comment at the bottom of the file.
-        // POTENTIAL SOLUTION: Might be able to hook this up to JSONConverter.java
-        if (Measure.class.isAssignableFrom(field.getDeclaringClass())
-                && field.getDeclaringClass().isRecord()) {
+        // Check if is record
+        if (field.getDeclaringClass().isRecord()) {
             return;
         }
 
@@ -99,9 +94,8 @@ public class JSONPrimitiveCheckStrategy {
     }
 }
 
-
-/* 
-java.lang.RuntimeException: Primitive Used: 
+/*
+java.lang.RuntimeException: Primitive Used:
 In Class: edu.wpi.first.units.measure.ImmutableAngle
 Declaring Class Super Classjava.lang.Record
 Field Name: magnitude

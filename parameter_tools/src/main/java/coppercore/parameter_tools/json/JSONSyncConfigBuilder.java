@@ -120,15 +120,18 @@ public class JSONSyncConfigBuilder {
                 typeAdapterFactories);
     }
 
-    public void setPrimitiveChecking(boolean primitiveChecking) {
+    public JSONSyncConfigBuilder setPrimitiveChecking(boolean primitiveChecking) {
         this.primitiveChecking = primitiveChecking;
+        return this;
     }
 
-    public void setPrimitiveCheckPrintAlert(boolean primitiveCheckPrintAlert) {
+    public JSONSyncConfigBuilder setPrimitiveCheckPrintAlert(boolean primitiveCheckPrintAlert) {
         this.primitiveCheckPrintAlert = primitiveCheckPrintAlert;
+        return this;
     }
 
-    public void setPrimitiveCheckCrash(boolean primitiveCheckCrash) {
+    public JSONSyncConfigBuilder setPrimitiveCheckCrash(boolean primitiveCheckCrash) {
         this.primitiveCheckCrash = primitiveCheckCrash;
+        return this;
     }
 }
