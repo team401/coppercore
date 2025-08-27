@@ -18,10 +18,17 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class JSONTypeAdapterFactory implements TypeAdapterFactory {
 
+    private JSONSyncConfig config;
+
+    public JSONTypeAdapterFactory(JSONSyncConfig config) {
+        this.config = config;
+    }
+
     @Override
     public <T> TypeAdapter<T> create(Gson gson, com.google.gson.reflect.TypeToken<T> type) {
         @SuppressWarnings("unchecked")
         Class<T> rawType = (Class<T>) type.getRawType();
+
         if (!JSONConverter.has(rawType)) {
             return null;
         }

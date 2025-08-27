@@ -21,6 +21,9 @@ public class JSONSyncConfigBuilder {
 
     /** Indicates whether fields without @Expose annotations should be excluded. */
     public boolean excludeFieldsWithoutExposeAnnotation = false;
+    public boolean primitiveChecking = true;
+    public boolean primitiveCheckPrintAlert = false;
+    public boolean primitiveCheckCrash = true;
 
     /** The naming policy for fields in the JSON output. */
     public FieldNamingPolicy namingPolicy = FieldNamingPolicy.IDENTITY;
@@ -158,7 +161,25 @@ public class JSONSyncConfigBuilder {
                 excludeFieldsWithoutExposeAnnotation,
                 namingPolicy,
                 longSerializationPolicy,
+                primitiveChecking,
+                primitiveCheckPrintAlert,
+                primitiveCheckCrash,
                 typeAdapters,
                 typeAdapterFactories);
+    }
+
+    public JSONSyncConfigBuilder setPrimitiveChecking(boolean primitiveChecking) {
+        this.primitiveChecking = primitiveChecking;
+        return this;
+    }
+
+    public JSONSyncConfigBuilder setPrimitiveCheckPrintAlert(boolean primitiveCheckPrintAlert) {
+        this.primitiveCheckPrintAlert = primitiveCheckPrintAlert;
+        return this;
+    }
+
+    public JSONSyncConfigBuilder setPrimitiveCheckCrash(boolean primitiveCheckCrash) {
+        this.primitiveCheckCrash = primitiveCheckCrash;
+        return this;
     }
 }

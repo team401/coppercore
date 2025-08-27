@@ -2,6 +2,8 @@ package coppercore.parameter_tools.json.strategies;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.FieldNamingStrategy;
+import coppercore.parameter_tools.json.JSONSyncConfig;
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.json.annotations.JSONName;
 import java.lang.reflect.Field;
 
@@ -12,7 +14,8 @@ import java.lang.reflect.Field;
  */
 public class JSONNamingStrategy implements FieldNamingStrategy {
 
-    private FieldNamingPolicy policy = FieldNamingPolicy.IDENTITY;
+    protected FieldNamingPolicy policy = FieldNamingPolicy.IDENTITY;
+    protected JSONSyncConfig config = new JSONSyncConfigBuilder().build();
 
     /**
      * Default constructor for JSONNamingStrategy, its fall back policy will be {@link
@@ -24,9 +27,11 @@ public class JSONNamingStrategy implements FieldNamingStrategy {
      * Constructor for JSONNamingStrategy.
      *
      * @param policy the fall back policy
+     * @param config the JSONSyncConfig to use for serialization and deserialization
      */
-    public JSONNamingStrategy(FieldNamingPolicy policy) {
+    public JSONNamingStrategy(FieldNamingPolicy policy, JSONSyncConfig config) {
         this.policy = policy;
+        this.config = config;
     }
 
     /**
@@ -37,6 +42,7 @@ public class JSONNamingStrategy implements FieldNamingStrategy {
     @Override
     public String translateName(Field field) {
         JSONName annotation = field.getAnnotation(JSONName.class);
+
         if (annotation != null) {
             return annotation.value();
         }

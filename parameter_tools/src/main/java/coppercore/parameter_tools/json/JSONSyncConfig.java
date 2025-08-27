@@ -18,5 +18,8 @@ public record JSONSyncConfig(
         boolean excludeFieldsWithoutExposeAnnotation,
         FieldNamingPolicy namingPolicy,
         LongSerializationPolicy longSerializationPolicy,
+        boolean primitiveChecking,
+        boolean primitiveCheckPrintAlert,
+        boolean primitiveCheckCrash,
         List<Pair<Class, Object>> typeAdapters,
         List<TypeAdapterFactory> typeAdapterFactories) {}
