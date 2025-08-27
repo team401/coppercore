@@ -14,7 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public class JSONTypeAdapterFactory implements TypeAdapterFactory {
 
-    private JSONSyncConfig config = new JSONSyncConfigBuilder().build();
+    private JSONSyncConfig config;
 
     public JSONTypeAdapterFactory(JSONSyncConfig config) {
         this.config = config;

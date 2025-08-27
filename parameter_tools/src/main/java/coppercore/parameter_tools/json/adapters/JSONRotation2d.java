@@ -4,7 +4,7 @@ import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public class JSONRotation2d extends JSONObject<Object> {
-    Double radians;
+    double radians;
 
     public JSONRotation2d(Rotation2d rotation) {
         super(rotation);

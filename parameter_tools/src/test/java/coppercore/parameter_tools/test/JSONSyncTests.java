@@ -29,7 +29,7 @@ public class JSONSyncTests {
      */
     @BeforeEach
     public void TestPrep() {
-        System.out.println("\\/");
+        System.out.println("Test Prep");
         ExampleJsonSyncClass.synced =
                 new JSONSync<>(
                         new ExampleJsonSyncClass(),
@@ -92,4 +92,33 @@ public class JSONSyncTests {
         ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "/SaveFileTest.json");
         ExampleJsonSyncClass.synced.saveData();
     }
+
+    private static class PrimitiveClass {
+        final int testInt;
+
+        PrimitiveClass(int x) {
+            testInt = x;
+        }
+    }
+
+    /** Written with help from CoPilot */
+    @Test
+    public void JsonSyncPrimitiveCrashTest() {
+        Exception e =
+                Assertions.assertThrows(
+                        RuntimeException.class,
+                        () -> {
+                            JSONSync<PrimitiveClass> sync =
+                                    new JSONSync<>(
+                                            new PrimitiveClass(0),
+                                            RESOURCE_DIRECTORY + "/PrimitiveClass.json",
+                                            new JSONSyncConfigBuilder()
+                                                    .setPrettyPrinting(true)
+                                                    .build());
+                            sync.loadData();
+                        });
+        System.out.println(e);
+    }
+
+	
 }

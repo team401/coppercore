@@ -4,8 +4,8 @@ import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class JSONTranslation2d extends JSONObject<Translation2d> {
-    Double x;
-    Double y;
+    double x;
+    double y;
 
     public JSONTranslation2d(Translation2d translation) {
         super(translation);

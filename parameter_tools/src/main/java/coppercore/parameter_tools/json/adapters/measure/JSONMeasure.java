@@ -6,7 +6,7 @@ import edu.wpi.first.units.Units;
 
 @SuppressWarnings("rawtypes")
 public class JSONMeasure extends JSONObject<Measure> {
-    Double value = 0.0;
+    double value = 0.0;
     String unit = "";
 
     public JSONMeasure(Measure measure) {
