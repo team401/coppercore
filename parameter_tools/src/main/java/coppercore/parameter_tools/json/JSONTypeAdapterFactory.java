@@ -12,6 +12,10 @@ import edu.wpi.first.units.Measure;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * A factory for creating TypeAdapters that convert between Java objects and their JSON
+ * representations
+ */
 public class JSONTypeAdapterFactory implements TypeAdapterFactory {
 
     @Override

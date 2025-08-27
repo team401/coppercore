@@ -4,11 +4,17 @@ import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 
+/** A JSON representation of a Measure object. */
 @SuppressWarnings("rawtypes")
 public class JSONMeasure extends JSONObject<Measure> {
     double value = 0.0;
     String unit = "";
 
+    /**
+     * Default constructor for JSON deserialization.
+     *
+     * @param measure The Measure object to convert to JSON.
+     */
     public JSONMeasure(Measure measure) {
         super(measure);
         value = measure.magnitude();

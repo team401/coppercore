@@ -79,10 +79,23 @@ public class JSONSync<T> {
         file = newFilePath;
     }
 
+    /**
+     * Constructs a new JSONSync instance with default configuration.
+     *
+     * @param instance The object to synchronize with the JSON file.
+     * @param file The file path for the JSON file.
+     */
     public JSONSync(T instance, String file) {
         this(instance, file, null, defaultConfig);
     }
 
+    /**
+     * Constructs a new JSONSync instance with a PathProvider and default configuration.
+     *
+     * @param instance The object to synchronize with the JSON file.
+     * @param file The file path for the JSON file.
+     * @param provider The PathProvider to resolve file paths; can be null.
+     */
     public JSONSync(T instance, String file, PathProvider provider) {
         this(instance, file, provider, defaultConfig);
     }
@@ -98,6 +111,14 @@ public class JSONSync<T> {
         this(instance, file, null, config);
     }
 
+    /**
+     * Constructs a new JSONSync instance with the specified parameters.
+     *
+     * @param instance The object to synchronize with the JSON file.
+     * @param file The file path for the JSON file.
+     * @param provider The PathProvider to resolve file paths; can be null.
+     * @param config Configuration for the Gson instance; uses defaults if null.
+     */
     public JSONSync(T instance, String file, PathProvider provider, JSONSyncConfig config) {
         this.instance = instance;
         this.config = (config == null) ? new JSONSyncConfigBuilder().build() : config;

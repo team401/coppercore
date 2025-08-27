@@ -6,7 +6,17 @@ package coppercore.parameter_tools.json.helpers;
  * @param <T> the type of the Java object that this JSON object represents
  */
 public abstract class JSONObject<T> {
+    /**
+     * Constructor for creating a JSONObject from a Java object of type T.
+     *
+     * @param object the Java object to convert to a JSON object
+     */
     protected JSONObject(T object) {}
 
+    /**
+     * Converts this JSON object to a Java object of type T.
+     *
+     * @return the Java object represented by this JSON object
+     */
     public abstract T toJava();
 }

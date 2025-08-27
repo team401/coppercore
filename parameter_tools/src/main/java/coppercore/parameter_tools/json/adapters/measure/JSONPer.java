@@ -5,10 +5,16 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.PerUnit;
 import edu.wpi.first.units.measure.Per;
 
+/** A JSON representation of a Per object. */
 public class JSONPer extends JSONObject<Per> {
     Measure dividend;
     Measure divisor;
 
+    /**
+     * Default constructor for JSON deserialization.
+     *
+     * @param measure The Per object to convert to JSON.
+     */
     public JSONPer(Per measure) {
         super(measure);
         PerUnit baseUnit = measure.unit();

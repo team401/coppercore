@@ -5,10 +5,16 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
+/** A JSON representation of a Pose2d object. */
 public class JSONPose2d extends JSONObject<Pose2d> {
     Rotation2d rotation;
     Translation2d translation;
 
+    /**
+     * Default constructor for JSON deserialization.
+     *
+     * @param pose The Pose2d object to convert to JSON.
+     */
     public JSONPose2d(Pose2d pose) {
         super(pose);
         rotation = pose.getRotation();

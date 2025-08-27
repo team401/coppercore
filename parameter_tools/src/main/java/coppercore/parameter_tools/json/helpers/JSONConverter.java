@@ -29,7 +29,11 @@ import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
 import java.util.HashMap;
 
+/**
+ * A utility class for converting between Java classes and their corresponding JSON wrapper classes.
+ */
 public class JSONConverter {
+    /** A map of classes to their corresponding JSONObject wrapper classes. */
     public static final HashMap<Class<?>, Class<? extends JSONObject<?>>> jsonMap = new HashMap<>();
 
     static {
@@ -57,10 +61,24 @@ public class JSONConverter {
         jsonMap.put(Per.class, JSONPer.class);
     }
 
+    /**
+     * Registers a class and its corresponding JSONObject wrapper.
+     *
+     * @param clazz The class to register.
+     * @param jsonClazz The corresponding JSONObject wrapper class.
+     */
     public static void addConversion(Class<?> clazz, Class<? extends JSONObject<?>> jsonClazz) {
         jsonMap.put(clazz, jsonClazz);
     }
 
+    /**
+     * This method look up the class to see if their is a corresponding JSONObject wrapper.
+     *
+     * @param <T> The type of the class to look for.
+     * @param clazz The class of the wrapper to look for.
+     * @return the JSONObject wrapper.
+     * @throws ClassCastException If wrapper can not be found
+     */
     @SuppressWarnings("unchecked")
     public static <T> Class<? extends JSONObject<T>> convert(Class<T> clazz) {
         try {
@@ -72,6 +90,13 @@ public class JSONConverter {
         }
     }
 
+    /**
+     * Checks if a class has a registered JSONObject wrapper.
+     *
+     * @param <T> The type of the class to check.
+     * @param clazz The class to check for a wrapper.
+     * @return if the class has a registered JSONObject wrapper.
+     */
     public static <T> boolean has(Class<T> clazz) {
         return jsonMap.containsKey(clazz);
     }

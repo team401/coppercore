@@ -58,8 +58,8 @@ public class EnvironmentHandler {
     /**
      * Sets the current environment.
      *
-     * @param environment
-     * @return
+     * @param environment the name of the environment to set
+     * @return the current instance of EnvironmentHandler for method chaining
      */
     public EnvironmentHandler setEnvironment(String environment) {
         this.environment = environment;
