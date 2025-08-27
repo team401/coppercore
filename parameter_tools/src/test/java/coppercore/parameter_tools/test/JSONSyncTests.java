@@ -121,4 +121,120 @@ public class JSONSyncTests {
     }
 
 	
+    /** Class to test the primitive check crash feature. */
+    private static class PrimitiveCheckCrash {
+        public final int primitiveField = 10;
+    }
+
+    /** Tests the {@link JSONSync#saveData} method to ensure it crashes when a primitive is used. */
+    @Test
+    public void JsonSyncPrimitiveCheckCrash() {
+        JSONSync<PrimitiveCheckCrash> synced =
+                new JSONSync<>(
+                        new PrimitiveCheckCrash(),
+                        RESOURCE_DIRECTORY + "/PrimitiveCheckCrash.json",
+                        new JSONSyncConfigBuilder()
+                                .setPrettyPrinting(true)
+                                .setPrimitiveCheckCrash(true)
+                                .build());
+        Assertions.assertThrows(RuntimeException.class, synced::saveData);
+    }
+
+    /** Class to test the primitive check crash feature with a private field. */
+    private static class PrivatePrimitiveCheckCrash {
+        private final int primitiveField = 10;
+    }
+
+    /**
+     * Tests the {@link JSONSync#saveData} method to ensure it crashes when a private primitive is
+     * used.
+     */
+    @Test
+    public void JsonSyncPrivatePrimitiveCheckCrash() {
+        JSONSync<PrivatePrimitiveCheckCrash> synced =
+                new JSONSync<>(
+                        new PrivatePrimitiveCheckCrash(),
+                        RESOURCE_DIRECTORY + "/PrivatePrimitiveCheckCrash.json",
+                        new JSONSyncConfigBuilder()
+                                .setPrettyPrinting(true)
+                                .setPrimitiveCheckCrash(true)
+                                .build());
+        Assertions.assertThrows(RuntimeException.class, synced::saveData);
+    }
+
+    /** Class to test the primitive check crash feature with a double. */
+    private static class DoublePrimitiveCheckCrash {
+        public final double primitiveField = 10.0;
+    }
+
+    /** Tests the {@link JSONSync#saveData} method to ensure it crashes when a double is used. */
+    @Test
+    public void JsonSyncDoublePrimitiveCheckCrash() {
+        JSONSync<DoublePrimitiveCheckCrash> synced =
+                new JSONSync<>(
+                        new DoublePrimitiveCheckCrash(),
+                        RESOURCE_DIRECTORY + "/DoublePrimitiveCheckCrash.json",
+                        new JSONSyncConfigBuilder()
+                                .setPrettyPrinting(true)
+                                .setPrimitiveCheckCrash(true)
+                                .build());
+        Assertions.assertThrows(RuntimeException.class, synced::saveData);
+    }
+
+    /** Class to test the primitive check crash feature with a boolean. */
+    private static class BooleanPrimitiveCheckCrash {
+        public final boolean primitiveField = true;
+    }
+
+    /** Tests the {@link JSONSync#saveData} method to ensure it crashes when a boolean is used. */
+    @Test
+    public void JsonSyncBooleanPrimitiveCheckCrash() {
+        JSONSync<BooleanPrimitiveCheckCrash> synced =
+                new JSONSync<>(
+                        new BooleanPrimitiveCheckCrash(),
+                        RESOURCE_DIRECTORY + "/BooleanPrimitiveCheckCrash.json",
+                        new JSONSyncConfigBuilder()
+                                .setPrettyPrinting(true)
+                                .setPrimitiveCheckCrash(true)
+                                .build());
+        Assertions.assertThrows(RuntimeException.class, synced::saveData);
+    }
+
+    /** Class to test the primitive check crash feature with a byte. */
+    private static class BytePrimitiveCheckCrash {
+        public final byte primitiveField = 1;
+    }
+
+    /** Tests the {@link JSONSync#saveData} method to ensure it crashes when a byte is used. */
+    @Test
+    public void JsonSyncBytePrimitiveCheckCrash() {
+        JSONSync<BytePrimitiveCheckCrash> synced =
+                new JSONSync<>(
+                        new BytePrimitiveCheckCrash(),
+                        RESOURCE_DIRECTORY + "/BytePrimitiveCheckCrash.json",
+                        new JSONSyncConfigBuilder()
+                                .setPrettyPrinting(true)
+                                .setPrimitiveCheckCrash(true)
+                                .build());
+        Assertions.assertThrows(RuntimeException.class, synced::saveData);
+    }
+
+    /** Class to test the primitive check crash feature with a short. */
+    private static class ShortPrimitiveCheckCrash {
+        public final short primitiveField = 2;
+    }
+
+    /** Tests the {@link JSONSync#saveData} method to ensure it crashes when a short is used. */
+    @Test
+    public void JsonSyncShortPrimitiveCheckCrash() {
+        JSONSync<ShortPrimitiveCheckCrash> synced =
+                new JSONSync<>(
+                        new ShortPrimitiveCheckCrash(),
+                        RESOURCE_DIRECTORY + "/ShortPrimitiveCheckCrash.json",
+                        new JSONSyncConfigBuilder()
+                                .setPrettyPrinting(true)
+                                .setPrimitiveCheckCrash(true)
+                                .build());
+        Assertions.assertThrows(RuntimeException.class, synced::saveData);
+    }
 }
