@@ -83,11 +83,12 @@ public class JSONSyncTests {
         Integer random_int = 102130324;
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
-        instance.testingIntField = 106454;
+        instance.testingIntField = saved_int;
         ExampleJsonSyncClass.synced.setFile("SaveFileTest.json");
         ExampleJsonSyncClass.synced.saveData();
         instance.testingIntField = random_int;
         ExampleJsonSyncClass.synced.loadData();
+        instance = ExampleJsonSyncClass.synced.getObject();
         Assertions.assertEquals(
                 saved_int, instance.testingIntField, "testInt should be " + saved_int);
     }
