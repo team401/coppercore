@@ -1,11 +1,10 @@
 package coppercore.parameter_tools.test;
 
+import coppercore.parameter_tools.json.JSONSync;
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import coppercore.parameter_tools.json.JSONSync;
-import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 
 /**
  * Unit tests for the {@link JSONSync} class to validate its functionality, including data loading,
@@ -89,6 +88,7 @@ public class JSONSyncTests {
         ExampleJsonSyncClass.synced.saveData();
         instance.testingIntField = random_int;
         ExampleJsonSyncClass.synced.loadData();
-        Assertions.assertEquals(saved_int, instance.testingIntField, "testInt should be " + saved_int);
+        Assertions.assertEquals(
+                saved_int, instance.testingIntField, "testInt should be " + saved_int);
     }
 }

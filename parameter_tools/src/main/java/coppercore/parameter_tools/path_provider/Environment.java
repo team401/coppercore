@@ -10,8 +10,7 @@ public class Environment {
     private String name;
     private String filepath;
 
-    @SuppressWarnings("FieldMayBeFinal")
-    private Boolean defaultToEnvironment = null;
+    private final Boolean defaultToEnvironment = null;
 
     /**
      * Returns the name of the environment.
