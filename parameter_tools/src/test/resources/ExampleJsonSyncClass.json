@@ -5,6 +5,16 @@
     "rotation": {
         "radians": 1.0
     },
+    "testPer": {
+        "dividend": {
+        "value": 10,
+        "unit": "Degree"
+        },
+        "divisor": {
+        "value": 1.0,
+        "unit": "Second"
+        }
+    },
     "actions": [
         {
             "debug": true,

@@ -13,10 +13,8 @@ import edu.wpi.first.units.PerUnit;
 import edu.wpi.first.units.TimeUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-
-import java.util.List;
-
 import edu.wpi.first.units.measure.Per;
+import java.util.List;
 
 /**
  * Example class to demonstrate the usage of the {@link JSONSync} utility for saving and loading
