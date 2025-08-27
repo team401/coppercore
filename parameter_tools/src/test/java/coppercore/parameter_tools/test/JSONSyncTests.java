@@ -53,7 +53,8 @@ public class JSONSyncTests {
         Assertions.assertEquals(
                 0.47, instance.pose.getRotation().getRadians(), "rotation radians should be 0.47");
         Assertions.assertNull(instance.motorData, "motorData should be null");
-		Assertions.assertEquals(10.0, instance.testPer.magnitude(), 0.1, "testPer magnitude should be 10.0");
+        Assertions.assertEquals(
+                10.0, instance.testPer.magnitude(), 0.1, "testPer magnitude should be 10.0");
         Assertions.assertEquals(instance.actions.size(), 2);
         Assertions.assertEquals(
                 instance.actions.get(0) instanceof ExampleJsonSyncClass.Start, true);
@@ -237,5 +238,4 @@ public class JSONSyncTests {
                                 .build());
         Assertions.assertThrows(RuntimeException.class, synced::saveData);
     }
-
 }

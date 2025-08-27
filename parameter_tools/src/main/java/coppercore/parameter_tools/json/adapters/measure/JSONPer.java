@@ -18,7 +18,7 @@ public class JSONPer extends JSONObject<Per> {
 
     @Override
     public Per toJava() {
-        return Per.ofBaseUnits(
+        return Per.ofRelativeUnits(
                 dividend.magnitude(), PerUnit.combine(dividend.unit(), divisor.unit()));
     }
 }
