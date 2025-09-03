@@ -1,34 +1,57 @@
 package coppercore.math.test;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Microseconds;
 import static edu.wpi.first.units.Units.Millimeters;
+import static edu.wpi.first.units.Units.Seconds;
 
 import coppercore.math.CachedData;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.util.WPIUtilJNI;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class CachedDataTest {
+
+    @BeforeEach
+    @SuppressWarnings("unused")
+    void setUpMockTime() {
+        WPIUtilJNI.enableMockTime();
+        setMockTimeSeconds(0.0);
+    }
+
+    public static void enableMockTime() {}
+
+    public static void setMockTime(long time) {}
+
+    /**
+     * Set WPIUtilJni's mock time to timeSeconds
+     *
+     * <p>This exists as a wrapper because WPIUtilJNI.setMockTime expects the time as a long in
+     * microseconds
+     *
+     * @param timeSeconds the time to set, in seconds
+     */
+    private void setMockTimeSeconds(double timeSeconds) {
+        WPIUtilJNI.setMockTime((long) Seconds.of(timeSeconds).in(Microseconds));
+    }
+
+    public static void disableMockTime() {}
+
     @Test
     public void isStaleTest() {
+        enableMockTime();
         CachedData<Integer> data = new CachedData<>(1.5);
+        double staletimeTest = 0.1;
         for (int i = 0; i < 7; i++) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            setMockTimeSeconds(staletimeTest + 0.1 * i);
             Assertions.assertFalse(data.isStale());
         }
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } // Room for error in Thread.sleep
+        setMockTimeSeconds(10.0);
         Assertions.assertTrue(data.isStale());
+        disableMockTime();
     }
 
     @Test
@@ -59,23 +82,16 @@ public class CachedDataTest {
 
     @Test
     public void isStaleTest3() {
+        enableMockTime();
         CachedData<Integer> data = new CachedData<>(1.5);
+        double staletimeTest = 0.05;
         for (int i = 0; i < 5; i++) {
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            setMockTimeSeconds(staletimeTest + 0.05 * i);
             Assertions.assertFalse(data.isStale());
         }
-        try {
-            Thread.sleep(1600);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } // Room for error in Thread.sleep
+        setMockTimeSeconds(10.0);
         Assertions.assertTrue(data.isStale());
+        disableMockTime();
     }
 
     @SuppressWarnings({"rawtypes"})

@@ -15,11 +15,10 @@ public class CachedData<Type> {
     private boolean isTimeBased = true;
 
     /**
-     * This class is a constructor for the Time-based expiration of the Cashed Data.
+     * This is a constructor for the Time-based expiration of the Cached Data.
      *
      * @param staleTime This is the amount of time it takes a cache to be stale
      */
-    // Constructor for Time-based expiration
     public CachedData(double staleTime) {
         this.isTimeBased = true;
         this.staleTime = staleTime * 1000; // Convert seconds to milliseconds
@@ -27,48 +26,45 @@ public class CachedData<Type> {
     }
 
     /**
-     * This class is a constructor for the readCount-based expiration of the Cached Data.
+     * This is a constructor for the readCount-based expiration of the Cached Data.
      *
      * @param maxReads This is the maximum amount of reads we can take before the cache is stale
      */
-    // Constructor for readCount-based expiration
     public CachedData(int maxReads) {
         this.isTimeBased = false;
         this.maxReads = maxReads;
         this.readCount = 0;
     }
 
-    /** This class updates the value when it becomes stale. */
-    // Update the value based on the change (for both time and read-based mechanisms)
-    private void update() {
+    // This method sets the value to become null when the cache is stale (for both time and
+    // read-based mechanisms)
+    private void makeStale() {
         if (isStale()) {
             value = null;
         }
     }
 
     /**
-     * This is used to write a new signal value(A new cache).
+     * This method is used to write a new signal value(A new cache).
      *
      * @param signal This is the signal that is being sent.
      */
-    // Write a new signal value
     public void write(Type signal) {
         if (signal != null) {
             value = signal;
-            reset(); // Resetting the expiration count or time
+            reset();
         }
     }
 
     /**
-     * This reads the cached value, increases the readcount, and returns the cached value.
+     * This method reads the cached value, increases the readcount, and returns the cached value.
      *
      * @return this returns the cached value
      */
-    // Read the cached value, returning null if the cache is stale
     public Type read() {
-        update();
+        makeStale();
         readCount++;
-        return value; // Return the cached value
+        return value;
     }
 
     /**
@@ -76,24 +72,21 @@ public class CachedData<Type> {
      *
      * @return A boolean for whether the cache is stale or not
      */
-    // Check if the cache has expired (is stale)
     public boolean isStale() {
         if (isTimeBased) {
             double currentTime = MathSharedStore.getTimestamp() * 1000;
-            return currentTime - lastUpdateTime >= staleTime; // Check if time has passed
+            return currentTime - lastUpdateTime >= staleTime;
         } else {
-            return readCount >= maxReads; // Check if the read count has exceeded
+            return readCount >= maxReads;
         }
     }
 
-    /** This resets the expiration tracking value(time or readCount) */
-    // Reset the expiration tracking
+    /** This method resets the expiration tracking value(time or readCount) */
     private void reset() {
         if (isTimeBased) {
             lastUpdateTime =
                     MathSharedStore.getTimestamp()
-                            * 1000; // Reset the last update time for time-based
-            // expiration
+                            * 1000; // Reset the last update time for time-based expiration
         } else {
             readCount = 0; // Reset the read count for read-based expiration
         }
