@@ -1,5 +1,6 @@
 package coppercore.wpilib_interface;
 
+
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.json.annotations.JSONExclude;

@@ -33,6 +33,7 @@ public class EnvironmentPathProvider implements PathProvider {
             return pathAttempt;
         }
 
+
         if (defaults != null) {
             pathAttempt = filepath + File.separator + defaults + File.separator + file;
             return pathAttempt;
