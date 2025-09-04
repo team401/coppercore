@@ -51,8 +51,7 @@ public class ExampleJsonSyncClass {
     public Integer testingIntField = 0;
 
     public Angle angle = Units.Degree.of(340.0);
-
-    public Per<AngleUnit, TimeUnit> test =
+    public Per<AngleUnit, TimeUnit> testPer =
             Per.ofRelativeUnits(6.5, PerUnit.combine(Units.Degrees, Units.Seconds));
 
     public final BasicMotorDataHolder motorData = null;
