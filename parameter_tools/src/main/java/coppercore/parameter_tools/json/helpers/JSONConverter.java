@@ -27,6 +27,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.Frequency;
 import java.util.HashMap;
 
 public class JSONConverter {
@@ -54,6 +55,7 @@ public class JSONConverter {
         jsonMap.put(Time.class, JSONMeasure.class);
         jsonMap.put(MomentOfInertia.class, JSONMeasure.class);
         jsonMap.put(Measure.class, JSONMeasure.class);
+        jsonMap.put(Frequency.class, JSONMeasure.class);
         jsonMap.put(Per.class, JSONPer.class);
     }
 
