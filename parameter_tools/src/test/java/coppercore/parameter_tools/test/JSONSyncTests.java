@@ -31,7 +31,6 @@ public class JSONSyncTests {
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setUpPolymorphAdapter(ExampleJsonSyncClass.Action.class)
-                                .setPrimitiveChecking(false)
                                 .build());
     }
 
