@@ -1,5 +1,7 @@
 package coppercore.parameter_tools.json.helpers;
 
+import java.util.HashMap;
+
 import coppercore.parameter_tools.json.adapters.JSONPose2d;
 import coppercore.parameter_tools.json.adapters.JSONRotation2d;
 import coppercore.parameter_tools.json.adapters.JSONTranslation2d;
@@ -12,10 +14,12 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularMomentum;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Energy;
 import edu.wpi.first.units.measure.Force;
+import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
@@ -27,7 +31,8 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
-import java.util.HashMap;
+
+//TODO: Make sure ever class that needs a JSON wrapper has one of json measures
 
 /**
  * A utility class for converting between Java classes and their corresponding JSON wrapper classes.
@@ -40,6 +45,7 @@ public class JSONConverter {
         jsonMap.put(Translation2d.class, JSONTranslation2d.class);
         jsonMap.put(Rotation2d.class, JSONRotation2d.class);
         jsonMap.put(Pose2d.class, JSONPose2d.class);
+
         jsonMap.put(Distance.class, JSONMeasure.class);
         jsonMap.put(Torque.class, JSONMeasure.class);
         jsonMap.put(Temperature.class, JSONMeasure.class);
@@ -52,12 +58,15 @@ public class JSONConverter {
         jsonMap.put(Resistance.class, JSONMeasure.class);
         jsonMap.put(AngularMomentum.class, JSONMeasure.class);
         jsonMap.put(AngularAcceleration.class, JSONMeasure.class);
+        jsonMap.put(AngularVelocity.class, JSONMeasure.class);
         jsonMap.put(LinearAcceleration.class, JSONMeasure.class);
         jsonMap.put(LinearVelocity.class, JSONMeasure.class);
         jsonMap.put(Angle.class, JSONMeasure.class);
         jsonMap.put(Time.class, JSONMeasure.class);
         jsonMap.put(MomentOfInertia.class, JSONMeasure.class);
         jsonMap.put(Measure.class, JSONMeasure.class);
+        jsonMap.put(Frequency.class, JSONMeasure.class);
+
         jsonMap.put(Per.class, JSONPer.class);
     }
 
