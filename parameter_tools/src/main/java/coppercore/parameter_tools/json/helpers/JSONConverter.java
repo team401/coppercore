@@ -9,26 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularMomentum;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Energy;
-import edu.wpi.first.units.measure.Force;
-import edu.wpi.first.units.measure.Frequency;
-import edu.wpi.first.units.measure.LinearAcceleration;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Per;
-import edu.wpi.first.units.measure.Power;
-import edu.wpi.first.units.measure.Resistance;
-import edu.wpi.first.units.measure.Temperature;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Torque;
-import edu.wpi.first.units.measure.Voltage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,27 +32,16 @@ public class JSONConverter {
         JSONConverter.addConversion(Rotation2d.class, JSONRotation2d.class);
         JSONConverter.addConversion(Pose2d.class, JSONPose2d.class);
 
-        jsonMap.put(Distance.class, JSONMeasure.class);
-        jsonMap.put(Torque.class, JSONMeasure.class);
-        jsonMap.put(Temperature.class, JSONMeasure.class);
-        jsonMap.put(Mass.class, JSONMeasure.class);
-        jsonMap.put(Force.class, JSONMeasure.class);
-        jsonMap.put(Current.class, JSONMeasure.class);
-        jsonMap.put(Power.class, JSONMeasure.class);
-        jsonMap.put(Energy.class, JSONMeasure.class);
-        jsonMap.put(Voltage.class, JSONMeasure.class);
-        jsonMap.put(Resistance.class, JSONMeasure.class);
-        jsonMap.put(AngularMomentum.class, JSONMeasure.class);
-        jsonMap.put(AngularAcceleration.class, JSONMeasure.class);
-        jsonMap.put(AngularVelocity.class, JSONMeasure.class);
-        jsonMap.put(LinearAcceleration.class, JSONMeasure.class);
-        jsonMap.put(LinearVelocity.class, JSONMeasure.class);
-        jsonMap.put(Angle.class, JSONMeasure.class);
-        jsonMap.put(Time.class, JSONMeasure.class);
-        jsonMap.put(MomentOfInertia.class, JSONMeasure.class);
-        jsonMap.put(Measure.class, JSONMeasure.class);
-        jsonMap.put(Frequency.class, JSONMeasure.class);
+        // All measure are wrapped by the JSONMeasure class except Per
+        JSONConverter.addAdvancedConversion(
+                (Class<?> clazz) -> {
+                    if (Measure.class.isAssignableFrom(clazz)) {
+                        return JSONMeasure.class;
+                    }
+                    return null;
+                });
 
+        // Filter out Per from the rest of the measures
         JSONConverter.addConversion(Per.class, JSONPer.class);
     }
 
