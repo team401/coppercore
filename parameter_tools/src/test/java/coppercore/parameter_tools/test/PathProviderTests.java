@@ -115,13 +115,13 @@ public class PathProviderTests {
     }
 
     @Test
-    public void defaultingToEnvironmentPathTest() {
-        environmentHandler = environmentHandler.setEnvironment("defaulting");
+    public void isolatedPathTest() {
+        environmentHandler = environmentHandler.setEnvironment("isolated");
         testPathProvider = environmentHandler.getEnvironmentPathProvider();
         Assertions.assertEquals(
                 pathProvider.getFullPath()
                         + File.separator
-                        + "defaulting"
+                        + "isolated"
                         + File.separator
                         + "RandomNoneExistentFile.json",
                 testPathProvider.resolveWritePath("RandomNoneExistentFile.json"));

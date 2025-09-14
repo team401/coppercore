@@ -10,7 +10,8 @@ public class Environment {
     private String name;
     private String filepath;
 
-    private final Boolean defaultToEnvironment = null;
+    /** If is isolated only uses files in its directory */
+    private final Boolean isolated = false;
 
     /**
      * Returns the name of the environment.
@@ -43,11 +44,11 @@ public class Environment {
     }
 
     /**
-     * Return if it has a defined default location
+     * Return if the environment is isolated
      *
-     * @return defined defaultToEnvironment value
+     * @return environment is isolated
      */
-    public Boolean getDefaultToEnvironment() {
-        return defaultToEnvironment;
+    public Boolean isIsolated() {
+        return isolated;
     }
 }

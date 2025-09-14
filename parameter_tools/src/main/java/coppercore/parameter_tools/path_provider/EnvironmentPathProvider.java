@@ -1,7 +1,6 @@
 package coppercore.parameter_tools.path_provider;
 
 import java.io.File;
-import java.util.Optional;
 
 /** Provides file paths based on the current environment. It checks if the file exists in the */
 public class EnvironmentPathProvider implements PathProvider {
@@ -28,17 +27,13 @@ public class EnvironmentPathProvider implements PathProvider {
      */
     @Override
     public String resolveWritePath(String file) {
-        return resolvePath(
-                file, Optional.ofNullable(environment.getDefaultToEnvironment()).orElse(true));
+        return resolvePath(file, true);
     }
 
     /** Gets path to file This will throw an error if the file does not exist */
     @Override
     public String resolveReadPath(String file) {
-        String path =
-                resolvePath(
-                        file,
-                        Optional.ofNullable(environment.getDefaultToEnvironment()).orElse(false));
+        String path = resolvePath(file, environment.isIsolated());
         File f = new File(path);
         if (f.exists() && !f.isDirectory()) {
             return path;
@@ -64,8 +59,8 @@ public class EnvironmentPathProvider implements PathProvider {
      * desired location for the file to be made in.
      *
      * @param file file to find
-     * @param defaultToEnvironment if true then it will default to the environment path if the file
-     *     does not exist in the defaults path
+     * @param defaultToEnvironment if true it will not use the default path if the file does not
+     *     exist
      * @return resolved path
      */
     public String resolvePath(String file, boolean defaultToEnvironment) {

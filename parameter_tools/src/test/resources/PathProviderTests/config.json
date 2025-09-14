@@ -13,8 +13,8 @@
         "filepath": "custom"
       },
       {
-        "name": "defaulting",
-        "defaultToEnvironment": true
+        "name": "isolated",
+        "isolated": true
       }
     ]
   }
