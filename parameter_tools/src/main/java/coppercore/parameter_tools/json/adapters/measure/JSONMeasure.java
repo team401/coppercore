@@ -1,12 +1,12 @@
 package coppercore.parameter_tools.json.adapters.measure;
 
-import java.util.HashMap;
-import java.util.function.Function;
-
 import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.Units;
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.function.Function;
 
 /** A JSON representation of a Measure object. */
 @SuppressWarnings("rawtypes")
@@ -21,7 +21,7 @@ public class JSONMeasure extends JSONObject<Measure> {
         registerUnit(unit.name(), unit::of);
     }
 
-    public static void registerUnit(Unit unit, String... names){
+    public static void registerUnit(Unit unit, String... names) {
         for (String name : names) {
             registerUnit(name, unit::of);
         }
@@ -41,22 +41,20 @@ public class JSONMeasure extends JSONObject<Measure> {
         unit = measure.unit().name();
         if (unitMap.containsKey(unit) == false) {
             System.out.println("Warning: Unit not registered in map: " + unit);
-            System.out.println("""
+            System.out.println(
+                    """
                 -------------------------------------------------------------------------
                 To register it, call call one of the following methods:
                 JSONMeasure.registerUnit(<YOUR UNIT>);
                 JSONMeasure.registerUnit(<YOUR UNIT>, "CustomName1", "CustomName2", ...);
                 JSONMeasure.registerUnit("CustomName", <Converter to your unit>);
             """);
-            
         }
     }
-
 
     // Written with help from CoPilot
     static {
         // ### Register all units in Units class ###
-
 
         // ## Baseless Units ##
         JSONMeasure.registerUnit(Units.Value);
@@ -89,11 +87,16 @@ public class JSONMeasure extends JSONObject<Measure> {
         JSONMeasure.registerUnit(Units.FeetPerSecond, "FeetPerSecond", "Feet/Second", "ft/s");
         JSONMeasure.registerUnit(Units.InchesPerSecond, "InchesPerSecond", "Inches/Second", "in/s");
         // # Angular Velocity #
-        JSONMeasure.registerUnit(Units.RevolutionsPerSecond, "RevolutionsPerSecond", "Revolutions/Second", "rev/s");
-        JSONMeasure.registerUnit(Units.RotationsPerSecond, "RotationsPerSecond", "Rotations/Second", "rot/s");
-        JSONMeasure.registerUnit(Units.RPM, "RPM", "RevolutionsPerMinute", "Revolutions/Minute", "rev/min", "r/min");
-        JSONMeasure.registerUnit(Units.RadiansPerSecond, "RadiansPerSecond", "Radians/Second", "rad/s");
-        JSONMeasure.registerUnit(Units.DegreesPerSecond, "DegreesPerSecond", "Degrees/Second", "deg/s");
+        JSONMeasure.registerUnit(
+                Units.RevolutionsPerSecond, "RevolutionsPerSecond", "Revolutions/Second", "rev/s");
+        JSONMeasure.registerUnit(
+                Units.RotationsPerSecond, "RotationsPerSecond", "Rotations/Second", "rot/s");
+        JSONMeasure.registerUnit(
+                Units.RPM, "RPM", "RevolutionsPerMinute", "Revolutions/Minute", "rev/min", "r/min");
+        JSONMeasure.registerUnit(
+                Units.RadiansPerSecond, "RadiansPerSecond", "Radians/Second", "rad/s");
+        JSONMeasure.registerUnit(
+                Units.DegreesPerSecond, "DegreesPerSecond", "Degrees/Second", "deg/s");
 
         // ## Frequency Units ##
         JSONMeasure.registerUnit(Units.Hertz, "Hertz", "Hertz", "Hz");
@@ -101,12 +104,42 @@ public class JSONMeasure extends JSONObject<Measure> {
 
         // ## Acceleration Units ##
         // # Linear Acceleration #
-        JSONMeasure.registerUnit(Units.MetersPerSecondPerSecond, "MetersPerSecondPerSecond", "Meters Per Second Squared", "Meters/Second^2", "m/s²", "m/s^2");
-        JSONMeasure.registerUnit(Units.FeetPerSecondPerSecond, "FeetPerSecondPerSecond", "Feet Per Second Squared", "Feet/Second^2", "ft/s²", "ft/s^2");
+        JSONMeasure.registerUnit(
+                Units.MetersPerSecondPerSecond,
+                "MetersPerSecondPerSecond",
+                "Meters Per Second Squared",
+                "Meters/Second^2",
+                "m/s²",
+                "m/s^2");
+        JSONMeasure.registerUnit(
+                Units.FeetPerSecondPerSecond,
+                "FeetPerSecondPerSecond",
+                "Feet Per Second Squared",
+                "Feet/Second^2",
+                "ft/s²",
+                "ft/s^2");
         // # Angular Acceleration #
-        JSONMeasure.registerUnit(Units.RotationsPerSecondPerSecond, "RotationsPerSecondPerSecond", "Rotations Per Second Squared", "Rotations/Second^2", "rot/s²", "rot/s^2");
-        JSONMeasure.registerUnit(Units.RadiansPerSecondPerSecond, "RadiansPerSecondPerSecond", "Radians Per Second Squared", "Radians/Second^2", "rad/s²", "rad/s^2");
-        JSONMeasure.registerUnit(Units.DegreesPerSecondPerSecond, "DegreesPerSecondPerSecond", "Degrees Per Second Squared", "Degrees/Second^2", "deg/s²", "deg/s^2");
+        JSONMeasure.registerUnit(
+                Units.RotationsPerSecondPerSecond,
+                "RotationsPerSecondPerSecond",
+                "Rotations Per Second Squared",
+                "Rotations/Second^2",
+                "rot/s²",
+                "rot/s^2");
+        JSONMeasure.registerUnit(
+                Units.RadiansPerSecondPerSecond,
+                "RadiansPerSecondPerSecond",
+                "Radians Per Second Squared",
+                "Radians/Second^2",
+                "rad/s²",
+                "rad/s^2");
+        JSONMeasure.registerUnit(
+                Units.DegreesPerSecondPerSecond,
+                "DegreesPerSecondPerSecond",
+                "Degrees Per Second Squared",
+                "Degrees/Second^2",
+                "deg/s²",
+                "deg/s^2");
         // # Gs #
         JSONMeasure.registerUnit(Units.Gs, "Gs", "g", "G");
 
@@ -131,12 +164,21 @@ public class JSONMeasure extends JSONObject<Measure> {
 
         // ## Momentum##
         // Linear Momentum
-        JSONMeasure.registerUnit(Units.KilogramMetersPerSecond, "KilogramMetersPerSecond", "KilogramMeters/Second");
+        JSONMeasure.registerUnit(
+                Units.KilogramMetersPerSecond, "KilogramMetersPerSecond", "KilogramMeters/Second");
         // Angular Momentum
-        JSONMeasure.registerUnit(Units.KilogramMetersSquaredPerSecond, "KilogramMetersSquaredPerSecond", "KilogramMeters^2/Second", "KilogramMetersSquared/Second");
-        
+        JSONMeasure.registerUnit(
+                Units.KilogramMetersSquaredPerSecond,
+                "KilogramMetersSquaredPerSecond",
+                "KilogramMeters^2/Second",
+                "KilogramMetersSquared/Second");
+
         // ## Moment of Inertia ##
-        JSONMeasure.registerUnit(Units.KilogramSquareMeters, "KilogramSquareMeters", "KilogramMeters^2", "KilogramMetersSquared");
+        JSONMeasure.registerUnit(
+                Units.KilogramSquareMeters,
+                "KilogramSquareMeters",
+                "KilogramMeters^2",
+                "KilogramMetersSquared");
 
         // ## Electric Units ##
         // # Voltage #
@@ -164,18 +206,45 @@ public class JSONMeasure extends JSONObject<Measure> {
         JSONMeasure.registerUnit(Units.Fahrenheit, "Fahrenheit", "°F", "F");
 
         // ## Feedforward Units ##
-        JSONMeasure.registerUnit(Units.VoltsPerMeterPerSecond, "VoltsPerMeterPerSecond", "Volts/Meter/Second", "V/(m/s)");
-        JSONMeasure.registerUnit(Units.VoltsPerMeterPerSecondSquared, "VoltsPerMeterPerSecondSquared", "Volts/Meter/Second^2", "V/(m/s²)", "V/(m/s^2)");
-        JSONMeasure.registerUnit(Units.VoltsPerRadianPerSecond, "VoltsPerRadianPerSecond", "Volts/Radian/Second", "V/(rad/s)");
-        JSONMeasure.registerUnit(Units.VoltsPerRadianPerSecondSquared, "VoltsPerRadianPerSecondSquared", "Volts/Radian/Second^2", "V/(rad/s²)", "V/(rad/s^2)");
+        JSONMeasure.registerUnit(
+                Units.VoltsPerMeterPerSecond,
+                "VoltsPerMeterPerSecond",
+                "Volts/Meter/Second",
+                "V/(m/s)");
+        JSONMeasure.registerUnit(
+                Units.VoltsPerMeterPerSecondSquared,
+                "VoltsPerMeterPerSecondSquared",
+                "Volts/Meter/Second^2",
+                "V/(m/s²)",
+                "V/(m/s^2)");
+        JSONMeasure.registerUnit(
+                Units.VoltsPerRadianPerSecond,
+                "VoltsPerRadianPerSecond",
+                "Volts/Radian/Second",
+                "V/(rad/s)");
+        JSONMeasure.registerUnit(
+                Units.VoltsPerRadianPerSecondSquared,
+                "VoltsPerRadianPerSecondSquared",
+                "Volts/Radian/Second^2",
+                "V/(rad/s²)",
+                "V/(rad/s^2)");
     }
 
     @Override
     public Measure toJava() {
         if (unitMap.containsKey(unit)) {
             return unitMap.get(unit).apply(value);
-        }else{
+        } else {
             throw new RuntimeException("Unit not registered in map: " + unit);
         }
+    }
+
+    /**
+     * Gets the constructor of the json wrapper
+     *
+     * @return the json wrapper constructor
+     */
+    public static Constructor<JSONMeasure> getConstructor() throws NoSuchMethodException {
+        return JSONMeasure.class.getConstructor(Measure.class);
     }
 }

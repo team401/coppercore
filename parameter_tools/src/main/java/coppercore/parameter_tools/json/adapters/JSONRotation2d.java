@@ -2,6 +2,7 @@ package coppercore.parameter_tools.json.adapters;
 
 import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.math.geometry.Rotation2d;
+import java.lang.reflect.Constructor;
 
 /** A JSON representation of a Rotation2d object. */
 public class JSONRotation2d extends JSONObject<Object> {
@@ -20,5 +21,14 @@ public class JSONRotation2d extends JSONObject<Object> {
     @Override
     public Rotation2d toJava() {
         return new Rotation2d(radians);
+    }
+
+    /**
+     * Gets the constructor of the json wrapper
+     *
+     * @return the json wrapper constructor
+     */
+    public static Constructor<JSONRotation2d> getConstructor() throws NoSuchMethodException {
+        return JSONRotation2d.class.getConstructor(Rotation2d.class);
     }
 }

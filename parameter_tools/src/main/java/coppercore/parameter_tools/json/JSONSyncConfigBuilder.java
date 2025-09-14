@@ -21,6 +21,7 @@ public class JSONSyncConfigBuilder {
 
     /** Indicates whether fields without @Expose annotations should be excluded. */
     public boolean excludeFieldsWithoutExposeAnnotation = false;
+
     public boolean primitiveChecking = true;
     public boolean primitiveCheckPrintAlert = false;
     public boolean primitiveCheckCrash = true;

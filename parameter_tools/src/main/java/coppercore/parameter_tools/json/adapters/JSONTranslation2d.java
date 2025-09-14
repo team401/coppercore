@@ -2,6 +2,7 @@ package coppercore.parameter_tools.json.adapters;
 
 import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.math.geometry.Translation2d;
+import java.lang.reflect.Constructor;
 
 /**
  * A JSON adapter for the Translation2d class, enabling serialization and deserialization
@@ -26,5 +27,14 @@ public class JSONTranslation2d extends JSONObject<Translation2d> {
     @Override
     public Translation2d toJava() {
         return new Translation2d(x, y);
+    }
+
+    /**
+     * Gets the constructor of the json wrapper
+     *
+     * @return the json wrapper constructor
+     */
+    public static Constructor<JSONTranslation2d> getConstructor() throws NoSuchMethodException {
+        return JSONTranslation2d.class.getConstructor(Translation2d.class);
     }
 }

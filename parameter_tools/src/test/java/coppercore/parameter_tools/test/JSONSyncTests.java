@@ -31,6 +31,7 @@ public class JSONSyncTests {
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setUpPolymorphAdapter(ExampleJsonSyncClass.Action.class)
+                                .setPrimitiveChecking(false)
                                 .build());
     }
 
@@ -114,11 +115,13 @@ public class JSONSyncTests {
                             JSONSync<PrimitiveClass> sync =
                                     new JSONSync<>(
                                             new PrimitiveClass(0),
-                                            RESOURCE_DIRECTORY + "/PrimitiveClass.json",
+                                            "PrimitiveClass.json",
+                                            new UnitTestingPathProvider()
+                                                    .getDirectory("JSONSyncTests"),
                                             new JSONSyncConfigBuilder()
                                                     .setPrettyPrinting(true)
                                                     .build());
-                            sync.loadData();
+                            sync.saveData();
                         });
         System.out.println(e);
     }
@@ -134,7 +137,8 @@ public class JSONSyncTests {
         JSONSync<PrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new PrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/PrimitiveCheckCrash.json",
+                        "PrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)
@@ -156,7 +160,8 @@ public class JSONSyncTests {
         JSONSync<PrivatePrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new PrivatePrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/PrivatePrimitiveCheckCrash.json",
+                        "PrivatePrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)
@@ -175,7 +180,8 @@ public class JSONSyncTests {
         JSONSync<DoublePrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new DoublePrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/DoublePrimitiveCheckCrash.json",
+                        "DoublePrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)
@@ -194,7 +200,8 @@ public class JSONSyncTests {
         JSONSync<BooleanPrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new BooleanPrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/BooleanPrimitiveCheckCrash.json",
+                        "BooleanPrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)
@@ -213,7 +220,8 @@ public class JSONSyncTests {
         JSONSync<BytePrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new BytePrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/BytePrimitiveCheckCrash.json",
+                        "BytePrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)
@@ -232,7 +240,8 @@ public class JSONSyncTests {
         JSONSync<ShortPrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new ShortPrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/ShortPrimitiveCheckCrash.json",
+                        "ShortPrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)

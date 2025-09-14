@@ -3,6 +3,7 @@ package coppercore.parameter_tools.json.strategies;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import coppercore.parameter_tools.json.annotations.JSONExclude;
+
 /**
  * Exclusion strategy to exclude fields marked with {@link JSONExclude} from serialization and
  * deserialization.
