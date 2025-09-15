@@ -1,35 +1,24 @@
 package coppercore.controls.test;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import coppercore.controls.state_machine.StateMachine;
 import coppercore.controls.state_machine.StateMachineConfiguration;
 import coppercore.controls.state_machine.state.EnumStateBase;
 import coppercore.controls.state_machine.state.StateBase;
-import coppercore.controls.state_machine.transition.TransitionBase;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class StateContainerStateMachineTests {
 
-    static class IdleState implements StateBase<testStateContainer, testEnumTriggers>  {
-        public static void customOnEntry(
-                TransitionBase<StateContainerStateMachineTests, testEnumTriggers> transition) {}
-
-        public static void customOnExit(
-                TransitionBase<StateContainerStateMachineTests, testEnumTriggers> transition) {}
-
-        public static void customTransitionAction(
-                TransitionBase<StateContainerStateMachineTests, testEnumTriggers> transition) {}
-    }
+    static class IdleState implements StateBase<testStateContainer, testEnumTriggers> {}
     ;
 
-    static class ReadyState implements StateBase<testStateContainer, testEnumTriggers>  {}
+    static class ReadyState implements StateBase<testStateContainer, testEnumTriggers> {}
     ;
 
-    static class WaitingState implements StateBase<testStateContainer, testEnumTriggers>  {}
+    static class WaitingState implements StateBase<testStateContainer, testEnumTriggers> {}
     ;
 
-    static class DoneState implements StateBase<testStateContainer, testEnumTriggers>  {}
+    static class DoneState implements StateBase<testStateContainer, testEnumTriggers> {}
     ;
 
     static class ShutdownState implements StateBase<testStateContainer, testEnumTriggers> {}
@@ -42,14 +31,14 @@ public class StateContainerStateMachineTests {
         DONE(new DoneState()),
         SHUTDOWN(new ShutdownState());
 
-        private final StateBase<testStateContainer, testEnumTriggers>  state;
+        private final StateBase<testStateContainer, testEnumTriggers> state;
 
-        testStateContainer(StateBase<testStateContainer, testEnumTriggers>  state) {
+        testStateContainer(StateBase<testStateContainer, testEnumTriggers> state) {
             this.state = state;
         }
 
         @Override
-        public StateBase<testStateContainer, testEnumTriggers>  getState() {
+        public StateBase<testStateContainer, testEnumTriggers> getState() {
             return state;
         }
     }

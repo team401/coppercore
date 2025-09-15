@@ -1,15 +1,16 @@
 package coppercore.controls.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import coppercore.controls.state_machine.StateMachine;
-import coppercore.controls.state_machine.StateMachineConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import coppercore.controls.state_machine.StateMachine;
+import coppercore.controls.state_machine.StateMachineConfiguration;
+import coppercore.controls.state_machine.state.StateBase;
+
 public class SimpleEnumStateMachineTests {
 
-    static enum simpleEnumStates {
+    static enum simpleEnumStates implements StateBase<simpleEnumStates, simpleEnumTriggers> {
         IDLE,
         READY,
         WAITING,
