@@ -1,11 +1,10 @@
 package coppercore.controls.state_machine;
 
+import coppercore.controls.state_machine.state.StateConfiguration;
+import coppercore.controls.state_machine.transition.TransitionBase;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import coppercore.controls.state_machine.state.StateConfiguration;
-import coppercore.controls.state_machine.transition.TransitionBase;
 
 /** Object to configure State Machine */
 public class StateMachineConfiguration<State, Trigger> {

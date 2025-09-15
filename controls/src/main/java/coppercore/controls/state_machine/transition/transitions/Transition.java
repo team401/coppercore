@@ -3,7 +3,7 @@ package coppercore.controls.state_machine.transition.transitions;
 import coppercore.controls.state_machine.transition.TransitionBase;
 
 public class Transition<State, Trigger> extends TransitionBase<State, Trigger> {
-    
+
     private boolean runOnEntry;
     private boolean runOnExit;
 
@@ -11,24 +11,23 @@ public class Transition<State, Trigger> extends TransitionBase<State, Trigger> {
         super(source, destination, trigger);
     }
 
-    public Transition<State, Trigger> disableOnEntry(){
+    public Transition<State, Trigger> disableOnEntry() {
         this.runOnEntry = false;
         return this;
     }
 
-    public Transition<State, Trigger> disableOnExit(){
+    public Transition<State, Trigger> disableOnExit() {
         this.runOnExit = false;
         return this;
     }
 
     @Override
-    public boolean runOnEntry(){
+    public boolean runOnEntry() {
         return runOnEntry;
     }
 
     @Override
-    public boolean runOnExit(){
+    public boolean runOnExit() {
         return runOnExit;
     }
-    
 }

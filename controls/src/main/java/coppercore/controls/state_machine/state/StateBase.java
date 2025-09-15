@@ -3,10 +3,11 @@ package coppercore.controls.state_machine.state;
 import coppercore.controls.state_machine.transition.TransitionBase;
 
 public interface StateBase<State, Trigger> {
-    
+
     public default StateBase<State, Trigger> getState() {
         return this;
-    };
+    }
+    ;
 
     /**
      * Define statemachine action to be run when entering state

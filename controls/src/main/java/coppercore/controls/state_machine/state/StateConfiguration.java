@@ -1,14 +1,13 @@
 package coppercore.controls.state_machine.state;
 
+import coppercore.controls.state_machine.transition.TransitionBase;
+import coppercore.controls.state_machine.transition.transitions.ConditionalTransition;
+import coppercore.controls.state_machine.transition.transitions.Transition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
-
-import coppercore.controls.state_machine.transition.TransitionBase;
-import coppercore.controls.state_machine.transition.transitions.ConditionalTransition;
-import coppercore.controls.state_machine.transition.transitions.Transition;
 
 /** Configures State Machine State behavior */
 public class StateConfiguration<State, Trigger> {
@@ -29,7 +28,8 @@ public class StateConfiguration<State, Trigger> {
 
     public StateConfiguration<State, Trigger> permit(Transition<State, Trigger> transition) {
         if (!source.equals(transition.getSource())) {
-            throw new RuntimeException("Transition Source must Be same as transition is permitted from");
+            throw new RuntimeException(
+                    "Transition Source must Be same as transition is permitted from");
         }
         if (Objects.isNull(transition.getDestination())) {
             throw new RuntimeException("Transition Destination must not be null");
@@ -62,9 +62,8 @@ public class StateConfiguration<State, Trigger> {
      * @return configuration
      */
     public StateConfiguration<State, Trigger> permitInternal(Trigger trigger, State destination) {
-        TransitionBase<State, Trigger> transition = new Transition<>(source, destination, trigger)
-            .disableOnEntry()
-            .disableOnExit();
+        TransitionBase<State, Trigger> transition =
+                new Transition<>(source, destination, trigger).disableOnEntry().disableOnExit();
         transitions.add(transition);
         return this;
     }
@@ -80,7 +79,8 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permitIf(
             Trigger trigger, State destination, BooleanSupplier check) {
-        TransitionBase<State, Trigger> transition = new ConditionalTransition<>(source, destination, trigger, check);
+        TransitionBase<State, Trigger> transition =
+                new ConditionalTransition<>(source, destination, trigger, check);
         transitions.add(transition);
         return this;
     }
@@ -97,9 +97,10 @@ public class StateConfiguration<State, Trigger> {
      */
     public StateConfiguration<State, Trigger> permitInternalIf(
             Trigger trigger, State destination, BooleanSupplier check) {
-        TransitionBase<State, Trigger> transition = new ConditionalTransition<>(source, destination, trigger, check)
-            .disableOnEntry()
-            .disableOnExit();
+        TransitionBase<State, Trigger> transition =
+                new ConditionalTransition<>(source, destination, trigger, check)
+                        .disableOnEntry()
+                        .disableOnExit();
         transitions.add(transition);
         return this;
     }
@@ -113,8 +114,10 @@ public class StateConfiguration<State, Trigger> {
     public List<TransitionBase<State, Trigger>> getTransitions(Trigger trigger) {
         if (Objects.isNull(trigger)) return new ArrayList<>();
         return transitions.stream()
-            .filter((TransitionBase<State, Trigger> transition) -> trigger.equals(transition.getTrigger()))
-            .toList();
+                .filter(
+                        (TransitionBase<State, Trigger> transition) ->
+                                trigger.equals(transition.getTrigger()))
+                .toList();
     }
 
     /**
@@ -136,9 +139,6 @@ public class StateConfiguration<State, Trigger> {
         return returnOptional;
     }
 
-
-
-
     /**
      * Gets filtered transition
      *
@@ -148,5 +148,4 @@ public class StateConfiguration<State, Trigger> {
     public Optional<TransitionBase<State, Trigger>> getFilteredTransition(Trigger trigger) {
         return filterTransitions(getTransitions(trigger));
     }
-    
 }

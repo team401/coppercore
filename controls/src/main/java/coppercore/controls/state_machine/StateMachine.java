@@ -1,10 +1,9 @@
 package coppercore.controls.state_machine;
 
-import java.util.Optional;
-
 import coppercore.controls.state_machine.state.StateBase;
 import coppercore.controls.state_machine.transition.TransitionBase;
 import coppercore.controls.state_machine.transition.TransitionInfo;
+import java.util.Optional;
 
 /** Generic State Machine */
 public class StateMachine<State extends StateBase<State, Trigger>, Trigger> {

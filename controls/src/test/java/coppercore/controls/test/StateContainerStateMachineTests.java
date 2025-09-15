@@ -1,16 +1,17 @@
 package coppercore.controls.test;
 
-import coppercore.controls.state_machine.StateMachine;
-import coppercore.controls.state_machine.StateMachineConfiguration;
-import coppercore.controls.state_machine.state.PeriodicStateBase;
-import coppercore.controls.state_machine.state.StateContainerBase;
-import coppercore.controls.state_machine.transition.TransitionBase;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import coppercore.controls.state_machine.StateMachine;
+import coppercore.controls.state_machine.StateMachineConfiguration;
+import coppercore.controls.state_machine.state.EnumStateBase;
+import coppercore.controls.state_machine.state.StateBase;
+import coppercore.controls.state_machine.transition.TransitionBase;
+
 public class StateContainerStateMachineTests {
 
-    static class IdleState implements PeriodicStateBase {
+    static class IdleState implements StateBase<testStateContainer, testEnumTriggers>  {
         public static void customOnEntry(
                 TransitionBase<StateContainerStateMachineTests, testEnumTriggers> transition) {}
 
@@ -22,33 +23,33 @@ public class StateContainerStateMachineTests {
     }
     ;
 
-    static class ReadyState implements PeriodicStateBase {}
+    static class ReadyState implements StateBase<testStateContainer, testEnumTriggers>  {}
     ;
 
-    static class WaitingState implements PeriodicStateBase {}
+    static class WaitingState implements StateBase<testStateContainer, testEnumTriggers>  {}
     ;
 
-    static class DoneState implements PeriodicStateBase {}
+    static class DoneState implements StateBase<testStateContainer, testEnumTriggers>  {}
     ;
 
-    static class ShutdownState implements PeriodicStateBase {}
+    static class ShutdownState implements StateBase<testStateContainer, testEnumTriggers> {}
     ;
 
-    static enum testStateContainer implements StateContainerBase {
+    static enum testStateContainer implements EnumStateBase<testStateContainer, testEnumTriggers> {
         IDLE(new IdleState()),
         READY(new ReadyState()),
         WAITING(new WaitingState()),
         DONE(new DoneState()),
         SHUTDOWN(new ShutdownState());
 
-        private final PeriodicStateBase state;
+        private final StateBase<testStateContainer, testEnumTriggers>  state;
 
-        testStateContainer(PeriodicStateBase state) {
+        testStateContainer(StateBase<testStateContainer, testEnumTriggers>  state) {
             this.state = state;
         }
 
         @Override
-        public PeriodicStateBase getState() {
+        public StateBase<testStateContainer, testEnumTriggers>  getState() {
             return state;
         }
     }
@@ -69,14 +70,6 @@ public class StateContainerStateMachineTests {
     public static void setup() {
         stateContainerTestMachineConfig = new StateMachineConfiguration<>();
 
-        stateContainerTestMachineConfig
-                .configureDefaultOnExitAction(
-                        (TransitionBase<testStateContainer, testEnumTriggers> transition) ->
-                                transition.getSource().getState().onEntry(transition))
-                .configureDefaultOnExitAction(
-                        (TransitionBase<testStateContainer, testEnumTriggers> transition) ->
-                                transition.getSource().getState().onExit(transition));
-
         // stateContainerTestMachineConfig
         //    .registerBlankParent(testStateContainer.SOME_PARENT_STATE);  Not in first
         // Implemenation
@@ -88,11 +81,7 @@ public class StateContainerStateMachineTests {
                 .configure(testStateContainer.IDLE)
                 // .parentState(testStateContainer.SOME_STATE) Not in first Implemenation
                 .permit(testEnumTriggers.PREPARE, testStateContainer.READY)
-                .permitInternal(testEnumTriggers.PREPARE, testStateContainer.READY)
-                .configureOnEntryAction(IdleState::customOnEntry)
-                .configureOnExitAction(IdleState::customOnExit)
-                .disableDefualtOnEntry()
-                .disableDefualtOnExit();
+                .permitInternal(testEnumTriggers.PREPARE, testStateContainer.READY);
 
         stateContainerTestMachineConfig
                 .configure(testStateContainer.READY)

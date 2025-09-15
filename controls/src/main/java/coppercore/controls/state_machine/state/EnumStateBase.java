@@ -2,14 +2,14 @@ package coppercore.controls.state_machine.state;
 
 import coppercore.controls.state_machine.transition.TransitionBase;
 
-/** State Container Base */
-public interface StateContainerBase<State, Trigger> extends StateBase<State, Trigger> {
+/** State Base for Enum Containing States */
+public interface EnumStateBase<State, Trigger> extends StateBase<State, Trigger> {
+
     /**
-     * Method to get Containted State
+     * Method to get State
      *
      * @return held state
      */
-
     @Override
     public StateBase<State, Trigger> getState();
 

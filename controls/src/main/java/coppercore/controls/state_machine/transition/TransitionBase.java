@@ -7,7 +7,6 @@ public abstract class TransitionBase<State, Trigger> {
     private final Trigger trigger;
     protected int priority;
 
-
     /**
      * Creates Transition Data Object
      *
@@ -15,14 +14,11 @@ public abstract class TransitionBase<State, Trigger> {
      * @param destination Transition Destination
      * @param trigger Transition Trigger
      */
-    public TransitionBase(
-            State source, State destination, Trigger trigger) {
+    public TransitionBase(State source, State destination, Trigger trigger) {
         this(source, destination, trigger, 0);
     }
 
-    
-    public TransitionBase(
-            State source, State destination, Trigger trigger, int priority) {
+    public TransitionBase(State source, State destination, Trigger trigger, int priority) {
         this.source = source;
         this.destination = destination;
         this.trigger = trigger;
