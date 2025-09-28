@@ -1,9 +1,7 @@
 package coppercore.parameter_tools.json.annotations;
 
 /**
- * Annotation to define a subtype for use with {@link JsonType} for polymorphic deserialization. Use
- * will need to use JSONSyncConfigBuilder should be used to register this with the JSONSyncConfig to
- * use.
+ * Annotation to define a subtype for use with {@link JsonType} for polymorphic deserialization. Used with JsonType.
  */
 public @interface JsonSubtype {
 

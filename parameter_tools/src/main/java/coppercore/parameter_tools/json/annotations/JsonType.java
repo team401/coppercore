@@ -7,8 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to define a JSON type with subtypes for polymorphic deserialization. {@link
- * JsonSubtype} should be used to define the subtypes. Use will need to use should be used to
- * register this with the to use.
+ * JsonSubtype} should be used to define the subtypes.
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

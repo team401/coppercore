@@ -1,10 +1,11 @@
 package coppercore.parameter_tools.json.adapters.measure;
 
+import java.lang.reflect.Constructor;
+
 import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.PerUnit;
 import edu.wpi.first.units.measure.Per;
-import java.lang.reflect.Constructor;
 
 /** A JSON representation of a Per object. */
 public class JSONPer extends JSONObject<Per> {
@@ -12,7 +13,7 @@ public class JSONPer extends JSONObject<Per> {
     Measure divisor;
 
     /**
-     * Default constructor for JSON deserialization.
+     * Default constructor for JSON serialization.
      *
      * @param measure The Per object to convert to JSON.
      */

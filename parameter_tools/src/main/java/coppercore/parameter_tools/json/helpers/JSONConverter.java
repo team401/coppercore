@@ -1,5 +1,10 @@
 package coppercore.parameter_tools.json.helpers;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.function.Function;
+
 import coppercore.parameter_tools.json.adapters.JSONPose2d;
 import coppercore.parameter_tools.json.adapters.JSONRotation2d;
 import coppercore.parameter_tools.json.adapters.JSONTranslation2d;
@@ -10,12 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.Per;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.function.Function;
 
-// TODO: Make sure ever class that needs a JSON wrapper has one of json measures
 
 /**
  * A utility class for converting between Java classes and their corresponding JSON wrapper classes.
@@ -79,11 +79,14 @@ public class JSONConverter {
             if (jsonMap.containsKey(clazz)) {
                 return (Class<? extends JSONObject<T>>) jsonMap.get(clazz);
             }
-            return JSONConverter.tryAdvancedConversions(clazz);
+            Class<?> advancedClazz = JSONConverter.tryAdvancedConversions(clazz);
+            if (advancedClazz != null) {
+                return (Class<? extends JSONObject<T>>) clazz;
+            }
         } catch (ClassCastException e) {
-
             throw new ConversionException("No JsonObject for " + clazz.getName(), e);
         }
+        throw new ConversionException("No JsonObject for " + clazz.getName());
     }
 
     /**

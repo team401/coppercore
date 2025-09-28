@@ -1,12 +1,13 @@
 package coppercore.parameter_tools.json.adapters.measure;
 
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.function.Function;
+
 import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.Units;
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.function.Function;
 
 /** A JSON representation of a Measure object. */
 @SuppressWarnings("rawtypes")
@@ -22,6 +23,7 @@ public class JSONMeasure extends JSONObject<Measure> {
     }
 
     public static void registerUnit(Unit unit, String... names) {
+        registerUnit(unit);
         for (String name : names) {
             registerUnit(name, unit::of);
         }
@@ -31,7 +33,7 @@ public class JSONMeasure extends JSONObject<Measure> {
     String unit = "";
 
     /**
-     * Default constructor for JSON deserialization.
+     * Default constructor for JSON serialization.
      *
      * @param measure The Measure object to convert to JSON.
      */
@@ -44,7 +46,7 @@ public class JSONMeasure extends JSONObject<Measure> {
             System.out.println(
                     """
                 -------------------------------------------------------------------------
-                To register it, call call one of the following methods:
+                To register it, call one of the following methods:
                 JSONMeasure.registerUnit(<YOUR UNIT>);
                 JSONMeasure.registerUnit(<YOUR UNIT>, "CustomName1", "CustomName2", ...);
                 JSONMeasure.registerUnit("CustomName", <Converter to your unit>);
