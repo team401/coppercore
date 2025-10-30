@@ -2,10 +2,9 @@
 
 package coppercore.wpilib_interface.tuning;
 
-import static edu.wpi.first.units.Units.Rotations;
-
 import edu.wpi.first.math.filter.MedianFilter;
-import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -16,10 +15,11 @@ import edu.wpi.first.wpilibj2.command.Command;
  *
  * <p>Outputs its findings to SmartDashboard at Test-Mode/kS and to console
  */
-public class TuneG extends Command {
-    private Tunable mechanism;
+public class TuneG<U extends Unit> extends Command {
+    private final U calculationUnit;
+    private Tunable<U> mechanism;
 
-    Angle startPosition;
+    Measure<U> startPosition;
 
     double kG;
     double kS;
@@ -34,8 +34,9 @@ public class TuneG extends Command {
 
     /**
      * Create a command to automatically characterize kG for a Tunable system
-     * 
-     * <p> WARNING: this command is very finicky and doesn't seem to function properly. We recommend using a TuneS to tune your kG, or tuning it manually
+     *
+     * <p>WARNING: this command is very finicky and doesn't seem to function properly. We recommend
+     * using a TuneS to tune your kG, or tuning it manually
      *
      * @param mechanism The Tunable mechanism/subsystem to tune
      * @param rampUpSpeed How much to increase the applied output by per loop. 0.001 is very precise
@@ -45,7 +46,12 @@ public class TuneG extends Command {
      *     moved", in rotations
      */
     public TuneG(
-            Tunable mechanism, double rampUpSpeed, int filterWindow, double movementThreshold) {
+            U calculationUnit,
+            Tunable<U> mechanism,
+            double rampUpSpeed,
+            int filterWindow,
+            double movementThreshold) {
+        this.calculationUnit = calculationUnit;
         this.mechanism = mechanism;
         this.kS = SmartDashboard.getNumber("Test-Mode/kS", 0);
 
@@ -66,7 +72,7 @@ public class TuneG extends Command {
 
     @Override
     public void execute() {
-        filteredPosition = positionFilter.calculate(mechanism.getPosition().in(Rotations));
+        filteredPosition = positionFilter.calculate(mechanism.getPosition().in(calculationUnit));
 
         mechanism.setOutput(kG);
         kG += rampUpSpeed;
@@ -83,8 +89,9 @@ public class TuneG extends Command {
 
     @Override
     public boolean isFinished() {
-        // This used to check if position was greater than abs(startPosition) - 0.1, if things break
+        // This used to check if position was greater than abs(startPosition) - 0.1, if
+        // things break
         // maybe try this again
-        return filteredPosition > (startPosition.in(Rotations) + movementThreshold);
+        return filteredPosition > (startPosition.in(calculationUnit) + movementThreshold);
     }
 }

@@ -1,27 +1,33 @@
 package coppercore.wpilib_interface.tuning;
 
+import edu.wpi.first.units.AccelerationUnit;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.PerUnit;
+import edu.wpi.first.units.TimeUnit;
+import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.VelocityUnit;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
 
 /**
  * An interface to allow a subsystem to be tuned in a standardized way. Implementing Tunable allows
  * the subsystem to use TuneG, TuneS, and TuneV.
+ *
+ * @param <U> The Unit for the dimension that this system exists within
  */
-public interface Tunable {
+public interface Tunable<U extends Unit> {
     /**
      * Get the position of a mechanism
      *
      * @return An Angle, the current position of the system
      */
-    public Angle getPosition();
+    public Measure<U> getPosition();
 
     /**
      * Get the velocity of a mechanism
      *
      * @return An AngularVelocity, the current velocity of the system
      */
-    public AngularVelocity getVelocity();
+    public Measure<PerUnit<U, TimeUnit>> getVelocity();
 
     /**
      * Sets the output applied for the mechanism
@@ -65,7 +71,7 @@ public interface Tunable {
      * @param maxAcceleration The maximum allowed acceleration of the system
      */
     public void setMaxProfileProperties(
-            AngularVelocity maxVelocity, AngularAcceleration maxAcceleration);
+            VelocityUnit<U> maxVelocity, AccelerationUnit<U> maxAcceleration);
 
     /**
      * Run the mechanism to a position using closed-loop control
