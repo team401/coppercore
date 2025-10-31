@@ -55,6 +55,13 @@ public class LoggedTunableNumber implements DoubleSupplier {
         }
     }
 
+    /**
+     * Set the condition for initializing the dashboard value. If the condition is false during
+     * construction or when setting the default value, the dashboard value will not be initialized.
+     * The condition can be changed later using setInitCondition.
+     *
+     * @param condition The condition to check
+     */
     public void setInitCondition(BooleanSupplier condition) {
         this.condition = condition;
     }
@@ -124,7 +131,14 @@ public class LoggedTunableNumber implements DoubleSupplier {
         }
     }
 
-    /** Runs action if any of the tunableNumbers have changed */
+    /**
+     * Runs action if any of the tunableNumbers have changed
+     *
+     * @param id Unique identifier for the caller to avoid conflicts when shared between multiple
+     *     objects. Recommended approach is to pass the result of "hashCode()"
+     * @param action Callback to run when any of the tunable numbers have changed.
+     * @param tunableNumbers All tunable numbers to check
+     */
     public static void ifChanged(int id, Runnable action, LoggedTunableNumber... tunableNumbers) {
         ifChanged(id, values -> action.run(), tunableNumbers);
     }
