@@ -1,7 +1,8 @@
 package coppercore.parameter_tools.json.annotations;
 
 /**
- * Annotation to define a subtype for use with {@link JsonType} for polymorphic deserialization. Used with JsonType.
+ * Annotation to define a subtype for use with {@link JsonType} for polymorphic deserialization.
+ * Used with JsonType.
  */
 public @interface JsonSubtype {
 

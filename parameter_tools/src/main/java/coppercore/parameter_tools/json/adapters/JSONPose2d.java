@@ -1,11 +1,10 @@
 package coppercore.parameter_tools.json.adapters;
 
-import java.lang.reflect.Constructor;
-
 import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import java.lang.reflect.Constructor;
 
 /** A JSON representation of a Pose2d object. */
 public class JSONPose2d extends JSONObject<Pose2d> {

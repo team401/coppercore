@@ -1,9 +1,8 @@
 package coppercore.parameter_tools.json.adapters;
 
-import java.lang.reflect.Constructor;
-
 import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.math.geometry.Translation2d;
+import java.lang.reflect.Constructor;
 
 /**
  * A JSON adapter for the Translation2d class, enabling serialization and deserialization

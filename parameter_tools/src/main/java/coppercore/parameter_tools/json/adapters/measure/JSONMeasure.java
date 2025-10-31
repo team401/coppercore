@@ -1,13 +1,12 @@
 package coppercore.parameter_tools.json.adapters.measure;
 
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.function.Function;
-
 import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.Units;
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.function.Function;
 
 /** A JSON representation of a Measure object. */
 @SuppressWarnings("rawtypes")

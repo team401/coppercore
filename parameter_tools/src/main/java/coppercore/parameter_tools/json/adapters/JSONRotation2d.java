@@ -1,9 +1,8 @@
 package coppercore.parameter_tools.json.adapters;
 
-import java.lang.reflect.Constructor;
-
 import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.math.geometry.Rotation2d;
+import java.lang.reflect.Constructor;
 
 /** A JSON representation of a Rotation2d object. */
 public class JSONRotation2d extends JSONObject<Object> {
