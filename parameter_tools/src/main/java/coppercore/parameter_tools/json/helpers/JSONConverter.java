@@ -81,7 +81,7 @@ public class JSONConverter {
             }
             Class<?> advancedClazz = JSONConverter.tryAdvancedConversions(clazz);
             if (advancedClazz != null) {
-                return (Class<? extends JSONObject<T>>) clazz;
+                return (Class<? extends JSONObject<T>>) advancedClazz;
             }
         } catch (ClassCastException e) {
             throw new ConversionException("No JsonObject for " + clazz.getName(), e);
