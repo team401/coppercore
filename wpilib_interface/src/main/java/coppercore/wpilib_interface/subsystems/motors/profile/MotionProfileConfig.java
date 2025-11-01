@@ -1,0 +1,120 @@
+package coppercore.wpilib_interface.subsystems.motors.profile;
+
+import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Velocity;
+
+/**
+ * A generic motion profile configuration
+ *
+ * <p>Leaving any value at 0 signifies that it is uncapped
+ *
+ * <p>This class is almost identical to a Phoenix-6 MotionMagicConfigs object except that a
+ * coppercore MotionProfileConfig stores all values that can reasonably have units attached with
+ * units, whereas MotionMagicExpoConfigs use doubles.
+ *
+ * @param maxVelocity The maximum/"cruise" velocity of the profile
+ * @param maxAcceleration The maximum acceleration of the profile
+ * @param maxJerk The maximum allowed jerk of the profile
+ * @param expoKv The kV for MotionMagicExpo/exponential motion profile. Represents the output
+ *     required to maintain a certain velocity. Is in units of Output Unit / Rotations per Second.
+ *     As a result, when supply voltage is fixed, a higher profile kV results in a lower profile
+ *     velocity.
+ * @param expoKa The kA for MotionMagicExpo/exponential motion profile. Represents the output
+ *     required to apply a given acceleration. Is in units of Output Unit / (Rotations per Second /
+ *     Second). As a result, when supply voltage is fixed, a higher profile kA results in a lower
+ *     profile acceleration.
+ */
+public abstract sealed class MotionProfileConfig
+        permits MutableMotionProfileConfig, ImmutableMotionProfileConfig {
+    /**
+     * Create a new immutable motion profile configuration.
+     *
+     * @param maxVelocity The maximum/"cruise" velocity of the profile
+     * @param maxAcceleration The maximum acceleration of the profile
+     * @param maxJerk The maximum allowed jerk of the profile
+     * @param expoKv The kV for MotionMagicExpo/exponential motion profile. Represents the output
+     *     required to maintain a certain velocity. Is in units of Output Unit / Rotations per
+     *     Second. As a result, when supply voltage is fixed, a higher profile kV results in a lower
+     *     profile velocity.
+     * @param expoKa The kA for MotionMagicExpo/exponential motion profile. Represents the output
+     *     required to apply a given acceleration. Is in units of Output Unit / (Rotations per
+     *     Second / Second). As a result, when supply voltage is fixed, a higher profile kA results
+     *     in a lower profile acceleration.
+     */
+    static ImmutableMotionProfileConfig immutable(
+            AngularVelocity maxVelocity,
+            AngularAcceleration maxAcceleration,
+            Velocity<AngularAccelerationUnit> maxJerk,
+            double expoKv,
+            double expoKa) {
+        return new ImmutableMotionProfileConfig(
+                maxVelocity, maxAcceleration, maxJerk, expoKv, expoKa);
+    }
+
+    /**
+     * Create a new mutable motion profile configuration.
+     *
+     * <p>Leaving any value at 0 signifies that it is uncapped
+     *
+     * @param maxVelocity The maximum/"cruise" velocity of the profile
+     * @param maxAcceleration The maximum acceleration of the profile
+     * @param maxJerk The maximum allowed jerk of the profile
+     * @param expoKv The kV for MotionMagicExpo/exponential motion profile. Represents the output
+     *     required to maintain a certain velocity. Is in units of Output Unit / Rotations per
+     *     Second. As a result, when supply voltage is fixed, a higher profile kV results in a lower
+     *     profile velocity.
+     * @param expoKa The kA for MotionMagicExpo/exponential motion profile. Represents the output
+     *     required to apply a given acceleration. Is in units of Output Unit / (Rotations per
+     *     Second / Second). As a result, when supply voltage is fixed, a higher profile kA results
+     *     in a lower profile acceleration.
+     */
+    static MutableMotionProfileConfig mutable(
+            AngularVelocity maxVelocity,
+            AngularAcceleration maxAcceleration,
+            Velocity<AngularAccelerationUnit> maxJerk,
+            double expoKv,
+            double expoKa) {
+        return new MutableMotionProfileConfig(
+                maxVelocity, maxAcceleration, maxJerk, expoKv, expoKa);
+    }
+
+    /**
+     * Get the maximum velocity of the motion profile.
+     *
+     * @return An AngularVelocity representing either the max velocity, if it is capped, or 0 if it
+     *     is uncapped.
+     */
+    public abstract AngularVelocity getMaxVelocity();
+
+    /**
+     * Get the maximum acceleration of the motion profile.
+     *
+     * @return An AngularAcceleration representing either the max acceleration, if it is capped, or
+     *     0 if it is uncapped.
+     */
+    public abstract AngularAcceleration getMaxAcceleration();
+
+    /**
+     * Get the maximum jerk of the motion profile.
+     *
+     * @return A measure of AngularAcceleration per time representing either the max jerk, if it is
+     *     capped, or 0 if it is uncapped.
+     */
+    public abstract Velocity<AngularAccelerationUnit> getMaxJerk();
+
+    /**
+     * Get the exponential profile Kv of the motion profile.
+     *
+     * @return A double representing expo Kv, if it is capped, or 0 if expo Kv limiting is not used
+     */
+    public abstract double getExpoKv();
+
+    /**
+     * Get the exponential profile Ka of the motion profile.
+     *
+     * @return A double representing expo Ka, if it is capped, or 0 if expo Ka limiting is not used
+     */
+    public abstract double getExpoKa();
+}
