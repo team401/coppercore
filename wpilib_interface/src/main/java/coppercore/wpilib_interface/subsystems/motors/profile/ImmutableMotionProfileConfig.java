@@ -29,6 +29,7 @@ import edu.wpi.first.units.measure.Velocity;
  *       output required to apply a given acceleration. Is in units of Output Unit / (Rotations per
  *       Second / Second). As a result, when supply voltage is fixed, a higher profile kA results in
  *       a lower profile acceleration.
+ * </ul>
  */
 public final class ImmutableMotionProfileConfig extends MotionProfileConfig {
     private final AngularVelocity maxVelocity;
