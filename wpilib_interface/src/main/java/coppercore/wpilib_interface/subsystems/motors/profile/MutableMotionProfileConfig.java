@@ -71,7 +71,7 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      *     Second / Second). As a result, when supply voltage is fixed, a higher profile kA results
      *     in a lower profile acceleration.
      */
-    public MutableMotionProfileConfig(
+    protected MutableMotionProfileConfig(
             AngularVelocity maxVelocity,
             AngularAcceleration maxAcceleration,
             Velocity<AngularAccelerationUnit> maxJerk,
@@ -89,7 +89,7 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      *
      * @param other The config to copy from.
      */
-    public MutableMotionProfileConfig(MotionProfileConfig other) {
+    protected MutableMotionProfileConfig(MotionProfileConfig other) {
         this.maxVelocity = other.getMaxVelocity().mutableCopy();
         this.maxAcceleration = other.getMaxAcceleration().mutableCopy();
         this.maxJerk = other.getMaxJerk().mutableCopy();
@@ -98,7 +98,7 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
     }
 
     /** Create a new config by setting all fields to zero. */
-    public MutableMotionProfileConfig() {
+    private MutableMotionProfileConfig() {
         this.maxVelocity = RotationsPerSecond.mutable(0.0);
         this.maxAcceleration = RotationsPerSecondPerSecond.mutable(0.0);
         this.maxJerk =
@@ -122,6 +122,41 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      */
     public static MutableMotionProfileConfig zeros() {
         return new MutableMotionProfileConfig();
+    }
+
+    @Override
+    public MutableMotionProfileConfig derive() {
+        return clone();
+    }
+
+    @Override
+    public MutableMotionProfileConfig clone() {
+        return new MutableMotionProfileConfig(this);
+    }
+
+    /**
+     * Copy this config's parameters into a new immutable config and then return it.
+     *
+     * <p>This is useful for converting a config created using the `.with...` syntax back to be
+     * immutable, as seen below:
+     *
+     * <pre>{@code
+     * MutableMotionProfileConfig.zeros()
+     *     .withExpoKv(0.5)
+     *     .withExpoKa(0.2)
+     *     .freeze();
+     * }</pre>
+     *
+     * @return The new copy
+     */
+    // This method can't be implemented here because the Mutable config has to copy its measures
+    public ImmutableMotionProfileConfig freeze() {
+        return new ImmutableMotionProfileConfig(
+                this.maxVelocity.copy(),
+                this.maxAcceleration.copy(),
+                this.maxJerk.copy(),
+                this.expoKv,
+                this.expoKa);
     }
 
     /**

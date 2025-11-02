@@ -30,7 +30,7 @@ import edu.wpi.first.units.measure.Velocity;
  *       a lower profile acceleration.
  * </ul>
  */
-public abstract sealed class MotionProfileConfig
+public abstract sealed class MotionProfileConfig implements Cloneable
         permits MutableMotionProfileConfig, ImmutableMotionProfileConfig {
     /**
      * Create a new immutable motion profile configuration.
@@ -83,6 +83,35 @@ public abstract sealed class MotionProfileConfig
         return new MutableMotionProfileConfig(
                 maxVelocity, maxAcceleration, maxJerk, expoKv, expoKa);
     }
+
+    /**
+     * Copy this config's parameters into a new mutable config and then return it.
+     *
+     * <p>This is useful for creating a new config using the `.with...` syntax from a base/default
+     * immutable config, as seen below:
+     *
+     * <pre>{@code
+     * immutableConfig.derive()
+     *     .withExpoKv(0.5)
+     *     .withExpoKa(0.2);
+     * }</pre>
+     *
+     * <p>This method behaves identically to `clone` on a Mutable config.
+     *
+     * @return A new, mutable copy of this config.
+     */
+    public MutableMotionProfileConfig derive() {
+        return new MutableMotionProfileConfig(this);
+    }
+
+    /**
+     * Make a new copy of this object, maintaining its mutability/immutability.
+     *
+     * <p>This method also copies mutable measures, where needed.
+     *
+     * @return The new copy.
+     */
+    public abstract MotionProfileConfig clone();
 
     /**
      * Get the maximum velocity of the motion profile.

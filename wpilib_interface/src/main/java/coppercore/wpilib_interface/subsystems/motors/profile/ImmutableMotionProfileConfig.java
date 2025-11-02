@@ -41,8 +41,7 @@ public final class ImmutableMotionProfileConfig extends MotionProfileConfig {
     /**
      * A generic, immutable motion profile configuration
      *
-     * <p>For a mutable config, see {@link MutableMotionProfileConfig} or {@link
-     * MotionProfileConfig#mutable}
+     * <p>For a mutable config, see {@link MotionProfileConfig#mutable}
      *
      * <p>Leaving any value at 0 signifies that it is uncapped
      *
@@ -62,7 +61,7 @@ public final class ImmutableMotionProfileConfig extends MotionProfileConfig {
      *     Second / Second). As a result, when supply voltage is fixed, a higher profile kA results
      *     in a lower profile acceleration.
      */
-    public ImmutableMotionProfileConfig(
+    protected ImmutableMotionProfileConfig(
             AngularVelocity maxVelocity,
             AngularAcceleration maxAcceleration,
             Velocity<AngularAccelerationUnit> maxJerk,
@@ -80,7 +79,7 @@ public final class ImmutableMotionProfileConfig extends MotionProfileConfig {
      *
      * @param other The config to copy from.
      */
-    public ImmutableMotionProfileConfig(MotionProfileConfig other) {
+    protected ImmutableMotionProfileConfig(MotionProfileConfig other) {
         this.maxVelocity = other.getMaxVelocity();
         this.maxAcceleration = other.getMaxAcceleration();
         this.maxJerk = other.getMaxJerk();
@@ -100,6 +99,11 @@ public final class ImmutableMotionProfileConfig extends MotionProfileConfig {
                 .withMotionMagicJerk(this.maxJerk)
                 .withMotionMagicExpo_kV(this.expoKv)
                 .withMotionMagicExpo_kA(this.expoKa);
+    }
+
+    @Override
+    public ImmutableMotionProfileConfig clone() {
+        return new ImmutableMotionProfileConfig(this);
     }
 
     @Override
