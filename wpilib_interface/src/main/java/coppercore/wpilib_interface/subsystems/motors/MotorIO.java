@@ -1,0 +1,151 @@
+package coppercore.wpilib_interface.subsystems.motors;
+
+import static edu.wpi.first.units.Units.Rotations;
+
+import coppercore.wpilib_interface.subsystems.motors.profile.MutableMotionProfileConfig;
+import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.PerUnit;
+import edu.wpi.first.units.TimeUnit;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
+
+/**
+ * A generic motor IO. Contains methods to update inputs, control to positions, and specify
+ * closed-loop gains.
+ */
+public interface MotorIO {
+    /**
+     * Take a set of inputs and update them with the latest data from the motor controller
+     *
+     * @param inputs The inputs object, which will be mutated.
+     */
+    void updateInputs(MotorInputs inputs);
+
+    /**
+     * Control the motor to a certain position setpoint without using a motion profile
+     *
+     * @param positionSetpoint The new position to control the mechanism to
+     */
+    void controlToPositionUnprofiled(Angle positionSetpoint);
+
+    /**
+     * Control the motor to a certain position setpoint using closed-loop control and a motion
+     * profile
+     *
+     * <p>To use this overload, setProfileConstraints must have been called with the correct profile
+     * constraints
+     *
+     * @param positionSetpoint The position to control the motor to
+     */
+    void controlToPositionProfiled(Angle positionSetpoint);
+
+    /**
+     * Control the motor to a certain position setpoint using closed-loop control and a motion
+     * profile
+     *
+     * @see MutableMotionProfileConfig
+     * @param positionSetpoint The setpoint to control the motor to
+     * @param maxVelocity The max profile velocity. Use 0 for uncapped.
+     * @param maxAcceleration The max profile acceleration. Use 0 for uncapped.
+     * @param maxJerk The max profile jerk (change in acceleration over time). Use 0 for uncapped.
+     * @param expoKv The Kv for MotionMagicExpo (or other exponential profile).
+     * @param expoKa The Ka for MotionMagicExpo (or other exponential profile).
+     */
+    void controlToPositionProfiled(
+            Angle positionSetpoint,
+            AngularVelocity maxVelocity,
+            AngularAcceleration maxAcceleration,
+            PerUnit<AngularAccelerationUnit, TimeUnit> maxJerk,
+            double expoKv,
+            double expoKa);
+
+    /**
+     * Control the motor to a certain position setpoint using closed-loop control and a motion
+     * profile
+     *
+     * @param positionSetpoint The setpoint to control the motor to
+     * @param profileConfig
+     */
+    void controlToPositionProfiled(
+            Angle positionSetpoint, MutableMotionProfileConfig profileConfig);
+
+    /**
+     * Control the motor to a certain velocity using closed-loop control without a motion profile
+     *
+     * @param velocitySetpoint The velocity to control the motor to
+     */
+    void controlToVelocityUnprofiled(AngularVelocity velocitySetpoint);
+
+    /**
+     * @param velocitySetpoint
+     */
+    void controlToVelocityProfiled(AngularVelocity velocitySetpoint);
+
+    /**
+     * Control the motor by applying a certain Voltage
+     *
+     * @param voltage The voltage to apply to the motor
+     */
+    void controlOpenLoop(Voltage voltage);
+
+    /**
+     * Control the motor by applying a certain current with FOC
+     *
+     * @param current The current to apply to the motor
+     */
+    void controlOpenLoop(Current current);
+
+    /**
+     * Control the motor by following another motor
+     *
+     * <p>The follower (this motor) must be on the same CAN bus as the leader motor
+     *
+     * @param leaderId The leader motor ID
+     * @param opposeLeaderDirection True if the motor should spin in the opposite direction as its
+     *     leader, false if it should spin in the same direction
+     */
+    void follow(int leaderId, boolean opposeLeaderDirection);
+
+    /**
+     * Set the default motion profile constraints that will be used for closed-loop control.
+     *
+     * <p>This method should be assumed to be blocking, and may take significant time to finish. If
+     * periodic changes to profile constraints are required, use the various overloads of
+     * controlToPositionProfiled to provide constraints.
+     *
+     * <p>For example, for TalonFX, this will update the motion magic configuration and apply it to
+     * the motor.
+     *
+     * @param profileConfig The motion profile configuration to use.
+     */
+    void setProfileConstraints(MutableMotionProfileConfig profileConfig);
+
+    /**
+     * Set whether or not the motor should brake when a neutral (0) output is commanded.
+     *
+     * @param shouldBrake True if the motor should brake, false if the motor should coast.
+     */
+    public void setBrakeMode(boolean shouldBrake);
+
+    /**
+     * Set the current position of the system in terms of the motor's encoder.
+     *
+     * <p>This does NOT move the system. It tells the motor encoder that it is now at `position`,
+     * updating its offset accordingly.
+     *
+     * @param position The position to set as the current encoder position.
+     */
+    public void setCurrentPosition(Angle position);
+
+    /**
+     * Set the current position of the system in terms of the motor's encoder to zero.
+     *
+     * <p>This does NOT move the system. It tells the motor encoder that it is now at zero.
+     */
+    public default void setCurrentPositionAsZero() {
+        setCurrentPosition(Rotations.zero());
+    }
+}
