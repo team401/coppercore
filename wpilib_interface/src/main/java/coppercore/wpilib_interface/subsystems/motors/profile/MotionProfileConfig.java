@@ -47,7 +47,7 @@ public abstract sealed class MotionProfileConfig
      *     Second / Second). As a result, when supply voltage is fixed, a higher profile kA results
      *     in a lower profile acceleration.
      */
-    static ImmutableMotionProfileConfig immutable(
+    public static ImmutableMotionProfileConfig immutable(
             AngularVelocity maxVelocity,
             AngularAcceleration maxAcceleration,
             Velocity<AngularAccelerationUnit> maxJerk,
@@ -74,7 +74,7 @@ public abstract sealed class MotionProfileConfig
      *     Second / Second). As a result, when supply voltage is fixed, a higher profile kA results
      *     in a lower profile acceleration.
      */
-    static MutableMotionProfileConfig mutable(
+    public static MutableMotionProfileConfig mutable(
             AngularVelocity maxVelocity,
             AngularAcceleration maxAcceleration,
             Velocity<AngularAccelerationUnit> maxJerk,
