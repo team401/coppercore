@@ -26,17 +26,20 @@ import edu.wpi.first.units.measure.Velocity;
  * coppercore MotionProfileConfig stores all values that can reasonably have units attached with
  * units, whereas MotionMagicExpoConfigs use doubles.
  *
- * @param maxVelocity The maximum/"cruise" velocity of the profile
- * @param maxAcceleration The maximum acceleration of the profile
- * @param maxJerk The maximum allowed jerk of the profile
- * @param expoKv The kV for MotionMagicExpo/exponential motion profile. Represents the output
- *     required to maintain a certain velocity. Is in units of Output Unit / Rotations per Second.
- *     As a result, when supply voltage is fixed, a higher profile kV results in a lower profile
- *     velocity.
- * @param expoKa The kA for MotionMagicExpo/exponential motion profile. Represents the output
- *     required to apply a given acceleration. Is in units of Output Unit / (Rotations per Second /
- *     Second). As a result, when supply voltage is fixed, a higher profile kA results in a lower
- *     profile acceleration.
+ * <p>Fields:
+ *
+ * <ul>
+ *   <li><b>maxVelocity</b> - The maximum/"cruise" velocity of the profile
+ *   <li><b>maxAcceleration</b> - The maximum acceleration of the profile
+ *   <li><b>maxJerk</b> - The maximum allowed jerk of the profile
+ *   <li><b>expoKv</b> - The kV for MotionMagicExpo/exponential motion profile. Represents the
+ *       output required to maintain a certain velocity. Is in units of Output Unit / Rotations per
+ *       Second. As a result, when supply voltage is fixed, a higher profile kV results in a lower
+ *       profile velocity.
+ *   <li><b>expoKa</b> - The kA for MotionMagicExpo/exponential motion profile. Represents the
+ *       output required to apply a given acceleration. Is in units of Output Unit / (Rotations per
+ *       Second / Second). As a result, when supply voltage is fixed, a higher profile kA results in
+ *       a lower profile acceleration.
  */
 public final class MutableMotionProfileConfig extends MotionProfileConfig {
     private MutAngularVelocity maxVelocity;
