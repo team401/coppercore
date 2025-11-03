@@ -1,6 +1,7 @@
 package coppercore.wpilib_interface;
 
 import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -21,7 +22,7 @@ public final class CTREUtil {
      *     if tryUntilOk fails.
      * @return The StatusCode from the final call.
      */
-    public StatusCode tryUntilOk(
+    public static StatusCode tryUntilOk(
             Supplier<StatusCode> function, int deviceId, Consumer<StatusCode> onFailure) {
         return tryUntilOk(function, defaultMaxTries, deviceId, onFailure);
     }
@@ -37,7 +38,7 @@ public final class CTREUtil {
      *     if tryUntilOk fails.
      * @return The StatusCode from the final call.
      */
-    public StatusCode tryUntilOk(
+    public static StatusCode tryUntilOk(
             Supplier<StatusCode> function,
             int maxTries,
             int deviceId,
@@ -52,11 +53,31 @@ public final class CTREUtil {
         }
 
         DriverStation.reportError(
-                "tryUntilOk failed after " + maxTries + " attempts (deviceId" + deviceId + ")",
+                "tryUntilOk failed after "
+                        + maxTries
+                        + " attempts (deviceId"
+                        + deviceId
+                        + ") with code"
+                        + code,
                 true);
 
         onFailure.accept(code);
 
         return code;
+    }
+
+    /**
+     * Clone a TalonFXConfiguration by serializing it and then deserializing it into a new config.
+     *
+     * <p>This method probably incurs a massive performance cost and therefore should be used
+     * sparingly.
+     *
+     * @param config The old config to clone.
+     * @return A brand new config, with the old config serialized and deserialized into it.
+     */
+    public static TalonFXConfiguration cloneTalonFXConfig(TalonFXConfiguration config) {
+        var newConfig = new TalonFXConfiguration();
+        newConfig.deserialize(config.serialize());
+        return newConfig;
     }
 }

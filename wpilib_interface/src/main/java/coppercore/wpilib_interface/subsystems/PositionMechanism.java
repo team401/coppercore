@@ -2,6 +2,7 @@ package coppercore.wpilib_interface.subsystems;
 
 import static edu.wpi.first.units.Units.Rotations;
 
+import coppercore.wpilib_interface.subsystems.configs.PositionMechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputsAutoLogged;
 import edu.wpi.first.units.measure.MutAngle;
@@ -42,7 +43,7 @@ public class PositionMechanism<V extends MotorInputsAutoLogged, T extends MotorI
 
         // Config all followers to follow leader motor
         for (T follower : followerIos) {
-            follower.follow(config.motorId, false);
+            follower.follow(config.leadMotorId, false);
         }
     }
 }
