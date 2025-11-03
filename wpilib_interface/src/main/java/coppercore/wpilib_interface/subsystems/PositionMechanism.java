@@ -28,6 +28,8 @@ public class PositionMechanism<V extends MotorInputsAutoLogged, T extends MotorI
      * @param inputs An inputs object
      * @param io An IO object, either for a real, sim, or replay/dummy IO implementation
      * @param followerIos An array of IOs for each follower
+     * @param invertFollowers An array of booleans specifying whether or not to invert the direction
+     *     for each follower
      */
     public PositionMechanism(
             PositionMechanismConfig config,
@@ -41,9 +43,16 @@ public class PositionMechanism<V extends MotorInputsAutoLogged, T extends MotorI
 
         this.followerIos = followerIos;
 
+        if (followerIos.length != invertFollowers.length) {
+            throw new IllegalArgumentException(
+                    "followerIos must contain the same number of elements as invertFollowers");
+        }
+
         // Config all followers to follow leader motor
-        for (T follower : followerIos) {
-            follower.follow(config.leadMotorId, false);
+        for (int i = 0; i < followerIos.length; i++) {
+            T follower = followerIos[i];
+            boolean invert = invertFollowers[i];
+            follower.follow(config.leadMotorId, invert);
         }
     }
 }
