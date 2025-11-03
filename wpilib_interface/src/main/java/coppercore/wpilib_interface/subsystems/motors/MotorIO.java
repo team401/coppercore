@@ -22,14 +22,14 @@ public interface MotorIO {
      *
      * @param inputs The inputs object, which will be mutated.
      */
-    void updateInputs(MotorInputs inputs);
+    public void updateInputs(MotorInputs inputs);
 
     /**
      * Control the motor to a certain position setpoint without using a motion profile
      *
      * @param positionSetpoint The new position to control the mechanism to
      */
-    void controlToPositionUnprofiled(Angle positionSetpoint);
+    public void controlToPositionUnprofiled(Angle positionSetpoint);
 
     /**
      * Control the motor to a certain position setpoint using closed-loop control and a motion
@@ -40,7 +40,7 @@ public interface MotorIO {
      *
      * @param positionSetpoint The position to control the motor to
      */
-    void controlToPositionProfiled(Angle positionSetpoint);
+    public void controlToPositionProfiled(Angle positionSetpoint);
 
     /**
      * Control the motor to a certain position setpoint using closed-loop control and a motion
@@ -54,7 +54,7 @@ public interface MotorIO {
      * @param expoKv The Kv for MotionMagicExpo (or other exponential profile).
      * @param expoKa The Ka for MotionMagicExpo (or other exponential profile).
      */
-    void controlToPositionProfiled(
+    public void controlToPositionProfiled(
             Angle positionSetpoint,
             AngularVelocity maxVelocity,
             AngularAcceleration maxAcceleration,
@@ -69,7 +69,7 @@ public interface MotorIO {
      * @param positionSetpoint The setpoint to control the motor to
      * @param profileConfig
      */
-    void controlToPositionProfiled(
+    public void controlToPositionProfiled(
             Angle positionSetpoint, MutableMotionProfileConfig profileConfig);
 
     /**
@@ -77,26 +77,26 @@ public interface MotorIO {
      *
      * @param velocitySetpoint The velocity to control the motor to
      */
-    void controlToVelocityUnprofiled(AngularVelocity velocitySetpoint);
+    public void controlToVelocityUnprofiled(AngularVelocity velocitySetpoint);
 
     /**
      * @param velocitySetpoint
      */
-    void controlToVelocityProfiled(AngularVelocity velocitySetpoint);
+    public void controlToVelocityProfiled(AngularVelocity velocitySetpoint);
 
     /**
      * Control the motor by applying a certain Voltage
      *
      * @param voltage The voltage to apply to the motor
      */
-    void controlOpenLoop(Voltage voltage);
+    public void controlOpenLoop(Voltage voltage);
 
     /**
      * Control the motor by applying a certain current with FOC
      *
      * @param current The current to apply to the motor
      */
-    void controlOpenLoop(Current current);
+    public void controlOpenLoop(Current current);
 
     /**
      * Control the motor by following another motor
@@ -107,7 +107,7 @@ public interface MotorIO {
      * @param opposeLeaderDirection True if the motor should spin in the opposite direction as its
      *     leader, false if it should spin in the same direction
      */
-    void follow(int leaderId, boolean opposeLeaderDirection);
+    public void follow(int leaderId, boolean opposeLeaderDirection);
 
     /**
      * Set the default motion profile constraints that will be used for closed-loop control.
@@ -121,7 +121,7 @@ public interface MotorIO {
      *
      * @param profileConfig The motion profile configuration to use.
      */
-    void setProfileConstraints(MutableMotionProfileConfig profileConfig);
+    public void setProfileConstraints(MutableMotionProfileConfig profileConfig);
 
     /**
      * Set whether or not the motor should brake when a neutral (0) output is commanded.
