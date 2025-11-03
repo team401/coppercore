@@ -2,14 +2,14 @@ package coppercore.wpilib_interface.subsystems.motors;
 
 import static edu.wpi.first.units.Units.Rotations;
 
+import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
 import coppercore.wpilib_interface.subsystems.motors.profile.MutableMotionProfileConfig;
 import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.PerUnit;
-import edu.wpi.first.units.TimeUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 
 /**
@@ -58,7 +58,7 @@ public interface MotorIO {
             Angle positionSetpoint,
             AngularVelocity maxVelocity,
             AngularAcceleration maxAcceleration,
-            PerUnit<AngularAccelerationUnit, TimeUnit> maxJerk,
+            Velocity<AngularAccelerationUnit> maxJerk,
             double expoKv,
             double expoKa);
 
@@ -70,7 +70,17 @@ public interface MotorIO {
      * @param profileConfig
      */
     public void controlToPositionProfiled(
-            Angle positionSetpoint, MutableMotionProfileConfig profileConfig);
+            Angle positionSetpoint, MotionProfileConfig profileConfig);
+
+    /**
+     * Control the motor to a certain position setpoint using closed-loop control and an exponential
+     * motion profile. The profile must have been configured, either in the motor config or using
+     * {@link setProfileConstraints}.
+     *
+     * @param positionSetpoint The position to control the motor to The position to control the
+     *     motor to.
+     */
+    public void controlToPositionExpoProfiled(Angle positionSetpoint);
 
     /**
      * Control the motor to a certain velocity using closed-loop control without a motion profile
@@ -80,7 +90,11 @@ public interface MotorIO {
     public void controlToVelocityUnprofiled(AngularVelocity velocitySetpoint);
 
     /**
-     * @param velocitySetpoint
+     * Control the motor to a certain velocity using closed-loop control with a motion profile. The
+     * motion profile must have been configured using the motor config or with
+     * setProfileConstraints.
+     *
+     * @param velocitySetpoint The velocity to control the motor to
      */
     public void controlToVelocityProfiled(AngularVelocity velocitySetpoint);
 
@@ -121,7 +135,7 @@ public interface MotorIO {
      *
      * @param profileConfig The motion profile configuration to use.
      */
-    public void setProfileConstraints(MutableMotionProfileConfig profileConfig);
+    public void setProfileConstraints(MotionProfileConfig profileConfig);
 
     /**
      * Set whether or not the motor should brake when a neutral (0) output is commanded.

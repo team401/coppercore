@@ -1,5 +1,6 @@
 package coppercore.wpilib_interface.subsystems.motors.profile;
 
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -150,4 +151,18 @@ public abstract sealed class MotionProfileConfig implements Cloneable
      * @return A double representing expo Ka, if it is capped, or 0 if expo Ka limiting is not used
      */
     public abstract double getExpoKa();
+
+    /**
+     * Converts this motion profile config into a motion magic config
+     *
+     * @return a MotionMagicConfigs object with fields from this configuration
+     */
+    public MotionMagicConfigs asMotionMagicConfigs() {
+        return new MotionMagicConfigs()
+                .withMotionMagicCruiseVelocity(this.getMaxVelocity())
+                .withMotionMagicAcceleration(this.getMaxAcceleration())
+                .withMotionMagicJerk(this.getMaxJerk())
+                .withMotionMagicExpo_kV(this.getExpoKv())
+                .withMotionMagicExpo_kA(this.getExpoKa());
+    }
 }

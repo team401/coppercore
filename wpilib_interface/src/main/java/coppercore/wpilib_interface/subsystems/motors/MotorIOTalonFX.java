@@ -1,22 +1,31 @@
 package coppercore.wpilib_interface.subsystems.motors;
 
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DynamicMotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
+import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
 import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.PerUnit;
-import edu.wpi.first.units.TimeUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -27,29 +36,40 @@ import java.util.Optional;
  * MotionMagicExpo, MotionMagicVelocity, and TorqueCurrentFOC wherever possible.
  */
 public class MotorIOTalonFX implements MotorIO {
-    private final MechanismConfig config;
+    protected final MechanismConfig config;
 
-    private final TalonFXConfiguration talonFXConfig;
+    protected final TalonFXConfiguration talonFXConfig;
 
-    private final TalonFX talon;
+    protected final TalonFX talon;
 
-    private final String deviceName;
+    protected final String deviceName;
 
     private final Alert configFailedToApplyAlert;
 
-    private final StatusSignal<AngularVelocity> velocitySignal;
-    private final StatusSignal<Angle> positionSignal;
-    private final StatusSignal<Voltage> appliedVoltageSignal;
-    private final StatusSignal<Current> statorCurrentSignal;
-    private final StatusSignal<Current> supplyCurrentSignal;
-    private final StatusSignal<Angle> rawRotorPositionSignal;
+    protected final StatusSignal<AngularVelocity> velocitySignal;
+    protected final StatusSignal<Angle> positionSignal;
+    protected final StatusSignal<Voltage> appliedVoltageSignal;
+    protected final StatusSignal<Current> statorCurrentSignal;
+    protected final StatusSignal<Current> supplyCurrentSignal;
+    protected final StatusSignal<Angle> rawRotorPositionSignal;
 
-    private final BaseStatusSignal[] signals;
+    protected final BaseStatusSignal[] signals;
 
-    private final PositionTorqueCurrentFOC unprofiledPositionRequest =
+    protected final PositionTorqueCurrentFOC unprofiledPositionRequest =
             new PositionTorqueCurrentFOC(Rotations.zero());
-    private final MotionMagicExpoTorqueCurrentFOC profiledPositionRequest =
+    protected final MotionMagicTorqueCurrentFOC profiledPositionRequest =
+            new MotionMagicTorqueCurrentFOC(Rotations.zero());
+    protected final DynamicMotionMagicTorqueCurrentFOC dynamicProfiledPositionRequest;
+    protected final MotionMagicExpoTorqueCurrentFOC expoProfiledPositionRequest =
             new MotionMagicExpoTorqueCurrentFOC(Rotations.zero());
+
+    protected final VelocityTorqueCurrentFOC unprofiledVelocityRequest =
+            new VelocityTorqueCurrentFOC(RotationsPerSecond.zero());
+    protected final MotionMagicVelocityTorqueCurrentFOC profiledVelocityRequest =
+            new MotionMagicVelocityTorqueCurrentFOC(RotationsPerSecond.zero());
+
+    protected final VoltageOut voltageRequest = new VoltageOut(0.0);
+    protected final TorqueCurrentFOC currentRequest = new TorqueCurrentFOC(0.0);
 
     /**
      * Create a new TalonFX IO, initializing a TalonFX and all required StatusSignals
@@ -112,6 +132,13 @@ public class MotorIOTalonFX implements MotorIO {
         CTREUtil.tryUntilOk(
                 () -> BaseStatusSignal.setUpdateFrequencyForAll(50.0, signals), id, (code) -> {});
         CTREUtil.tryUntilOk(() -> talon.optimizeBusUtilization(), id, (code) -> {});
+
+        this.dynamicProfiledPositionRequest =
+                new DynamicMotionMagicTorqueCurrentFOC(
+                        0.0,
+                        talonFXConfig.MotionMagic.MotionMagicCruiseVelocity,
+                        talonFXConfig.MotionMagic.MotionMagicAcceleration,
+                        talonFXConfig.MotionMagic.MotionMagicJerk);
     }
 
     @Override
@@ -141,12 +168,75 @@ public class MotorIOTalonFX implements MotorIO {
             Angle positionSetpoint,
             AngularVelocity maxVelocity,
             AngularAcceleration maxAcceleration,
-            PerUnit<AngularAccelerationUnit, TimeUnit> maxJerk,
+            Velocity<AngularAccelerationUnit> maxJerk,
             double expoKv,
             double expoKa) {
-        // TODO: Figure out if it's possible to vary the profile in real-time with motion magic expo
-        throw new UnsupportedOperationException(
-                "controlToPositionProfiled does not yet support real-time modification of"
-                        + " profile.");
+        talon.setControl(
+                dynamicProfiledPositionRequest
+                        .withPosition(positionSetpoint)
+                        .withVelocity(maxVelocity)
+                        .withAcceleration(maxAcceleration)
+                        .withJerk(maxJerk));
+    }
+
+    @Override
+    public void controlToPositionProfiled(
+            Angle positionSetpoint, MotionProfileConfig profileConfig) {
+        talon.setControl(
+                dynamicProfiledPositionRequest
+                        .withPosition(positionSetpoint)
+                        .withVelocity(profileConfig.getMaxVelocity())
+                        .withAcceleration(profileConfig.getMaxAcceleration())
+                        .withJerk(profileConfig.getMaxJerk()));
+    }
+
+    @Override
+    public void controlToPositionExpoProfiled(Angle positionSetpoint) {
+        talon.setControl(expoProfiledPositionRequest.withPosition(positionSetpoint));
+    }
+
+    @Override
+    public void controlToVelocityUnprofiled(AngularVelocity velocity) {
+        talon.setControl(unprofiledVelocityRequest.withVelocity(velocity));
+    }
+
+    @Override
+    public void controlToVelocityProfiled(AngularVelocity velocity) {
+        talon.setControl(profiledVelocityRequest.withVelocity(velocity));
+    }
+
+    @Override
+    public void controlOpenLoop(Voltage voltage) {
+        talon.setControl(voltageRequest.withOutput(voltage));
+    }
+
+    @Override
+    public void controlOpenLoop(Current current) {
+        talon.setControl(currentRequest.withOutput(current));
+    }
+
+    @Override
+    public void follow(int leaderId, boolean opposeLeaderDirection) {
+        talon.setControl(new Follower(leaderId, opposeLeaderDirection));
+    }
+
+    @Override
+    public void setBrakeMode(boolean shouldBrake) {
+        talon.setNeutralMode(shouldBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    }
+
+    @Override
+    public void setCurrentPosition(Angle position) {
+        talon.setPosition(position);
+    }
+
+    @Override
+    public void setProfileConstraints(MotionProfileConfig config) {
+        CTREUtil.tryUntilOk(
+                () -> talon.getConfigurator().apply(config.asMotionMagicConfigs()),
+                talon.getDeviceID(),
+                (code) -> {
+                    configFailedToApplyAlert.set(true);
+                });
     }
 }

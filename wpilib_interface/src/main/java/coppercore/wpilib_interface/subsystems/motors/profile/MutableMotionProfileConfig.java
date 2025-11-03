@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Second;
 
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.VelocityUnit;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -157,20 +156,6 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
                 this.maxJerk.copy(),
                 this.expoKv,
                 this.expoKa);
-    }
-
-    /**
-     * Converts this motion profile config into a motion magic config
-     *
-     * @return a MotionMagicConfigs object with fields from this configuration
-     */
-    public MotionMagicConfigs asMotionMagicConfigs() {
-        return new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(this.maxVelocity)
-                .withMotionMagicAcceleration(this.maxAcceleration)
-                .withMotionMagicJerk(this.maxJerk)
-                .withMotionMagicExpo_kV(this.expoKv)
-                .withMotionMagicExpo_kA(this.expoKa);
     }
 
     @Override
