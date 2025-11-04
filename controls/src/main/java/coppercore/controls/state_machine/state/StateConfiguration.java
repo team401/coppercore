@@ -1,13 +1,14 @@
 package coppercore.controls.state_machine.state;
 
-import coppercore.controls.state_machine.transition.TransitionBase;
-import coppercore.controls.state_machine.transition.transitions.ConditionalTransition;
-import coppercore.controls.state_machine.transition.transitions.Transition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
+
+import coppercore.controls.state_machine.transition.TransitionBase;
+import coppercore.controls.state_machine.transition.transitions.ConditionalTransition;
+import coppercore.controls.state_machine.transition.transitions.Transition;
 
 /** Configures State Machine State behavior */
 public class StateConfiguration<State, Trigger> {
@@ -55,7 +56,7 @@ public class StateConfiguration<State, Trigger> {
     }
 
     /**
-     * Create Transistion between states without trigger the enter or exit functions.
+     * Create Transition between states without trigger the enter or exit functions.
      *
      * @param trigger trigger event
      * @param destination end state
