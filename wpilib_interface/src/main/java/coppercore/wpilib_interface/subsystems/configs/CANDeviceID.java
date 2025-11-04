@@ -1,0 +1,13 @@
+package coppercore.wpilib_interface.subsystems.configs;
+
+/**
+ * A record to store a CAN ID with its associated CAN bus name.
+ *
+ * @param canbus The name of the CAN bus, usually "rio" or "canivore"
+ * @param id The integer CAN ID
+ */
+public record CANDeviceID(String canbus, int id) {
+    public String toString() {
+        return canbus + "_" + id;
+    }
+}

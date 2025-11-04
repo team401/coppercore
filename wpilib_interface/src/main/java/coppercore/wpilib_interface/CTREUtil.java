@@ -2,6 +2,7 @@ package coppercore.wpilib_interface;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -23,7 +24,7 @@ public final class CTREUtil {
      * @return The StatusCode from the final call.
      */
     public static StatusCode tryUntilOk(
-            Supplier<StatusCode> function, int deviceId, Consumer<StatusCode> onFailure) {
+            Supplier<StatusCode> function, CANDeviceID deviceId, Consumer<StatusCode> onFailure) {
         return tryUntilOk(function, defaultMaxTries, deviceId, onFailure);
     }
 
@@ -41,7 +42,7 @@ public final class CTREUtil {
     public static StatusCode tryUntilOk(
             Supplier<StatusCode> function,
             int maxTries,
-            int deviceId,
+            CANDeviceID deviceId,
             Consumer<StatusCode> onFailure) {
         StatusCode code = StatusCode.StatusCodeNotInitialized;
 
@@ -55,9 +56,9 @@ public final class CTREUtil {
         DriverStation.reportError(
                 "tryUntilOk failed after "
                         + maxTries
-                        + " attempts (deviceId"
+                        + " attempts (deviceId: "
                         + deviceId
-                        + ") with code"
+                        + ") with status code"
                         + code,
                 true);
 

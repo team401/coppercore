@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DynamicMotionMagicTorqueCurrentFOC;
@@ -18,6 +19,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import coppercore.wpilib_interface.CTREUtil;
+import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
 import edu.wpi.first.units.AngularAccelerationUnit;
@@ -29,6 +31,7 @@ import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
 import java.util.Optional;
 
 /**
@@ -37,6 +40,8 @@ import java.util.Optional;
  */
 public class MotorIOTalonFX implements MotorIO {
     protected final MechanismConfig config;
+
+    protected final CANDeviceID id;
 
     protected final TalonFXConfiguration talonFXConfig;
 
@@ -76,26 +81,24 @@ public class MotorIOTalonFX implements MotorIO {
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param followerIndex An Optional containing either the index of the follower motor (what
-     *     position in config.followerIds this motor is) or None if this is the lead motor.
+     *     position in config.followerIds this motor is) or None if this is the lead motor. If
+     *     followerIndex is not None, this IO will automatically follow the lead motor at the end of
+     *     its constructor.
      */
     public MotorIOTalonFX(MechanismConfig config, Optional<Integer> followerIndex) {
         this.config = config;
 
-        int id =
-                followerIndex.map((idx) -> config.followerMotorIds[idx]).orElse(config.leadMotorId);
+        this.id =
+                followerIndex
+                        .map((idx) -> config.followerMotorConfigs[idx].id())
+                        .orElse(config.leadMotorId);
 
         this.deviceName =
-                new StringBuilder()
-                        .append(config.name)
-                        .append("_TalonFX_")
-                        .append(config.canbus)
-                        .append("_")
-                        .append(id)
-                        .toString();
+                new StringBuilder().append(config.name).append("_TalonFX_").append(id).toString();
 
         this.talonFXConfig = CTREUtil.cloneTalonFXConfig(config.motorConfig);
 
-        this.talon = new TalonFX(id, config.canbus);
+        this.talon = new TalonFX(id.id(), id.canbus());
 
         this.velocitySignal = talon.getVelocity();
         this.positionSignal = talon.getPosition();
@@ -139,11 +142,27 @@ public class MotorIOTalonFX implements MotorIO {
                         talonFXConfig.MotionMagic.MotionMagicCruiseVelocity,
                         talonFXConfig.MotionMagic.MotionMagicAcceleration,
                         talonFXConfig.MotionMagic.MotionMagicJerk);
+
+        if (followerIndex.isPresent()) {
+            follow(
+                    config.leadMotorId.id(),
+                    config.followerMotorConfigs[followerIndex.get()].invert());
+        }
     }
 
     @Override
     public void updateInputs(MotorInputs inputs) {
-        BaseStatusSignal.refreshAll(signals);
+        StatusCode code = BaseStatusSignal.refreshAll(signals);
+
+        inputs.connected = code.isOK();
+
+        if (code.isError()) {
+            DriverStation.reportError(
+                    deviceName + ": Failed to refresh status signals: " + code, false);
+        } else if (code.isWarning()) {
+            DriverStation.reportWarning(
+                    deviceName + ": Warning while refreshing status signals: " + code, false);
+        }
 
         inputs.velocity.mut_replace(velocitySignal.getValue());
         inputs.position.mut_replace(positionSignal.getValue());
@@ -234,7 +253,7 @@ public class MotorIOTalonFX implements MotorIO {
     public void setProfileConstraints(MotionProfileConfig config) {
         CTREUtil.tryUntilOk(
                 () -> talon.getConfigurator().apply(config.asMotionMagicConfigs()),
-                talon.getDeviceID(),
+                id,
                 (code) -> {
                     configFailedToApplyAlert.set(true);
                 });
