@@ -85,8 +85,13 @@ public class MotorIOTalonFX implements MotorIO {
      *     position in config.followerIds this motor is) or None if this is the lead motor. If
      *     followerIndex is not None, this IO will automatically follow the lead motor at the end of
      *     its constructor.
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
      */
-    public MotorIOTalonFX(MechanismConfig config, Optional<Integer> followerIndex) {
+    public MotorIOTalonFX(
+            MechanismConfig config,
+            Optional<Integer> followerIndex,
+            TalonFXConfiguration talonFXConfig) {
         this.config = config;
 
         this.id =
@@ -97,7 +102,7 @@ public class MotorIOTalonFX implements MotorIO {
         this.deviceName =
                 new StringBuilder().append(config.name).append("_TalonFX_").append(id).toString();
 
-        this.talonFXConfig = CTREUtil.cloneTalonFXConfig(config.motorConfig);
+        this.talonFXConfig = talonFXConfig;
 
         this.talon = new TalonFX(id.id(), id.canbus());
 

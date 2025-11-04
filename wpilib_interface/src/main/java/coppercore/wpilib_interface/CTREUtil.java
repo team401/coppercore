@@ -1,7 +1,6 @@
 package coppercore.wpilib_interface;
 
 import com.ctre.phoenix6.StatusCode;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.function.Consumer;
@@ -65,20 +64,5 @@ public final class CTREUtil {
         onFailure.accept(code);
 
         return code;
-    }
-
-    /**
-     * Clone a TalonFXConfiguration by serializing it and then deserializing it into a new config.
-     *
-     * <p>This method probably incurs a massive performance cost and therefore should be used
-     * sparingly.
-     *
-     * @param config The old config to clone.
-     * @return A brand new config, with the old config serialized and deserialized into it.
-     */
-    public static TalonFXConfiguration cloneTalonFXConfig(TalonFXConfiguration config) {
-        var newConfig = new TalonFXConfiguration();
-        newConfig.deserialize(config.serialize());
-        return newConfig;
     }
 }

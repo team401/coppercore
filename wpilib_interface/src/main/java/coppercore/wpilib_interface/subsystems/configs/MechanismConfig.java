@@ -1,6 +1,5 @@
 package coppercore.wpilib_interface.subsystems.configs;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 
 /**
@@ -42,8 +41,6 @@ public class MechanismConfig {
 
     public final GravityFeedforwardType gravityFeedforwardType;
 
-    public TalonFXConfiguration motorConfig;
-
     /**
      * Create a new base mechanism config.
      *
@@ -51,13 +48,11 @@ public class MechanismConfig {
      * @param leadMotorId CAN ID of the lead motor
      * @param followerMotorConfigs Array of configs for follower IDs and inverts. Leave empty for no
      *     followers.
-     * @param motorConfig The TalonFXConfiguration to apply to all motors
      */
     public MechanismConfig(
             String name,
             CANDeviceID leadMotorId,
             MechanismFollowerMotorConfig[] followerMotorConfigs,
-            TalonFXConfiguration motorConfig,
             GravityFeedforwardType gravityFeedforwardType) {
         this.name = name;
         this.leadMotorId = leadMotorId;
