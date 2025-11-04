@@ -133,6 +133,7 @@ public class StateConfiguration<State, Trigger> {
         for (TransitionBase<State, Trigger> transition : transitions) {
             int priority = transition.getPriority();
             if (priority > highest_priority && transition.canTransition()) {
+                highest_priority = priority;
                 returnOptional = Optional.of(transition);
             }
         }
