@@ -1,6 +1,7 @@
 package coppercore.wpilib_interface.subsystems.configs;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 
 /**
  * A base mechanism config.
@@ -12,10 +13,34 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
  * configs, and motor inverts.
  */
 public class MechanismConfig {
+    /**
+     * Represents whether a mechanism's gravity is static (like an elevator) or cosine-based (like
+     * an arm)
+     */
+    public enum GravityFeedforwardType {
+        STATIC_ELEVATOR,
+        COSINE_ARM;
+
+        /**
+         * Convert this value to a Phoenix-6 compatible GravityTypeValue
+         *
+         * @return A GravityTypeValue, Elevator_Static for STATIC_ELEVATOR and Arm_Cosine for
+         *     COSINE_ARM
+         */
+        public GravityTypeValue toPhoenix6GravityTypeValue() {
+            return switch (this) {
+                case STATIC_ELEVATOR -> GravityTypeValue.Elevator_Static;
+                case COSINE_ARM -> GravityTypeValue.Arm_Cosine;
+            };
+        }
+    }
+
     public final String name;
     public final CANDeviceID leadMotorId;
 
     public final MechanismFollowerMotorConfig[] followerMotorConfigs;
+
+    public final GravityFeedforwardType gravityFeedforwardType;
 
     public TalonFXConfiguration motorConfig;
 
@@ -32,9 +57,11 @@ public class MechanismConfig {
             String name,
             CANDeviceID leadMotorId,
             MechanismFollowerMotorConfig[] followerMotorConfigs,
-            TalonFXConfiguration motorConfig) {
+            TalonFXConfiguration motorConfig,
+            GravityFeedforwardType gravityFeedforwardType) {
         this.name = name;
         this.leadMotorId = leadMotorId;
         this.followerMotorConfigs = followerMotorConfigs;
+        this.gravityFeedforwardType = gravityFeedforwardType;
     }
 }

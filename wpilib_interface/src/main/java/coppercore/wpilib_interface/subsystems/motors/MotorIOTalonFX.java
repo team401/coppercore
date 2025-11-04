@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DynamicMotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.Follower;
@@ -237,6 +238,24 @@ public class MotorIOTalonFX implements MotorIO {
     @Override
     public void follow(int leaderId, boolean opposeLeaderDirection) {
         talon.setControl(new Follower(leaderId, opposeLeaderDirection));
+    }
+
+    @Override
+    public void setGains(
+            double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
+        talon.getConfigurator()
+                .apply(
+                        new Slot0Configs()
+                                .withKP(kP)
+                                .withKI(kI)
+                                .withKD(kD)
+                                .withKS(kS)
+                                .withKG(kG)
+                                .withKV(kV)
+                                .withKA(kA)
+                                .withGravityType(
+                                        config.gravityFeedforwardType
+                                                .toPhoenix6GravityTypeValue()));
     }
 
     @Override

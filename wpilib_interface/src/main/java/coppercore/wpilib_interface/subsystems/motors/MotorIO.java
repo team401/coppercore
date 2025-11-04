@@ -138,6 +138,26 @@ public interface MotorIO {
     public void setProfileConstraints(MotionProfileConfig profileConfig);
 
     /**
+     * Set the closed-loop control gains used by the motor.
+     *
+     * <p>This method should be assumed to be blocking, and may take significant time to finish. If
+     * periodic changes to gains are required, use a PID controller running in robot code.
+     *
+     * <p>Units listed are for position control. When using velocity control, error will be in
+     * rotations/second instead.
+     *
+     * @param kP Proportional gain. Unit is output units / rotation of error.
+     * @param kI Integral gain. Unit is output units / (rotation of error * seconds).
+     * @param kD Derivative gain. Unit is output units / (rotation per second)
+     * @param kS Static feed-forward gain. Unit is output units.
+     * @param kG Gravity feed-forward gain. Unit is output units.
+     * @param kV Velocity feed-forward gain. Unit is output units / requested input velocity.
+     * @param kA Accelerated feed-forward. Unit is output units / requested input acceleration.
+     */
+    public void setGains(
+            double kP, double kI, double kD, double kS, double kG, double kV, double kA);
+
+    /**
      * Set whether or not the motor should brake when a neutral (0) output is commanded.
      *
      * @param shouldBrake True if the motor should brake, false if the motor should coast.
