@@ -1,10 +1,12 @@
+package coppercore.wpilib_interface.test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig.GravityFeedforwardType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for the MechanismConfig to ensure that its builder correctly validates and stores
@@ -99,6 +101,19 @@ public class MechanismConfigTests {
                             .withLeadMotorId(new CANDeviceID("rio", 1))
                             .build();
                 });
+    }
+
+    @Test
+    public void followerCanBusMustMatch() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        MechanismConfig.builder()
+                                .withName("TestMechanism")
+                                .withLeadMotorId(new CANDeviceID("correct_bus", 1))
+                                .withGravityFeedforwardType(GravityFeedforwardType.COSINE_ARM)
+                                .addFollower(new CANDeviceID("incorrect_bus", 2), false)
+                                .build());
     }
 
     @Test
