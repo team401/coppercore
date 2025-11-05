@@ -25,10 +25,10 @@ public abstract class State<StateKey extends Enum> {
     public final void transitionWhen(BooleanSupplier condition, StateKey state) {
         transitions.add(new Transition<>(state, condition));
     }
-    public final void transitionWhenFinish(StateKey state) {
+    public final void transitionWhenFinished(StateKey state) {
         transitions.add(new Transition<>(state, this::isFinished));
     }
-    public final void transitionWhenFinishAnd(BooleanSupplier condition, StateKey state) {
+    public final void transitionWhenFinishedAnd(BooleanSupplier condition, StateKey state) {
         transitions.add(new Transition<>(state, () -> this.isFinished() && condition.getAsBoolean()));
     }
 

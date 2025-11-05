@@ -13,14 +13,15 @@ public class StateMachine<StateKey extends Enum> {
         this.states = new HashMap<>();
     }
 
-    public State<StateKey> addState(StateKey state, Function<Void, Void> periodic) {
+    public State<StateKey> addState(StateKey state, Runnable periodic) {
         State<StateKey> newState = new FunctionalState<>(periodic);
         states.put(state, newState);
         return newState;
     }
 
-    public void registerState(StateKey stateKey, State<StateKey> state) {
+    public State<StateKey> registerState(StateKey stateKey, State<StateKey> state) {
         states.put(stateKey, state);
+        return state;
     }
 
     public void setState(StateKey newState) {
