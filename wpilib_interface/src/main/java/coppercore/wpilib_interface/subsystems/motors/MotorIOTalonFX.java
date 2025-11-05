@@ -18,7 +18,6 @@ import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
@@ -267,8 +266,8 @@ public class MotorIOTalonFX implements MotorIO {
     }
 
     @Override
-    public void setBrakeMode(boolean shouldBrake) {
-        talon.setNeutralMode(shouldBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    public void setNeutralMode(NeutralMode neutralMode) {
+        talon.setNeutralMode(CTREUtil.translateNeutralMode(neutralMode));
     }
 
     @Override

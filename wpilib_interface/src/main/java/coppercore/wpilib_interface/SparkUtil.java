@@ -2,7 +2,9 @@ package coppercore.wpilib_interface;
 
 import com.revrobotics.REVLibError;
 import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
+import coppercore.wpilib_interface.subsystems.motors.MotorIO.NeutralMode;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
@@ -85,5 +87,21 @@ public class SparkUtil {
         onFailure.accept(err);
 
         return err;
+    }
+
+    /**
+     * Translate a vendor-agnostic NeutralMode into a REVLib IdleMode for use with a
+     * SparkMax/SparkFlex
+     *
+     * @param neutralMode The {@link
+     *     coppercore.wpilib_interface.subsystems.motors.MotorIO.NeutralMode} to translate
+     * @return A {@link com.revrobotics.spark.config.SparkBaseConfig.IdleMode} representing the same
+     *     value (kBrake/kCoast) as the original neutralMode
+     */
+    public static IdleMode translateNeutralMode(NeutralMode neutralMode) {
+        return switch (neutralMode) {
+            case Coast -> IdleMode.kCoast;
+            case Brake -> IdleMode.kBrake;
+        };
     }
 }

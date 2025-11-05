@@ -222,9 +222,19 @@ public class MotorIOSparkMax implements MotorIO {
     }
 
     @Override
-    public void setBrakeMode(boolean shouldBrake) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setBrakeMode'");
+    public void setNeutralMode(NeutralMode neutralMode) {
+        sparkMaxConfig.idleMode(SparkUtil.translateNeutralMode(neutralMode));
+
+        SparkUtil.tryUntilOk(
+                () ->
+                        sparkMax.configure(
+                                sparkMaxConfig,
+                                ResetMode.kResetSafeParameters,
+                                PersistMode.kPersistParameters),
+                id,
+                (err) -> {
+                    configFailedToApplyAlert.set(true);
+                });
     }
 
     @Override

@@ -18,6 +18,26 @@ import edu.wpi.first.units.measure.Voltage;
  */
 public interface MotorIO {
     /**
+     * A vendor-agnostic value to represent neutral-mode behavior.
+     *
+     * <p>This determines whether the motor will spin freely (coast) or resist movement (brake) when
+     * 0 output is applied.
+     *
+     * <p>Docs for this can be found here:
+     *
+     * <ul>
+     *   <li>For Spark:
+     *       https://docs.revrobotics.com/brushless/spark-flex/spark-flex-feature-description/operating-modes
+     *   <li>For TalonFX:
+     *       https://api.ctr-electronics.com/phoenix6/release/java/com/ctre/phoenix6/configs/MotorOutputConfigs.html#NeutralMode
+     * </ul>
+     */
+    public enum NeutralMode {
+        Brake,
+        Coast
+    }
+
+    /**
      * Take a set of inputs and update them with the latest data from the motor controller
      *
      * @param inputs The inputs object, which will be mutated.
@@ -161,11 +181,12 @@ public interface MotorIO {
             double kP, double kI, double kD, double kS, double kG, double kV, double kA);
 
     /**
-     * Set whether or not the motor should brake when a neutral (0) output is commanded.
+     * Set whether the motor should brake or coast when a neutral (0) output is commanded.
      *
-     * @param shouldBrake True if the motor should brake, false if the motor should coast.
+     * @param neutralMode A NeutralMode, either Brake to resist movement when neutral or Coast to
+     *     spin freely when neutral.
      */
-    public void setBrakeMode(boolean shouldBrake);
+    public void setNeutralMode(NeutralMode neutralMode);
 
     /**
      * Set the current position of the system in terms of the motor's encoder.

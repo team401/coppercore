@@ -1,7 +1,9 @@
 package coppercore.wpilib_interface;
 
 import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
+import coppercore.wpilib_interface.subsystems.motors.MotorIO.NeutralMode;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -64,5 +66,21 @@ public final class CTREUtil {
         onFailure.accept(code);
 
         return code;
+    }
+
+    /**
+     * Translate a vendor-agnostic NeutralMode into a Phoenix-6 NeutralModeValue for use with
+     * TalonFX
+     *
+     * @param neutralMode The {@link
+     *     coppercore.wpilib_interface.subsystems.motors.MotorIO.NeutralMode} to translate
+     * @return A {@link com.ctre.phoenix6.signals.NeutralModeValue} representing the same value
+     *     (Brake/Coast) as the original neutralMode
+     */
+    public static NeutralModeValue translateNeutralMode(NeutralMode neutralMode) {
+        return switch (neutralMode) {
+            case Coast -> NeutralModeValue.Coast;
+            case Brake -> NeutralModeValue.Brake;
+        };
     }
 }
