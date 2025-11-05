@@ -65,8 +65,7 @@ public class MotorIOSparkMax implements MotorIO {
                         .map((idx) -> config.followerMotorConfigs[idx].id())
                         .orElse(config.leadMotorId);
 
-        this.deviceName =
-                new StringBuilder().append(config.name).append("_SparkMax_").append(id).toString();
+        this.deviceName = config.name + "_SparkMax_" + id;
 
         this.sparkMaxConfig = sparkMaxConfig;
 
@@ -74,19 +73,11 @@ public class MotorIOSparkMax implements MotorIO {
 
         this.controller = sparkMax.getClosedLoopController();
 
-        String configFailedToApplyMessage =
-                new StringBuilder()
-                        .append(deviceName)
-                        .append(" failed to apply configs.")
-                        .toString();
+        String configFailedToApplyMessage = deviceName + " failed to apply configs.";
 
         this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, AlertType.kError);
 
-        String disconnectedMessage =
-                new StringBuilder()
-                        .append(deviceName)
-                        .append(" disconnected/is reporting an error.")
-                        .toString();
+        String disconnectedMessage = deviceName + " disconnected/is reporting an error.";
 
         this.disconnectedAlert = new Alert(disconnectedMessage, AlertType.kError);
 

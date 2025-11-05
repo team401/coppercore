@@ -101,8 +101,7 @@ public class MotorIOTalonFX implements MotorIO {
                         .map((idx) -> config.followerMotorConfigs[idx].id())
                         .orElse(config.leadMotorId);
 
-        this.deviceName =
-                new StringBuilder().append(config.name).append("_TalonFX_").append(id).toString();
+        this.deviceName = config.name + "_TalonFX_" + id;
 
         this.talonFXConfig = talonFXConfig;
 
@@ -125,19 +124,11 @@ public class MotorIOTalonFX implements MotorIO {
                     rawRotorPositionSignal,
                 };
 
-        String configFailedToApplyMessage =
-                new StringBuilder()
-                        .append(deviceName)
-                        .append(" failed to apply configs.")
-                        .toString();
+        String configFailedToApplyMessage = deviceName + " failed to apply configs.";
 
         this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, AlertType.kError);
 
-        String disconnectedMessage =
-                new StringBuffer()
-                        .append(deviceName)
-                        .append(" disconnected/invalid status code.")
-                        .toString();
+        String disconnectedMessage = deviceName + " disconnected/invalid status code.";
 
         this.disconnectedAlert = new Alert(disconnectedMessage, AlertType.kError);
 
