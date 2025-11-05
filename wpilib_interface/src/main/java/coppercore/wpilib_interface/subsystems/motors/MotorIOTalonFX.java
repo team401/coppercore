@@ -52,6 +52,8 @@ public class MotorIOTalonFX implements MotorIO {
 
     private final Alert configFailedToApplyAlert;
 
+    private final Alert disconnectedAlert;
+
     protected final StatusSignal<AngularVelocity> velocitySignal;
     protected final StatusSignal<Angle> positionSignal;
     protected final StatusSignal<Voltage> appliedVoltageSignal;
@@ -131,6 +133,14 @@ public class MotorIOTalonFX implements MotorIO {
 
         this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, AlertType.kError);
 
+        String disconnectedMessage =
+                new StringBuffer()
+                        .append(deviceName)
+                        .append(" disconnected/invalid status code.")
+                        .toString();
+
+        this.disconnectedAlert = new Alert(disconnectedMessage, AlertType.kError);
+
         CTREUtil.tryUntilOk(
                 () -> talon.getConfigurator().apply(talonFXConfig),
                 id,
@@ -161,6 +171,8 @@ public class MotorIOTalonFX implements MotorIO {
         StatusCode code = BaseStatusSignal.refreshAll(signals);
 
         inputs.connected = code.isOK();
+
+        disconnectedAlert.set(!code.isOK());
 
         if (code.isError()) {
             DriverStation.reportError(
