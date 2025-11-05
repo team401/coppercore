@@ -32,7 +32,7 @@ public abstract class State<StateKey extends Enum> {
         transitions.add(new Transition<>(state, () -> this.isFinished() && condition.getAsBoolean()));
     }
 
-    protected StateKey checkTransitions() {
+    StateKey checkTransitions() {
         for (Transition<StateKey> transition : transitions) {
             if (transition.condition.getAsBoolean()){
                 return transition.nextState;

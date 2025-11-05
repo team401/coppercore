@@ -2,7 +2,6 @@ package coppercore.controls.state_machine;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 public class StateMachine<StateKey extends Enum> {
     
@@ -30,15 +29,22 @@ public class StateMachine<StateKey extends Enum> {
 
     public void updateStates() {
         StateKey nextState = state.checkTransitions();
-        if (nextState != null) {
+        if (nextState == null ) {
+            return;
+        }
+        if (state != null){
             state._onExit();
         }
         setState(nextState);
-        state._onEntry();
+        if (state != null){
+            state._onEntry();
+        }
     }
 
     public void periodic() {
-        state._periodic();
+        if (state != null){
+            state._periodic();
+        }
     }
 
 }

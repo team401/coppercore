@@ -4,8 +4,6 @@ import coppercore.controls.state_machine.StateMachine;
 import coppercore.controls.state_machine.State;
 import static coppercore.controls.test.StateMachineTestsStates.States;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class StateMachineTests {
@@ -36,7 +34,7 @@ public class StateMachineTests {
         shootingState.transitionWhen(() -> !shouldShoot, States.Idle);
         shootingState.transitionWhen(() -> !stateHolder.hasNote, States.Idle);
 
-
+        stateMachine.setState(States.Idle);
         // Tests
     }
 
@@ -68,7 +66,7 @@ public class StateMachineTests {
         shootingState.transitionWhen(() -> !shouldShoot, States.Idle);
         shootingState.transitionWhenFinished(States.Idle);
 
-
+        stateMachine.setState(States.Idle);
         // Tests
     }
 

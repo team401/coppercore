@@ -1,6 +1,5 @@
 package coppercore.controls.state_machine;
 
-import java.util.function.Supplier;
 
 public class FunctionalState<StateKey extends Enum> extends State<StateKey> {
 
