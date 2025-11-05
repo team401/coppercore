@@ -200,13 +200,13 @@ public class MotorIOSparkMax implements MotorIO {
     }
 
     @Override
-    public void controlOpenLoop(Voltage voltage) {
+    public void controlOpenLoopVoltage(Voltage voltage) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'controlOpenLoop'");
     }
 
     @Override
-    public void controlOpenLoop(Current current) {
+    public void controlOpenLoopCurrent(Current current) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'controlOpenLoop'");
     }

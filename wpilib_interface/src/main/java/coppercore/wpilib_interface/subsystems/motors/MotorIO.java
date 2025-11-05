@@ -103,14 +103,14 @@ public interface MotorIO {
      *
      * @param voltage The voltage to apply to the motor
      */
-    public void controlOpenLoop(Voltage voltage);
+    public void controlOpenLoopVoltage(Voltage voltage);
 
     /**
      * Control the motor by applying a certain current with FOC
      *
      * @param current The current to apply to the motor
      */
-    public void controlOpenLoop(Current current);
+    public void controlOpenLoopCurrent(Current current);
 
     /**
      * Control the motor by following another motor
@@ -142,6 +142,9 @@ public interface MotorIO {
      *
      * <p>This method should be assumed to be blocking, and may take significant time to finish. If
      * periodic changes to gains are required, use a PID controller running in robot code.
+     *
+     * <p>For example, applying a config to a TalonFX is a blocking operation:
+     * https://v6.docs.ctr-electronics.com/en/latest/docs/api-reference/api-usage/configuration.html#applying-configs
      *
      * <p>Units listed are for position control. When using velocity control, error will be in
      * rotations/second instead.

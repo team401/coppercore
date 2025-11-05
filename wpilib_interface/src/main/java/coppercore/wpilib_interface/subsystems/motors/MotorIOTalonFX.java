@@ -243,12 +243,12 @@ public class MotorIOTalonFX implements MotorIO {
     }
 
     @Override
-    public void controlOpenLoop(Voltage voltage) {
+    public void controlOpenLoopVoltage(Voltage voltage) {
         talon.setControl(voltageRequest.withOutput(voltage));
     }
 
     @Override
-    public void controlOpenLoop(Current current) {
+    public void controlOpenLoopCurrent(Current current) {
         talon.setControl(currentRequest.withOutput(current));
     }
 
