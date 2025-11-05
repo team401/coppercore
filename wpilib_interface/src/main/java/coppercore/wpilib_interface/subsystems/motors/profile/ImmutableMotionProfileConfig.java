@@ -2,8 +2,11 @@ package coppercore.wpilib_interface.subsystems.motors.profile;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Velocity;
 
 /**
@@ -35,8 +38,8 @@ public final class ImmutableMotionProfileConfig extends MotionProfileConfig {
     private final AngularVelocity maxVelocity;
     private final AngularAcceleration maxAcceleration;
     private final Velocity<AngularAccelerationUnit> maxJerk;
-    private final double expoKv;
-    private final double expoKa;
+    private final Per<VoltageUnit, AngularVelocityUnit> expoKv;
+    private final Per<VoltageUnit, AngularAccelerationUnit> expoKa;
 
     /**
      * A generic, immutable motion profile configuration
@@ -65,8 +68,8 @@ public final class ImmutableMotionProfileConfig extends MotionProfileConfig {
             AngularVelocity maxVelocity,
             AngularAcceleration maxAcceleration,
             Velocity<AngularAccelerationUnit> maxJerk,
-            double expoKv,
-            double expoKa) {
+            Per<VoltageUnit, AngularVelocityUnit> expoKv,
+            Per<VoltageUnit, AngularAccelerationUnit> expoKa) {
         this.maxVelocity = maxVelocity;
         this.maxAcceleration = maxAcceleration;
         this.maxJerk = maxJerk;
@@ -122,12 +125,12 @@ public final class ImmutableMotionProfileConfig extends MotionProfileConfig {
     }
 
     @Override
-    public double getExpoKv() {
+    public Per<VoltageUnit, AngularVelocityUnit> getExpoKv() {
         return this.expoKv;
     }
 
     @Override
-    public double getExpoKa() {
+    public Per<VoltageUnit, AngularAccelerationUnit> getExpoKa() {
         return this.expoKa;
     }
 }

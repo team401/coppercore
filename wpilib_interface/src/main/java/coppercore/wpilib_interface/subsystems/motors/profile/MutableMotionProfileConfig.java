@@ -1,16 +1,22 @@
 package coppercore.wpilib_interface.subsystems.motors.profile;
 
+import static coppercore.wpilib_interface.UnitUtils.VoltsPerRotationPerSecond;
+import static coppercore.wpilib_interface.UnitUtils.VoltsPerRotationPerSecondSquared;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Second;
 
 import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.units.VelocityUnit;
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.MutAngularAcceleration;
 import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.units.measure.MutPer;
 import edu.wpi.first.units.measure.MutVelocity;
+import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Velocity;
 
 /**
@@ -46,8 +52,8 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
     private MutAngularAcceleration maxAcceleration;
     private MutVelocity<AngularAccelerationUnit> maxJerk;
 
-    private double expoKv;
-    private double expoKa;
+    private MutPer<VoltageUnit, AngularVelocityUnit> expoKv;
+    private MutPer<VoltageUnit, AngularAccelerationUnit> expoKa;
 
     /**
      * A generic, mutable motion profile configuration
@@ -74,13 +80,13 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
             AngularVelocity maxVelocity,
             AngularAcceleration maxAcceleration,
             Velocity<AngularAccelerationUnit> maxJerk,
-            double expoKv,
-            double expoKa) {
+            Per<VoltageUnit, AngularVelocityUnit> expoKv,
+            Per<VoltageUnit, AngularAccelerationUnit> expoKa) {
         this.maxVelocity = maxVelocity.mutableCopy();
         this.maxAcceleration = maxAcceleration.mutableCopy();
         this.maxJerk = maxJerk.mutableCopy();
-        this.expoKv = expoKv;
-        this.expoKa = expoKa;
+        this.expoKv = expoKv.mutableCopy();
+        this.expoKa = expoKa.mutableCopy();
     }
 
     /**
@@ -92,8 +98,8 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
         this.maxVelocity = other.getMaxVelocity().mutableCopy();
         this.maxAcceleration = other.getMaxAcceleration().mutableCopy();
         this.maxJerk = other.getMaxJerk().mutableCopy();
-        this.expoKv = other.getExpoKv();
-        this.expoKa = other.getExpoKa();
+        this.expoKv = other.getExpoKv().mutableCopy();
+        this.expoKa = other.getExpoKa().mutableCopy();
     }
 
     /** Create a new config by setting all fields to zero. */
@@ -104,8 +110,8 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
                 Velocity.ofRelativeUnits(
                                 0.0, VelocityUnit.combine(RotationsPerSecondPerSecond, Second))
                         .mutableCopy();
-        this.expoKv = 0;
-        this.expoKa = 0;
+        this.expoKv = VoltsPerRotationPerSecond.mutableNative(0.0);
+        this.expoKa = VoltsPerRotationPerSecondSquared.mutableNative(0.0);
     }
 
     /**
@@ -141,14 +147,13 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      *
      * <pre>{@code
      * MutableMotionProfileConfig.zeros()
-     *     .withExpoKv(0.5)
-     *     .withExpoKa(0.2)
+     *     .withMaxVelocity(RotationsPerSecond.of(1.0))
+     *     .withMaxAcceleration(RotationsPerSecondPerSecond.of(3.0))
      *     .freeze();
      * }</pre>
      *
      * @return The new copy
      */
-    // This method can't be implemented here because the Mutable config has to copy its measures
     public ImmutableMotionProfileConfig freeze() {
         return new ImmutableMotionProfileConfig(
                 this.maxVelocity.copy(),
@@ -174,12 +179,12 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
     }
 
     @Override
-    public double getExpoKv() {
+    public Per<VoltageUnit, AngularVelocityUnit> getExpoKv() {
         return this.expoKv;
     }
 
     @Override
-    public double getExpoKa() {
+    public Per<VoltageUnit, AngularAccelerationUnit> getExpoKa() {
         return this.expoKa;
     }
 
@@ -226,8 +231,8 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      * @param newExpoKv The new max expoKv to set in the config.
      * @return This object, for easy chaining.
      */
-    public MutableMotionProfileConfig withExpoKv(double newExpoKv) {
-        this.expoKv = newExpoKv;
+    public MutableMotionProfileConfig withExpoKv(Per<VoltageUnit, AngularVelocityUnit> newExpoKv) {
+        this.expoKv.mut_replace(newExpoKv);
         return this;
     }
 
@@ -238,8 +243,9 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      * @param newExpoKa The new max expoKa to set in the config.
      * @return This object, for easy chaining.
      */
-    public MutableMotionProfileConfig withExpoKa(double newExpoKa) {
-        this.expoKa = newExpoKa;
+    public MutableMotionProfileConfig withExpoKa(
+            Per<VoltageUnit, AngularAccelerationUnit> newExpoKa) {
+        this.expoKa.mut_replace(newExpoKa);
         return this;
     }
 }
