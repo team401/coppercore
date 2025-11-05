@@ -15,8 +15,8 @@ import edu.wpi.first.units.measure.Velocity;
  * <p>Leaving any value at 0 signifies that it is uncapped
  *
  * <p>This class is almost identical to a Phoenix-6 MotionMagicConfigs object except that a
- * coppercore MotionProfileConfig stores all values that can reasonably have units attached with
- * units, whereas MotionMagicExpoConfigs use doubles.
+ * coppercore MotionProfileConfig stores all values with units attached using the WPILib units
+ * library, whereas MotionMagicExpoConfigs use doubles.
  *
  * <p>Fields:
  *
@@ -156,7 +156,7 @@ public abstract sealed class MotionProfileConfig implements Cloneable
     public abstract Per<VoltageUnit, AngularAccelerationUnit> getExpoKa();
 
     /**
-     * Converts this motion profile config into a motion magic config
+     * Converts this motion profile config into a CTRE/Phoenix-6 motion magic config
      *
      * @return a MotionMagicConfigs object with fields from this configuration
      */
