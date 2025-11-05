@@ -82,7 +82,7 @@ public class StateMachineTestsStates {
         @Override
         protected void periodic() {
             setSpeed(-100);
-            dataHolder.armPos = 1;
+            dataHolder.armPos = -1;
             dataHolder.hasNote = true;
             finish();
         }
