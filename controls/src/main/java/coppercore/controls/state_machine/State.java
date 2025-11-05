@@ -1,14 +1,12 @@
 package coppercore.controls.state_machine;
 
-import java.util.function.BooleanSupplier;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BooleanSupplier;
 
+public abstract class State<StateKey extends Enum<StateKey>> {
 
-public abstract class State<StateKey extends Enum> {
-
-    protected final record Transition<TStateKey>(TStateKey nextState, BooleanSupplier condition){}
-
+    protected final record Transition<TStateKey>(TStateKey nextState, BooleanSupplier condition) {}
 
     protected boolean finished = false;
     protected final List<Transition<StateKey>> transitions;
@@ -17,7 +15,6 @@ public abstract class State<StateKey extends Enum> {
         this.transitions = new ArrayList<>();
     }
 
-
     private boolean isFinished() {
         return finished;
     }
@@ -25,33 +22,39 @@ public abstract class State<StateKey extends Enum> {
     public final void transitionWhen(BooleanSupplier condition, StateKey state) {
         transitions.add(new Transition<>(state, condition));
     }
+
     public final void transitionWhenFinished(StateKey state) {
         transitions.add(new Transition<>(state, this::isFinished));
     }
+
     public final void transitionWhenFinishedAnd(BooleanSupplier condition, StateKey state) {
-        transitions.add(new Transition<>(state, () -> this.isFinished() && condition.getAsBoolean()));
+        transitions.add(
+                new Transition<>(state, () -> this.isFinished() && condition.getAsBoolean()));
     }
 
     StateKey checkTransitions() {
         for (Transition<StateKey> transition : transitions) {
-            if (transition.condition.getAsBoolean()){
+            if (transition.condition.getAsBoolean()) {
                 return transition.nextState;
             }
         }
         return null;
     }
 
-    protected final void _onEntry(){
+    protected final void _onEntry() {
         finished = false;
         onEntry();
     }
-    protected final void _onExit(){
+
+    protected final void _onExit() {
         onExit();
     }
-    protected final void _onFinish(){
+
+    protected final void _onFinish() {
         onFinish();
     }
-    protected final void _periodic(){
+
+    protected final void _periodic() {
         periodic();
     }
 
@@ -60,11 +63,11 @@ public abstract class State<StateKey extends Enum> {
         _onFinish();
     }
 
-
-
     protected void onEntry() {}
-    protected void onExit() {}
-    protected void onFinish() {}
-    protected abstract void periodic();
 
+    protected void onExit() {}
+
+    protected void onFinish() {}
+
+    protected abstract void periodic();
 }

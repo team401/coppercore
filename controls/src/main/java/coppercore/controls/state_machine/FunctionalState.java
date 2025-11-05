@@ -1,7 +1,6 @@
 package coppercore.controls.state_machine;
 
-
-public class FunctionalState<StateKey extends Enum> extends State<StateKey> {
+public class FunctionalState<StateKey extends Enum<StateKey>> extends State<StateKey> {
 
     private final Runnable periodicFunction;
 
@@ -14,5 +13,4 @@ public class FunctionalState<StateKey extends Enum> extends State<StateKey> {
     protected void periodic() {
         periodicFunction.run();
     }
-    
 }

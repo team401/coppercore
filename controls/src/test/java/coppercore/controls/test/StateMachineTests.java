@@ -1,26 +1,31 @@
 package coppercore.controls.test;
 
-import coppercore.controls.state_machine.StateMachine;
-import coppercore.controls.state_machine.State;
 import static coppercore.controls.test.StateMachineTestsStates.States;
 
+import coppercore.controls.state_machine.State;
+import coppercore.controls.state_machine.StateMachine;
 import org.junit.jupiter.api.Test;
 
 public class StateMachineTests {
 
     @Test
     public void FunctionalStatesTest() {
-        StateMachineTestsStates.FunctionalStateHolder stateHolder = new StateMachineTestsStates.FunctionalStateHolder();
+        StateMachineTestsStates.FunctionalStateHolder stateHolder =
+                new StateMachineTestsStates.FunctionalStateHolder();
 
         boolean shouldShoot = false;
         boolean shouldIntake = false;
 
         StateMachine<States> stateMachine = new StateMachine<>();
 
-        State<States> idleState = stateMachine.addState(States.Idle, stateHolder::functionalIdlePeriodic);
-        State<States> intakingState = stateMachine.addState(States.Intaking, stateHolder::functionalIntakingPeriodic);
-        State<States> warmingUpState = stateMachine.addState(States.WarmingUp, stateHolder::functionalWarmingUpPeriodic);
-        State<States> shootingState = stateMachine.addState(States.Shooting, stateHolder::functionalShootingPeriodic);
+        State<States> idleState =
+                stateMachine.addState(States.Idle, stateHolder::functionalIdlePeriodic);
+        State<States> intakingState =
+                stateMachine.addState(States.Intaking, stateHolder::functionalIntakingPeriodic);
+        State<States> warmingUpState =
+                stateMachine.addState(States.WarmingUp, stateHolder::functionalWarmingUpPeriodic);
+        State<States> shootingState =
+                stateMachine.addState(States.Shooting, stateHolder::functionalShootingPeriodic);
 
         idleState.transitionWhen(() -> shouldIntake && !stateHolder.hasNote, States.Intaking);
         idleState.transitionWhen(() -> shouldShoot && stateHolder.hasNote, States.WarmingUp);
@@ -38,21 +43,28 @@ public class StateMachineTests {
         // Tests
     }
 
-
-
     @Test
     public void StateClassesTest() {
-        StateMachineTestsStates.StateDataHolder dataHolder = new StateMachineTestsStates.StateDataHolder();
+        StateMachineTestsStates.StateDataHolder dataHolder =
+                new StateMachineTestsStates.StateDataHolder();
 
         boolean shouldShoot = false;
         boolean shouldIntake = false;
 
         StateMachine<States> stateMachine = new StateMachine<>();
 
-        State<States> idleState = stateMachine.registerState(States.Idle, new StateMachineTestsStates.IdleState(dataHolder));
-        State<States> intakingState = stateMachine.registerState(States.Intaking, new StateMachineTestsStates.IntakingState(dataHolder));
-        State<States> warmingUpState = stateMachine.registerState(States.WarmingUp, new StateMachineTestsStates.WarmingUpState(dataHolder));
-        State<States> shootingState = stateMachine.registerState(States.Shooting, new StateMachineTestsStates.ShootingState(dataHolder));
+        State<States> idleState =
+                stateMachine.registerState(
+                        States.Idle, new StateMachineTestsStates.IdleState(dataHolder));
+        State<States> intakingState =
+                stateMachine.registerState(
+                        States.Intaking, new StateMachineTestsStates.IntakingState(dataHolder));
+        State<States> warmingUpState =
+                stateMachine.registerState(
+                        States.WarmingUp, new StateMachineTestsStates.WarmingUpState(dataHolder));
+        State<States> shootingState =
+                stateMachine.registerState(
+                        States.Shooting, new StateMachineTestsStates.ShootingState(dataHolder));
 
         idleState.transitionWhen(() -> shouldIntake && !dataHolder.hasNote, States.Intaking);
         idleState.transitionWhen(() -> shouldShoot && dataHolder.hasNote, States.WarmingUp);
@@ -69,5 +81,4 @@ public class StateMachineTests {
         stateMachine.setState(States.Idle);
         // Tests
     }
-
 }

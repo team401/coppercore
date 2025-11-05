@@ -18,25 +18,25 @@ public class StateMachineTestsStates {
         public double armPos = 0;
         public boolean isWarmedUp = false;
 
-        public void functionalIdlePeriodic(){
+        public void functionalIdlePeriodic() {
             motorSpeed = 0;
             armPos = 0;
             isWarmedUp = false;
         }
 
-        public void functionalIntakingPeriodic(){
+        public void functionalIntakingPeriodic() {
             motorSpeed = -100;
             armPos = -1;
             hasNote = true;
         }
 
-        public void functionalWarmingUpPeriodic(){
+        public void functionalWarmingUpPeriodic() {
             motorSpeed = 0;
             armPos = 3;
             isWarmedUp = true;
         }
 
-        public void functionalShootingPeriodic(){
+        public void functionalShootingPeriodic() {
             motorSpeed = 100;
             hasNote = false;
         }
@@ -48,10 +48,10 @@ public class StateMachineTestsStates {
         public double armPos = 0;
     }
 
-    public static abstract class StateBase extends State<States> {
+    public abstract static class StateBase extends State<States> {
 
         StateDataHolder dataHolder;
-        
+
         public StateBase(StateDataHolder dataHolder) {
             this.dataHolder = dataHolder;
         }
@@ -59,25 +59,21 @@ public class StateMachineTestsStates {
         void setSpeed(double speed) {
             dataHolder.motorSpeed = speed;
         }
-
     }
 
     public static class IdleState extends StateBase {
 
-
-
         public IdleState(StateDataHolder dataHolder) {
             super(dataHolder);
         }
-        
+
         @Override
         protected void periodic() {
             setSpeed(0);
         }
-
     }
 
-    public static class IntakingState extends StateBase{
+    public static class IntakingState extends StateBase {
 
         public IntakingState(StateDataHolder dataHolder) {
             super(dataHolder);
@@ -90,7 +86,6 @@ public class StateMachineTestsStates {
             dataHolder.hasNote = true;
             finish();
         }
-
     }
 
     public static class WarmingUpState extends StateBase {
@@ -98,17 +93,16 @@ public class StateMachineTestsStates {
         public WarmingUpState(StateDataHolder dataHolder) {
             super(dataHolder);
         }
-        
+
         @Override
         protected void periodic() {
             setSpeed(0);
             dataHolder.armPos = 3;
             finish();
         }
-
     }
 
-    public static class ShootingState extends StateBase{
+    public static class ShootingState extends StateBase {
 
         public ShootingState(StateDataHolder dataHolder) {
             super(dataHolder);
@@ -120,6 +114,5 @@ public class StateMachineTestsStates {
             dataHolder.hasNote = false;
             finish();
         }
-
     }
 }
