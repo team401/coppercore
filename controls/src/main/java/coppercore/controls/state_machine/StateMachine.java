@@ -6,6 +6,7 @@ import java.util.Map;
 public class StateMachine<StateKey extends Enum<StateKey>> {
 
     private State<StateKey> state;
+    private StateKey stateKey;
     private final Map<StateKey, State<StateKey>> states;
 
     public StateMachine() {
@@ -24,22 +25,32 @@ public class StateMachine<StateKey extends Enum<StateKey>> {
     }
 
     public void setState(StateKey newState) {
+        if (newState == null) {
+            return;
+        }
+        if (state != null) {
+            state._onExit();
+        }
         state = states.get(newState);
+        stateKey = newState;
+        if (state != null) {
+            state._onEntry();
+        }
+    }
+
+    public StateKey getCurrentStateKey() {
+        return stateKey;
+    }
+
+    public State getCurrentState() {
+        return state;
     }
 
     public void updateStates() {
         if (state == null) {
             return;
         }
-        StateKey nextState = state.checkTransitions();
-        if (nextState == null) {
-            return;
-        }
-        state._onExit();
-        setState(nextState);
-        if (state != null) {
-            state._onEntry();
-        }
+        setState(state.checkTransitions());
     }
 
     public void periodic() {

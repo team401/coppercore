@@ -50,7 +50,7 @@ public class StateMachineTestsStates {
 
     public abstract static class StateBase extends State<States> {
 
-        StateDataHolder dataHolder;
+        final StateDataHolder dataHolder;
 
         public StateBase(StateDataHolder dataHolder) {
             this.dataHolder = dataHolder;

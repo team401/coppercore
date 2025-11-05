@@ -1,20 +1,29 @@
 package coppercore.controls.test;
 
 import static coppercore.controls.test.StateMachineTestsStates.States;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import coppercore.controls.state_machine.State;
 import coppercore.controls.state_machine.StateMachine;
+import java.util.function.Consumer;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class StateMachineTests {
+
+    public boolean shouldShoot = false;
+    public boolean shouldIntake = false;
+
+    @BeforeEach
+    public void reset() {
+        shouldShoot = false;
+        shouldIntake = false;
+    }
 
     @Test
     public void FunctionalStatesTest() {
         StateMachineTestsStates.FunctionalStateHolder stateHolder =
                 new StateMachineTestsStates.FunctionalStateHolder();
-
-        boolean shouldShoot = false;
-        boolean shouldIntake = false;
 
         StateMachine<States> stateMachine = new StateMachine<>();
 
@@ -40,16 +49,15 @@ public class StateMachineTests {
         shootingState.transitionWhen(() -> !stateHolder.hasNote, States.Idle);
 
         stateMachine.setState(States.Idle);
-        // Tests
+
+        // Testing
+        testStateMachine(stateMachine);
     }
 
     @Test
     public void StateClassesTest() {
         StateMachineTestsStates.StateDataHolder dataHolder =
                 new StateMachineTestsStates.StateDataHolder();
-
-        boolean shouldShoot = false;
-        boolean shouldIntake = false;
 
         StateMachine<States> stateMachine = new StateMachine<>();
 
@@ -79,6 +87,63 @@ public class StateMachineTests {
         shootingState.transitionWhenFinished(States.Idle);
 
         stateMachine.setState(States.Idle);
+
+        // Testing
+        testStateMachine(stateMachine);
+    }
+
+    public void testStateMachine(StateMachine<States> stateMachine) {
+        Consumer<States> assertState =
+                (state) -> {
+                    assertEquals(state, stateMachine.getCurrentStateKey());
+                };
+
         // Tests
+        assertState.accept(States.Idle);
+
+        stateMachine.periodic();
+        assertState.accept(States.Idle);
+
+        shouldShoot = true;
+        stateMachine.updateStates();
+        assertState.accept(States.Idle);
+
+        shouldShoot = false;
+        stateMachine.periodic();
+        assertState.accept(States.Idle);
+
+        stateMachine.updateStates();
+        stateMachine.periodic();
+        assertState.accept(States.Idle);
+
+        shouldIntake = true;
+        stateMachine.periodic();
+        assertState.accept(States.Idle);
+
+        stateMachine.updateStates();
+        stateMachine.periodic();
+        assertState.accept(States.Intaking);
+
+        stateMachine.updateStates();
+        assertState.accept(States.Idle);
+
+        shouldShoot = true;
+        stateMachine.updateStates();
+        assertState.accept(States.WarmingUp);
+
+        shouldShoot = false;
+        stateMachine.periodic();
+        assertState.accept(States.WarmingUp);
+
+        shouldShoot = true;
+        stateMachine.updateStates();
+        assertState.accept(States.Shooting);
+
+        stateMachine.periodic();
+        assertState.accept(States.Shooting);
+
+        stateMachine.updateStates();
+        assertState.accept(States.Idle);
+        shouldShoot = false;
     }
 }
