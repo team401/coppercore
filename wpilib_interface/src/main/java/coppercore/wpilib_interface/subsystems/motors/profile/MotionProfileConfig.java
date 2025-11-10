@@ -1,6 +1,10 @@
 package coppercore.wpilib_interface.subsystems.motors.profile;
 
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Second;
+
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.revrobotics.spark.config.MAXMotionConfig;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.units.VoltageUnit;
@@ -167,5 +171,19 @@ public abstract sealed class MotionProfileConfig implements Cloneable
                 .withMotionMagicJerk(this.getMaxJerk())
                 .withMotionMagicExpo_kV(this.getExpoKv())
                 .withMotionMagicExpo_kA(this.getExpoKa());
+    }
+
+    /**
+     * Converts this motion profile config into a REV/SparkMAX MAX Motion config.
+     *
+     * <p>Exponential and jerk constants are ignored in this config, since MAX Motion doesn't
+     * support them.
+     *
+     * @return A MAXMotionConfig object with fields from this configuration
+     */
+    public MAXMotionConfig asMaxMotionConfig() {
+        return new MAXMotionConfig()
+                .maxAcceleration(this.getMaxAcceleration().in(RPM.per(Second)))
+                .maxVelocity(this.getMaxVelocity().in(RPM));
     }
 }

@@ -82,7 +82,8 @@ public class MotorIOSparkMax implements MotorIO {
 
         this.deviceName = config.name + "_SparkMax_" + id;
 
-        this.sparkMaxConfig = sparkMaxConfig;
+        // Copy the config since updating follow mode modifies the config in place.
+        this.sparkMaxConfig = new SparkMaxConfig().apply(sparkMaxConfig);
 
         this.sparkMax = new SparkMax(id.id(), motorType);
 
@@ -96,16 +97,7 @@ public class MotorIOSparkMax implements MotorIO {
 
         this.disconnectedAlert = new Alert(disconnectedMessage, AlertType.kError);
 
-        SparkUtil.tryUntilOk(
-                () ->
-                        sparkMax.configure(
-                                sparkMaxConfig,
-                                ResetMode.kResetSafeParameters,
-                                PersistMode.kPersistParameters),
-                id,
-                (err) -> {
-                    configFailedToApplyAlert.set(true);
-                });
+        applyConfig();
 
         if (followerIndex.isPresent()) {
             follow(
@@ -127,6 +119,28 @@ public class MotorIOSparkMax implements MotorIO {
         this.absoluteEncoderRequired = true;
 
         return this;
+    }
+
+    /**
+     * Uses tryUntilOk to apply sparkMaxConfig until it succeeds. If the config failed to apply
+     * supplier has been initialized (is not null), this will set it to display when a config fails
+     * to applUses tryUntilOk to apply sparkMaxConfig until it succeeds. If the config failed to
+     * apply supplier has been initialized (is not null), this will set it to display when a config
+     * fails to apply.
+     */
+    private void applyConfig() {
+        SparkUtil.tryUntilOk(
+                () ->
+                        sparkMax.configure(
+                                sparkMaxConfig,
+                                ResetMode.kResetSafeParameters,
+                                PersistMode.kPersistParameters),
+                id,
+                (err) -> {
+                    if (configFailedToApplyAlert != null) {
+                        configFailedToApplyAlert.set(true);
+                    }
+                });
     }
 
     @Override
@@ -212,72 +226,61 @@ public class MotorIOSparkMax implements MotorIO {
     @Override
     public void controlToPositionExpoProfiled(Angle positionSetpoint) {
         throw new UnsupportedOperationException(
-                "Exponential profiles are not yet supported in Spark IOs.");
+                "Exponential profiles are not supported in Spark IOs.");
     }
 
     @Override
     public void controlToVelocityUnprofiled(AngularVelocity velocitySetpoint) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException(
-                "Unimplemented method 'controlToVelocityUnprofiled'");
+        controller.setReference(velocitySetpoint.in(RPM), ControlType.kVelocity);
     }
 
     @Override
     public void controlToVelocityProfiled(AngularVelocity velocitySetpoint) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'controlToVelocityProfiled'");
+        controller.setReference(velocitySetpoint.in(RPM), ControlType.kMAXMotionVelocityControl);
     }
 
     @Override
     public void controlOpenLoopVoltage(Voltage voltage) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'controlOpenLoop'");
+        sparkMax.setVoltage(voltage);
     }
 
     @Override
     public void controlOpenLoopCurrent(Current current) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'controlOpenLoop'");
+        throw new UnsupportedOperationException(
+                "Current open-loop control is not supported by Spark IOs.");
     }
 
     @Override
     public void follow(int leaderId, boolean opposeLeaderDirection) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'follow'");
+        sparkMaxConfig.follow(leaderId, opposeLeaderDirection);
+
+        applyConfig();
     }
 
     @Override
     public void setProfileConstraints(MotionProfileConfig profileConfig) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setProfileConstraints'");
+        sparkMaxConfig.closedLoop.apply(profileConfig.asMaxMotionConfig());
+
+        applyConfig();
     }
 
     @Override
     public void setGains(
             double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setGains'");
+        // TODO: Decide on whether adding manual calculation of feedforward is worth it
+        sparkMaxConfig.closedLoop.pidf(kP, kI, kD, kV);
+        applyConfig();
     }
 
     @Override
     public void setNeutralMode(NeutralMode neutralMode) {
         sparkMaxConfig.idleMode(SparkUtil.translateNeutralMode(neutralMode));
 
-        SparkUtil.tryUntilOk(
-                () ->
-                        sparkMax.configure(
-                                sparkMaxConfig,
-                                ResetMode.kResetSafeParameters,
-                                PersistMode.kPersistParameters),
-                id,
-                (err) -> {
-                    configFailedToApplyAlert.set(true);
-                });
+        applyConfig();
     }
 
     @Override
     public void setCurrentPosition(Angle position) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setCurrentPosition'");
+        sparkMax.getEncoder().setPosition(position.in(Rotations));
     }
 }

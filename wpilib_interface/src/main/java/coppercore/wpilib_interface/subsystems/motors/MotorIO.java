@@ -137,6 +137,10 @@ public interface MotorIO {
      *
      * <p>The follower (this motor) must be on the same CAN bus as the leader motor
      *
+     * <p>When using a SparkMax, this requires reconfiguring the motor controller and will take
+     * significant time. Therefore, it is not recommended to call this method in periodic when using
+     * a SparkMax.
+     *
      * @param leaderId The leader motor ID
      * @param opposeLeaderDirection True if the motor should spin in the opposite direction as its
      *     leader, false if it should spin in the same direction
@@ -168,6 +172,8 @@ public interface MotorIO {
      *
      * <p>Units listed are for position control. When using velocity control, error will be in
      * rotations/second instead.
+     *
+     * <p>Currently, Spark IOs don't support the usage of kS, kG, or kA.
      *
      * @param kP Proportional gain. Unit is output units / rotation of error.
      * @param kI Integral gain. Unit is output units / (rotation of error * seconds).
