@@ -39,12 +39,27 @@ public class MotorIOSparkMax implements MotorIO {
 
     protected final String deviceName;
 
+    protected boolean absoluteEncoderRequired = false;
+
     private final Alert configFailedToApplyAlert;
 
     private final Alert disconnectedAlert;
 
     /**
      * Create a new SparkMax IO, initializing a SparkMax
+     *
+     * <p>By default, an absolute encoder is not required. When using an absolute encoder, call
+     * {@link requireAbsoluteEncoder} to make the `connected` field of the input factor in absolute
+     * encoder refresh status. For example:
+     *
+     * <pre>{@code
+     * new ScoringSubsystem(new MotorIOSparkMax(
+     *     config,
+     *     followerIndex,
+     *     sparkMaxConfig,
+     *     motorType)
+     *         .requireAbsoluteEncoder());
+     * }</pre>
      *
      * @param config A MechanismConfig to use for CAN IDs
      * @param followerIndex An Optional containing either the index of the follower motor (what
@@ -99,6 +114,21 @@ public class MotorIOSparkMax implements MotorIO {
         }
     }
 
+    /**
+     * Make `updateInputs` report a disconnected motor when the absolute encoder position fails to
+     * refresh.
+     *
+     * <p>By default, a failure to read an absolute encoder is ignored, as it is an optional part of
+     * the motor configuration.
+     *
+     * @return This MotorIOSparkMax, for easy method chaining.
+     */
+    public MotorIOSparkMax requireAbsoluteEncoder() {
+        this.absoluteEncoderRequired = true;
+
+        return this;
+    }
+
     @Override
     public void updateInputs(MotorInputs inputs) {
         boolean connected = true;
@@ -109,28 +139,36 @@ public class MotorIOSparkMax implements MotorIO {
         connected &=
                 SparkUtil.ifOk(
                         sparkMax,
-                        () -> sparkMax.getAlternateEncoder().getVelocity(),
-                        (value) -> inputs.velocity.mut_replace(value, RPM));
+                        () -> sparkMax.getEncoder().getVelocity(),
+                        (velocityRPM) -> inputs.velocity.mut_replace(velocityRPM, RPM));
         connected &=
                 SparkUtil.ifOk(
                         sparkMax,
-                        () -> sparkMax.getAlternateEncoder().getPosition(),
-                        (value) -> inputs.position.mut_replace(value, Rotations));
+                        () -> sparkMax.getEncoder().getPosition(),
+                        (positionRotations) ->
+                                inputs.position.mut_replace(positionRotations, Rotations));
         connected &=
                 SparkUtil.ifOk(
                         sparkMax,
                         () -> sparkMax.getAppliedOutput() * sparkMax.getBusVoltage(),
-                        (value) -> inputs.appliedVolts = value);
+                        (appliedVolts) -> inputs.appliedVolts = appliedVolts);
         connected &=
                 SparkUtil.ifOk(
                         sparkMax,
                         sparkMax::getOutputCurrent,
-                        (value) -> inputs.supplyCurrentAmps = value);
-        connected &=
+                        (current) -> inputs.supplyCurrentAmps = current);
+
+        boolean absoluteEncoderConnected =
                 SparkUtil.ifOk(
                         sparkMax,
                         () -> sparkMax.getAbsoluteEncoder().getPosition(),
-                        (value) -> inputs.rawRotorPosition.mut_replace(value, Rotations));
+                        (rotorPositionRotations) ->
+                                inputs.rawRotorPosition.mut_replace(
+                                        rotorPositionRotations, Rotations));
+
+        if (absoluteEncoderRequired) {
+            connected &= absoluteEncoderConnected;
+        }
 
         inputs.connected = connected;
 
