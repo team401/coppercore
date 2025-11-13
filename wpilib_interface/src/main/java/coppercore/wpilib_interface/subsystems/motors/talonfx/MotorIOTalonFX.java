@@ -1,4 +1,4 @@
-package coppercore.wpilib_interface.subsystems.motors;
+package coppercore.wpilib_interface.subsystems.motors.talonfx;
 
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -21,6 +21,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
+import coppercore.wpilib_interface.subsystems.motors.MotorIO;
+import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
+import coppercore.wpilib_interface.subsystems.motors.MotorIO.NeutralMode;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;

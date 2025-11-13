@@ -121,22 +121,19 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      * exists to create a more readable option.
      *
      * <p>A config with all zeros effectively uncaps all constraints, or can be used in combination
-     * with the `.with...` methods to create configs in a more readable format
+     * with the `.with...` methods to create configs in a more readable format:
+     * 
+     * <pre>{@code
+     * MutableMotionProfileConfig.zeros()
+     *     .withMaxVelocity(RotationsPerSecond.of(1.0))
+     *     .withMaxAcceleration(RotationsPerSecondPerSecond.of(3.0))
+     *     .freeze();
+     * }</pre>
      *
      * @return A new config with all fields set to zero
      */
     public static MutableMotionProfileConfig zeros() {
         return new MutableMotionProfileConfig();
-    }
-
-    @Override
-    public MutableMotionProfileConfig derive() {
-        return clone();
-    }
-
-    @Override
-    public MutableMotionProfileConfig clone() {
-        return new MutableMotionProfileConfig(this);
     }
 
     /**

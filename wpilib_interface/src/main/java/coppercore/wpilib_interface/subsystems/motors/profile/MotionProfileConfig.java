@@ -38,8 +38,7 @@ import edu.wpi.first.units.measure.Velocity;
  *       a lower profile acceleration.
  * </ul>
  */
-public abstract sealed class MotionProfileConfig implements Cloneable
-        permits MutableMotionProfileConfig, ImmutableMotionProfileConfig {
+public abstract sealed class MotionProfileConfig permits MutableMotionProfileConfig, ImmutableMotionProfileConfig {
     /**
      * Create a new immutable motion profile configuration.
      *
@@ -111,15 +110,6 @@ public abstract sealed class MotionProfileConfig implements Cloneable
     public MutableMotionProfileConfig derive() {
         return new MutableMotionProfileConfig(this);
     }
-
-    /**
-     * Make a new copy of this object, maintaining its mutability/immutability.
-     *
-     * <p>This method also copies mutable measures, where needed.
-     *
-     * @return The new copy.
-     */
-    public abstract MotionProfileConfig clone();
 
     /**
      * Get the maximum velocity of the motion profile.

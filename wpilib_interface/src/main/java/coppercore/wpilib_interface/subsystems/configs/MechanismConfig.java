@@ -11,7 +11,7 @@ import java.util.Objects;
  * <p>Contains a name, CAN bus name, motor IDs for lead and follower motors, and a TalonFX config.
  *
  * <p>This config is used by the {@link
- * coppercore.wpilib_interface.subsystems.motors.MotorIOTalonFX} to initialize CAN IDs, motor
+ * coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFX} to initialize CAN IDs, motor
  * configs, and motor inverts.
  *
  * <p>Use a {@link MechanismConfig#builder()} to create this config.

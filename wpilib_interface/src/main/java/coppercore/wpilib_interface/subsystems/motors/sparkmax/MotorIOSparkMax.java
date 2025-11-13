@@ -1,4 +1,4 @@
-package coppercore.wpilib_interface.subsystems.motors;
+package coppercore.wpilib_interface.subsystems.motors.sparkmax;
 
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Rotations;
@@ -13,6 +13,9 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import coppercore.wpilib_interface.SparkUtil;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
+import coppercore.wpilib_interface.subsystems.motors.MotorIO;
+import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
+import coppercore.wpilib_interface.subsystems.motors.MotorIO.NeutralMode;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;
