@@ -14,7 +14,6 @@ import coppercore.wpilib_interface.SparkUtil;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO;
-import coppercore.wpilib_interface.subsystems.motors.MotorIO.NeutralMode;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
 import edu.wpi.first.units.AngularAccelerationUnit;
