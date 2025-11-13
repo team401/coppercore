@@ -38,7 +38,8 @@ import edu.wpi.first.units.measure.Velocity;
  *       a lower profile acceleration.
  * </ul>
  */
-public abstract sealed class MotionProfileConfig permits MutableMotionProfileConfig, ImmutableMotionProfileConfig {
+public abstract sealed class MotionProfileConfig
+        permits MutableMotionProfileConfig, ImmutableMotionProfileConfig {
     /**
      * Create a new immutable motion profile configuration.
      *
