@@ -11,9 +11,9 @@ import edu.wpi.first.units.measure.Voltage;
  * duplicate the IO to interface with elevators and arms.
  *
  * <p>Adapters implementing PositionSimAdapter should take in whatever parameters are required to
- * convert all values to be in terms of motor position & velocity.
+ * convert all values to be in terms of motor position and velocity.
  *
- * @see coppercore.wpilib_interface.motors.talonfx.MotorIOTalonFXPositionSim
+ * @see coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXPositionSim
  * @see edu.wpi.first.wpilibj.simulation.SingleJointedArmSim
  * @see edu.wpi.first.wpilibj.simulation.ElevatorSim
  */

@@ -41,43 +41,92 @@ import java.util.Optional;
  * MotionMagicExpo, MotionMagicVelocity, and TorqueCurrentFOC wherever possible.
  */
 public class MotorIOTalonFX implements MotorIO {
+    /**
+     * MechanismConfig describing the whole mechanism; can be shared between IOs within mechanism
+     */
     protected final MechanismConfig config;
 
+    /** id encapsulating CAN ID and CAN bus name */
     protected final CANDeviceID id;
 
+    /**
+     * TalonFXConfiguration used by the motor. This may be shared between multiple IOs and therefore
+     * should be mutated only with extreme caution.
+     */
     protected final TalonFXConfiguration talonFXConfig;
 
+    /**
+     * TalonFX motor controller interface object to interact with a Kraken x60 or x44's integrated
+     * TalonFX controller
+     */
     protected final TalonFX talon;
 
+    /** A unique string for this device used for logging when something goes awry */
     protected final String deviceName;
 
+    /** An alert to be shown whenever a config fails to apply to the motor controller */
     private final Alert configFailedToApplyAlert;
 
+    /**
+     * An alert to be shown whenever any status signal fails to refresh, which indicates a
+     * disconnected state
+     */
     private final Alert disconnectedAlert;
 
+    /** Velocity StatusSignal cached for easy repeated access */
     protected final StatusSignal<AngularVelocity> velocitySignal;
+
+    /** Position StatusSignal cached for easy repeated access */
     protected final StatusSignal<Angle> positionSignal;
+
+    /** AppliedVoltage StatusSignal cached for easy repeated access */
     protected final StatusSignal<Voltage> appliedVoltageSignal;
+
+    /** StatorCurrent StatusSignal cached for easy repeated access */
     protected final StatusSignal<Current> statorCurrentSignal;
+
+    /** SupplyCurrent StatusSignal cached for easy repeated access */
     protected final StatusSignal<Current> supplyCurrentSignal;
+
+    /** RawRotorPosition StatusSignal cached for easy repeated access */
     protected final StatusSignal<Angle> rawRotorPositionSignal;
 
+    /** Array of status signals to be easily passed to refreshAll */
     protected final BaseStatusSignal[] signals;
 
+    /** An unprofiled position FOC request for non-profiled position closed-loop control */
     protected final PositionTorqueCurrentFOC unprofiledPositionRequest =
             new PositionTorqueCurrentFOC(Rotations.zero());
+
+    /**
+     * A Motion-Magic profiled position FOC request for non-expo profiled position closed-loop
+     * control
+     */
     protected final MotionMagicTorqueCurrentFOC profiledPositionRequest =
             new MotionMagicTorqueCurrentFOC(Rotations.zero());
+
+    /**
+     * A Dynamic Motion-Magic position FOC request for dynamically profiled position closed-loop
+     * control
+     */
     protected final DynamicMotionMagicTorqueCurrentFOC dynamicProfiledPositionRequest;
+
+    /** A Motion-Magic-Expo profiled FOC request for expo profiled position closed-loop control */
     protected final MotionMagicExpoTorqueCurrentFOC expoProfiledPositionRequest =
             new MotionMagicExpoTorqueCurrentFOC(Rotations.zero());
 
+    /** An unprofiled velocity FOC request for unprofiled velocity closed-loop control */
     protected final VelocityTorqueCurrentFOC unprofiledVelocityRequest =
             new VelocityTorqueCurrentFOC(RotationsPerSecond.zero());
+
+    /** A Motion-Magic profiled velocity FOC request for profiled velocity closed-loop control */
     protected final MotionMagicVelocityTorqueCurrentFOC profiledVelocityRequest =
             new MotionMagicVelocityTorqueCurrentFOC(RotationsPerSecond.zero());
 
+    /** A voltage request to use for all open-loop voltage control */
     protected final VoltageOut voltageRequest = new VoltageOut(0.0);
+
+    /** A torque-current FOC request to use for all open-loop current control */
     protected final TorqueCurrentFOC currentRequest = new TorqueCurrentFOC(0.0);
 
     /**

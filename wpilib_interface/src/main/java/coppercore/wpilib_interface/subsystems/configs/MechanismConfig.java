@@ -62,6 +62,8 @@ public class MechanismConfig {
      *     followers.
      * @param gravityFeedforwardType The type of gravity feedforward to use for the mechanism,
      *     either STATIC_ELEVATOR or COSINE_ARM.
+     * @param motorToEncoderRatio Ratio of motor angle to encoder ratio. Encoder position *
+     *     motorToEncoderRatio = motor position .
      */
     protected MechanismConfig(
             String name,
@@ -76,7 +78,12 @@ public class MechanismConfig {
         this.motorToEncoderRatio = motorToEncoderRatio;
     }
 
-    /** Create a new builder object to gracefully create a MechanismConfig. */
+    /**
+     * Create a new builder object to gracefully create a MechanismConfig.
+     *
+     * @return a MechanismConfigBuilder with empty fields except for a default motorToEncoderRatio
+     *     of 1.0
+     */
     public static MechanismConfigBuilder builder() {
         return new MechanismConfigBuilder();
     }
