@@ -3,8 +3,6 @@ package coppercore.controls.state_machine;
 import java.util.HashMap;
 import java.util.Map;
 
-import coppercore.controls.state_machine.State.Transition;
-
 // Note: Some parts of the javadoc were written using Copilot
 
 /** A simple state machine implementation. */
@@ -21,18 +19,18 @@ public class StateMachine<StateKey extends Enum<StateKey>, World> {
         this.world = world;
     }
 
-    /**
-     * Adds a new functional state to the state machine.
-     *
-     * @param state StateKey of the new state
-     * @param periodic The periodic function to be called while in this state
-     * @return The newly created state
-     */
-    public State<StateKey, World> addState(StateKey state, Runnable periodic) {
-        State<StateKey, World> newState = new FunctionalState<>(periodic);
-        states.put(state, newState);
-        return newState;
-    }
+    // /**
+    //  * Adds a new functional state to the state machine.
+    //  *
+    //  * @param state StateKey of the new state
+    //  * @param periodic The periodic function to be called while in this state
+    //  * @return The newly created state
+    //  */
+    // public State<StateKey, World> addState(StateKey state, Runnable periodic) {
+    //     State<StateKey, World> newState = new FunctionalState<>(periodic);
+    //     states.put(state, newState);
+    //     return newState;
+    // }
 
     /**
      * Registers a new state to the state machine.
@@ -118,6 +116,14 @@ public class StateMachine<StateKey extends Enum<StateKey>, World> {
 
         public TransitionConditionBuilder when(Condition<World> condition) {
             return new TransitionConditionBuilder(condition);
+        }
+
+        public TransitionConditionBuilder whenFinished() {
+            return when((world) -> fromState.isFinished());
+        }
+
+        public TransitionConditionBuilder whenRequested(StateKey requestedState) {
+            return when((world) -> fromState.requestedState != null && fromState.requestedState.equals(requestedState));
         }
 
     

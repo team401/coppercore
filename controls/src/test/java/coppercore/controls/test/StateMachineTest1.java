@@ -3,6 +3,7 @@ package coppercore.controls.test;
 import org.junit.jupiter.api.Test;
 
 import coppercore.controls.state_machine.StateMachine;
+import coppercore.controls.state_machine.FunctionalState;
 import coppercore.controls.test.StateMachineTest1.States;
 
 public class StateMachineTest1 {
@@ -23,14 +24,15 @@ public class StateMachineTest1 {
         Shooting
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void StateMachineTestNoteScenario() {
         Robot theRobot = new Robot();
         StateMachine <States, Robot> stateMachine = new StateMachine<>(theRobot);
-        stateMachine.addState(States.Idle, ()->{});
-        stateMachine.addState(States.Intaking, ()->{});
-        stateMachine.addState(States.WarmingUp, ()->{});
-        stateMachine.addState(States.Shooting, ()->{});
+        stateMachine.registerState(States.Idle, FunctionalState.of(()->{}));
+        stateMachine.registerState(States.Intaking, FunctionalState.of(()->{}));
+        stateMachine.registerState(States.WarmingUp, FunctionalState.of(()->{}));
+        stateMachine.registerState(States.Shooting, FunctionalState.of(()->{}));
 
         stateMachine.from(States.Idle)
             .when((robot) -> robot.shouldIntake && !robot.hasNote).transitionTo(States.Intaking)

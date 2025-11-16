@@ -10,8 +10,12 @@ public class FunctionalState<StateKey extends Enum<StateKey>, World> extends Sta
      *
      * @param periodicFunction The function to be executed periodically while in this state
      */
-    public FunctionalState(Runnable periodicFunction) {
+    private FunctionalState(Runnable periodicFunction) {
         this.periodicFunction = periodicFunction;
+    }
+
+    public static FunctionalState of(Runnable periodicFunction) {
+        return new FunctionalState<>(periodicFunction);
     }
 
     /** Executes the periodic function. */

@@ -26,61 +26,6 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
         return finished;
     }
 
-    // /**
-    //  * Adds a transition to another state when the specified condition is true. If multiple
-    //  * transitions are defined, the first whose condition is true is taken.
-    //  *
-    //  * @param condition The condition to evaluate
-    //  * @param state The StateKey of the next state
-    //  * @return The current state for chaining
-    //  */
-    // public final State<StateKey, World> transitionWhen(BooleanSupplier condition, StateKey state) {
-    //     transitions.add(new Transition<>(state, condition));
-    //     return this;
-    // }
-
-    // /**
-    //  * Adds a transition to another state when the state is finished. If multiple transitions are
-    //  * defined, the first whose condition is true is taken.
-    //  *
-    //  * @param state The StateKey of the next state
-    //  * @return The current state for chaining
-    //  */
-    // public final State<StateKey, World> transitionWhenFinished(StateKey state) {
-    //     transitions.add(new Transition<>(state, this::isFinished));
-    //     return this;
-    // }
-
-    // /**
-    //  * Adds a transition to another state when the state is finished and the specified condition is
-    //  * true. If the state is not finished, the condition is not evaluated. If the state is finished,
-    //  * the condition is evaluated to determine if the transition should occur. And if multiple
-    //  * transitions are defined, the first whose condition is true is taken.
-    //  *
-    //  * @param condition The condition to evaluate
-    //  * @param state The StateKey of the next state
-    //  * @return The current state for chaining
-    //  */
-    // public final State<StateKey, World> transitionWhenFinishedAnd(
-    //         BooleanSupplier condition, StateKey state) {
-    //     transitions.add(
-    //             new Transition<>(state, () -> this.isFinished() && condition.getAsBoolean()));
-    //     return this;
-    // }
-
-    // /**
-    //  * Adds a transition to another state when that state is requested. If multiple transitions are
-    //  * defined, the first whose condition is true is taken. If the requested state does not match,
-    //  * the condition is false. Only the most recently requested state is considered.
-    //  *
-    //  * @param state
-    //  * @return
-    //  */
-    // public final State<StateKey, World> transitionWhenRequested(StateKey state) {
-    //     transitions.add(new Transition<>(state, () -> this.requestedState == state));
-    //     return this;
-    // }
-
     /**
      * Determines the next state based on the defined transitions. Multiple transitions may be
      * defined; the first whose condition is true is taken.
