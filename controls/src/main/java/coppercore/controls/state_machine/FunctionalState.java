@@ -1,7 +1,7 @@
 package coppercore.controls.state_machine;
 
 /** A state that executes a provided periodic function. */
-public class FunctionalState<StateKey extends Enum<StateKey>> extends State<StateKey> {
+public class FunctionalState<StateKey extends Enum<StateKey>, World> extends State<StateKey, World> {
 
     private final Runnable periodicFunction;
 

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 
 /** An abstract class representing a state in a state machine. */
-public abstract class State<StateKey extends Enum<StateKey>> {
+public abstract class State<StateKey extends Enum<StateKey>, World> {
 
     /** A record representing a transition from one state to another based on a condition. */
     protected final static record Transition<TStateKey>(TStateKey nextState, BooleanSupplier condition) {}
@@ -37,7 +37,7 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * @param state The StateKey of the next state
      * @return The current state for chaining
      */
-    public final State<StateKey> transitionWhen(BooleanSupplier condition, StateKey state) {
+    public final State<StateKey, World> transitionWhen(BooleanSupplier condition, StateKey state) {
         transitions.add(new Transition<>(state, condition));
         return this;
     }
@@ -49,7 +49,7 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * @param state The StateKey of the next state
      * @return The current state for chaining
      */
-    public final State<StateKey> transitionWhenFinished(StateKey state) {
+    public final State<StateKey, World> transitionWhenFinished(StateKey state) {
         transitions.add(new Transition<>(state, this::isFinished));
         return this;
     }
@@ -64,7 +64,7 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * @param state The StateKey of the next state
      * @return The current state for chaining
      */
-    public final State<StateKey> transitionWhenFinishedAnd(
+    public final State<StateKey, World> transitionWhenFinishedAnd(
             BooleanSupplier condition, StateKey state) {
         transitions.add(
                 new Transition<>(state, () -> this.isFinished() && condition.getAsBoolean()));
@@ -79,7 +79,7 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * @param state
      * @return
      */
-    public final State<StateKey> transitionWhenRequested(StateKey state) {
+    public final State<StateKey, World> transitionWhenRequested(StateKey state) {
         transitions.add(new Transition<>(state, () -> this.requestedState == state));
         return this;
     }

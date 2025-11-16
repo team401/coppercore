@@ -6,11 +6,11 @@ import java.util.Map;
 // Note: Some parts of the javadoc were written using Copilot
 
 /** A simple state machine implementation. */
-public class StateMachine<StateKey extends Enum<StateKey>> {
+public class StateMachine<StateKey extends Enum<StateKey>, World> {
 
-    private State<StateKey> state;
+    private State<StateKey, World> state;
     private StateKey stateKey;
-    private final Map<StateKey, State<StateKey>> states;
+    private final Map<StateKey, State<StateKey, World>> states;
 
     /** Constructs a new StateMachine. */
     public StateMachine() {
@@ -24,8 +24,8 @@ public class StateMachine<StateKey extends Enum<StateKey>> {
      * @param periodic The periodic function to be called while in this state
      * @return The newly created state
      */
-    public State<StateKey> addState(StateKey state, Runnable periodic) {
-        State<StateKey> newState = new FunctionalState<>(periodic);
+    public State<StateKey, World> addState(StateKey state, Runnable periodic) {
+        State<StateKey, World> newState = new FunctionalState<>(periodic);
         states.put(state, newState);
         return newState;
     }
@@ -37,7 +37,7 @@ public class StateMachine<StateKey extends Enum<StateKey>> {
      * @param state The state to be registered
      * @return The registered state
      */
-    public State<StateKey> registerState(StateKey stateKey, State<StateKey> state) {
+    public State<StateKey, World> registerState(StateKey stateKey, State<StateKey, World> state) {
         states.put(stateKey, state);
         return state;
     }
@@ -75,7 +75,7 @@ public class StateMachine<StateKey extends Enum<StateKey>> {
      *
      * @return The current State
      */
-    public State<StateKey> getCurrentState() {
+    public State<StateKey, World> getCurrentState() {
         return state;
     }
 
