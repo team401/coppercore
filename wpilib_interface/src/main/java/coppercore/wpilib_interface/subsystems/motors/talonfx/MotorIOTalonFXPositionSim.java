@@ -13,6 +13,11 @@ import java.util.Optional;
  * update an ElevatorSim or SingleJointedArmSim periodically and propagate its values into the
  * SimState of the motor.
  *
+ * <p>The same PositionSimAdapter should (and can safely) be passed to all
+ * MotorIOTalonFXPositionSims and CANCoderIOSims for each mechanism because only the lead motor
+ * MotorIOTalonFXPositionSim will actually update the input the sim while the others will only read
+ * values.
+ *
  * <p>The distinction betewen MotorIOTalonFXPositionSim and MotorIOTalonFXFlywheelSim is that
  * FlywheelSim does not provide an easy way to access position measurements.
  *
@@ -25,6 +30,7 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
     private final TalonFXSimState talonSimState;
 
     private final Timer deltaTimer = new Timer();
+    private double lastTimestamp;
 
     private final boolean isFollower;
 
@@ -62,7 +68,8 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
 
         this.physicsSimAdapter = physicsSimAdapter;
 
-        deltaTimer.restart();
+        deltaTimer.start();
+        this.lastTimestamp = deltaTimer.get();
     }
 
     @Override
@@ -76,17 +83,21 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
      * Update the state of the mechanismPhysicsSim and send these values to the motor's
      * TalonFXSimState
      *
-     * <p>If this
+     * <p>If this IO is not the leader, it will not update the sim to avoid conflicts/updating
+     * multiple times per periodic.
      */
     private void updateSimState() {
-        double deltaTimeSeconds = deltaTimer.get();
-        deltaTimer.restart();
-
         if (!isFollower) {
+            double timestamp = deltaTimer.get();
+
+            double deltaTimeSeconds = timestamp - this.lastTimestamp;
+            this.lastTimestamp = timestamp;
+
             physicsSimAdapter.update(talonSimState.getMotorVoltageMeasure(), deltaTimeSeconds);
         }
 
         double invertMultiplier = invertSimRotation ? -1.0 : 1.0;
+
         talonSimState.setRawRotorPosition(
                 physicsSimAdapter.getMotorPosition().times(invertMultiplier));
         talonSimState.setRotorVelocity(
