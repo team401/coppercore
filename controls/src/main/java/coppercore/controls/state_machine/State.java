@@ -2,17 +2,14 @@ package coppercore.controls.state_machine;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
+import coppercore.controls.state_machine.StateMachine.Condition;
 
 /** An abstract class representing a state in a state machine. */
 public abstract class State<StateKey extends Enum<StateKey>, World> {
 
-    /** A record representing a transition from one state to another based on a condition. */
-    protected final static record Transition<TStateKey>(TStateKey nextState, BooleanSupplier condition) {}
-
     protected boolean finished = false;
     protected StateKey requestedState = null;
-    protected final List<Transition<StateKey>> transitions;
+    protected final List<Transition> transitions;
 
     /** Constructs a new State. */
     public State() {
@@ -29,60 +26,60 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
         return finished;
     }
 
-    /**
-     * Adds a transition to another state when the specified condition is true. If multiple
-     * transitions are defined, the first whose condition is true is taken.
-     *
-     * @param condition The condition to evaluate
-     * @param state The StateKey of the next state
-     * @return The current state for chaining
-     */
-    public final State<StateKey, World> transitionWhen(BooleanSupplier condition, StateKey state) {
-        transitions.add(new Transition<>(state, condition));
-        return this;
-    }
+    // /**
+    //  * Adds a transition to another state when the specified condition is true. If multiple
+    //  * transitions are defined, the first whose condition is true is taken.
+    //  *
+    //  * @param condition The condition to evaluate
+    //  * @param state The StateKey of the next state
+    //  * @return The current state for chaining
+    //  */
+    // public final State<StateKey, World> transitionWhen(BooleanSupplier condition, StateKey state) {
+    //     transitions.add(new Transition<>(state, condition));
+    //     return this;
+    // }
 
-    /**
-     * Adds a transition to another state when the state is finished. If multiple transitions are
-     * defined, the first whose condition is true is taken.
-     *
-     * @param state The StateKey of the next state
-     * @return The current state for chaining
-     */
-    public final State<StateKey, World> transitionWhenFinished(StateKey state) {
-        transitions.add(new Transition<>(state, this::isFinished));
-        return this;
-    }
+    // /**
+    //  * Adds a transition to another state when the state is finished. If multiple transitions are
+    //  * defined, the first whose condition is true is taken.
+    //  *
+    //  * @param state The StateKey of the next state
+    //  * @return The current state for chaining
+    //  */
+    // public final State<StateKey, World> transitionWhenFinished(StateKey state) {
+    //     transitions.add(new Transition<>(state, this::isFinished));
+    //     return this;
+    // }
 
-    /**
-     * Adds a transition to another state when the state is finished and the specified condition is
-     * true. If the state is not finished, the condition is not evaluated. If the state is finished,
-     * the condition is evaluated to determine if the transition should occur. And if multiple
-     * transitions are defined, the first whose condition is true is taken.
-     *
-     * @param condition The condition to evaluate
-     * @param state The StateKey of the next state
-     * @return The current state for chaining
-     */
-    public final State<StateKey, World> transitionWhenFinishedAnd(
-            BooleanSupplier condition, StateKey state) {
-        transitions.add(
-                new Transition<>(state, () -> this.isFinished() && condition.getAsBoolean()));
-        return this;
-    }
+    // /**
+    //  * Adds a transition to another state when the state is finished and the specified condition is
+    //  * true. If the state is not finished, the condition is not evaluated. If the state is finished,
+    //  * the condition is evaluated to determine if the transition should occur. And if multiple
+    //  * transitions are defined, the first whose condition is true is taken.
+    //  *
+    //  * @param condition The condition to evaluate
+    //  * @param state The StateKey of the next state
+    //  * @return The current state for chaining
+    //  */
+    // public final State<StateKey, World> transitionWhenFinishedAnd(
+    //         BooleanSupplier condition, StateKey state) {
+    //     transitions.add(
+    //             new Transition<>(state, () -> this.isFinished() && condition.getAsBoolean()));
+    //     return this;
+    // }
 
-    /**
-     * Adds a transition to another state when that state is requested. If multiple transitions are
-     * defined, the first whose condition is true is taken. If the requested state does not match,
-     * the condition is false. Only the most recently requested state is considered.
-     *
-     * @param state
-     * @return
-     */
-    public final State<StateKey, World> transitionWhenRequested(StateKey state) {
-        transitions.add(new Transition<>(state, () -> this.requestedState == state));
-        return this;
-    }
+    // /**
+    //  * Adds a transition to another state when that state is requested. If multiple transitions are
+    //  * defined, the first whose condition is true is taken. If the requested state does not match,
+    //  * the condition is false. Only the most recently requested state is considered.
+    //  *
+    //  * @param state
+    //  * @return
+    //  */
+    // public final State<StateKey, World> transitionWhenRequested(StateKey state) {
+    //     transitions.add(new Transition<>(state, () -> this.requestedState == state));
+    //     return this;
+    // }
 
     /**
      * Determines the next state based on the defined transitions. Multiple transitions may be
@@ -90,10 +87,10 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      *
      * @return The StateKey of the next state, or null if no transition is taken
      */
-    protected final StateKey getNextState() {
-        for (Transition<StateKey> transition : transitions) {
-            if (transition.condition.getAsBoolean()) {
-                return transition.nextState;
+    protected final StateKey getNextState(World world) {
+        for (Transition transition : transitions) {
+            if (transition.whenCondition.isFulfilledFor(world)) {
+                return transition.toState;
             }
         }
         return null;
@@ -182,5 +179,22 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      * periodic update.
      */
     protected abstract void periodic();
+    
+    /** A record representing a transition from one state to another based on a condition. */
+    // protected final static record Transition<TStateKey>(TStateKey nextState, BooleanSupplier condition) {}
+
+    public class Transition {
+        StateKey toState;
+        Condition<World> whenCondition;
+
+        Transition(StateKey toState, Condition<World> whenCondition) {
+            this.toState = toState;
+        }
+
+    }
+
+    public void addTransition(StateKey toState, Condition<World> whenCondition) {
+        new Transition(toState, whenCondition);
+    }
     
 }

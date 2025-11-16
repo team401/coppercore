@@ -3,6 +3,8 @@ package coppercore.controls.state_machine;
 import java.util.HashMap;
 import java.util.Map;
 
+import coppercore.controls.state_machine.State.Transition;
+
 // Note: Some parts of the javadoc were written using Copilot
 
 /** A simple state machine implementation. */
@@ -11,10 +13,12 @@ public class StateMachine<StateKey extends Enum<StateKey>, World> {
     private State<StateKey, World> state;
     private StateKey stateKey;
     private final Map<StateKey, State<StateKey, World>> states;
+    private World world;
 
     /** Constructs a new StateMachine. */
-    public StateMachine() {
+    public StateMachine(World world) {
         this.states = new HashMap<>();
+        this.world = world;
     }
 
     /**
@@ -84,7 +88,7 @@ public class StateMachine<StateKey extends Enum<StateKey>, World> {
         if (state == null) {
             return;
         }
-        setState(state.getNextState());
+        setState(state.getNextState(world));
     }
 
     /** Calls the periodic function of the current state. */
@@ -93,4 +97,53 @@ public class StateMachine<StateKey extends Enum<StateKey>, World> {
             state._periodic();
         }
     }
+
+    public TransitionFrom from(StateKey stateKey) {
+        if (!states.containsKey(stateKey)) {
+            throw new IllegalArgumentException("StateMachine does not contain state: " + stateKey);
+        }
+        State<StateKey, World> fromState = states.get(stateKey);
+        if (fromState == null) {
+            throw new IllegalArgumentException("StateMachine does not contain state: " + stateKey);
+        }
+        return new TransitionFrom(fromState);
+    }
+
+    public class TransitionFrom {
+        State<StateKey, World> fromState;
+
+        TransitionFrom(State<StateKey, World> fromState) {
+            this.fromState = fromState;
+        }
+
+        public TransitionConditionBuilder when(Condition<World> condition) {
+            return new TransitionConditionBuilder(condition);
+        }
+
+    
+        public class TransitionConditionBuilder {
+            Condition<World> condition;
+    
+            TransitionConditionBuilder(Condition<World> condition) {
+                this.condition = condition;
+            }
+    
+            public TransitionConditionBuilder andWhen(Condition<World> nextCondition) {
+                this.condition = (world) -> this.condition.isFulfilledFor(world) && nextCondition.isFulfilledFor(world);
+                return this;    
+            }
+    
+            public TransitionFrom transitionTo(StateKey toState) {
+                fromState.addTransition(toState, condition);
+                return TransitionFrom.this;
+            }
+        }
+
+    }
+
+    @FunctionalInterface
+    public interface Condition<World> {
+        public boolean isFulfilledFor(World world);
+    }
+
 }
