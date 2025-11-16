@@ -80,8 +80,10 @@ public class StateMachineTests {
         intakingState.transitionWhen(() -> !shouldIntake, States.Idle);
         intakingState.transitionWhenFinished(States.Idle);
 
+        warmingUpState.transitionWhenRequested(States.Idle);
         warmingUpState.transitionWhen(() -> !shouldShoot, States.Idle);
         warmingUpState.transitionWhenFinished(States.Shooting);
+        
 
         shootingState.transitionWhen(() -> !shouldShoot, States.Idle);
         shootingState.transitionWhenFinished(States.Idle);

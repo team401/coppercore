@@ -44,7 +44,7 @@ public class StateMachine<StateKey extends Enum<StateKey>> {
 
     /**
      * Sets the current state of the state machine.
-     *
+     * This will override defined transitions.
      * @param newState The StateKey of the new state
      */
     public void setState(StateKey newState) {

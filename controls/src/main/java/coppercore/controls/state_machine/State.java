@@ -8,7 +8,7 @@ import java.util.function.BooleanSupplier;
 public abstract class State<StateKey extends Enum<StateKey>> {
 
     /** A record representing a transition from one state to another based on a condition. */
-    protected final record Transition<TStateKey>(TStateKey nextState, BooleanSupplier condition) {}
+    protected final static record Transition<TStateKey>(TStateKey nextState, BooleanSupplier condition) {}
 
     protected boolean finished = false;
     protected StateKey requestedState = null;
@@ -182,4 +182,5 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * periodic update.
      */
     protected abstract void periodic();
+    
 }
