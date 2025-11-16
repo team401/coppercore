@@ -37,10 +37,10 @@ public class ElevatorSimAdapter implements PositionSimAdapter {
 
     @Override
     public AngularVelocity getMotorAngularVelocity() {
-        double heightMeters = elevatorSim.getPositionMeters();
+        double velocityMetersPerSecond = elevatorSim.getVelocityMetersPerSecond();
         double metersPerRotation = config.elevatorToMotorRatio.in(Meters.per(Rotations));
 
-        double motorVelRotationsPerSecond = heightMeters / metersPerRotation;
+        double motorVelRotationsPerSecond = velocityMetersPerSecond / metersPerRotation;
 
         return RotationsPerSecond.of(motorVelRotationsPerSecond);
     }
