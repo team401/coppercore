@@ -37,8 +37,9 @@ public class ElevatorMechanismConfig extends MechanismConfig {
             CANDeviceID leadMotorId,
             MechanismFollowerMotorConfig[] followerMotorConfigs,
             GravityFeedforwardType gravityFeedforwardType,
+            double motorToEncoderRatio,
             Per<DistanceUnit, AngleUnit> elevatorToMotorRatio) {
-        super(name, leadMotorId, followerMotorConfigs, gravityFeedforwardType);
+        super(name, leadMotorId, followerMotorConfigs, gravityFeedforwardType, motorToEncoderRatio);
 
         this.elevatorToMotorRatio = elevatorToMotorRatio;
     }
@@ -116,6 +117,7 @@ public class ElevatorMechanismConfig extends MechanismConfig {
                     leadMotorId,
                     followerConfigsArray,
                     gravityFeedforwardType,
+                    motorToEncoderRatio,
                     elevatorToMotorRatio);
         }
     }

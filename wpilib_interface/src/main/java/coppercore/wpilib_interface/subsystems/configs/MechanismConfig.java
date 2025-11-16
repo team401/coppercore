@@ -47,6 +47,13 @@ public class MechanismConfig {
     public final GravityFeedforwardType gravityFeedforwardType;
 
     /**
+     * The ratio of motor angle : encoder ratio.
+     *
+     * <p>E.g. if motorToEncoderRatio = 5.0, 5 motor rotations = 1 encoder rotation.
+     */
+    public final double motorToEncoderRatio;
+
+    /**
      * Create a new base mechanism config.
      *
      * @param name Mechanism name, used for logging
@@ -60,11 +67,13 @@ public class MechanismConfig {
             String name,
             CANDeviceID leadMotorId,
             MechanismFollowerMotorConfig[] followerMotorConfigs,
-            GravityFeedforwardType gravityFeedforwardType) {
+            GravityFeedforwardType gravityFeedforwardType,
+            double motorToEncoderRatio) {
         this.name = name;
         this.leadMotorId = leadMotorId;
         this.followerMotorConfigs = followerMotorConfigs;
         this.gravityFeedforwardType = gravityFeedforwardType;
+        this.motorToEncoderRatio = motorToEncoderRatio;
     }
 
     /** Create a new builder object to gracefully create a MechanismConfig. */
@@ -81,12 +90,16 @@ public class MechanismConfig {
      * calling `build` to create the object.
      *
      * <p>`addFollower` should be used for each follower, or not called to indicate no followers.
+     *
+     * <p>When using an external CANcoder with a ratio other than 1.0, `withMotorToEncoderRatio`
+     * should be called once to configure that ratio.
      */
     public static class MechanismConfigBuilder {
         String name = null;
         CANDeviceID leadMotorId = null;
         List<MechanismFollowerMotorConfig> followerMotorConfigs = new ArrayList<>();
         GravityFeedforwardType gravityFeedforwardType = null;
+        double motorToEncoderRatio = 1.0;
 
         // Only allow MechanismConfigBuilder to be created using MechanismConfig.builder()
         protected MechanismConfigBuilder() {}
@@ -152,6 +165,34 @@ public class MechanismConfig {
         }
 
         /**
+         * Configure the motor to encoder ratio when using an external CANcoder with a ratio other
+         * than 1.0.
+         *
+         * <p>For example, a value of 5.0 means that the motor will turn 5 full rotations for each
+         * rotation of the encoder.
+         *
+         * <p>This value must be nonzero (a ratio of zero means that the motor would not turn at all
+         * and the encoder would magically change) and positive (encoder direction should be handled
+         * in the CANCoder config's invert settings such that lead motor positive rotation =
+         * CANcoder positive rotation).
+         *
+         * @param motorToEncoderRatio A positive value representing the ratio of motor rotor
+         *     rotations : encoder rotations. This value can be calculated with (encoder gear teeth
+         *     / motor gear teeth).
+         */
+        public MechanismConfigBuilder withMotorToEncoderRatio(double motorToEncoderRatio) {
+            if (motorToEncoderRatio <= 0.0) {
+                throw new IllegalArgumentException(
+                        "motor to encoder ratio must be positive (and nonzero), but was configured"
+                                + " with value "
+                                + motorToEncoderRatio
+                                + ".");
+            }
+            this.motorToEncoderRatio = motorToEncoderRatio;
+            return this;
+        }
+
+        /**
          * Verify that all parameters are not null and that CAN bus names match between leader and
          * follower motor(s).
          *
@@ -191,6 +232,14 @@ public class MechanismConfig {
                                     + " motor.");
                 }
             }
+
+            if (motorToEncoderRatio <= 0.0) {
+                throw new IllegalArgumentException(
+                        "motor to encoder ratio must be positive (and nonzero), but was configured"
+                                + " with value "
+                                + motorToEncoderRatio
+                                + ".");
+            }
         }
 
         /**
@@ -209,7 +258,11 @@ public class MechanismConfig {
                     followerMotorConfigs.toArray(new MechanismFollowerMotorConfig[] {});
 
             return new MechanismConfig(
-                    name, leadMotorId, followerConfigsArray, gravityFeedforwardType);
+                    name,
+                    leadMotorId,
+                    followerConfigsArray,
+                    gravityFeedforwardType,
+                    this.motorToEncoderRatio);
         }
     }
 }
