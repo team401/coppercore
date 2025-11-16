@@ -53,8 +53,10 @@ public class MechanismConfig {
      * @param leadMotorId CAN ID of the lead motor
      * @param followerMotorConfigs Array of configs for follower IDs and inverts. Leave empty for no
      *     followers.
+     * @param gravityFeedforwardType The type of gravity feedforward to use for the mechanism,
+     *     either STATIC_ELEVATOR or COSINE_ARM.
      */
-    private MechanismConfig(
+    protected MechanismConfig(
             String name,
             CANDeviceID leadMotorId,
             MechanismFollowerMotorConfig[] followerMotorConfigs,
@@ -150,15 +152,19 @@ public class MechanismConfig {
         }
 
         /**
-         * Validate parameters and build a MechanismConfig using the values configured in this
-         * builder.
+         * Verify that all parameters are not null and that CAN bus names match between leader and
+         * follower motor(s).
          *
          * <p>withName, withLeadMotorId, and withGravityFeedforwardType must have been called before
          * attempting to build the config.
          *
-         * @return The MechanismConfig created.
+         * <p>This method will throw an IllegalArgumentException in the case of a null or invalid
+         * argument.
+         *
+         * <p>This method is separated from build() so that it can be extended more easily by
+         * allowing subclasses to call `super.validateConfigBeforeBuilding()`.
          */
-        public MechanismConfig build() {
+        protected void validateBeforeBuilding() {
             MechanismFollowerMotorConfig[] followerConfigsArray =
                     followerMotorConfigs.toArray(new MechanismFollowerMotorConfig[] {});
             Objects.requireNonNull(
@@ -185,6 +191,22 @@ public class MechanismConfig {
                                     + " motor.");
                 }
             }
+        }
+
+        /**
+         * Validate parameters and build a MechanismConfig using the values configured in this
+         * builder.
+         *
+         * <p>withName, withLeadMotorId, and withGravityFeedforwardType must have been called before
+         * attempting to build the config.
+         *
+         * @return The MechanismConfig created.
+         */
+        public MechanismConfig build() {
+            validateBeforeBuilding();
+
+            MechanismFollowerMotorConfig[] followerConfigsArray =
+                    followerMotorConfigs.toArray(new MechanismFollowerMotorConfig[] {});
 
             return new MechanismConfig(
                     name, leadMotorId, followerConfigsArray, gravityFeedforwardType);
