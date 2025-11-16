@@ -1,5 +1,7 @@
 package coppercore.controls.state_machine;
 
+// TODO: Consider removing this or making it accept World in the periodic function
+
 /** A state that executes a provided periodic function. */
 public class FunctionalState<StateKey extends Enum<StateKey>, World> extends State<StateKey, World> {
 
@@ -20,7 +22,8 @@ public class FunctionalState<StateKey extends Enum<StateKey>, World> extends Sta
 
     /** Executes the periodic function. */
     @Override
-    protected void periodic() {
+    protected void periodic(World world) {
+        // Need to make this accept world
         periodicFunction.run();
     }
 }

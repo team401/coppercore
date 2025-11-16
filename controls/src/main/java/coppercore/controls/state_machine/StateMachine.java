@@ -54,12 +54,12 @@ public class StateMachine<StateKey extends Enum<StateKey>, World> {
             return;
         }
         if (state != null) {
-            state._onExit();
+            state._onExit(world);
         }
         state = states.get(newState);
         stateKey = newState;
         if (state != null) {
-            state._onEntry();
+            state._onEntry(world);
         }
     }
 
@@ -92,7 +92,7 @@ public class StateMachine<StateKey extends Enum<StateKey>, World> {
     /** Calls the periodic function of the current state. */
     public void periodic() {
         if (state != null) {
-            state._periodic();
+            state._periodic(world);
         }
     }
 

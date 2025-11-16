@@ -45,17 +45,17 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      * Called when the state is entered. This is a internal method; use onEntry() to override
      * behavior.
      */
-    protected final void _onEntry() {
+    protected final void _onEntry(World world) {
         finished = false;
-        onEntry();
+        onEntry(world);
     }
 
     /**
      * Called when the state is exited. This is a internal method; use onExit() to override
      * behavior.
      */
-    protected final void _onExit() {
-        onExit();
+    protected final void _onExit(World world) {
+        onExit(world);
         requestedState = null;
     }
 
@@ -63,16 +63,16 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      * Called when the state is finished. This is a internal method; use onFinish() to override
      * behavior.
      */
-    protected final void _onFinish() {
-        onFinish();
+    protected final void _onFinish(World world) {
+        onFinish(world);
     }
 
     /**
      * Called periodically while in this state. This is a internal method; use periodic() to
      * override behavior.
      */
-    protected final void _periodic() {
-        periodic();
+    protected final void _periodic(World world) {
+        periodic(world);
     }
 
     /**
@@ -83,9 +83,9 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      * trigger a transition. And it can be used to indicate that the state's work is done. When
      * finish() is called, the onFinish() method is also called.
      */
-    protected final void finish() {
+    protected final void finish(World world) {
         finished = true;
-        _onFinish();
+        _onFinish(world);
     }
 
     /**
@@ -105,25 +105,25 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      * Called when the state is entered. This method is called after a state transition. So it is
      * the first chance to perform any setup or initialization for this state.
      */
-    protected void onEntry() {}
+    protected void onEntry(World world) {}
 
     /**
      * Called when the state is exited. This method is called before a state transition. So it is
      * the last chance to perform any cleanup or final actions in this state.
      */
-    protected void onExit() {}
+    protected void onExit(World world) {}
 
     /**
      * Called when the state is finished. This method is called when finish() is invoked. So it is
      * not guaranteed to be called before a state transition.
      */
-    protected void onFinish() {}
+    protected void onFinish(World world) {}
 
     /**
      * Called periodically while in this state. This method is called by the state machine's
      * periodic update.
      */
-    protected abstract void periodic();
+    protected abstract void periodic(World world);
     
     /** A record representing a transition from one state to another based on a condition. */
     // protected final static record Transition<TStateKey>(TStateKey nextState, BooleanSupplier condition) {}
