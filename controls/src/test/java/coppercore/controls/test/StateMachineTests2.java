@@ -1,6 +1,6 @@
 package coppercore.controls.test;
 
-import static coppercore.controls.test.StateMachineTests.States.*;
+import static coppercore.controls.test.StateMachineTests2.States.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import coppercore.controls.state_machine.State;
@@ -8,7 +8,7 @@ import coppercore.controls.state_machine.StateMachine;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
-public class StateMachineTests {
+public class StateMachineTests2 {
 
     public enum States implements State<States, Robot> {
         Idle {
@@ -35,7 +35,8 @@ public class StateMachineTests {
                 robot.motorSpeed = 0;
                 robot.armPos = 3;
                 robot.isWarmedUp = true;
-                return true;
+                stateMachine.finish(this); // example use of .finish
+                return false; // ignored because finish was called
             }
         },
         Shooting {
@@ -43,7 +44,8 @@ public class StateMachineTests {
             public boolean periodic(StateMachine<States, Robot> stateMachine, Robot robot) {
                 robot.motorSpeed = 100;
                 robot.hasNote = false;
-                return true;
+                stateMachine.requestTransitionTo(Idle); // example use of requestTransitionTo
+                return false;
             }
         };
     }
@@ -68,15 +70,15 @@ public class StateMachineTests {
 
         var fromIntaking = stateMachine.transitionFrom(Intaking);
         fromIntaking.to(Idle).when((robot) -> !robot.shouldIntake);
-        fromIntaking.to(Idle).when((robot) -> robot.hasNote);
+        fromIntaking.to(Idle).whenFinished();
 
         var fromWarmingUp = stateMachine.transitionFrom(WarmingUp);
         fromWarmingUp.to(Idle).when((robot) -> !robot.shouldShoot);
-        fromWarmingUp.to(Shooting).when((robot) -> robot.isWarmedUp);
+        fromWarmingUp.to(Shooting).whenFinished();
 
         var fromShooting = stateMachine.transitionFrom(Shooting);
         fromShooting.to(Idle).when((robot) -> !robot.shouldShoot);
-        fromShooting.to(Idle).when((robot) -> !robot.hasNote);
+        fromShooting.to(Idle).whenRequested();
         stateMachine.setState(Idle);
 
         // Testing

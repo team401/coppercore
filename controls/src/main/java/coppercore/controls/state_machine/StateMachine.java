@@ -1,96 +1,116 @@
 package coppercore.controls.state_machine;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
-// Note: Some parts of the javadoc were written using Copilot
+public class StateMachine<
+        StateEnumType extends Enum<StateEnumType> & State<StateEnumType, World>, World> {
+    private Optional<StateEnumType> currentState = Optional.<StateEnumType>empty();
+    private Optional<StateEnumType> requestedState = Optional.<StateEnumType>empty();
+    private Map<StateEnumType, List<Transition>> transitionsByState = new HashMap<>();
+    private Map<StateEnumType, Boolean> hasFinished = new HashMap<>();
+    private World world;
 
-/** A simple state machine implementation. */
-public class StateMachine<StateKey extends Enum<StateKey>> {
-
-    private State<StateKey> state;
-    private StateKey stateKey;
-    private final Map<StateKey, State<StateKey>> states;
-
-    /** Constructs a new StateMachine. */
-    public StateMachine() {
-        this.states = new HashMap<>();
-    }
-
-    /**
-     * Adds a new functional state to the state machine.
-     *
-     * @param state StateKey of the new state
-     * @param periodic The periodic function to be called while in this state
-     * @return The newly created state
-     */
-    public State<StateKey> addState(StateKey state, Runnable periodic) {
-        State<StateKey> newState = new FunctionalState<>(periodic);
-        states.put(state, newState);
-        return newState;
-    }
-
-    /**
-     * Registers a new state to the state machine.
-     *
-     * @param stateKey StateKey of the new state
-     * @param state The state to be registered
-     * @return The registered state
-     */
-    public State<StateKey> registerState(StateKey stateKey, State<StateKey> state) {
-        states.put(stateKey, state);
-        return state;
-    }
-
-    /**
-     * Sets the current state of the state machine.
-     *
-     * @param newState The StateKey of the new state
-     */
-    public void setState(StateKey newState) {
-        if (newState == null) {
-            return;
-        }
-        if (state != null) {
-            state._onExit();
-        }
-        state = states.get(newState);
-        stateKey = newState;
-        if (state != null) {
-            state._onEntry();
+    public StateMachine(Class<StateEnumType> stateEnum, World world) {
+        this.world = world;
+        for (var state : stateEnum.getEnumConstants()) {
+            transitionsByState.put(state, new ArrayList<Transition>());
         }
     }
 
-    /**
-     * Gets the current state key of the state machine.
-     *
-     * @return The current StateKey
-     */
-    public StateKey getCurrentStateKey() {
-        return stateKey;
+    public State getCurrentState() {
+        return currentState.orElse(null);
     }
 
-    /**
-     * Gets the current state of the state machine.
-     *
-     * @return The current State
-     */
-    public State<StateKey> getCurrentState() {
-        return state;
-    }
-
-    /** Updates the state machine, transitioning to the next state if conditions are met. */
-    public void updateStates() {
-        if (state == null) {
-            return;
-        }
-        setState(state.getNextState());
-    }
-
-    /** Calls the periodic function of the current state. */
     public void periodic() {
-        if (state != null) {
-            state._periodic();
+        currentState.ifPresent(
+                (state) -> {
+                    if (state.periodic(this, world)) {
+                        hasFinished.put(state, true);
+                    }
+                });
+    }
+
+    // alternative way to finish
+    public void finish(StateEnumType state) {
+        hasFinished.put(state, true);
+    }
+
+    public void requestTransitionTo(StateEnumType state) {
+        Objects.requireNonNull(state);
+        requestedState = Optional.<StateEnumType>of(state);
+    }
+
+    public void setState(StateEnumType newState) {
+        Objects.requireNonNull(newState);
+        currentState.ifPresent(
+                (oldState) -> {
+                    oldState.onExit(this, world);
+                    requestedState = Optional.<StateEnumType>empty();
+                });
+        currentState = Optional.<StateEnumType>of(newState);
+        hasFinished.put(newState, false);
+        newState.onEntry(this, world);
+    }
+
+    public void updateStates() {
+        currentState.ifPresent(
+                (state) -> {
+                    for (var transition : transitionsByState.get(state)) {
+                        if (transition.whenCondition.isFulfilledFor(world)) {
+                            setState(transition.toState);
+                            break;
+                        }
+                    }
+                });
+    }
+
+    public TransitionFrom transitionFrom(StateEnumType state) {
+        return new TransitionFrom(state);
+    }
+
+    public class TransitionFrom {
+        StateEnumType fromState;
+
+        TransitionFrom(StateEnumType fromState) {
+            this.fromState = fromState;
         }
+
+        public Transition to(StateEnumType toState) {
+            return new Transition(fromState, toState);
+        }
+    }
+
+    public class Transition {
+        StateEnumType fromState, toState;
+        Condition<World> whenCondition;
+
+        Transition(StateEnumType fromState, StateEnumType toState) {
+            this.fromState = fromState;
+            this.toState = toState;
+            transitionsByState.get(fromState).add(this);
+        }
+
+        public void when(Condition<World> whenCondition) {
+            if (this.whenCondition != null) throw new Error("Cannot chain when conditions");
+            this.whenCondition = whenCondition;
+        }
+
+        public void whenFinished() {
+            when((world) -> hasFinished.get(fromState));
+        }
+
+        public void whenRequested() {
+            when((world) -> requestedState.isPresent() && requestedState.get() == toState);
+        }
+    }
+
+    @FunctionalInterface
+    public interface Condition<World> {
+        public boolean isFulfilledFor(World world);
     }
 }
