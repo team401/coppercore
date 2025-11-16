@@ -4,11 +4,13 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import coppercore.wpilib_interface.subsystems.configs.ElevatorMechanismConfig;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
 /**
@@ -49,5 +51,8 @@ public class ElevatorSimAdapter implements PositionSimAdapter {
     }
 
     @Override
-    public void update(double deltaTimeSeconds) {}
+    public void update(Voltage motorAppliedOutput, double deltaTimeSeconds) {
+        elevatorSim.setInput(motorAppliedOutput.in(Volts));
+        elevatorSim.update(deltaTimeSeconds);
+    }
 }

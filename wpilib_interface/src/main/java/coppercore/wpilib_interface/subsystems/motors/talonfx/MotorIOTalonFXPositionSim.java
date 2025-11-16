@@ -26,6 +26,14 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
 
     private final Timer deltaTimer = new Timer();
 
+    private final boolean isFollower;
+
+    /**
+     * Track whether or not to invert the sim rotation based on an being inverted follower in the
+     * config.
+     */
+    private final boolean invertSimRotation;
+
     /**
      * Create a new Simulated TalonFX IO, initializing a TalonFX and all required StatusSignals
      *
@@ -46,6 +54,10 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
             PositionSimAdapter physicsSimAdapter) {
         super(config, followerIndex, talonFXConfig);
 
+        this.isFollower = followerIndex.isPresent();
+        this.invertSimRotation =
+                followerIndex.map(idx -> config.followerMotorConfigs[idx].invert()).orElse(false);
+
         this.talonSimState = this.talon.getSimState();
 
         this.physicsSimAdapter = physicsSimAdapter;
@@ -63,16 +75,21 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
     /**
      * Update the state of the mechanismPhysicsSim and send these values to the motor's
      * TalonFXSimState
+     *
+     * <p>If this
      */
     private void updateSimState() {
         double deltaTimeSeconds = deltaTimer.get();
         deltaTimer.restart();
 
-        physicsSimAdapter.update(deltaTimeSeconds);
+        if (!isFollower) {
+            physicsSimAdapter.update(talonSimState.getMotorVoltageMeasure(), deltaTimeSeconds);
+        }
 
-        talonSimState.setRawRotorPosition(physicsSimAdapter.getMotorPosition());
-        talonSimState.setRotorVelocity(physicsSimAdapter.getMotorAngularVelocity());
-
-        // TODO: Add a way to update the physicsSimAdapter with new motor voltage (sim input)
+        double invertMultiplier = invertSimRotation ? -1.0 : 1.0;
+        talonSimState.setRawRotorPosition(
+                physicsSimAdapter.getMotorPosition().times(invertMultiplier));
+        talonSimState.setRotorVelocity(
+                physicsSimAdapter.getMotorAngularVelocity().times(invertMultiplier));
     }
 }

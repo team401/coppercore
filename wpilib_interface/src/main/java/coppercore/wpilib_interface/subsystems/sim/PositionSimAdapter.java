@@ -3,6 +3,7 @@ package coppercore.wpilib_interface.subsystems.sim;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 
 /**
  * The PositionSimAdapter interface provides the MotorIO{TalonFX/SparkMax}PositionSim classes a
@@ -33,10 +34,12 @@ public interface PositionSimAdapter {
     public Current getCurrentDraw();
 
     /**
-     * Update the physics sim, based on the period of time that has elapsed.
+     * Update the physics sim based on motor voltage and the period of time that has elapsed.
      *
+     * @param motorAppliedOutput The current applied voltage reported by the motor sim state as
+     *     output.
      * @param deltaTimeSeconds The amount of time that has elapsed since the method was last called,
      *     measured in seconds.
      */
-    public void update(double deltaTimeSeconds);
+    public void update(Voltage motorAppliedOutput, double deltaTimeSeconds);
 }
