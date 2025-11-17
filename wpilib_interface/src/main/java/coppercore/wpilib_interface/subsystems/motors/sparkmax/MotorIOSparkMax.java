@@ -28,6 +28,27 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.Optional;
 
+/**
+ * The MotorIOSparkMax implements the MotorIO interface for the SparkMax motor controller.
+ *
+ * <p>By default, this IO uses the internal encoder and doesn't require that an absolute encoder be
+ * connected. This means that a "disconnected" absolute encoder will not trigger warnings or cause
+ * it to report being "disconnected." When using an absolute encoder, call {@link
+ * requireAbsoluteEncoder} to cause the IO to signal that it is disconnected when it fails to read
+ * data from the absolute encoder. The method returns the IO so it can easily be used inline in
+ * subsystem initialization:
+ *
+ * <pre>{@code
+ * scoring =
+ *     new ScoringSubsystem(
+ *         new MotorIOSparkMax(
+ *             config,
+ *             followerIndex,
+ *             sparkMaxConfig,
+ *             motorType)
+ *         .requireAbsoluteEncoder());
+ * }</pre>
+ */
 public class MotorIOSparkMax implements MotorIO {
     protected final MechanismConfig config;
 

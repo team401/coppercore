@@ -3,10 +3,6 @@ package coppercore.wpilib_interface.subsystems.configs;
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.measure.Per;
-
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Rotations;
-
 import java.util.Objects;
 
 /**
@@ -74,7 +70,10 @@ public class ElevatorMechanismConfig extends MechanismConfig {
          *
          * <p>For example, motor position * elevator to motor ratio = elevator height.
          *
-         * @param elevatorToMotorRatio The ratio of elevator distance : motor angle. Can be created by: <pre>{@code Inches.of(5.0).div(Rotations.of(1.0))}</pre>. Must not be null
+         * @param elevatorToMotorRatio The ratio of elevator distance : motor angle. Can be created
+         *     by:
+         *     <pre>{@code Inches.of(5.0).div(Rotations.of(1.0))}</pre>
+         *     . Must not be null
          * @return This MechanismConfigBuilder, for easy method chaining
          */
         public ElevatorMechanismConfigBuilder withElevatorToMotorRatio(
@@ -86,8 +85,9 @@ public class ElevatorMechanismConfig extends MechanismConfig {
         }
 
         /**
-         * Performs all checks present in {@link MechanismConfig#validateBeforeBuilding()} and then
-         * checks to verify that withElevatorToMotorRatio has been called with a non-null value.
+         * Performs all checks present in {@link MechanismConfigBuilder#validateBeforeBuilding} and
+         * then checks to verify that withElevatorToMotorRatio has been called with a non-null
+         * value.
          *
          * <p>This method will throw an IllegalArgumentException in the case of an invalid argument.
          */

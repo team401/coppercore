@@ -33,7 +33,12 @@ public interface MotorIO {
      * </ul>
      */
     public enum NeutralMode {
+        /**
+         * Effectively connects motor wires together when 0 output is applied so that the motor
+         * provides "back-EMF" that will rapidly slow down the motor and resist movement.
+         */
         Brake,
+        /** Disconnects motor wires when 0 output is applied so that the motor will spin freely. */
         Coast
     }
 
@@ -87,7 +92,7 @@ public interface MotorIO {
      * profile
      *
      * @param positionSetpoint The setpoint to control the motor to
-     * @param profileConfig
+     * @param profileConfig The motion profile config to control motion profile constraints.
      */
     public void controlToPositionProfiled(
             Angle positionSetpoint, MotionProfileConfig profileConfig);
