@@ -1,5 +1,7 @@
 package coppercore.wpilib_interface.subsystems.motors.talonfx;
 
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -73,11 +75,11 @@ public class MotorIOTalonFX implements MotorIO {
      */
     private final Alert disconnectedAlert;
 
-    /** Velocity StatusSignal cached for easy repeated access */
-    protected final StatusSignal<AngularVelocity> velocitySignal;
-
     /** Position StatusSignal cached for easy repeated access */
     protected final StatusSignal<Angle> positionSignal;
+
+    /** Velocity StatusSignal cached for easy repeated access */
+    protected final StatusSignal<AngularVelocity> velocitySignal;
 
     /** AppliedVoltage StatusSignal cached for easy repeated access */
     protected final StatusSignal<Voltage> appliedVoltageSignal;
@@ -157,8 +159,8 @@ public class MotorIOTalonFX implements MotorIO {
 
         this.talon = new TalonFX(id.id(), id.canbus());
 
-        this.velocitySignal = talon.getVelocity();
         this.positionSignal = talon.getPosition();
+        this.velocitySignal = talon.getVelocity();
         this.appliedVoltageSignal = talon.getMotorVoltage();
         this.statorCurrentSignal = talon.getStatorCurrent();
         this.supplyCurrentSignal = talon.getSupplyCurrent();
@@ -223,12 +225,12 @@ public class MotorIOTalonFX implements MotorIO {
                     deviceName + ": Warning while refreshing status signals: " + code, false);
         }
 
-        inputs.velocity.mut_replace(velocitySignal.getValue());
-        inputs.position.mut_replace(positionSignal.getValue());
+        inputs.positionRadians = positionSignal.getValue().in(Radians);
+        inputs.velocityRadiansPerSecond = velocitySignal.getValue().in(RadiansPerSecond);
         inputs.appliedVolts = appliedVoltageSignal.getValueAsDouble();
         inputs.statorCurrentAmps = statorCurrentSignal.getValueAsDouble();
         inputs.supplyCurrentAmps = supplyCurrentSignal.getValueAsDouble();
-        inputs.rawRotorPosition.mut_replace(rawRotorPositionSignal.getValue());
+        inputs.rawRotorPositionRadians = rawRotorPositionSignal.getValue().in(Radians);
     }
 
     @Override

@@ -16,6 +16,7 @@ import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -31,23 +32,12 @@ import java.util.Optional;
 /**
  * The MotorIOSparkMax implements the MotorIO interface for the SparkMax motor controller.
  *
- * <p>By default, this IO uses the internal encoder and doesn't require that an absolute encoder be
- * connected. This means that a "disconnected" absolute encoder will not trigger warnings or cause
- * it to report being "disconnected." When using an absolute encoder, call {@link
- * requireAbsoluteEncoder} to cause the IO to signal that it is disconnected when it fails to read
- * data from the absolute encoder. The method returns the IO so it can easily be used inline in
- * subsystem initialization:
+ * <p>MotorIOSparkMax does not support measuring stator current or raw rotor position. This values
+ * will be set to zero when updateInputs is called.
  *
- * <pre>{@code
- * scoring =
- *     new ScoringSubsystem(
- *         new MotorIOSparkMax(
- *             config,
- *             followerIndex,
- *             sparkMaxConfig,
- *             motorType)
- *         .requireAbsoluteEncoder());
- * }</pre>
+ * <p>This IO implementation also does not support dynamic motion profiles, exponential motion
+ * profiles, or current/FOC-based open-loop control. Calling any of the aforementioned control
+ * methods will result in an UnsupportedOperationException.
  */
 public class MotorIOSparkMax implements MotorIO {
     protected final MechanismConfig config;
@@ -62,27 +52,12 @@ public class MotorIOSparkMax implements MotorIO {
 
     protected final String deviceName;
 
-    protected boolean absoluteEncoderRequired = false;
-
     private final Alert configFailedToApplyAlert;
 
     private final Alert disconnectedAlert;
 
     /**
      * Create a new SparkMax IO, initializing a SparkMax
-     *
-     * <p>By default, an absolute encoder is not required. When using an absolute encoder, call
-     * {@link requireAbsoluteEncoder} to make the `connected` field of the input factor in absolute
-     * encoder refresh status. For example:
-     *
-     * <pre>{@code
-     * new ScoringSubsystem(new MotorIOSparkMax(
-     *     config,
-     *     followerIndex,
-     *     sparkMaxConfig,
-     *     motorType)
-     *         .requireAbsoluteEncoder());
-     * }</pre>
      *
      * @param config A MechanismConfig to use for CAN IDs
      * @param followerIndex An Optional containing either the index of the follower motor (what
@@ -130,21 +105,6 @@ public class MotorIOSparkMax implements MotorIO {
     }
 
     /**
-     * Make `updateInputs` report a disconnected motor when the absolute encoder position fails to
-     * refresh.
-     *
-     * <p>By default, a failure to read an absolute encoder is ignored, as it is an optional part of
-     * the motor configuration.
-     *
-     * @return This MotorIOSparkMax, for easy method chaining.
-     */
-    public MotorIOSparkMax requireAbsoluteEncoder() {
-        this.absoluteEncoderRequired = true;
-
-        return this;
-    }
-
-    /**
      * Uses tryUntilOk to apply sparkMaxConfig until it succeeds. If the config failed to apply
      * supplier has been initialized (is not null), this will set it to display when a config fails
      * to applUses tryUntilOk to apply sparkMaxConfig until it succeeds. If the config failed to
@@ -172,18 +132,22 @@ public class MotorIOSparkMax implements MotorIO {
 
         // No way to get this value from the motor controller
         inputs.statorCurrentAmps = 0.0;
+        inputs.rawRotorPositionRadians = 0.0;
 
-        connected &=
-                SparkUtil.ifOk(
-                        sparkMax,
-                        () -> sparkMax.getEncoder().getVelocity(),
-                        (velocityRPM) -> inputs.velocity.mut_replace(velocityRPM, RPM));
         connected &=
                 SparkUtil.ifOk(
                         sparkMax,
                         () -> sparkMax.getEncoder().getPosition(),
                         (positionRotations) ->
-                                inputs.position.mut_replace(positionRotations, Rotations));
+                                inputs.positionRadians =
+                                        Units.rotationsToRadians(positionRotations));
+        connected &=
+                SparkUtil.ifOk(
+                        sparkMax,
+                        () -> sparkMax.getEncoder().getVelocity(),
+                        (velocityRPM) ->
+                                inputs.velocityRadiansPerSecond =
+                                        Units.rotationsPerMinuteToRadiansPerSecond(velocityRPM));
         connected &=
                 SparkUtil.ifOk(
                         sparkMax,
@@ -194,18 +158,6 @@ public class MotorIOSparkMax implements MotorIO {
                         sparkMax,
                         sparkMax::getOutputCurrent,
                         (current) -> inputs.supplyCurrentAmps = current);
-
-        boolean absoluteEncoderConnected =
-                SparkUtil.ifOk(
-                        sparkMax,
-                        () -> sparkMax.getAbsoluteEncoder().getPosition(),
-                        (rotorPositionRotations) ->
-                                inputs.rawRotorPosition.mut_replace(
-                                        rotorPositionRotations, Rotations));
-
-        if (absoluteEncoderRequired) {
-            connected &= absoluteEncoderConnected;
-        }
 
         inputs.connected = connected;
 
@@ -237,6 +189,12 @@ public class MotorIOSparkMax implements MotorIO {
             Velocity<AngularAccelerationUnit> maxJerk,
             double expoKv,
             double expoKa) {
+        // Dynamic motion profiles would have to be implemented here in the IO, since they are not
+        // supported by the motor controller. This means that we would be requiring the user to fire
+        // all closed-loop control requests periodically and would also result in lower-frequency
+        // motion profiling and inconsistent behavior between dynamic and non-dynamic profiles. To
+        // future programmers: if this is a required feature and you deem it to be worth the
+        // inconsistencies caused, feel free to implement it.
         throw new UnsupportedOperationException("Dynamic profiles are not supported in Spark IOs.");
     }
 
