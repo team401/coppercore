@@ -12,6 +12,7 @@ import java.util.Objects;
  * <p>Use a {@link ElevatorMechanismConfig#builder()} to create this config.
  */
 public class ElevatorMechanismConfig extends MechanismConfig {
+    // TODO: Rename elevatorToMotorRatio to something like elevatorToMechanismRatio due to how Phoenix-6 handles remote feedback sources and the motor position signal.
     /**
      * A ratio of distance to angle that relates how much the elevator moves per rotation of the
      * motor(s).
