@@ -7,14 +7,14 @@ public final class VisionGainConstants {
     /**
      * Baseline position standard deviation, for 1 tag from 1 meter distance, measured in meters.
      *
-     * <p>This value will be adjusted for distance & tag count.
+     * <p>This value will be adjusted for distance and tag count.
      */
     public double linearStdDevFactor = 0.02;
 
     /**
      * Baseline angular standard deviation, for 1 tag from 1 meter distance, measured in radians.
      *
-     * <p>This value will be adjusted for distance & tag count.
+     * <p>This value will be adjusted for distance and tag count.
      */
     public double angularStdDevFactor = 0.06;
 
