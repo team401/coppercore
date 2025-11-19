@@ -29,11 +29,15 @@ public class VisionLocalizer extends SubsystemBase {
     public AprilTagFieldLayout aprilTagLayout;
     private double[] cameraStdDevFactors;
 
+    private final VisionGainConstants gainConstants;
+
     /**
      * Constructs a new VisionLocalizer instance
      *
      * @param consumer functional interface responsible for adding vision measurements to drive pose
      * @param aprilTagLayout the field layout for current year
+     * @param gainConstants a VisionGainConstants object containing the standard deviation factors
+     *     and pose rejection parameters for this VisionLocalizer.
      * @param cameraStdDevFactors factors to multiply standard deviation. matches camera index
      *     (camera 0 -> index 0 in factors)
      * @param io of each camera, using photon vision or sim
@@ -41,11 +45,13 @@ public class VisionLocalizer extends SubsystemBase {
     public VisionLocalizer(
             VisionConsumer consumer,
             AprilTagFieldLayout aprilTagLayout,
+            VisionGainConstants gainConstants,
             double[] cameraStdDevFactors,
             VisionIO... io) {
         this.consumer = consumer;
         this.io = io;
         this.aprilTagLayout = aprilTagLayout;
+        this.gainConstants = gainConstants;
         this.cameraStdDevFactors = cameraStdDevFactors;
 
         for (int i = 0; i < io.length; i++) {
@@ -88,7 +94,7 @@ public class VisionLocalizer extends SubsystemBase {
     }
 
     /**
-     * boolean that checks whether  or not a coprocessor is connected like the BeeLink
+     * boolean that checks whether or not a coprocessor is connected like the BeeLink
      *
      * @return camera inputs are connected
      */
@@ -209,12 +215,12 @@ public class VisionLocalizer extends SubsystemBase {
         return observation.tagCount() == 0 // Must have at least one tag
                 || (observation.tagCount() == 1
                         && observation.ambiguity()
-                                > CoreVisionConstants
+                                > gainConstants
                                         .maxSingleTagAmbiguity) // Cannot be high ambiguity if
                 // single tag
                 || Math.abs(observation.pose().getZ())
-                        > CoreVisionConstants.maxZCutoff // Must have realistic Z coordinate
-                || observation.averageTagDistance() > CoreVisionConstants.maxAcceptedDistanceMeters
+                        > gainConstants.maxZCutoff // Must have realistic Z coordinate
+                || observation.averageTagDistance() > gainConstants.maxAcceptedDistanceMeters
                 || observation.ambiguity() > 0.3
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
@@ -235,13 +241,9 @@ public class VisionLocalizer extends SubsystemBase {
         double avgDistanceFromTarget = observation.averageTagDistance();
         int numTags = observation.tagCount();
         double linearStdDev =
-                CoreVisionConstants.linearStdDevFactor
-                        * Math.pow(avgDistanceFromTarget, 2)
-                        / numTags;
+                gainConstants.linearStdDevFactor * Math.pow(avgDistanceFromTarget, 2) / numTags;
         double angularStdDev =
-                CoreVisionConstants.angularStdDevFactor
-                        * Math.pow(avgDistanceFromTarget, 2)
-                        / numTags;
+                gainConstants.angularStdDevFactor * Math.pow(avgDistanceFromTarget, 2) / numTags;
 
         // adjustment based on position of camera
         if (cameraIndex < this.cameraStdDevFactors.length) {
@@ -255,7 +257,7 @@ public class VisionLocalizer extends SubsystemBase {
     /**
      * logs individual camera data to advantage kit realOutputs under Vision/camera/index
      *
-     * @param cameraIndex index of camera to liog
+     * @param cameraIndex index of camera to log
      * @param robotPoses list of all poses found by camera
      * @param robotPosesAccepted list of poses NOT REJECTED by shouldRejectPose
      * @param robotPosesRejected list of poses REJECTED by shouldRejectPose
