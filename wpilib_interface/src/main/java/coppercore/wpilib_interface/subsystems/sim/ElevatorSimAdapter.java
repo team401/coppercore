@@ -16,8 +16,9 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 /**
  * The ElevatorSimAdapter class adapts wpilib ElevatorSim for use with
  * MotorIO{TalonFX/SparkMax}PositionSim by implementing PositionSimAdapter.
- * 
- * <p>It does this by converting an elevator position yielded by the ElevatorSim to a motor angle using the elevatorToMotorRatio in the ElevatorMechanismConfig. It does the same for velocities.</p>
+ *
+ * <p>It does this by converting an elevator position yielded by the ElevatorSim to a motor angle
+ * using the elevatorToMotorRatio in the ElevatorMechanismConfig. It does the same for velocities.
  *
  * @see coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXPositionSim
  * @see coppercore.wpilib_interface.subsystems.sim.PositionSimAdapter
@@ -27,9 +28,13 @@ public class ElevatorSimAdapter implements PositionSimAdapter {
     private final ElevatorSim elevatorSim;
 
     /**
-     * Create a new ElevatorSimAdapter to adapt a given ElevatorSim for use according to parameters specified in an ElevatorMechanismConfig.
-     * @param config The ElevatorMechanismConfig, which will be used to get the elevator to motor ratio.
-     * @param elevatorSim The ElevatorSim, whose position and velocity will be read to update inputs in sim.
+     * Create a new ElevatorSimAdapter to adapt a given ElevatorSim for use according to parameters
+     * specified in an ElevatorMechanismConfig.
+     *
+     * @param config The ElevatorMechanismConfig, which will be used to get the elevator to motor
+     *     ratio.
+     * @param elevatorSim The ElevatorSim, whose position and velocity will be read to update inputs
+     *     in sim.
      */
     public ElevatorSimAdapter(ElevatorMechanismConfig config, ElevatorSim elevatorSim) {
         this.config = config;

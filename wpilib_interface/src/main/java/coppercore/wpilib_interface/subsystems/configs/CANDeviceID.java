@@ -7,6 +7,7 @@ package coppercore.wpilib_interface.subsystems.configs;
  * @param id The integer CAN ID
  */
 public record CANDeviceID(String canbus, int id) {
+    @Override
     public String toString() {
         return canbus + "_" + id;
     }

@@ -34,7 +34,7 @@ import edu.wpi.first.units.measure.Velocity;
  *       a lower profile acceleration.
  * </ul>
  */
-public final class ImmutableMotionProfileConfig extends MotionProfileConfig {
+public final class ImmutableMotionProfileConfig extends MotionProfileConfig implements Cloneable {
     private final AngularVelocity maxVelocity;
     private final AngularAcceleration maxAcceleration;
     private final Velocity<AngularAccelerationUnit> maxJerk;
@@ -95,6 +95,7 @@ public final class ImmutableMotionProfileConfig extends MotionProfileConfig {
      *
      * @return a MotionMagicConfigs object with fields from this configuration
      */
+    @Override
     public MotionMagicConfigs asMotionMagicConfigs() {
         return new MotionMagicConfigs()
                 .withMotionMagicCruiseVelocity(this.maxVelocity)

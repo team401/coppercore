@@ -227,7 +227,7 @@ public class MechanismConfig {
                             + " `withGravityFeedforwardType(...)` prior to calling build()");
 
             for (MechanismFollowerMotorConfig followerConfig : followerConfigsArray) {
-                if (followerConfig.id().canbus() != leadMotorId.canbus()) {
+                if (!followerConfig.id().canbus().equals(leadMotorId.canbus())) {
                     throw new IllegalArgumentException(
                             "Follower with CAN ID + "
                                     + followerConfig.id().id()
