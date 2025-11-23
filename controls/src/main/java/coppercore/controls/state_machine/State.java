@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 
 /** An abstract class representing a state in a state machine. */
-public abstract class State<StateKey extends Enum<StateKey>, World> {
+public abstract class State<World> {
 
     /** A record representing a transition from one state to another based on a condition. */
-    protected final static record Transition<TStateKey>(TStateKey nextState, BooleanSupplier condition) {}
+    protected final static record Transition<TWorld>(State<TWorld> nextState, BooleanSupplier condition) {}
 
     protected boolean finished = false;
-    protected StateKey requestedState = null;
-    protected final List<Transition<StateKey>> transitions;
+    protected State<World> requestedState = null;
+    protected final List<Transition<World>> transitions;
 
     /** Constructs a new State. */
     public State() {
@@ -37,7 +37,7 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      * @param state The StateKey of the next state
      * @return The current state for chaining
      */
-    public final State<StateKey, World> transitionWhen(BooleanSupplier condition, StateKey state) {
+    public final State<World> transitionWhen(BooleanSupplier condition, State<World> state) {
         transitions.add(new Transition<>(state, condition));
         return this;
     }
@@ -49,7 +49,7 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      * @param state The StateKey of the next state
      * @return The current state for chaining
      */
-    public final State<StateKey, World> transitionWhenFinished(StateKey state) {
+    public final State<World> transitionWhenFinished(State<World> state) {
         transitions.add(new Transition<>(state, this::isFinished));
         return this;
     }
@@ -64,8 +64,8 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      * @param state The StateKey of the next state
      * @return The current state for chaining
      */
-    public final State<StateKey, World> transitionWhenFinishedAnd(
-            BooleanSupplier condition, StateKey state) {
+    public final State<World> transitionWhenFinishedAnd(
+            BooleanSupplier condition, State<World> state) {
         transitions.add(
                 new Transition<>(state, () -> this.isFinished() && condition.getAsBoolean()));
         return this;
@@ -79,7 +79,7 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      * @param state
      * @return
      */
-    public final State<StateKey, World> transitionWhenRequested(StateKey state) {
+    public final State<World> transitionWhenRequested(State<World> state) {
         transitions.add(new Transition<>(state, () -> this.requestedState == state));
         return this;
     }
@@ -90,8 +90,8 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      *
      * @return The StateKey of the next state, or null if no transition is taken
      */
-    protected final StateKey getNextState(World world) {
-        for (Transition<StateKey> transition : transitions) {
+    protected final State<World> getNextState(World world) {
+        for (Transition<World> transition : transitions) {
             if (transition.condition.getAsBoolean()) {
                 return transition.nextState;
             }
@@ -155,7 +155,7 @@ public abstract class State<StateKey extends Enum<StateKey>, World> {
      *
      * @param state The StateKey of the requested state
      */
-    public final void requestState(StateKey state) {
+    public final void requestState(State<World> state) {
         this.requestedState = state;
     }
 

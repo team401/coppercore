@@ -1,21 +1,20 @@
 package coppercore.controls.state_machine;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 // Note: Some parts of the javadoc were written using Copilot
 
 /** A simple state machine implementation. */
-public class StateMachine<StateKey extends Enum<StateKey>, World> {
+public class StateMachine<World> {
 
-    private State<StateKey, World> state;
-    private StateKey stateKey;
-    private final Map<StateKey, State<StateKey, World>> states;
+    private State<World> currentState;
+    private final List<State<World>> states;
     private final World world;
 
     /** Constructs a new StateMachine. */
     public StateMachine(World world) {
-        this.states = new HashMap<>();
+        this.states = new ArrayList<>();
         this.world = world;
     }
 
@@ -26,8 +25,8 @@ public class StateMachine<StateKey extends Enum<StateKey>, World> {
      * @param state The state to be registered
      * @return The registered state
      */
-    public State<StateKey, World> registerState(StateKey stateKey, State<StateKey, World> state) {
-        states.put(stateKey, state);
+    public State<World> registerState(State<World> state) {
+        states.add(state);
         return state;
     }
 
@@ -36,27 +35,17 @@ public class StateMachine<StateKey extends Enum<StateKey>, World> {
      * This will override defined transitions.
      * @param newState The StateKey of the new state
      */
-    public void setState(StateKey newState) {
+    public void setState(State<World> newState) {
         if (newState == null) {
             return;
         }
-        if (state != null) {
-            state._onExit(world);
+        if (currentState != null) {
+            currentState._onExit(world);
         }
-        state = states.get(newState);
-        stateKey = newState;
-        if (state != null) {
-            state._onEntry(world);
+        currentState = newState;
+        if (currentState != null) {
+            currentState._onEntry(world);
         }
-    }
-
-    /**
-     * Gets the current state key of the state machine.
-     *
-     * @return The current StateKey
-     */
-    public StateKey getCurrentStateKey() {
-        return stateKey;
     }
 
     /**
@@ -64,22 +53,22 @@ public class StateMachine<StateKey extends Enum<StateKey>, World> {
      *
      * @return The current State
      */
-    public State<StateKey, World> getCurrentState() {
-        return state;
+    public State<World> getCurrentState() {
+        return currentState;
     }
 
     /** Updates the state machine, transitioning to the next state if conditions are met. */
     public void updateStates() {
-        if (state == null) {
+        if (currentState == null) {
             return;
         }
-        setState(state.getNextState(world));
+        setState(currentState.getNextState(world));
     }
 
     /** Calls the periodic function of the current state. */
     public void periodic() {
-        if (state != null) {
-            state._periodic(world);
+        if (currentState != null) {
+            currentState._periodic(world);
         }
     }
 }
