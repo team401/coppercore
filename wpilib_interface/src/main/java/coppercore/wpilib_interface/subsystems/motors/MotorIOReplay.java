@@ -20,12 +20,16 @@ import edu.wpi.first.units.measure.Voltage;
  * causing compiler errors, which can lead to bugs.
  */
 public class MotorIOReplay implements MotorIO {
+    @Override
     public void updateInputs(MotorInputs inputs) {}
 
+    @Override
     public void controlToPositionUnprofiled(Angle positionSetpoint) {}
 
+    @Override
     public void controlToPositionProfiled(Angle positionSetpoint) {}
 
+    @Override
     public void controlToPositionProfiled(
             Angle positionSetpoint,
             AngularVelocity maxVelocity,
@@ -34,27 +38,38 @@ public class MotorIOReplay implements MotorIO {
             double expoKv,
             double expoKa) {}
 
+    @Override
     public void controlToPositionProfiled(
             Angle positionSetpoint, MotionProfileConfig profileConfig) {}
 
+    @Override
     public void controlToPositionExpoProfiled(Angle positionSetpoint) {}
 
+    @Override
     public void controlToVelocityUnprofiled(AngularVelocity velocitySetpoint) {}
 
+    @Override
     public void controlToVelocityProfiled(AngularVelocity velocitySetpoint) {}
 
+    @Override
     public void controlOpenLoopVoltage(Voltage voltage) {}
 
+    @Override
     public void controlOpenLoopCurrent(Current current) {}
 
+    @Override
     public void follow(int leaderId, boolean opposeLeaderDirection) {}
 
+    @Override
     public void setProfileConstraints(MotionProfileConfig profileConfig) {}
 
+    @Override
     public void setGains(
             double kP, double kI, double kD, double kS, double kG, double kV, double kA) {}
 
+    @Override
     public void setNeutralMode(NeutralMode neutralMode) {}
 
+    @Override
     public void setCurrentPosition(Angle position) {}
 }
