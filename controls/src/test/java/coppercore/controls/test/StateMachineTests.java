@@ -26,18 +26,20 @@ public class StateMachineTests {
         StateMachineTestsStates.StateDataHolder dataHolder =
                 new StateMachineTestsStates.StateDataHolder();
 
-        StateMachine<States> stateMachine = new StateMachine<>();
+        // TODO: Rewrite tests to use new StateMachine implementation
 
-        State<States> idleState =
+        StateMachine<States, Integer> stateMachine = new StateMachine<>(0);
+
+        State<States, Integer> idleState =
                 stateMachine.registerState(
                         States.Idle, new StateMachineTestsStates.IdleState(dataHolder));
-        State<States> intakingState =
+        State<States, Integer> intakingState =
                 stateMachine.registerState(
                         States.Intaking, new StateMachineTestsStates.IntakingState(dataHolder));
-        State<States> warmingUpState =
+        State<States, Integer> warmingUpState =
                 stateMachine.registerState(
                         States.WarmingUp, new StateMachineTestsStates.WarmingUpState(dataHolder));
-        State<States> shootingState =
+        State<States, Integer> shootingState =
                 stateMachine.registerState(
                         States.Shooting, new StateMachineTestsStates.ShootingState(dataHolder));
 
@@ -61,7 +63,7 @@ public class StateMachineTests {
         testStateMachine(stateMachine);
     }
 
-    public void testStateMachine(StateMachine<States> stateMachine) {
+    public void testStateMachine(StateMachine<States, Integer> stateMachine) {
         Consumer<States> assertState =
                 (state) -> {
                     assertEquals(state, stateMachine.getCurrentStateKey());

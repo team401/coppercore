@@ -16,7 +16,7 @@ public class StateMachineTestsStates {
         public double armPos = 0;
     }
 
-    public abstract static class StateBase extends State<States> {
+    public abstract static class StateBase extends State<States, Integer> {
 
         final StateDataHolder dataHolder;
 
@@ -36,7 +36,7 @@ public class StateMachineTestsStates {
         }
 
         @Override
-        protected void periodic() {
+        protected void periodic(Integer world) {
             setSpeed(0);
         }
     }
@@ -48,7 +48,7 @@ public class StateMachineTestsStates {
         }
 
         @Override
-        protected void periodic() {
+        protected void periodic(Integer world) {
             setSpeed(-100);
             dataHolder.armPos = -1;
             dataHolder.hasNote = true;
@@ -63,7 +63,7 @@ public class StateMachineTestsStates {
         }
 
         @Override
-        protected void periodic() {
+        protected void periodic(Integer world) {
             setSpeed(0);
             dataHolder.armPos = 3;
             finish();
@@ -77,7 +77,7 @@ public class StateMachineTestsStates {
         }
 
         @Override
-        protected void periodic() {
+        protected void periodic(Integer world) {
             setSpeed(100);
             dataHolder.hasNote = false;
             finish();

@@ -6,15 +6,17 @@ import java.util.Map;
 // Note: Some parts of the javadoc were written using Copilot
 
 /** A simple state machine implementation. */
-public class StateMachine<StateKey extends Enum<StateKey>> {
+public class StateMachine<StateKey extends Enum<StateKey>, World> {
 
-    private State<StateKey> state;
+    private State<StateKey, World> state;
     private StateKey stateKey;
-    private final Map<StateKey, State<StateKey>> states;
+    private final Map<StateKey, State<StateKey, World>> states;
+    private final World world;
 
     /** Constructs a new StateMachine. */
-    public StateMachine() {
+    public StateMachine(World world) {
         this.states = new HashMap<>();
+        this.world = world;
     }
 
     /**
@@ -24,7 +26,7 @@ public class StateMachine<StateKey extends Enum<StateKey>> {
      * @param state The state to be registered
      * @return The registered state
      */
-    public State<StateKey> registerState(StateKey stateKey, State<StateKey> state) {
+    public State<StateKey, World> registerState(StateKey stateKey, State<StateKey, World> state) {
         states.put(stateKey, state);
         return state;
     }
@@ -39,12 +41,12 @@ public class StateMachine<StateKey extends Enum<StateKey>> {
             return;
         }
         if (state != null) {
-            state._onExit();
+            state._onExit(world);
         }
         state = states.get(newState);
         stateKey = newState;
         if (state != null) {
-            state._onEntry();
+            state._onEntry(world);
         }
     }
 
@@ -62,7 +64,7 @@ public class StateMachine<StateKey extends Enum<StateKey>> {
      *
      * @return The current State
      */
-    public State<StateKey> getCurrentState() {
+    public State<StateKey, World> getCurrentState() {
         return state;
     }
 
@@ -71,13 +73,13 @@ public class StateMachine<StateKey extends Enum<StateKey>> {
         if (state == null) {
             return;
         }
-        setState(state.getNextState());
+        setState(state.getNextState(world));
     }
 
     /** Calls the periodic function of the current state. */
     public void periodic() {
         if (state != null) {
-            state._periodic();
+            state._periodic(world);
         }
     }
 }

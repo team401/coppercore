@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 
 /** An abstract class representing a state in a state machine. */
-public abstract class State<StateKey extends Enum<StateKey>> {
+public abstract class State<StateKey extends Enum<StateKey>, World> {
 
     /** A record representing a transition from one state to another based on a condition. */
     protected final static record Transition<TStateKey>(TStateKey nextState, BooleanSupplier condition) {}
@@ -37,7 +37,7 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * @param state The StateKey of the next state
      * @return The current state for chaining
      */
-    public final State<StateKey> transitionWhen(BooleanSupplier condition, StateKey state) {
+    public final State<StateKey, World> transitionWhen(BooleanSupplier condition, StateKey state) {
         transitions.add(new Transition<>(state, condition));
         return this;
     }
@@ -49,7 +49,7 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * @param state The StateKey of the next state
      * @return The current state for chaining
      */
-    public final State<StateKey> transitionWhenFinished(StateKey state) {
+    public final State<StateKey, World> transitionWhenFinished(StateKey state) {
         transitions.add(new Transition<>(state, this::isFinished));
         return this;
     }
@@ -64,7 +64,7 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * @param state The StateKey of the next state
      * @return The current state for chaining
      */
-    public final State<StateKey> transitionWhenFinishedAnd(
+    public final State<StateKey, World> transitionWhenFinishedAnd(
             BooleanSupplier condition, StateKey state) {
         transitions.add(
                 new Transition<>(state, () -> this.isFinished() && condition.getAsBoolean()));
@@ -79,7 +79,7 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * @param state
      * @return
      */
-    public final State<StateKey> transitionWhenRequested(StateKey state) {
+    public final State<StateKey, World> transitionWhenRequested(StateKey state) {
         transitions.add(new Transition<>(state, () -> this.requestedState == state));
         return this;
     }
@@ -90,7 +90,7 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      *
      * @return The StateKey of the next state, or null if no transition is taken
      */
-    protected final StateKey getNextState() {
+    protected final StateKey getNextState(World world) {
         for (Transition<StateKey> transition : transitions) {
             if (transition.condition.getAsBoolean()) {
                 return transition.nextState;
@@ -103,17 +103,17 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * Called when the state is entered. This is a internal method; use onEntry() to override
      * behavior.
      */
-    protected final void _onEntry() {
+    protected final void _onEntry(World world) {
         finished = false;
-        onEntry();
+        onEntry(world);
     }
 
     /**
      * Called when the state is exited. This is a internal method; use onExit() to override
      * behavior.
      */
-    protected final void _onExit() {
-        onExit();
+    protected final void _onExit(World world) {
+        onExit(world);
         requestedState = null;
     }
 
@@ -129,8 +129,8 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * Called periodically while in this state. This is a internal method; use periodic() to
      * override behavior.
      */
-    protected final void _periodic() {
-        periodic();
+    protected final void _periodic(World world) {
+        periodic(world);
     }
 
     /**
@@ -163,13 +163,13 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * Called when the state is entered. This method is called after a state transition. So it is
      * the first chance to perform any setup or initialization for this state.
      */
-    protected void onEntry() {}
+    protected void onEntry(World world) {}
 
     /**
      * Called when the state is exited. This method is called before a state transition. So it is
      * the last chance to perform any cleanup or final actions in this state.
      */
-    protected void onExit() {}
+    protected void onExit(World world) {}
 
     /**
      * Called when the state is finished. This method is called when finish() is invoked. So it is
@@ -181,6 +181,6 @@ public abstract class State<StateKey extends Enum<StateKey>> {
      * Called periodically while in this state. This method is called by the state machine's
      * periodic update.
      */
-    protected abstract void periodic();
+    protected abstract void periodic(World world);
     
 }
