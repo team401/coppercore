@@ -2,6 +2,7 @@ package coppercore.controls.state_machine;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 // TODO: Add missing javadocs
 
@@ -35,7 +36,7 @@ public abstract class State<World> {
      */
     protected final State<World> getNextState(World world) {
         for (Transition transition : transitions) {
-            if (transition.whenCondition.isFulfilledFor(world)) {
+            if (transition.whenCondition.test(world)) {
                 return transition.toState;
             }
         }
@@ -126,30 +127,25 @@ public abstract class State<World> {
      */
     protected abstract void periodic(World world);
 
-    @FunctionalInterface
-    public interface Condition<World> {
-        public boolean isFulfilledFor(World world);
-    }
-
     public class Transition {
         State<World> toState;
-        Condition<World> whenCondition;
+        Predicate<World> whenCondition;
 
-        Transition(State<World> toState, Condition<World> whenCondition) {
+        Transition(State<World> toState, Predicate<World> whenCondition) {
             this.toState = toState;
         }
     }
 
     public class TransitionConditionBuilder {
-        Condition<World> condition;
+        Predicate<World> condition;
 
-        TransitionConditionBuilder(Condition<World> condition) {
+        TransitionConditionBuilder(Predicate<World> condition) {
             this.condition = condition;
         }
 
-        public TransitionConditionBuilder andWhen(Condition<World> nextCondition) {
-            this.condition = (world) -> this.condition.isFulfilledFor(world) && nextCondition.isFulfilledFor(world);
-            return this;    
+        public TransitionConditionBuilder andWhen(Predicate<World> nextCondition) {
+            this.condition = this.condition.and(nextCondition);
+            return this;
         }
 
         public void transitionTo(State<World> toState) {
@@ -157,7 +153,7 @@ public abstract class State<World> {
         }
     }
     
-    public TransitionConditionBuilder when(Condition<World> condition) {
+    public TransitionConditionBuilder when(Predicate<World> condition) {
         return new TransitionConditionBuilder(condition);
     }
 
