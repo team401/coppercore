@@ -18,19 +18,6 @@ public class StateMachine<StateKey extends Enum<StateKey>> {
     }
 
     /**
-     * Adds a new functional state to the state machine.
-     *
-     * @param state StateKey of the new state
-     * @param periodic The periodic function to be called while in this state
-     * @return The newly created state
-     */
-    public State<StateKey> addState(StateKey state, Runnable periodic) {
-        State<StateKey> newState = new FunctionalState<>(periodic);
-        states.put(state, newState);
-        return newState;
-    }
-
-    /**
      * Registers a new state to the state machine.
      *
      * @param stateKey StateKey of the new state

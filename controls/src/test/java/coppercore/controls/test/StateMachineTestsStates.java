@@ -10,38 +10,6 @@ public class StateMachineTestsStates {
         WarmingUp,
         Shooting
     }
-
-    public static class FunctionalStateHolder {
-
-        public boolean hasNote = false;
-        public double motorSpeed = 0;
-        public double armPos = 0;
-        public boolean isWarmedUp = false;
-
-        public void functionalIdlePeriodic() {
-            motorSpeed = 0;
-            armPos = 0;
-            isWarmedUp = false;
-        }
-
-        public void functionalIntakingPeriodic() {
-            motorSpeed = -100;
-            armPos = -1;
-            hasNote = true;
-        }
-
-        public void functionalWarmingUpPeriodic() {
-            motorSpeed = 0;
-            armPos = 3;
-            isWarmedUp = true;
-        }
-
-        public void functionalShootingPeriodic() {
-            motorSpeed = 100;
-            hasNote = false;
-        }
-    }
-
     public static class StateDataHolder {
         public boolean hasNote = false;
         public double motorSpeed = 0;

@@ -1,13 +1,14 @@
 package coppercore.controls.test;
 
-import static coppercore.controls.test.StateMachineTestsStates.States;
+import java.util.function.Consumer;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import coppercore.controls.state_machine.State;
 import coppercore.controls.state_machine.StateMachine;
-import java.util.function.Consumer;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import coppercore.controls.test.StateMachineTestsStates.States;
 
 public class StateMachineTests {
 
@@ -18,40 +19,6 @@ public class StateMachineTests {
     public void reset() {
         shouldShoot = false;
         shouldIntake = false;
-    }
-
-    @Test
-    public void FunctionalStatesTest() {
-        StateMachineTestsStates.FunctionalStateHolder stateHolder =
-                new StateMachineTestsStates.FunctionalStateHolder();
-
-        StateMachine<States> stateMachine = new StateMachine<>();
-
-        State<States> idleState =
-                stateMachine.addState(States.Idle, stateHolder::functionalIdlePeriodic);
-        State<States> intakingState =
-                stateMachine.addState(States.Intaking, stateHolder::functionalIntakingPeriodic);
-        State<States> warmingUpState =
-                stateMachine.addState(States.WarmingUp, stateHolder::functionalWarmingUpPeriodic);
-        State<States> shootingState =
-                stateMachine.addState(States.Shooting, stateHolder::functionalShootingPeriodic);
-
-        idleState.transitionWhen(() -> shouldIntake && !stateHolder.hasNote, States.Intaking);
-        idleState.transitionWhen(() -> shouldShoot && stateHolder.hasNote, States.WarmingUp);
-
-        intakingState.transitionWhen(() -> !shouldIntake, States.Idle);
-        intakingState.transitionWhen(() -> stateHolder.hasNote, States.Idle);
-
-        warmingUpState.transitionWhen(() -> !shouldShoot, States.Idle);
-        warmingUpState.transitionWhen(() -> stateHolder.isWarmedUp, States.Shooting);
-
-        shootingState.transitionWhen(() -> !shouldShoot, States.Idle);
-        shootingState.transitionWhen(() -> !stateHolder.hasNote, States.Idle);
-
-        stateMachine.setState(States.Idle);
-
-        // Testing
-        testStateMachine(stateMachine);
     }
 
     @Test
