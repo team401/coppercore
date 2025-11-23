@@ -2,17 +2,12 @@ package coppercore.controls.state_machine;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
-
 /** An abstract class representing a state in a state machine. */
 public abstract class State<World> {
 
-    /** A record representing a transition from one state to another based on a condition. */
-    protected final static record Transition<TWorld>(State<TWorld> nextState, BooleanSupplier condition) {}
-
     protected boolean finished = false;
     protected State<World> requestedState = null;
-    protected final List<Transition<World>> transitions;
+    protected final List<Transition> transitions;
 
     /** Constructs a new State. */
     public State() {
@@ -30,70 +25,15 @@ public abstract class State<World> {
     }
 
     /**
-     * Adds a transition to another state when the specified condition is true. If multiple
-     * transitions are defined, the first whose condition is true is taken.
-     *
-     * @param condition The condition to evaluate
-     * @param state The StateKey of the next state
-     * @return The current state for chaining
-     */
-    public final State<World> transitionWhen(BooleanSupplier condition, State<World> state) {
-        transitions.add(new Transition<>(state, condition));
-        return this;
-    }
-
-    /**
-     * Adds a transition to another state when the state is finished. If multiple transitions are
-     * defined, the first whose condition is true is taken.
-     *
-     * @param state The StateKey of the next state
-     * @return The current state for chaining
-     */
-    public final State<World> transitionWhenFinished(State<World> state) {
-        transitions.add(new Transition<>(state, this::isFinished));
-        return this;
-    }
-
-    /**
-     * Adds a transition to another state when the state is finished and the specified condition is
-     * true. If the state is not finished, the condition is not evaluated. If the state is finished,
-     * the condition is evaluated to determine if the transition should occur. And if multiple
-     * transitions are defined, the first whose condition is true is taken.
-     *
-     * @param condition The condition to evaluate
-     * @param state The StateKey of the next state
-     * @return The current state for chaining
-     */
-    public final State<World> transitionWhenFinishedAnd(
-            BooleanSupplier condition, State<World> state) {
-        transitions.add(
-                new Transition<>(state, () -> this.isFinished() && condition.getAsBoolean()));
-        return this;
-    }
-
-    /**
-     * Adds a transition to another state when that state is requested. If multiple transitions are
-     * defined, the first whose condition is true is taken. If the requested state does not match,
-     * the condition is false. Only the most recently requested state is considered.
-     *
-     * @param state
-     * @return
-     */
-    public final State<World> transitionWhenRequested(State<World> state) {
-        transitions.add(new Transition<>(state, () -> this.requestedState == state));
-        return this;
-    }
-
-    /**
      * Determines the next state based on the defined transitions. Multiple transitions may be
      * defined; the first whose condition is true is taken.
      *
      * @return The StateKey of the next state, or null if no transition is taken
      */
     protected final State<World> getNextState(World world) {
-        for (Transition<World> transition : transitions) {
-            if (transition.condition.getAsBoolean()) {
-                return transition.nextState;
+        for (Transition transition : transitions) {
+            if (transition.whenCondition.isFulfilledFor(world)) {
+                return transition.toState;
             }
         }
         return null;
@@ -182,5 +122,48 @@ public abstract class State<World> {
      * periodic update.
      */
     protected abstract void periodic(World world);
+
+    @FunctionalInterface
+    public interface Condition<World> {
+        public boolean isFulfilledFor(World world);
+    }
+
+    public class Transition {
+        State<World> toState;
+        Condition<World> whenCondition;
+
+        Transition(State<World> toState, Condition<World> whenCondition) {
+            this.toState = toState;
+        }
+    }
+
+    public class TransitionConditionBuilder {
+        Condition<World> condition;
+
+        TransitionConditionBuilder(Condition<World> condition) {
+            this.condition = condition;
+        }
+
+        public TransitionConditionBuilder andWhen(Condition<World> nextCondition) {
+            this.condition = (world) -> this.condition.isFulfilledFor(world) && nextCondition.isFulfilledFor(world);
+            return this;    
+        }
+
+        public void transitionTo(State<World> toState) {
+            transitions.add(new Transition(toState, condition));
+        }
+    }
     
+    public TransitionConditionBuilder when(Condition<World> condition) {
+        return new TransitionConditionBuilder(condition);
+    }
+
+    public TransitionConditionBuilder whenFinished() {
+        return when((world) -> isFinished());
+    }
+
+    public TransitionConditionBuilder whenRequested(State<World> requestedState) {
+        return when((world) -> this.requestedState != null && this.requestedState.equals(requestedState));
+    }
+
 }
