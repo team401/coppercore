@@ -1,7 +1,11 @@
 package coppercore.controls.state_machine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+// TODO: Add missing javadocs
 
 // Note: Some parts of the javadoc were written using Copilot
 
@@ -9,12 +13,12 @@ import java.util.List;
 public class StateMachine<World> {
 
     private State<World> currentState;
-    private final List<State<World>> states;
+    private final Map<String, State<World>> states;
     private final World world;
 
     /** Constructs a new StateMachine. */
     public StateMachine(World world) {
-        this.states = new ArrayList<>();
+        this.states = new HashMap<>();
         this.world = world;
     }
 
@@ -25,9 +29,13 @@ public class StateMachine<World> {
      * @param state The state to be registered
      * @return The registered state
      */
-    public State<World> registerState(State<World> state) {
-        states.add(state);
+    public State<World> registerState(String stateName, State<World> state) {
+        states.put(stateName, state);
         return state;
+    }
+
+    public State<World> getStateByName(String stateName) {
+        return states.get(stateName);
     }
 
     /**

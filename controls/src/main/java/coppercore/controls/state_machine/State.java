@@ -2,6 +2,9 @@ package coppercore.controls.state_machine;
 
 import java.util.ArrayList;
 import java.util.List;
+
+// TODO: Add missing javadocs
+
 /** An abstract class representing a state in a state machine. */
 public abstract class State<World> {
 
