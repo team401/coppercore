@@ -43,18 +43,49 @@ public class ElevatorSimAdapter implements PositionSimAdapter {
 
     @Override
     public Angle getMotorPosition() {
-        return Meters.of(elevatorSim.getPositionMeters())
-                .timesConversionFactor(config.elevatorToMotorRatio.reciprocal());
+        Angle mechanismPos =
+                Meters.of(elevatorSim.getPositionMeters())
+                        .timesConversionFactor(config.elevatorToMechanismRatio.reciprocal());
+        Angle encoderPos = mechanismPos.times(config.encoderToMechanismRatio);
+        Angle motorPos = encoderPos.times(config.motorToEncoderRatio);
+
+        return motorPos;
     }
 
     @Override
     public AngularVelocity getMotorAngularVelocity() {
         double velocityMetersPerSecond = elevatorSim.getVelocityMetersPerSecond();
-        double metersPerRotation = config.elevatorToMotorRatio.in(Meters.per(Rotations));
+        double metersPerRotation = config.elevatorToMechanismRatio.in(Meters.per(Rotations));
 
-        double motorVelRotationsPerSecond = velocityMetersPerSecond / metersPerRotation;
+        double mechanismVelRotationsPerSecond = velocityMetersPerSecond / metersPerRotation;
+        double encoderVelRotationsPerSecond =
+                mechanismVelRotationsPerSecond * config.encoderToMechanismRatio;
+        double motorVelRotationsPerSecond =
+                encoderVelRotationsPerSecond * config.motorToEncoderRatio;
 
         return RotationsPerSecond.of(motorVelRotationsPerSecond);
+    }
+
+    @Override
+    public Angle getEncoderPosition() {
+        Angle mechanismPos =
+                Meters.of(elevatorSim.getPositionMeters())
+                        .timesConversionFactor(config.elevatorToMechanismRatio.reciprocal());
+        Angle encoderPos = mechanismPos.times(config.encoderToMechanismRatio);
+
+        return encoderPos;
+    }
+
+    @Override
+    public AngularVelocity getEncoderAngularVelocity() {
+        double velocityMetersPerSecond = elevatorSim.getVelocityMetersPerSecond();
+        double metersPerRotation = config.elevatorToMechanismRatio.in(Meters.per(Rotations));
+
+        double mechanismVelRotationsPerSecond = velocityMetersPerSecond / metersPerRotation;
+        double encoderVelRotationsPerSecond =
+                mechanismVelRotationsPerSecond * config.encoderToMechanismRatio;
+
+        return RotationsPerSecond.of(encoderVelRotationsPerSecond);
     }
 
     @Override

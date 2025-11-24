@@ -8,7 +8,8 @@ import java.util.Objects;
 /**
  * A base mechanism config.
  *
- * <p>Contains a name, CAN bus name, motor IDs for lead and follower motors, and a TalonFX config.
+ * <p>Contains a name, CAN bus name, motor IDs for lead and follower motors, and ratios between
+ * motor and encoder and between encoder and mechanism.
  *
  * <p>This config is used by the {@link
  * coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFX} to initialize CAN IDs,
@@ -47,11 +48,24 @@ public class MechanismConfig {
     public final GravityFeedforwardType gravityFeedforwardType;
 
     /**
-     * The ratio of motor angle : encoder ratio.
+     * The ratio of motor angle : encoder angle.
      *
      * <p>E.g. if motorToEncoderRatio = 5.0, 5 motor rotations = 1 encoder rotation.
+     *
+     * <p>If the mechanism does not have an external encoder, this ratio should be 1.0, so the value
+     * can always be used for calculations.
      */
     public final double motorToEncoderRatio;
+
+    /**
+     * The ratio of encoder angle : mechanism angle.
+     *
+     * <p>E.g. if encoderToMechanismRatio = 5.0, 5 encoder rotations = 1 mechanism rotation.
+     *
+     * <p>If the mechanism does not have an external encoder, this ratio should be 1.0, so the value
+     * can always be used for calculations.
+     */
+    public final double encoderToMechanismRatio;
 
     /**
      * Create a new base mechanism config.
@@ -70,12 +84,14 @@ public class MechanismConfig {
             CANDeviceID leadMotorId,
             MechanismFollowerMotorConfig[] followerMotorConfigs,
             GravityFeedforwardType gravityFeedforwardType,
-            double motorToEncoderRatio) {
+            double motorToEncoderRatio,
+            double encoderToMechanismRatio) {
         this.name = name;
         this.leadMotorId = leadMotorId;
         this.followerMotorConfigs = followerMotorConfigs;
         this.gravityFeedforwardType = gravityFeedforwardType;
         this.motorToEncoderRatio = motorToEncoderRatio;
+        this.encoderToMechanismRatio = encoderToMechanismRatio;
     }
 
     /**
@@ -107,6 +123,7 @@ public class MechanismConfig {
         List<MechanismFollowerMotorConfig> followerMotorConfigs = new ArrayList<>();
         GravityFeedforwardType gravityFeedforwardType = null;
         double motorToEncoderRatio = 1.0;
+        double encoderToMechanismRatio = 1.0;
 
         // Only allow MechanismConfigBuilder to be created using MechanismConfig.builder()
         protected MechanismConfigBuilder() {}
@@ -186,6 +203,7 @@ public class MechanismConfig {
          * @param motorToEncoderRatio A positive value representing the ratio of motor rotor
          *     rotations : encoder rotations. This value can be calculated with (encoder gear teeth
          *     / motor gear teeth).
+         * @return this MechanismConfigBuilder, for easy method chaining
          */
         public MechanismConfigBuilder withMotorToEncoderRatio(double motorToEncoderRatio) {
             if (motorToEncoderRatio <= 0.0) {
@@ -196,6 +214,32 @@ public class MechanismConfig {
                                 + ".");
             }
             this.motorToEncoderRatio = motorToEncoderRatio;
+            return this;
+        }
+
+        /**
+         * Configure the encoder to mechanism ratio when using an external CANCoder with a ratio
+         * other than 1.0.
+         *
+         * <p>For example, a value of 5.0 means that the encoder will turn 5 full rotations for each
+         * rotation of the mechanism.
+         *
+         * <p>This value must be nonzero (a ratio of zero means that the encoder would not turn at
+         * all and the mechanism would magically change).
+         *
+         * @param encoderToMechanismRatio A nonzero value representing the ratio of encoder
+         *     rotations : mechanism rotations. This value can be calculated with (mechanism gear
+         *     teeth / encoder gear teeth).
+         * @return this MechanismConfigBuilder, for easy method chaining
+         */
+        public MechanismConfigBuilder withEncoderToMechanismRatio(double encoderToMechanismRatio) {
+            if (encoderToMechanismRatio == 0.0) {
+                throw new IllegalArgumentException(
+                        "encoder to mechanism ratio must be nonzero, but was configured with value "
+                                + motorToEncoderRatio
+                                + ".");
+            }
+            this.encoderToMechanismRatio = encoderToMechanismRatio;
             return this;
         }
 
@@ -247,6 +291,13 @@ public class MechanismConfig {
                                 + motorToEncoderRatio
                                 + ".");
             }
+
+            if (encoderToMechanismRatio == 0.0) {
+                throw new IllegalArgumentException(
+                        "encoder to mechanism ratio must be nonzero, but was configured with value "
+                                + motorToEncoderRatio
+                                + ".");
+            }
         }
 
         /**
@@ -269,7 +320,8 @@ public class MechanismConfig {
                     leadMotorId,
                     followerConfigsArray,
                     gravityFeedforwardType,
-                    this.motorToEncoderRatio);
+                    motorToEncoderRatio,
+                    encoderToMechanismRatio);
         }
     }
 }

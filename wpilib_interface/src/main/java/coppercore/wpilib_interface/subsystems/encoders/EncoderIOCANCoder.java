@@ -27,6 +27,8 @@ public class EncoderIOCANCoder implements EncoderIO {
 
     protected final CANcoder cancoder;
 
+    protected final CANcoderConfiguration cancoderConfig;
+
     /** An alert to be shown whenever a config fails to apply */
     protected final Alert configFailedToApplyAlert;
 
@@ -45,15 +47,24 @@ public class EncoderIOCANCoder implements EncoderIO {
     /** Velocity StatusSignal cached for easy repeated access */
     protected final StatusSignal<AngularVelocity> velocitySignal;
 
-    /** An array of status signals ot be easily passed to refreshAll */
+    /** An array of status signals to be easily passed to refreshAll */
     protected final BaseStatusSignal[] signals;
 
+    /**
+     * Create a new real CANcoder IO, initializing a new CANcoder and all required signals.
+     *
+     * @param id A CANDeviceID containing the integer ID and String CAN bus that the device is on.
+     * @param cancoderConfig A Phoenix-6 CANcoderConfiguration to apply to the CANcoder. This config
+     *     will not be mutated by this IO.
+     */
     public EncoderIOCANCoder(CANDeviceID id, CANcoderConfiguration cancoderConfig) {
         this.deviceID = id;
 
         this.deviceName = "CANcoder_" + id;
 
         this.cancoder = new CANcoder(id.id(), id.canbus());
+
+        this.cancoderConfig = cancoderConfig;
 
         String configFailedToApplyMessage = deviceName + " failed to apply configs.";
 

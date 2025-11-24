@@ -21,14 +21,30 @@ public interface PositionSimAdapter {
     /**
      * Get the current position of the motor, calculated by converting the physics sim's position to
      * a motor position.
+     *
+     * <p>This value will NOT account for encoder offsets. All offsets should be handled in the IO.
      */
     public Angle getMotorPosition();
 
     /**
-     * Get the current position of the motor, calculated by converting the physics sim's angular
-     * velocity to a motor angular velocity.
+     * Get the current angular velocity of the motor, calculated by converting the physics sim's
+     * angular velocity to a motor angular velocity.
      */
     public AngularVelocity getMotorAngularVelocity();
+
+    /**
+     * Get the current position of the encoder, calculated by converting the physics sim's position
+     * to an encoder position.
+     *
+     * <p>This value will NOT account for encoder offsets. All offsets should be handled in the IO.
+     */
+    public Angle getEncoderPosition();
+
+    /**
+     * Get the current angular velocity if the encoder, calculated by converting the physics sim's
+     * angular velocity to an encoder angular velocity.
+     */
+    public AngularVelocity getEncoderAngularVelocity();
 
     /** Get the current amount of current being drawn reported by the physics sim */
     public Current getCurrentDraw();
