@@ -5,8 +5,12 @@ import org.littletonrobotics.junction.AutoLog;
 /**
  * A generic set of inputs for a motor.
  *
- * <p>Contains measures for velocity, position, and raw rotor position, as well as double values for
- * applied voltage and supply and stator current.
+ * <p>Contains doubles for velocity, position, raw rotor position, stator current, supply current,
+ * and applied voltage.
+ *
+ * <p>This class doesn't use MutMeasures because they have caused issues in fromLog using replay
+ * sim. Instead, all values are labelled with their units and stored in their base units to help
+ * avoid confusion.
  */
 @AutoLog
 public class MotorInputs {

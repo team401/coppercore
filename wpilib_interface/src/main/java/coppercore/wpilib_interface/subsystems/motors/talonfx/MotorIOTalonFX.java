@@ -81,16 +81,16 @@ public class MotorIOTalonFX implements MotorIO {
     /** Velocity StatusSignal cached for easy repeated access */
     protected final StatusSignal<AngularVelocity> velocitySignal;
 
-    /** AppliedVoltage StatusSignal cached for easy repeated access */
+    /** Applied Voltage StatusSignal cached for easy repeated access */
     protected final StatusSignal<Voltage> appliedVoltageSignal;
 
-    /** StatorCurrent StatusSignal cached for easy repeated access */
+    /** Stator Current StatusSignal cached for easy repeated access */
     protected final StatusSignal<Current> statorCurrentSignal;
 
-    /** SupplyCurrent StatusSignal cached for easy repeated access */
+    /** Supply Current StatusSignal cached for easy repeated access */
     protected final StatusSignal<Current> supplyCurrentSignal;
 
-    /** RawRotorPosition StatusSignal cached for easy repeated access */
+    /** Raw Rotor Position StatusSignal cached for easy repeated access */
     protected final StatusSignal<Angle> rawRotorPositionSignal;
 
     /** Array of status signals to be easily passed to refreshAll */
@@ -159,6 +159,21 @@ public class MotorIOTalonFX implements MotorIO {
 
         this.talon = new TalonFX(id.id(), id.canbus());
 
+        String configFailedToApplyMessage = deviceName + " failed to apply configs.";
+
+        this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, AlertType.kError);
+
+        String disconnectedMessage = deviceName + " disconnected/invalid status code.";
+
+        this.disconnectedAlert = new Alert(disconnectedMessage, AlertType.kError);
+
+        CTREUtil.tryUntilOk(
+                () -> talon.getConfigurator().apply(talonFXConfig),
+                id,
+                (code) -> {
+                    configFailedToApplyAlert.set(true);
+                });
+
         this.positionSignal = talon.getPosition();
         this.velocitySignal = talon.getVelocity();
         this.appliedVoltageSignal = talon.getMotorVoltage();
@@ -175,21 +190,6 @@ public class MotorIOTalonFX implements MotorIO {
                     supplyCurrentSignal,
                     rawRotorPositionSignal,
                 };
-
-        String configFailedToApplyMessage = deviceName + " failed to apply configs.";
-
-        this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, AlertType.kError);
-
-        String disconnectedMessage = deviceName + " disconnected/invalid status code.";
-
-        this.disconnectedAlert = new Alert(disconnectedMessage, AlertType.kError);
-
-        CTREUtil.tryUntilOk(
-                () -> talon.getConfigurator().apply(talonFXConfig),
-                id,
-                (code) -> {
-                    configFailedToApplyAlert.set(true);
-                });
 
         CTREUtil.tryUntilOk(
                 () -> BaseStatusSignal.setUpdateFrequencyForAll(50.0, signals), id, (code) -> {});
