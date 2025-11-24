@@ -7,6 +7,13 @@ subprojects {
 	
 	group = 'io.github.team401.coppercore'
 
+  // As of 12/2025, all robot software requires Java 17
+  java {
+    toolchain {
+      languageVersion = JavaLanguageVersion.of(17)
+    }
+  }
+
 	javadoc {
 		if(JavaVersion.current().isJava9Compatible()) {
 			options.addBooleanOption('html5', true)
