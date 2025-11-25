@@ -2,12 +2,21 @@ package coppercore.vision;
 
 /** Vision constants for coppercore's pose rejection and standard deviation calculations. */
 public final class VisionGainConstants {
+    /**
+     * Maximum distance for a pose estimate to be accepted.
+     *
+     * <p>The default value of 10.0 is just a guess and will need to be tuned depending on your
+     * specific camera resolution and FOV.
+     */
     public double maxAcceptedDistanceMeters = 10.0;
 
     /**
      * Baseline position standard deviation, for 1 tag from 1 meter distance, measured in meters.
      *
      * <p>This value will be adjusted for distance and tag count.
+     *
+     * <p>The default value of 0.02 comes from the AdvantageKit vision template and will work
+     * decently in many situations but MUST be tuned per-robot for optimal results.
      */
     public double linearStdDevFactor = 0.02;
 
@@ -15,6 +24,9 @@ public final class VisionGainConstants {
      * Baseline angular standard deviation, for 1 tag from 1 meter distance, measured in radians.
      *
      * <p>This value will be adjusted for distance and tag count.
+     *
+     * <p>The default value of 0.06 comes from the AdvantageKit vision template and will work
+     * decently in many situations but MUST be tuned per-robot for optimal results.
      */
     public double angularStdDevFactor = 0.06;
 
@@ -37,7 +49,25 @@ public final class VisionGainConstants {
      */
     public double maxSingleTagAmbiguity = 0.3;
 
-    /** Create a new VisionGainConstants object with default gains. */
+    /**
+     * The maximum pose ambiguity a multi- or single-tag estimate may report before being rejected.
+     *
+     * <p>Read more about pose ambiguity here:
+     * https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/apriltag-intro.html#d-to-3d-ambiguity
+     *
+     * <p>The calculations for this value are described in the photonvision docs here:
+     * https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/3D-tracking.html#ambiguity.
+     */
+    public double maxAmbiguity = 0.3;
+
+    /**
+     * Create a new VisionGainConstants object with default gains.
+     *
+     * <p>These default gains are taken from the AdvantageKit vision template. They are intended to
+     * be a sensible BASELINE for your vision system. They will not give amazing results for your
+     * specific system, and they need to be tuned for each specific coprocessor and camera to ensure
+     * that they are as accurate as possible.
+     */
     public VisionGainConstants() {}
 
     /**
@@ -124,6 +154,22 @@ public final class VisionGainConstants {
      */
     public VisionGainConstants withMaxSingleTagAmbiguity(double maxSingleTagAmbiguity) {
         this.maxSingleTagAmbiguity = maxSingleTagAmbiguity;
+        return this;
+    }
+
+    /**
+     * Update this object's maximum pose ambiguity any estimate may report before being rejected.
+     *
+     * <p>While this value should almost always be greater than maxSingleTagAmbiguity, it will still
+     * serve as a maximum for single-tag measurements as well in the case that it's lower than the
+     * maxSingleTagAmbiguity.
+     *
+     * @param maxAmbiguity Maximum pose ambiguity a multi-tag estimate may report before being
+     *     rejected.
+     * @return This gains object, for easy method chaining.
+     */
+    public VisionGainConstants withMaxAmbiguity(double maxAmbiguity) {
+        this.maxAmbiguity = maxAmbiguity;
         return this;
     }
 }

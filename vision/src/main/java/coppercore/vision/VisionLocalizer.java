@@ -213,15 +213,14 @@ public class VisionLocalizer extends SubsystemBase {
      */
     private boolean shouldRejectPose(VisionIO.PoseObservation observation) {
         return observation.tagCount() == 0 // Must have at least one tag
+                // Cannot be high ambiguity if single tag
                 || (observation.tagCount() == 1
-                        && observation.ambiguity()
-                                > gainConstants
-                                        .maxSingleTagAmbiguity) // Cannot be high ambiguity if
-                // single tag
+                        && observation.ambiguity() > gainConstants.maxSingleTagAmbiguity)
+                // Multi-tag criteria:
                 || Math.abs(observation.pose().getZ())
                         > gainConstants.maxZCutoff // Must have realistic Z coordinate
                 || observation.averageTagDistance() > gainConstants.maxAcceptedDistanceMeters
-                || observation.ambiguity() > 0.3
+                || observation.ambiguity() > gainConstants.maxAmbiguity
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
                 || observation.pose().getX() > aprilTagLayout.getFieldLength()
