@@ -4,8 +4,8 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
@@ -45,8 +45,8 @@ public class VisionIOPhotonReal implements VisionIO {
         inputs.connected = camera.isConnected();
 
         Set<Short> tagsSeen = new HashSet<>();
-        List<PoseObservation> poses = new LinkedList<>();
-        List<SingleTagObservation> singleTagObservations = new LinkedList<>();
+        List<PoseObservation> poses = new ArrayList<>();
+        List<SingleTagObservation> singleTagObservations = new ArrayList<>();
 
         // loop through all results to find pose and targets observed
         for (var result : camera.getAllUnreadResults()) {
