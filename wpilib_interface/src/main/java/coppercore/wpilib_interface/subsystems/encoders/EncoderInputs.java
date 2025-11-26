@@ -1,10 +1,13 @@
 package coppercore.wpilib_interface.subsystems.encoders;
 
+import org.littletonrobotics.junction.AutoLog;
+
 /**
  * A generic set of inputs for an encoder.
  *
  * <p>
  */
+@AutoLog
 public class EncoderInputs {
     /**
      * Tracks whether, the last time inputs were updated, all values successfully refreshed from the

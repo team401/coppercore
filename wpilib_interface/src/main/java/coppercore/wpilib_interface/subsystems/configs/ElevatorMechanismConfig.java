@@ -58,6 +58,16 @@ public class ElevatorMechanismConfig extends MechanismConfig {
     }
 
     /**
+     * Create a new builder object to gracefully create an ElevatorMechanismConfig.
+     *
+     * @return an ElevatorMechanismConfigBuilder with empty fields except for a default
+     *     motorToEncoderRatio of 1.0 and a default encoderToMechanismRatio of 1.0.
+     */
+    public static ElevatorMechanismConfigBuilder builder() {
+        return new ElevatorMechanismConfigBuilder();
+    }
+
+    /**
      * A builder class to easily create ElevatorMechanismConfigs.
      *
      * <p>To create an ElevatorMechanismConfigBuilder, use {@link ElevatorMechanismConfig#builder}
@@ -67,7 +77,8 @@ public class ElevatorMechanismConfig extends MechanismConfig {
      *
      * <p>`addFollower` should be used for each follower, or not called to indicate no followers.
      */
-    public static class ElevatorMechanismConfigBuilder extends MechanismConfigBuilder {
+    public static class ElevatorMechanismConfigBuilder
+            extends MechanismConfigBuilder<ElevatorMechanismConfigBuilder> {
         Per<DistanceUnit, AngleUnit> elevatorToMechanismRatio;
 
         // Only allow ElevatorMechanismConfigBuilder to be created using

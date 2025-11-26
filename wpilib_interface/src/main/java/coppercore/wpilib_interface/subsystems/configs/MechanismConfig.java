@@ -98,11 +98,14 @@ public class MechanismConfig {
      * Create a new builder object to gracefully create a MechanismConfig.
      *
      * @return a MechanismConfigBuilder with empty fields except for a default motorToEncoderRatio
-     *     of 1.0
+     *     of 1.0 and a default encoderToMechanismRatio of 1.0.
      */
-    public static MechanismConfigBuilder builder() {
-        return new MechanismConfigBuilder();
+    public static MechanismConfigBuilder<?> builder() {
+        return new MechanismConfigBuilder<>();
     }
+
+    /** The GenericMechanismConfigBuilder class exists to allow subclasses */
+    public static class GenericMechanismConfigBuilder<T extends GenericMechanismConfigBuilder<T>> {}
 
     /**
      * A builder class to easily create MechanismConfigs.
@@ -117,7 +120,7 @@ public class MechanismConfig {
      * <p>When using an external CANcoder with a ratio other than 1.0, `withMotorToEncoderRatio`
      * should be called once to configure that ratio.
      */
-    public static class MechanismConfigBuilder {
+    public static class MechanismConfigBuilder<T extends MechanismConfigBuilder<T>> {
         String name = null;
         CANDeviceID leadMotorId = null;
         List<MechanismFollowerMotorConfig> followerMotorConfigs = new ArrayList<>();
@@ -129,16 +132,24 @@ public class MechanismConfig {
         protected MechanismConfigBuilder() {}
 
         /**
+         * Return this object, but with the correct type of any builder that may extend this one.
+         */
+        @SuppressWarnings("unchecked")
+        protected T self() {
+            return (T) this;
+        }
+
+        /**
          * Configure the Mechanism's name, used for logging and error reporting. Returns this
          * builder for easy method chaining.
          *
          * @param name A string, must not be null
          * @return This MechanismConfigBuilder, for easy method chaining
          */
-        public MechanismConfigBuilder withName(String name) {
+        public T withName(String name) {
             Objects.requireNonNull(name, "mechanism name must not be null.");
             this.name = name;
-            return this;
+            return self();
         }
 
         /**
@@ -148,12 +159,12 @@ public class MechanismConfig {
          *     Must not be null
          * @return This MechanismConfigBuilder, for easy method chaining
          */
-        public MechanismConfigBuilder withLeadMotorId(CANDeviceID leadMotorId) {
+        public T withLeadMotorId(CANDeviceID leadMotorId) {
             Objects.requireNonNull(leadMotorId, "lead motor device ID must not be null.");
             Objects.requireNonNull(
                     leadMotorId.canbus(), "lead motor device id CAN bus must not be null.");
             this.leadMotorId = leadMotorId;
-            return this;
+            return self();
         }
 
         /**
@@ -164,11 +175,10 @@ public class MechanismConfig {
          *     COSINE_ARM). Must not be null.
          * @return This MechanismConfigBuilder, for easy method chaining
          */
-        public MechanismConfigBuilder withGravityFeedforwardType(
-                GravityFeedforwardType gravityFeedforwardType) {
+        public T withGravityFeedforwardType(GravityFeedforwardType gravityFeedforwardType) {
             Objects.requireNonNull(name, "gravity feedforward type must not be null.");
             this.gravityFeedforwardType = gravityFeedforwardType;
-            return this;
+            return self();
         }
 
         /**
@@ -181,11 +191,11 @@ public class MechanismConfig {
          *     direction, false if not.
          * @return This MechanismConfigBuilder, for easy method chaining
          */
-        public MechanismConfigBuilder addFollower(CANDeviceID id, boolean invert) {
+        public T addFollower(CANDeviceID id, boolean invert) {
             Objects.requireNonNull(id, "follower device id must not be null.");
             Objects.requireNonNull(id.canbus(), "follower device id CAN bus must not be null.");
             followerMotorConfigs.add(new MechanismFollowerMotorConfig(id, invert));
-            return this;
+            return self();
         }
 
         /**
@@ -205,7 +215,7 @@ public class MechanismConfig {
          *     / motor gear teeth).
          * @return this MechanismConfigBuilder, for easy method chaining
          */
-        public MechanismConfigBuilder withMotorToEncoderRatio(double motorToEncoderRatio) {
+        public T withMotorToEncoderRatio(double motorToEncoderRatio) {
             if (motorToEncoderRatio <= 0.0) {
                 throw new IllegalArgumentException(
                         "motor to encoder ratio must be positive (and nonzero), but was configured"
@@ -214,7 +224,7 @@ public class MechanismConfig {
                                 + ".");
             }
             this.motorToEncoderRatio = motorToEncoderRatio;
-            return this;
+            return self();
         }
 
         /**
@@ -232,7 +242,7 @@ public class MechanismConfig {
          *     teeth / encoder gear teeth).
          * @return this MechanismConfigBuilder, for easy method chaining
          */
-        public MechanismConfigBuilder withEncoderToMechanismRatio(double encoderToMechanismRatio) {
+        public T withEncoderToMechanismRatio(double encoderToMechanismRatio) {
             if (encoderToMechanismRatio == 0.0) {
                 throw new IllegalArgumentException(
                         "encoder to mechanism ratio must be nonzero, but was configured with value "
@@ -240,7 +250,7 @@ public class MechanismConfig {
                                 + ".");
             }
             this.encoderToMechanismRatio = encoderToMechanismRatio;
-            return this;
+            return self();
         }
 
         /**
