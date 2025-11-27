@@ -11,20 +11,6 @@ plugins {
 	id "edu.wpi.first.GradleRIO" version "2025.2.1"
 }
 
-repositories {
-	// Use Maven Central for resolving dependencies.
-	mavenCentral()
-	mavenLocal()
-	maven {
-		url 'https://frcmaven.wpi.edu/artifactory/release/'
-	}
-	maven {
-		// AdvantageKit maven repository
-		url "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
-	}
-	gradlePluginPortal()
-}
-
 task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
 	mainClass = "org.littletonrobotics.junction.CheckInstall"
 	classpath = sourceSets.main.runtimeClasspath

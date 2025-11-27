@@ -16,6 +16,23 @@ subprojects {
 		}
 	}
 
+	// Repositories from which to resolve dependencies.
+	// Order matters
+	repositories {
+		// Use Maven Central for resolving dependencies.
+		mavenCentral()
+		maven {
+			// FRC/wpilib maven repository
+			url 'https://frcmaven.wpi.edu/artifactory/release/'
+		}
+		maven {
+			// AdvantageKit maven repository
+			url "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
+		}
+		gradlePluginPortal()
+		mavenLocal()	// this is local to your machine
+	}
+
 	javadoc {
 		if(JavaVersion.current().isJava9Compatible()) {
 			options.addBooleanOption('html5', true)

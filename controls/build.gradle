@@ -9,16 +9,6 @@ plugins {
 	id "com.vanniktech.maven.publish" version "0.30.0"
 }
 
-repositories {
-	// Use Maven Central for resolving dependencies.
-	mavenCentral()
-	maven {
-		// AdvantageKit maven repository
-		url "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
-	}
-	gradlePluginPortal()
-}
-
 dependencies {
 	def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
 	annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"

@@ -10,12 +10,6 @@ plugins {
 	id "edu.wpi.first.GradleRIO" version "2025.2.1"
 }
 
-repositories {
-	// Use Maven Central for resolving dependencies.
-	mavenCentral()
-
-}
-
 dependencies {
 	annotationProcessor wpi.java.deps.wpilibAnnotations()
 	implementation wpi.java.deps.wpilib()

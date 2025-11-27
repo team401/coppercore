@@ -17,15 +17,6 @@ wpi.java.debugJni = false
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true
 
-// Configuration for AdvantageKit
-repositories {
-	maven {
-		// AdvantageKit maven repository
-		url "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
-	}
-	mavenLocal()
-}
-
 // task(replayWatch, type: JavaExec) {
 // 	mainClass = "org.littletonrobotics.junction.ReplayWatch"
 // 	classpath = sourceSets.main.runtimeClasspath
