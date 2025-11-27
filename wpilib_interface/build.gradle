@@ -4,9 +4,9 @@ import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
 
 plugins {
-	id "com.peterabeles.gversion" version "1.10"
-	id "com.vanniktech.maven.publish" version "0.30.0"
-	id "edu.wpi.first.GradleRIO" version "2025.2.1"
+	alias(libs.plugins.gversion)
+	alias(libs.plugins.maven.publish)
+	alias(libs.plugins.gradlerio)
 }
 
 // Set to true to use debug for JNI.
@@ -38,10 +38,12 @@ dependencies {
 	nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
 	simulationRelease wpi.sim.enableRelease()
 
-	def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
-	annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
+	implementation libs.wpilib.newcommands
 
-	implementation "com.googlecode.json-simple:json-simple:1.1.1"
+	annotationProcessor libs.akit.autolog
+	implementation libs.akit.java
+
+	implementation libs.json.simple
 }
 
 // injects the JNI extraction dir into java.library.path for tests.

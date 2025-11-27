@@ -29,6 +29,14 @@ subprojects {
 			// AdvantageKit maven repository
 			url "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
 		}
+		maven {
+			// PhotonVision internal maven repository
+			url "https://maven.photonvision.org/repository/internal"
+		}
+		maven {
+			// PhotonVision snapshots maven repository
+			url "https://maven.photonvision.org/repository/snapshots"
+		}
 		gradlePluginPortal()
 		mavenLocal()	// this is local to your machine
 	}

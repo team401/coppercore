@@ -5,8 +5,7 @@ import com.vanniktech.maven.publish.JavadocJar
 plugins {
 	// Apply the java-library plugin for API and implementation separation.
 	id 'java-library'
-	id 'com.diffplug.spotless' version '6.24.0'
-	id "com.vanniktech.maven.publish" version "0.30.0"
+	alias(libs.plugins.maven.publish)
 }
 
 dependencies {

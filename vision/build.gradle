@@ -34,8 +34,13 @@ dependencies {
 	nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
 	simulationRelease wpi.sim.enableRelease()
 
-	def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
-	annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
+	implementation libs.wpilib.newcommands
+
+	annotationProcessor libs.akit.autolog
+	implementation libs.akit.java
+
+	implementation libs.photonlib.java
+	implementation libs.photontargeting.java
 }
 
 // Simulation configuration (e.g. environment variables).

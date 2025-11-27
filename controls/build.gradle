@@ -5,12 +5,11 @@ import com.vanniktech.maven.publish.JavadocJar
 plugins {
 	// Apply the java-library plugin for API and implementation separation.
 	id 'java-library'
-	id "com.vanniktech.maven.publish" version "0.30.0"
+	alias(libs.plugins.maven.publish)
 }
 
 dependencies {
-	def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
-	annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
+	annotationProcessor libs.akit.autolog
 	// This dependency is exported to consumers, that is to say found on their compile classpath.
 	api libs.commons.math3
 
