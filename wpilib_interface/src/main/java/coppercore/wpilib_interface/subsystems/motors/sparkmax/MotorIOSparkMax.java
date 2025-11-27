@@ -27,7 +27,6 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import java.util.Optional;
 
 /**
  * The MotorIOSparkMax implements the MotorIO interface for the SparkMax motor controller.
@@ -57,26 +56,25 @@ public class MotorIOSparkMax implements MotorIO {
     private final Alert disconnectedAlert;
 
     /**
-     * Create a new SparkMax IO, initializing a SparkMax
+     * Create a new MotorIOSparkMax given a mechanism config, a CANDeviceID, a SparkMaxConfig, and a
+     * MotorType
+     *
+     * <p>This constructor initializes all required fields but doesn't handle leader vs. follower
+     * behavior, so it is protected and is intended only to be called from a constructor that will
+     * extract the lead motor or follower motor ID from the config.
      *
      * @param config A MechanismConfig to use for CAN IDs
-     * @param followerIndex An Optional containing either the index of the follower motor (what
-     *     position in config.followerIds this motor is) or None if this is the lead motor. If
-     *     followerIndex is not None, this IO will automatically follow the lead motor at the end of
-     *     its constructor.
+     * @param id The CANDeviceID of the motor in question.
      * @param sparkMaxConfig A SparkMaxConfig to apply to the motor.
      * @param motorType The motor type (brushless or brushed)
      */
-    public MotorIOSparkMax(
+    protected MotorIOSparkMax(
             MechanismConfig config,
-            Optional<Integer> followerIndex,
+            CANDeviceID id,
             SparkMaxConfig sparkMaxConfig,
             MotorType motorType) {
         this.config = config;
-        this.id =
-                followerIndex
-                        .map((idx) -> config.followerMotorConfigs[idx].id())
-                        .orElse(config.leadMotorId);
+        this.id = id;
 
         this.deviceName = config.name + "_SparkMax_" + id;
 
@@ -96,12 +94,81 @@ public class MotorIOSparkMax implements MotorIO {
         this.disconnectedAlert = new Alert(disconnectedMessage, AlertType.kError);
 
         applyConfig();
+    }
 
-        if (followerIndex.isPresent()) {
-            follow(
-                    config.leadMotorId.id(),
-                    config.followerMotorConfigs[followerIndex.get()].invert());
-        }
+    /**
+     * Create a new leader SparkMax IO, initializing a SparkMax object to interface with the motor
+     * controller.
+     *
+     * <p>This constructor is used to create a lead motor IO. To create the IO for a follower motor,
+     * use {@link MotorIOSparkMax#MotorIOSparkMax(MechanismConfig, int, SparkMaxConfig, MotorType)}.
+     *
+     * @param config A MechanismConfig to use for CAN IDs
+     * @param sparkMaxConfig A SparkMaxConfig to apply to the motor.
+     * @param motorType The motor type (brushless or brushed)
+     */
+    public MotorIOSparkMax(
+            MechanismConfig config, SparkMaxConfig sparkMaxConfig, MotorType motorType) {
+        this(config, config.leadMotorId, sparkMaxConfig, motorType);
+    }
+
+    /**
+     * Create a new SparkMax IO for a leader motor.
+     *
+     * @param config A MechanismConfig to use for CAN IDs
+     * @param sparkMaxConfig A SparkMaxConfig to apply to the motor.
+     * @param motorType The motor type (brushless or brushed)
+     * @return A new MotorIOSparkMax created with the lead motor ID from the config and the
+     *     specified configs.
+     */
+    public static MotorIOSparkMax newLeader(
+            MechanismConfig config, SparkMaxConfig sparkMaxConfig, MotorType motorType) {
+        return new MotorIOSparkMax(config, sparkMaxConfig, motorType);
+    }
+
+    /**
+     * Create a new follower SparkMax IO, initializing a SparkMax object to interface with the motor
+     * controller.
+     *
+     * <p>This constructor is used to create a follower motor IO. To create the IO for the leader
+     * motor, use {@link MotorIOSparkMax#MotorIOSparkMax(MechanismConfig, SparkMaxConfig,
+     * MotorType)}.
+     *
+     * @param config A MechanismConfig to use for CAN IDs
+     * @param followerIndex An int containing the index of the follower motor (what position in
+     *     config.followerIds this motor is). This IO will automatically follow the lead motor at
+     *     the end of its constructor.
+     * @param sparkMaxConfig A SparkMaxConfig to apply to the motor.
+     * @param motorType The motor type (brushless or brushed)
+     */
+    public MotorIOSparkMax(
+            MechanismConfig config,
+            int followerIndex,
+            SparkMaxConfig sparkMaxConfig,
+            MotorType motorType) {
+        this(config, config.followerMotorConfigs[followerIndex].id(), sparkMaxConfig, motorType);
+        follow(config.leadMotorId.id(), config.followerMotorConfigs[followerIndex].invert());
+    }
+
+    /**
+     * Create a new follower SparkMax IO, initializing a SparkMax object to interface with the motor
+     * controller.
+     *
+     * @param config A MechanismConfig to use for CAN IDs
+     * @param followerIndex An int containing the index of the follower motor (what position in
+     *     config.followerIds this motor is). This IO will automatically follow the lead motor at
+     *     the end of its constructor.
+     * @param sparkMaxConfig A SparkMaxConfig to apply to the motor.
+     * @param motorType The motor type (brushless or brushed)
+     * @return A new MotorIOSparkMax configured with the correct ID and invert based on the follower
+     *     configs in the specified MechanismConfig.
+     */
+    public static MotorIOSparkMax newFollower(
+            MechanismConfig config,
+            int followerIndex,
+            SparkMaxConfig sparkMaxConfig,
+            MotorType motorType) {
+        return new MotorIOSparkMax(config, followerIndex, sparkMaxConfig, motorType);
     }
 
     /**

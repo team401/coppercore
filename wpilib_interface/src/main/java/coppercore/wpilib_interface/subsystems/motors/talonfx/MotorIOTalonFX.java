@@ -36,7 +36,6 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import java.util.Optional;
 
 /**
  * A base motor IO that implements closed-loop control for a TalonFX-supporting motor using
@@ -132,26 +131,23 @@ public class MotorIOTalonFX implements MotorIO {
     protected final TorqueCurrentFOC currentRequest = new TorqueCurrentFOC(0.0);
 
     /**
-     * Create a new TalonFX IO, initializing a TalonFX and all required StatusSignals
+     * Create a new MotorIOTalonFX given a mechanism config, a CANDeviceID, and a
+     * TalonFXConfiguration.
+     *
+     * <p>This constructor initializes all required fields but doesn't handle leader vs. follower
+     * behavior, so it is protected and is intended only to be called from a constructor that will
+     * extract the lead motor or follower motor ID from the config.
      *
      * @param config A MechanismConfig config to use for CAN IDs
-     * @param followerIndex An Optional containing either the index of the follower motor (what
-     *     position in config.followerIds this motor is) or None if this is the lead motor. If
-     *     followerIndex is not None, this IO will automatically follow the lead motor at the end of
-     *     its constructor.
+     * @param id The CANDeviceID of the motor in question.
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
      */
-    public MotorIOTalonFX(
-            MechanismConfig config,
-            Optional<Integer> followerIndex,
-            TalonFXConfiguration talonFXConfig) {
-        this.config = config;
+    protected MotorIOTalonFX(
+            MechanismConfig config, CANDeviceID id, TalonFXConfiguration talonFXConfig) {
+        this.id = id;
 
-        this.id =
-                followerIndex
-                        .map((idx) -> config.followerMotorConfigs[idx].id())
-                        .orElse(config.leadMotorId);
+        this.config = config;
 
         this.deviceName = config.name + "_TalonFX_" + id;
 
@@ -201,12 +197,74 @@ public class MotorIOTalonFX implements MotorIO {
                         talonFXConfig.MotionMagic.MotionMagicCruiseVelocity,
                         talonFXConfig.MotionMagic.MotionMagicAcceleration,
                         talonFXConfig.MotionMagic.MotionMagicJerk);
+    }
 
-        if (followerIndex.isPresent()) {
-            follow(
-                    config.leadMotorId.id(),
-                    config.followerMotorConfigs[followerIndex.get()].invert());
-        }
+    /**
+     * Create a new TalonFX IO, initializing a TalonFX and all required StatusSignals
+     *
+     * <p>This constructor is for the "lead motor". Use {@link
+     * MotorIOTalonFX#MotorIOTalonFX(MechanismConfig, int, TalonFXConfiguration)} to create a
+     * follower.
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
+     */
+    public MotorIOTalonFX(MechanismConfig config, TalonFXConfiguration talonFXConfig) {
+        this(config, config.leadMotorId, talonFXConfig);
+    }
+
+    /**
+     * Create a new TalonFX IO for a lead motor, initializing a TalonFX and all required
+     * StatusSignals
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
+     * @return A new MotorIOTalonFX created with the specified parameters, configured as a lead
+     *     motor.
+     */
+    public static MotorIOTalonFX newLeader(
+            MechanismConfig config, TalonFXConfiguration talonFXConfig) {
+        return new MotorIOTalonFX(config, talonFXConfig);
+    }
+
+    /**
+     * Create a new TalonFX IO, initializing a TalonFX and all required StatusSignals
+     *
+     * <p>This constructor is for a "follower motor". Use {@link
+     * MotorIOTalonFX#MotorIOTalonFX(MechanismConfig, TalonFXConfiguration)} to create the leader.
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param followerIndex An int containing the index of the follower motor (what position in
+     *     config.followerIds this motor is). This IO will automatically follow the lead motor at
+     *     the end of its constructor.
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
+     */
+    public MotorIOTalonFX(
+            MechanismConfig config, int followerIndex, TalonFXConfiguration talonFXConfig) {
+        this(config, config.followerMotorConfigs[followerIndex].id(), talonFXConfig);
+
+        follow(config.leadMotorId.id(), config.followerMotorConfigs[followerIndex].invert());
+    }
+
+    /**
+     * Create a new TalonFX IO for a follower motor, initializing a TalonFX and all required
+     * StatusSignals, and automatically following the lead motor specified in the config.
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param followerIndex An int containing the index of the follower motor (what position in
+     *     config.followerIds this motor is). This IO will automatically follow the lead motor at
+     *     the end of its constructor.
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
+     * @return A new MotorIOTalonFX created with the specified parameters, configured as a follower
+     *     motor.
+     */
+    public static MotorIOTalonFX newFollower(
+            MechanismConfig config, int followerIndex, TalonFXConfiguration talonFXConfig) {
+        return new MotorIOTalonFX(config, followerIndex, talonFXConfig);
     }
 
     @Override

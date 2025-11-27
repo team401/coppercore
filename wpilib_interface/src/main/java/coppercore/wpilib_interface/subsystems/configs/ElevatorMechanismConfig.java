@@ -63,8 +63,8 @@ public class ElevatorMechanismConfig extends MechanismConfig {
      * @return an ElevatorMechanismConfigBuilder with empty fields except for a default
      *     motorToEncoderRatio of 1.0 and a default encoderToMechanismRatio of 1.0.
      */
-    public static ElevatorMechanismConfigBuilder builder() {
-        return new ElevatorMechanismConfigBuilder();
+    public static ElevatorMechanismConfigBuilder<?> builder() {
+        return new ElevatorMechanismConfigBuilder<>();
     }
 
     /**
@@ -77,13 +77,21 @@ public class ElevatorMechanismConfig extends MechanismConfig {
      *
      * <p>`addFollower` should be used for each follower, or not called to indicate no followers.
      */
-    public static class ElevatorMechanismConfigBuilder
-            extends MechanismConfigBuilder<ElevatorMechanismConfigBuilder> {
+    public static class ElevatorMechanismConfigBuilder<T extends ElevatorMechanismConfigBuilder<T>>
+            extends MechanismConfigBuilder<ElevatorMechanismConfigBuilder<T>> {
         Per<DistanceUnit, AngleUnit> elevatorToMechanismRatio;
 
         // Only allow ElevatorMechanismConfigBuilder to be created using
         // ElevatorMechanismConfig.builder()
         protected ElevatorMechanismConfigBuilder() {}
+
+        /**
+         * Return this object, but with the correct type of any builder that may extend this one.
+         */
+        @SuppressWarnings("unchecked")
+        protected T self() {
+            return (T) this;
+        }
 
         /**
          * Configure the elevator to mechanism ratio. Returns this builder for easy method chaining.
@@ -103,12 +111,12 @@ public class ElevatorMechanismConfig extends MechanismConfig {
          *     Must not be null
          * @return This MechanismConfigBuilder, for easy method chaining
          */
-        public ElevatorMechanismConfigBuilder withElevatorToMechanismRatio(
+        public T withElevatorToMechanismRatio(
                 Per<DistanceUnit, AngleUnit> elevatorToMechanismRatio) {
             Objects.requireNonNull(
                     elevatorToMechanismRatio, "elevator to mechanism ratio must not be null.");
             this.elevatorToMechanismRatio = elevatorToMechanismRatio;
-            return this;
+            return self();
         }
 
         /**

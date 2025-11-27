@@ -104,9 +104,6 @@ public class MechanismConfig {
         return new MechanismConfigBuilder<>();
     }
 
-    /** The GenericMechanismConfigBuilder class exists to allow subclasses */
-    public static class GenericMechanismConfigBuilder<T extends GenericMechanismConfigBuilder<T>> {}
-
     /**
      * A builder class to easily create MechanismConfigs.
      *
