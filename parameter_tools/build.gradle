@@ -5,7 +5,6 @@ import com.vanniktech.maven.publish.JavadocJar
 plugins {
 	// Apply the java-library plugin for API and implementation separation.
 	id 'java-library'
-	id "com.diffplug.spotless" version "6.24.0"
 	id "com.vanniktech.maven.publish" version "0.30.0"
 	id "com.peterabeles.gversion" version "1.10"
 	id "edu.wpi.first.GradleRIO" version "2025.2.1"
@@ -33,11 +32,6 @@ dependencies {
 	nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
 	nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
 	simulationRelease wpi.sim.enableRelease()
-
-	// Use JUnit Jupiter for testing.
-	testImplementation libs.junit.jupiter
-
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	// This dependency is exported to consumers, that is to say found on their compile classpath.
 	api libs.commons.math3

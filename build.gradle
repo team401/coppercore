@@ -77,4 +77,11 @@ subprojects {
 		useJUnitPlatform()
 		systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
 	}
+
+	// shared dependencies
+	dependencies {
+		// Use JUnit Jupiter for testing for all subprojects.
+		testImplementation libs.junit.jupiter	// read junit version from gradle/libs.versions.toml
+		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	}
 }
