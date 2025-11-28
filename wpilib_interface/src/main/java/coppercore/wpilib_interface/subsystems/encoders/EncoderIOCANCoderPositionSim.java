@@ -51,6 +51,8 @@ public class EncoderIOCANCoderPositionSim extends EncoderIOCANCoder {
 
     @Override
     public void updateInputs(EncoderInputs inputs) {
+        // TODO: Figure out how to *correctly* handle inverts so that motor positions aren't always
+        // negative.
         updateSimState();
 
         super.updateInputs(inputs);
