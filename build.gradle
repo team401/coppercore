@@ -46,6 +46,7 @@ subprojects {
 			options.addBooleanOption('html5', true)
 		}
 
+        options.linkSource(true)
 		exclude 'frc/robot/**'
 	}
 
