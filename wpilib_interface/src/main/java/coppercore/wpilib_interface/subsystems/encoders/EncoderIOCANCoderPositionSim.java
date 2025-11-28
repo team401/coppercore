@@ -3,6 +3,7 @@ package coppercore.wpilib_interface.subsystems.encoders;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.CANcoderSimState;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.sim.PositionSimAdapter;
@@ -65,10 +66,17 @@ public class EncoderIOCANCoderPositionSim extends EncoderIOCANCoder {
      * be updated by the lead motor's sim IO.
      */
     private void updateSimState() {
-        cancoderSimState.setRawPosition(
+        boolean isDirectionBackward =
+                cancoderConfig.MagnetSensor.SensorDirection
+                        != SensorDirectionValue.CounterClockwise_Positive;
+        double invertMultiplier = isDirectionBackward ? -1.0 : 1.0;
+        var encoderPos =
                 physicsSimAdapter
                         .getEncoderPosition()
-                        .plus(Rotations.of(this.cancoderConfig.MagnetSensor.MagnetOffset)));
+                        .times(invertMultiplier)
+                        .plus(Rotations.of(this.cancoderConfig.MagnetSensor.MagnetOffset));
+
+        cancoderSimState.setRawPosition(encoderPos);
         cancoderSimState.setVelocity(physicsSimAdapter.getEncoderAngularVelocity());
     }
 }

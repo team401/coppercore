@@ -1,6 +1,7 @@
 package coppercore.wpilib_interface.subsystems.motors.talonfx;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
@@ -172,7 +173,12 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
             physicsSimAdapter.update(talonSimState.getMotorVoltageMeasure(), deltaTimeSeconds);
         }
 
-        double invertMultiplier = invertSimRotation ? -1.0 : 1.0;
+        boolean baseDirectionBackwards =
+                talonFXConfig.MotorOutput.Inverted != InvertedValue.CounterClockwise_Positive;
+        double invertMultiplier = baseDirectionBackwards ? -1.0 : 1.0;
+        if (invertSimRotation) {
+            invertMultiplier *= -1;
+        }
 
         talonSimState.setRawRotorPosition(
                 physicsSimAdapter.getMotorPosition().times(invertMultiplier));

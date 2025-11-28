@@ -92,6 +92,12 @@ public class MotorIOTalonFX implements MotorIO {
     /** Raw Rotor Position StatusSignal cached for easy repeated access */
     protected final StatusSignal<Angle> rawRotorPositionSignal;
 
+    /** Closed Loop Reference StatusSignal cached for easy repeated access */
+    protected final StatusSignal<Double> closedLoopReferenceSignal;
+
+    /** Closed Loop Reference Slope StatusSignal cached for easy repeated access */
+    protected final StatusSignal<Double> closedLoopReferenceSlopeSignal;
+
     /** Array of status signals to be easily passed to refreshAll */
     protected final BaseStatusSignal[] signals;
 
@@ -176,6 +182,8 @@ public class MotorIOTalonFX implements MotorIO {
         this.statorCurrentSignal = talon.getStatorCurrent();
         this.supplyCurrentSignal = talon.getSupplyCurrent();
         this.rawRotorPositionSignal = talon.getRotorPosition();
+        this.closedLoopReferenceSignal = talon.getClosedLoopReference();
+        this.closedLoopReferenceSlopeSignal = talon.getClosedLoopReferenceSlope();
 
         this.signals =
                 new BaseStatusSignal[] {
@@ -185,6 +193,8 @@ public class MotorIOTalonFX implements MotorIO {
                     statorCurrentSignal,
                     supplyCurrentSignal,
                     rawRotorPositionSignal,
+                    closedLoopReferenceSignal,
+                    closedLoopReferenceSlopeSignal,
                 };
 
         CTREUtil.tryUntilOk(
@@ -289,6 +299,8 @@ public class MotorIOTalonFX implements MotorIO {
         inputs.statorCurrentAmps = statorCurrentSignal.getValueAsDouble();
         inputs.supplyCurrentAmps = supplyCurrentSignal.getValueAsDouble();
         inputs.rawRotorPositionRadians = rawRotorPositionSignal.getValue().in(Radians);
+        inputs.closedLoopReference = closedLoopReferenceSignal.getValueAsDouble();
+        inputs.closedLoopReferenceSlope = closedLoopReferenceSlopeSignal.getValueAsDouble();
     }
 
     @Override

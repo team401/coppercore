@@ -66,4 +66,18 @@ public class MotorInputs {
      * <p>Not supported by MotorIOSparkMax.
      */
     public double rawRotorPositionRadians = 0.0;
+
+    /**
+     * The current "mechanism position" that the motor controller is targetting with closed loop
+     * control. This value will not be updated if onboard motor closed-loop control isn't supported
+     * or used.
+     */
+    public double closedLoopReference = 0.0;
+
+    /**
+     * The current "mechanism velocity" that the motor controller is targetting with closed loop
+     * control. This value will not be updated if onboard motor closed-loop control isn't supported
+     * or used.
+     */
+    public double closedLoopReferenceSlope = 0.0;
 }
