@@ -51,17 +51,6 @@ public class VisionIOPhotonReal implements VisionIO {
         // loop through all results to find pose and targets observed
         for (var result : camera.getAllUnreadResults()) {
 
-            // find latest target
-            if (result.hasTargets()) {
-                inputs.latestTargetObservation =
-                        new TargetObservation(
-                                Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
-                                Rotation2d.fromDegrees(result.getBestTarget().getPitch()));
-            } else {
-                inputs.latestTargetObservation =
-                        new TargetObservation(new Rotation2d(), new Rotation2d());
-            }
-
             // add pose
             if (result.multitagResult.isPresent()) {
                 inputs.hasMultitagResult = true;

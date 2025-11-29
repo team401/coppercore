@@ -16,16 +16,6 @@ public interface VisionIO {
         /** True if camera is connected. */
         public boolean connected = false;
 
-        /**
-         * Return observation to "best" target, where best target is determined as per
-         * PhotonTargetSortMode - which could be "largest". I was unable to find where
-         * PhotonTargetSortMode is set. It is not clear why just picking the best is useful; this is
-         * used in a method VisionLocalizer.getTargetX, which however isn't used anywhere in
-         * coppercore or the 2025-Robot-Code.
-         */
-        public TargetObservation latestTargetObservation =
-                new TargetObservation(new Rotation2d(), new Rotation2d());
-
         /** Array of pose observations, see {@link coppercore.vision.VisionIO.PoseObservation} */
         public PoseObservation[] poseObservations = new PoseObservation[0];
 
@@ -61,9 +51,8 @@ public interface VisionIO {
      * @param ambiguity ambiguity of pose estimate
      * @param tagCount number of fiducial ids used for pose estimate
      * @param averageTagDistance from camera to targets (if the pose estimate is based on one
-     *     target, the distance to the target; if the pose estimage is based on multiple, their
-     *     average - which doesn't appear very useful; it's also not used anywhere other than being
-     *     logged.)
+     *     target, the distance to the target; if the pose estimate is based on multiple targets,
+     *     their average.)
      */
     public static record PoseObservation(
             double timestamp,
