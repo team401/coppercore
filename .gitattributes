@@ -1,6 +1,10 @@
 #
 # https://help.github.com/articles/dealing-with-line-endings/
 #
+# Use unix-style line endings by default for all files;
+# spotless will respect this option as well.
+* text=auto eol=lf
+#
 # Linux start script should use lf
 /gradlew        text eol=lf
 
