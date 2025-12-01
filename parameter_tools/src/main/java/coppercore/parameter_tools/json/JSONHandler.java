@@ -3,7 +3,7 @@ package coppercore.parameter_tools.json;
 import coppercore.parameter_tools.path_provider.PathProvider;
 
 /** Handler to create JSONSync objects with given config and path provider */
-public class JSONHandler {
+public final class JSONHandler {
 
     private final JSONSyncConfig config;
     private final PathProvider path_provider;
@@ -52,7 +52,7 @@ public class JSONHandler {
      * @param config JSONSync config
      * @return JSONSync Object for the target type
      */
-    public <T> JSONSync<T> getJsonSync(
+    private <T> JSONSync<T> getJsonSync(
             T blankObject, String filename, PathProvider pathProvider, JSONSyncConfig config) {
         if (pathProvider == null) {
             return new JSONSync<>(blankObject, filename, config);
@@ -69,7 +69,7 @@ public class JSONHandler {
      * @param pathProvider pathProvider to get path to file
      * @return JSONSync Object for the target type
      */
-    public <T> JSONSync<T> getJsonSync(T blankObject, String filename, PathProvider pathProvider) {
+    private <T> JSONSync<T> getJsonSync(T blankObject, String filename, PathProvider pathProvider) {
         return getJsonSync(blankObject, filename, path_provider, config);
     }
 
@@ -82,7 +82,7 @@ public class JSONHandler {
      * @param config JSONSync config
      * @return JSONSync Object for the target type
      */
-    public <T> JSONSync<T> getJsonSync(T blankObject, String filename, JSONSyncConfig config) {
+    private <T> JSONSync<T> getJsonSync(T blankObject, String filename, JSONSyncConfig config) {
         return getJsonSync(blankObject, filename, path_provider, config);
     }
 
@@ -94,7 +94,7 @@ public class JSONHandler {
      * @param filename file name to load the object from.
      * @return JSONSync Object for the target type
      */
-    public <T> JSONSync<T> getJsonSync(T blankObject, String filename) {
+    private <T> JSONSync<T> getJsonSync(T blankObject, String filename) {
         return getJsonSync(blankObject, filename, path_provider, config);
     }
 
