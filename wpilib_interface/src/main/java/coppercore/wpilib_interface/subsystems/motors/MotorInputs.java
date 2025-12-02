@@ -68,6 +68,12 @@ public class MotorInputs {
     public double rawRotorPositionRadians = 0.0;
 
     /**
+     * The current closed loop output that the motor controller is targetting. This can be different
+     * from applied voltage when using a Torque Current FOC closed-loop request.
+     */
+    public double closedLoopOutput = 0.0;
+
+    /**
      * The current "mechanism position" that the motor controller is targetting with closed loop
      * control. This value will not be updated if onboard motor closed-loop control isn't supported
      * or used.

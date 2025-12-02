@@ -4,12 +4,10 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Microseconds;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -23,6 +21,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.unmanaged.Unmanaged;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.ElevatorMechanismConfig;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig.GravityFeedforwardType;
@@ -31,15 +30,14 @@ import coppercore.wpilib_interface.subsystems.encoders.EncoderInputs;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXPositionSim;
 import coppercore.wpilib_interface.subsystems.sim.ElevatorSimAdapter;
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.PerUnit;
-import edu.wpi.first.util.WPIUtilJNI;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -53,35 +51,6 @@ public class MotorIOTests {
 
     public static CANDeviceID encoderId = new CANDeviceID(canbus, 52);
 
-    private double currentMockTimeSeconds = 0.0;
-
-    /**
-     * Set WPIUtilJni's mock time to timeSeconds
-     *
-     * <p>This exists as a wrapper because WPIUtilJNI.setMockTime expects the time as a long in
-     * microseconds
-     *
-     * @param timeSeconds the time to set, in seconds
-     */
-    private void setMockTimeSeconds(double timeSeconds) {
-        WPIUtilJNI.setMockTime((long) Seconds.of(timeSeconds).in(Microseconds));
-    }
-
-    /** Enable mock time and sets the time to 0.0 seconds */
-    @BeforeEach
-    void setUpMockTime() {
-        assert HAL.initialize(500, 0);
-        WPIUtilJNI.enableMockTime();
-        setMockTimeSeconds(0.0);
-        this.currentMockTimeSeconds = 0.0;
-    }
-
-    /** Disable mock time in case another test needs it to be off. */
-    @AfterEach
-    void disableMockTime() {
-        WPIUtilJNI.disableMockTime();
-    }
-
     /**
      * Emulate the "periodic" loop of the robot by calling `loop` and incrementing the WPIUtilJNI
      * mock time by 20ms utnil `timeSeconds` seconds have elapsed.
@@ -91,15 +60,23 @@ public class MotorIOTests {
      * @param loop A Runnable to call before each increment of time and once at the very end.
      */
     void loopForTime(double timeSeconds, Runnable loop) {
-        double timeElapsed = 0.0;
+        double timeElapsed = -0.01;
+        Timer loopTimer = new Timer();
         while (timeElapsed < timeSeconds) {
+            loopTimer.restart();
+            System.out.print(timeElapsed + " : ");
+            if (DriverStation.isEnabled()) {
+                Unmanaged.feedEnable(20);
+            }
             loop.run();
-            timeElapsed += 0.02;
-            currentMockTimeSeconds += 0.02;
-            setMockTimeSeconds(currentMockTimeSeconds);
-        }
 
-        loop.run();
+            // Wait for the loop to be exactly 0.02 seconds
+            if (!loopTimer.hasElapsed(0.02)) {
+                Timer.delay(0.02 - loopTimer.get());
+            }
+
+            timeElapsed += loopTimer.get();
+        }
     }
 
     @Test
@@ -136,12 +113,12 @@ public class MotorIOTests {
                                 new Slot0Configs()
                                         .withGravityType(GravityTypeValue.Elevator_Static)
                                         .withKS(0.0)
-                                        .withKV(2.0)
-                                        .withKA(0.08)
-                                        .withKG(13.0)
-                                        .withKP(60.0)
+                                        .withKV(1.0)
+                                        .withKA(0.0)
+                                        .withKG(9.5)
+                                        .withKP(1.0)
                                         .withKI(0.0)
-                                        .withKD(10.0))
+                                        .withKD(0.0))
                         .withMotionMagic(
                                 new MotionMagicConfigs()
                                         .withMotionMagicCruiseVelocity(
@@ -199,15 +176,46 @@ public class MotorIOTests {
                     leadMotor.updateInputs(leadMotorInputs);
                     followerMotor.updateInputs(followerMotorInputs);
                     cancoder.updateInputs(cancoderInputs);
+                    System.out.println(
+                            cancoderInputs.positionRadians
+                                    + " -> "
+                                    + Units.rotationsToRadians(leadMotorInputs.closedLoopReference)
+                                    + " outputting "
+                                    + leadMotorInputs.closedLoopOutput
+                                    + " @ "
+                                    + leadMotorInputs.appliedVolts
+                                    + "v ("
+                                    + DriverStation.isEnabled()
+                                    + ")");
                 };
 
-        loopForTime(5.0, loop);
+        // Wait for library initialization to take place. As soon as a real value is read, it will
+        // be around 51.7, not 0.0.
+        while (cancoderInputs.positionRadians == 0.0) {
+            loopForTime(0, loop);
+        }
+
+        // Should be around 51.7 radians, but an unknown amount of time has passed during
+        // library startup so we have a big delta here. We also round down in case the physics sim
+        // has let it fall down at all.
+        Assertions.assertEquals(cancoderInputs.positionRadians, 51, 5);
+
+        // Enabling!
         DriverStationSim.setEnabled(true);
         DriverStationSim.notifyNewData();
-        loopForTime(2.0, loop);
+
         leadMotor.controlToPositionExpoProfiled(Rotations.zero());
 
-        System.err.println(cancoderInputs.positionRadians);
-        Assertions.assertEquals(cancoderInputs.positionRadians, 0, 1e-2);
+        // Drive to 0 and make sure it gets there
+        loopForTime(3.0, loop); // Give it enough time to drive to zero
+        Assertions.assertEquals(
+                cancoderInputs.positionRadians,
+                0,
+                1); // Give it a decent delta to account for slight oscillation
+
+        // Drive to 10.0 radians and make sure it gets there.
+        leadMotor.controlToPositionExpoProfiled(Radians.of(10.0));
+        loopForTime(1.0, loop);
+        Assertions.assertEquals(cancoderInputs.positionRadians, 10.0, 1);
     }
 }

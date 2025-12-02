@@ -1,11 +1,13 @@
 package coppercore.wpilib_interface.subsystems.motors.talonfx;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.sim.PositionSimAdapter;
+import coppercore.wpilib_interface.subsystems.sim.TestableSimIO;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -24,7 +26,7 @@ import edu.wpi.first.wpilibj.Timer;
  * <p>This class extends MotorIOTaloNFX to ensure that behavior is as close to identical in real
  * life and simulation as possible.
  */
-public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
+public class MotorIOTalonFXPositionSim extends MotorIOTalonFX implements TestableSimIO {
     private final PositionSimAdapter physicsSimAdapter;
 
     private final TalonFXSimState talonSimState;
@@ -184,5 +186,10 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
                 physicsSimAdapter.getMotorPosition().times(invertMultiplier));
         talonSimState.setRotorVelocity(
                 physicsSimAdapter.getMotorAngularVelocity().times(invertMultiplier));
+    }
+
+    @Override
+    public void unitTestPeriodic() {
+        StatusSignal.waitForAll(0.02, signals);
     }
 }
