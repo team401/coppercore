@@ -2,6 +2,7 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
+spotless = "6.24.0"
 gversion = "1.10"
 maven-publish = "0.30.0"
 wpilib = "2025.3.1"
@@ -14,6 +15,7 @@ gson = "2.11.0"
 photonlib = "v2025.1.1"
 
 [plugins]
+spotless = { id = "com.diffplug.spotless", version.ref="spotless"}
 gversion = { id = "com.peterabeles.gversion", version.ref = "gversion" }
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
 gradlerio = { id = "edu.wpi.first.GradleRIO", version.ref="wpilib" }

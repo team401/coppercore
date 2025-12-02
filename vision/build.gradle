@@ -1,8 +1,8 @@
 import java.text.SimpleDateFormat
 
 plugins {
-	id "com.peterabeles.gversion" version "1.10"
-	id "edu.wpi.first.GradleRIO" version "2025.2.1"
+	alias(libs.plugins.gversion)
+	alias(libs.plugins.gradlerio)
 }
 
 // Set to true to use debug for JNI.

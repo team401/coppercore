@@ -3,8 +3,8 @@ import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
 
 plugins {
-	id "com.diffplug.spotless" version "6.24.0"
-	id "com.vanniktech.maven.publish" version "0.30.0" apply false
+	alias(libs.plugins.spotless)
+	alias(libs.plugins.maven.publish).apply(false)
 }
 
 subprojects {
@@ -129,8 +129,8 @@ subprojects {
                     name = 'Nathan Smith'
                 }
                 developer {
-                    id = 'minhngyuenbhs'
-                    name = 'Minh Ngyuen'
+                    id = 'minhlpnguyen'
+                    name = 'Minh Nguyen'
                 }
                 developer {
                     id = 'jkleiber'
