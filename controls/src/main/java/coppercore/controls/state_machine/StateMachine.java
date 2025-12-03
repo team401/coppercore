@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 // TODO: Add missing javadocs
+// TODO: Clear requestedState after a transition or periodic call?
 
 // Note: Some parts of the javadoc were written using Copilot
 
@@ -30,6 +31,7 @@ public class StateMachine<World> {
      */
     public State<World> registerState(String stateName, State<World> state) {
         states.put(stateName, state);
+        state.setRequestedStateSupplier(() -> requestedState);
         return state;
     }
 

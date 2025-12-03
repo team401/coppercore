@@ -3,6 +3,7 @@ package coppercore.controls.state_machine;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 // TODO: Add missing javadocs
 
@@ -10,12 +11,16 @@ import java.util.function.Predicate;
 public abstract class State<World> {
 
     protected boolean finished = false;
-    protected State<World> requestedState = null;
     protected final List<Transition> transitions;
+    protected Supplier<State<World>> requestedStateSupplier;
 
     /** Constructs a new State. */
     public State() {
         this.transitions = new ArrayList<>();
+    }
+
+    public void setRequestedStateSupplier(Supplier<State<World>> supplier) {
+        this.requestedStateSupplier = supplier;
     }
 
     /**
@@ -58,7 +63,6 @@ public abstract class State<World> {
      */
     protected final void _onExit(StateMachine<World> stateMachine, World world) {
         onExit(stateMachine, world);
-        requestedState = null;
     }
 
     /**
@@ -90,6 +94,7 @@ public abstract class State<World> {
         _onFinish();
     }
 
+    //TODO: Move this comment to the requestState method in StateMachine.java
     /**
      * Requests a transition to another state. This is different from marking the state as finished.
      * Because of this, requesting a state does not automatically cause a state transition. And the
@@ -99,9 +104,6 @@ public abstract class State<World> {
      *
      * @param state The StateKey of the requested state
      */
-    public final void requestState(State<World> state) {
-        this.requestedState = state;
-    }
 
     /**
      * Called when the state is entered. This method is called after a state transition. So it is
@@ -162,7 +164,7 @@ public abstract class State<World> {
     }
 
     public TransitionConditionBuilder whenRequested(State<World> requestedState) {
-        return when((world) -> this.requestedState != null && this.requestedState.equals(requestedState));
+        return when((world) -> requestedState != null && requestedState.equals(this.requestedStateSupplier.get()));
     }
 
 }
