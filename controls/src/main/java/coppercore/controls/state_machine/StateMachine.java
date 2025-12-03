@@ -1,8 +1,6 @@
 package coppercore.controls.state_machine;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 // TODO: Add missing javadocs
@@ -13,6 +11,7 @@ import java.util.Map;
 public class StateMachine<World> {
 
     private State<World> currentState;
+    private State<World> requestedState;
     private final Map<String, State<World>> states;
     private final World world;
 
@@ -25,7 +24,7 @@ public class StateMachine<World> {
     /**
      * Registers a new state to the state machine.
      *
-     * @param stateKey StateKey of the new state
+     * @param stateName Name of the new state
      * @param state The state to be registered
      * @return The registered state
      */
@@ -41,18 +40,18 @@ public class StateMachine<World> {
     /**
      * Sets the current state of the state machine.
      * This will override defined transitions.
-     * @param newState The StateKey of the new state
+     * @param newState The new state
      */
     public void setState(State<World> newState) {
         if (newState == null) {
             return;
         }
         if (currentState != null) {
-            currentState._onExit(world);
+            currentState._onExit(this, world);
         }
         currentState = newState;
         if (currentState != null) {
-            currentState._onEntry(world);
+            currentState._onEntry(this, world);
         }
     }
 
@@ -76,7 +75,17 @@ public class StateMachine<World> {
     /** Calls the periodic function of the current state. */
     public void periodic() {
         if (currentState != null) {
-            currentState._periodic(world);
+            currentState._periodic(this, world);
+        }
+    }
+
+    /**
+     * Requests a state change to the specified state.
+     * @param state The requested state
+     */
+    public void requestState(State<World> state) {
+        if (state != null) {
+            setState(state);
         }
     }
 }

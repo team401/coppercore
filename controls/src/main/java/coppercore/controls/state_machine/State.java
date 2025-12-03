@@ -47,17 +47,17 @@ public abstract class State<World> {
      * Called when the state is entered. This is a internal method; use onEntry() to override
      * behavior.
      */
-    protected final void _onEntry(World world) {
+    protected final void _onEntry(StateMachine<World> stateMachine, World world) {
         finished = false;
-        onEntry(world);
+        onEntry(stateMachine, world);
     }
 
     /**
      * Called when the state is exited. This is a internal method; use onExit() to override
      * behavior.
      */
-    protected final void _onExit(World world) {
-        onExit(world);
+    protected final void _onExit(StateMachine<World> stateMachine, World world) {
+        onExit(stateMachine, world);
         requestedState = null;
     }
 
@@ -73,8 +73,8 @@ public abstract class State<World> {
      * Called periodically while in this state. This is a internal method; use periodic() to
      * override behavior.
      */
-    protected final void _periodic(World world) {
-        periodic(world);
+    protected final void _periodic(StateMachine<World> stateMachine, World world) {
+        periodic(stateMachine, world);
     }
 
     /**
@@ -107,13 +107,13 @@ public abstract class State<World> {
      * Called when the state is entered. This method is called after a state transition. So it is
      * the first chance to perform any setup or initialization for this state.
      */
-    protected void onEntry(World world) {}
+    protected void onEntry(StateMachine<World> stateMachine, World world) {}
 
     /**
      * Called when the state is exited. This method is called before a state transition. So it is
      * the last chance to perform any cleanup or final actions in this state.
      */
-    protected void onExit(World world) {}
+    protected void onExit(StateMachine<World> stateMachine, World world) {}
 
     /**
      * Called when the state is finished. This method is called when finish() is invoked. So it is
@@ -125,7 +125,7 @@ public abstract class State<World> {
      * Called periodically while in this state. This method is called by the state machine's
      * periodic update.
      */
-    protected abstract void periodic(World world);
+    protected abstract void periodic(StateMachine<World> stateMachine, World world);
 
     public class Transition {
         State<World> toState;
