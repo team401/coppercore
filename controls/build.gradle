@@ -7,11 +7,15 @@ plugins {
 	id 'java-library'
 	id "com.diffplug.spotless" version "6.24.0"
 	id "com.vanniktech.maven.publish" version "0.30.0"
+	id "edu.wpi.first.GradleRIO" version "2025.2.1"
 }
 
 repositories {
 	// Use Maven Central for resolving dependencies.
 	mavenCentral()
+	maven {
+		url 'https://frcmaven.wpi.edu/artifactory/release/'
+	}
 	maven {
 		// AdvantageKit maven repository
 		url "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
@@ -47,6 +51,19 @@ compileJava.dependsOn 'spotlessApply'
 
 
 dependencies {
+
+	annotationProcessor wpi.java.deps.wpilibAnnotations()
+	implementation wpi.java.deps.wpilib()
+	implementation wpi.java.vendor.java()
+
+	nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+	nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
+	simulationDebug wpi.sim.enableDebug()
+
+	nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
+	nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
+	simulationRelease wpi.sim.enableRelease()
+
 	def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
 	annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
 	// Use JUnit Jupiter for testing.

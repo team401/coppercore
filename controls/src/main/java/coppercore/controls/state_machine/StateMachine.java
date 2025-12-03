@@ -1,172 +1,91 @@
 package coppercore.controls.state_machine;
 
-import coppercore.controls.state_machine.state.PeriodicStateInterface;
-import coppercore.controls.state_machine.state.StateConfiguration;
-import coppercore.controls.state_machine.state.StateContainer;
-import coppercore.controls.state_machine.state.StateInterface;
-import coppercore.controls.state_machine.transition.Transition;
-import coppercore.controls.state_machine.transition.TransitionInfo;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
-/** Generic State Machine */
-public class StateMachine<State, Trigger> {
-    private final StateMachineConfiguration<State, Trigger> configuration;
-    private TransitionInfo<State, Trigger> transitionInfo;
-    private State currentState;
+// TODO: Add missing javadocs
+// TODO: Clear requestedState after a transition or periodic call?
 
-    /**
-     * Creates a StateMachine in the given state with the given configuration
-     *
-     * @param config The state machine configuration
-     * @param initialState default state
-     */
-    public StateMachine(StateMachineConfiguration<State, Trigger> config, State initialState) {
-        configuration = config;
-        currentState = initialState;
+// Note: Some parts of the javadoc were written using Copilot
+
+/** A simple state machine implementation. */
+public class StateMachine<World> {
+
+    private State<World> currentState;
+    private State<World> requestedState;
+    private final Map<String, State<World>> states;
+    private final World world;
+
+    /** Constructs a new StateMachine. */
+    public StateMachine(World world) {
+        this.states = new HashMap<>();
+        this.world = world;
     }
 
     /**
-     * Method to transition States based on given trigger
+     * Registers a new state to the state machine.
      *
-     * @param trigger Trigger event to run
+     * @param stateName Name of the new state
+     * @param state The state to be registered
+     * @return The registered state
      */
-    public void fire(Trigger trigger) {
-        transitionInfo = new TransitionInfo<>(currentState, trigger);
-        Optional<Transition<State, Trigger>> transitionOptional =
-                configuration.getTransition(currentState, trigger);
-        if (transitionOptional.isEmpty()) {
-            transitionInfo.fail();
+    public State<World> registerState(String stateName, State<World> state) {
+        states.put(stateName, state);
+        state.setRequestedStateSupplier(() -> requestedState);
+        return state;
+    }
+
+    public State<World> getStateByName(String stateName) {
+        return states.get(stateName);
+    }
+
+    /**
+     * Sets the current state of the state machine.
+     * This will override defined transitions.
+     * @param newState The new state
+     */
+    public void setState(State<World> newState) {
+        if (newState == null) {
             return;
         }
-        Transition<State, Trigger> transition = transitionOptional.get();
-        if (!transition.canTransition()) {
-            transitionInfo.fail();
-            return;
+        if (currentState != null) {
+            currentState._onExit(this, world);
         }
-        transitionInfo.setTransition(transition);
-        if (!transition.isInternal()) {
-            Optional<StateConfiguration<State, Trigger>> currentStateConfigurationOptional =
-                    configuration.getStateConfiguration(currentState);
-            Optional<StateConfiguration<State, Trigger>> nextStateConfigurationOptional =
-                    configuration.getStateConfiguration(transition.getDestination());
-            if (currentStateConfigurationOptional.isPresent()) {
-                StateConfiguration<State, Trigger> config = currentStateConfigurationOptional.get();
-                if (config.doRunDefaultExitAction() && configuration.hasExitAction()) {
-                    configuration.runOnExit(transition);
-                } else if (config.hasExitAction()) {
-                    config.runOnExit(transition);
-                } else {
-                    runOnExit(transition);
-                }
-            } else {
-                configuration.runOnExit(transition);
-            }
-            transition.runAction();
-            currentState = transition.getDestination();
-            if (nextStateConfigurationOptional.isPresent()) {
-                StateConfiguration<State, Trigger> config = nextStateConfigurationOptional.get();
-                if (config.doRunDefaultExitAction() && configuration.hasEntryAction()) {
-                    configuration.runOnEntry(transition);
-                } else if (config.hasEntryAction()) {
-                    config.runOnEntry(transition);
-                } else {
-                    runOnEntry(transition);
-                }
-            } else {
-                configuration.runOnEntry(transition);
-            }
-        } else {
-            currentState = transition.getDestination();
+        currentState = newState;
+        if (currentState != null) {
+            currentState._onEntry(this, world);
         }
     }
 
     /**
-     * Returns current state
+     * Gets the current state of the state machine.
      *
-     * @return current state
+     * @return The current State
      */
-    public State getCurrentState() {
+    public State<World> getCurrentState() {
         return currentState;
     }
 
-    /** Runs states Period if is periodic */
+    /** Updates the state machine, transitioning to the next state if conditions are met. */
+    public void updateStates() {
+        if (currentState == null) {
+            return;
+        }
+        setState(currentState.getNextState(world));
+    }
+
+    /** Calls the periodic function of the current state. */
     public void periodic() {
-        if (currentState instanceof PeriodicStateInterface) {
-            ((PeriodicStateInterface) currentState).periodic();
-        } else {
-            periodicContainer();
-        }
-    }
-
-    /** Runs states Period if is periodic (This method is for if state is in Container) */
-    public void periodicContainer() {
-        if (currentState instanceof StateContainer) {
-            StateInterface state = ((StateContainer) currentState).getState();
-            if (state instanceof PeriodicStateInterface) {
-                ((PeriodicStateInterface) state).periodic();
-            }
-        }
-    }
-
-    private void runOnEntry(Transition transition) {
-        if (currentState instanceof StateInterface) {
-            ((StateInterface) currentState).onEntry(transition);
-        } else {
-            runOnEntryContainer(transition);
-        }
-    }
-
-    private void runOnEntryContainer(Transition transition) {
-        if (currentState instanceof StateContainer) {
-            StateInterface state = ((StateContainer) currentState).getState();
-            if (state instanceof StateInterface) {
-                ((StateInterface) state).onEntry(transition);
-            }
-        }
-    }
-
-    private void runOnExit(Transition transition) {
-        if (currentState instanceof StateInterface) {
-            ((StateInterface) currentState).onEntry(transition);
-        } else {
-            runOnExitContainer(transition);
-        }
-    }
-
-    private void runOnExitContainer(Transition transition) {
-        if (currentState instanceof StateContainer) {
-            StateInterface state = ((StateContainer) currentState).getState();
-            if (state instanceof StateInterface) {
-                ((StateInterface) state).onExit(transition);
-            }
+        if (currentState != null) {
+            currentState._periodic(this, world);
         }
     }
 
     /**
-     * Returns if last transition was successful
-     *
-     * @return success
+     * Requests a state change to the specified state.
+     * @param state The requested state
      */
-    public boolean successfulTransition() {
-        return !transitionInfo.wasFail();
-    }
-
-    /**
-     * Returns infomation about last transtion
-     *
-     * @return information of last transiton
-     */
-    public TransitionInfo<State, Trigger> getTransitionInfo() {
-        return transitionInfo;
-    }
-
-    /**
-     * Tests if in state
-     *
-     * @param state target state
-     * @return if in state
-     */
-    public boolean inState(State state) {
-        return currentState.equals(state);
+    public void requestState(State<World> state) {
+        this.requestedState = state;
     }
 }
