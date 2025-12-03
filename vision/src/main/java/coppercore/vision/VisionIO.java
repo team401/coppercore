@@ -28,7 +28,10 @@ public interface VisionIO {
         /** Array with all distinct fiducial ids */
         public int[] tagIds = new int[0];
 
-        /** Average distance to targets (unclear what this is for) */
+        /**
+         * Average distance to targets, see {@link
+         * coppercore.vision.VisionLocalizer#getLatestVariance(VisionIO.PoseObservation,int)}
+         */
         public double averageTagDistanceM = 0;
 
         /** True if PhotonVision detected multiple tags in a frame. */
