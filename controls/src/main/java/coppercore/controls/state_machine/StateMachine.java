@@ -84,8 +84,6 @@ public class StateMachine<World> {
      * @param state The requested state
      */
     public void requestState(State<World> state) {
-        if (state != null) {
-            setState(state);
-        }
+        this.requestedState = state;
     }
 }
