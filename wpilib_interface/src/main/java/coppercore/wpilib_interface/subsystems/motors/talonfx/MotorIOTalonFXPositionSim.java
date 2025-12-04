@@ -8,6 +8,7 @@ import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.sim.PositionSimAdapter;
 import coppercore.wpilib_interface.subsystems.sim.TestableSimIO;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -166,6 +167,8 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX implements Testabl
      * multiple times per periodic.
      */
     private void updateSimState() {
+        talonSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+
         if (!isFollower) {
             double timestamp = deltaTimer.get();
 

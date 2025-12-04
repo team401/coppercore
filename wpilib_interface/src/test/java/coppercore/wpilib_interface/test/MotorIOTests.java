@@ -47,22 +47,22 @@ import org.junit.jupiter.api.Test;
  * https://github.com/team401/2025-Robot-Code.
  */
 public class MotorIOTests {
-    private static String canbus = "sim";
+    private static String canbus = "canivore";
 
     public static CANDeviceID encoderId = new CANDeviceID(canbus, 52);
 
     /**
      * Emulate the "periodic" loop of the robot by calling `loop` and incrementing the WPIUtilJNI
-     * mock time by 20ms utnil `timeSeconds` seconds have elapsed.
+     * mock time by 20ms until `timeSeconds` seconds have elapsed.
      *
      * @param timeSeconds The duration to simulate. If this is not a multiple of 20 milliseconds,
      *     the method will round up.
      * @param loop A Runnable to call before each increment of time and once at the very end.
      */
     void loopForTime(double timeSeconds, Runnable loop) {
-        double timeElapsed = -0.01;
+        double timeElapsed = 0.00;
         Timer loopTimer = new Timer();
-        while (timeElapsed < timeSeconds) {
+        while (timeElapsed < timeSeconds || (timeSeconds == 0 && timeElapsed == 0)) {
             loopTimer.restart();
             System.out.print(timeElapsed + " : ");
             if (DriverStation.isEnabled()) {
@@ -113,10 +113,10 @@ public class MotorIOTests {
                                 new Slot0Configs()
                                         .withGravityType(GravityTypeValue.Elevator_Static)
                                         .withKS(0.0)
-                                        .withKV(1.0)
-                                        .withKA(0.0)
-                                        .withKG(9.5)
-                                        .withKP(1.0)
+                                        .withKV(0.0)
+                                        .withKA(0.5)
+                                        .withKG(0.0)
+                                        .withKP(0.1)
                                         .withKI(0.0)
                                         .withKD(0.0))
                         .withMotionMagic(
@@ -135,8 +135,8 @@ public class MotorIOTests {
                                                                                 PerUnit.combine(
                                                                                         Meters,
                                                                                         Radians))))
-                                        .withMotionMagicExpo_kA(0.01)
-                                        .withMotionMagicExpo_kV(0.1));
+                                        .withMotionMagicExpo_kA(1)
+                                        .withMotionMagicExpo_kV(1));
 
         var cancoderConfig =
                 new CANcoderConfiguration()
@@ -153,7 +153,7 @@ public class MotorIOTests {
                         Inches.of(0.7515).in(Meters),
                         0.0,
                         1.9,
-                        true,
+                        false,
                         1.0,
                         0.0,
                         0.0);
