@@ -4,7 +4,7 @@ import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
 
 plugins {
-	id "java"
+	id "java-library"
 	id "com.peterabeles.gversion" version "1.10"
 	id "com.diffplug.spotless" version "6.24.0"
 	id "com.vanniktech.maven.publish" version "0.30.0"
@@ -27,6 +27,9 @@ repositories {
 	maven {
 		// AdvantageKit maven repository
 		url "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
+	}
+	maven {
+		url "https://maven.revrobotics.com/"
 	}
 	mavenLocal()
 }
@@ -62,6 +65,7 @@ dependencies {
 	annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
 
 	implementation "com.googlecode.json-simple:json-simple:1.1.1"
+	api "com.revrobotics.frc:REVLib-java:2025.0.3"
 }
 
 test {
