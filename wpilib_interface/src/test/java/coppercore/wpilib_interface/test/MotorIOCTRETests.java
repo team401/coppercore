@@ -31,7 +31,6 @@ import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXPositionSim;
 import coppercore.wpilib_interface.subsystems.sim.ElevatorSimAdapter;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.PerUnit;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -41,12 +40,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * The MotorIOTests class contains tests for motor IOs using simulation.
+ * The MotorIOCTRETests class contains tests for TalonFX motor IOs and CANCoder encoderIOs using
+ * simulation.
  *
  * <p>Most of the constants and gains found here are from
  * https://github.com/team401/2025-Robot-Code.
  */
-public class MotorIOTests {
+public class MotorIOCTRETests {
     private static String canbus = "canivore";
 
     public static CANDeviceID encoderId = new CANDeviceID(canbus, 52);
@@ -64,7 +64,6 @@ public class MotorIOTests {
         Timer loopTimer = new Timer();
         while (timeElapsed < timeSeconds || (timeSeconds == 0 && timeElapsed == 0)) {
             loopTimer.restart();
-            System.out.print(timeElapsed + " : ");
             if (DriverStation.isEnabled()) {
                 Unmanaged.feedEnable(20);
             }
@@ -176,17 +175,31 @@ public class MotorIOTests {
                     leadMotor.updateInputs(leadMotorInputs);
                     followerMotor.updateInputs(followerMotorInputs);
                     cancoder.updateInputs(cancoderInputs);
-                    System.out.println(
-                            cancoderInputs.positionRadians
-                                    + " -> "
-                                    + Units.rotationsToRadians(leadMotorInputs.closedLoopReference)
-                                    + " outputting "
-                                    + leadMotorInputs.closedLoopOutput
-                                    + " @ "
-                                    + leadMotorInputs.appliedVolts
-                                    + "v ("
-                                    + DriverStation.isEnabled()
-                                    + ")");
+                    // Ensure that the sim has properly started up before asserting that the
+                    // positions match.
+                    if (cancoderInputs.positionRadians != 0.0
+                            && leadMotorInputs.positionRadians != 0.0) {
+                        Assertions.assertEquals(
+                                cancoderInputs.positionRadians,
+                                leadMotorInputs.positionRadians,
+                                Math.PI / 2, // Large delta to account for +/- 1 cycle of CAN delay
+                                "Encoder and lead motor mechanism position should match at all"
+                                        + " times.");
+                    }
+                    // This line of logging is incredibly useful for tuning, but produces a ton of
+                    // output.
+                    //     System.out.println(
+                    //             cancoderInputs.positionRadians
+                    //                     + " -> "
+                    //                     +
+                    // Units.rotationsToRadians(leadMotorInputs.closedLoopReference)
+                    //                     + " outputting "
+                    //                     + leadMotorInputs.closedLoopOutput
+                    //                     + " @ "
+                    //                     + leadMotorInputs.appliedVolts
+                    //                     + "v ("
+                    //                     + DriverStation.isEnabled()
+                    //                     + ")");
                 };
 
         // Wait for library initialization to take place. As soon as a real value is read, it will
