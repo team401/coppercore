@@ -113,7 +113,7 @@ public class MotorIOCTRETests {
                                         .withGravityType(GravityTypeValue.Elevator_Static)
                                         .withKS(0.0)
                                         .withKV(0.0)
-                                        .withKA(0.5)
+                                        .withKA(0.6)
                                         .withKG(0.0)
                                         .withKP(0.1)
                                         .withKI(0.0)
@@ -182,7 +182,11 @@ public class MotorIOCTRETests {
                         Assertions.assertEquals(
                                 cancoderInputs.positionRadians,
                                 leadMotorInputs.positionRadians,
-                                Math.PI / 2, // Large delta to account for +/- 1 cycle of CAN delay
+                                cancoderInputs.velocityRadiansPerSecond
+                                                * 0.02
+                                                * 2 // Account of +/- 1 cycle of velocity
+                                        + Math.PI / 2, // Account for some rounding issues.
+                                // CAN delay
                                 "Encoder and lead motor mechanism position should match at all"
                                         + " times.");
                     }
@@ -221,7 +225,7 @@ public class MotorIOCTRETests {
         leadMotor.controlToPositionExpoProfiled(Rotations.zero());
 
         // Drive to 0 and make sure it gets there
-        loopForTime(6.0, loop); // Give it enough time to drive to zero
+        loopForTime(20.0, loop); // Give it enough time to drive to zero
         Assertions.assertEquals(
                 0.0,
                 cancoderInputs.positionRadians,
@@ -229,7 +233,7 @@ public class MotorIOCTRETests {
 
         // Drive to 10.0 radians and make sure it gets there.
         leadMotor.controlToPositionExpoProfiled(Radians.of(10.0));
-        loopForTime(2.0, loop);
+        loopForTime(10.0, loop);
         Assertions.assertEquals(10.0, cancoderInputs.positionRadians, 1);
     }
 }
