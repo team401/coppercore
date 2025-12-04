@@ -15,20 +15,19 @@ gson = "2.11.0"
 photonlib = "v2025.1.1"
 
 [plugins]
-spotless = { id = "com.diffplug.spotless", version.ref="spotless"}
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 gversion = { id = "com.peterabeles.gversion", version.ref = "gversion" }
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
-gradlerio = { id = "edu.wpi.first.GradleRIO", version.ref="wpilib" }
+gradlerio = { id = "edu.wpi.first.GradleRIO", version.ref = "wpilib" }
 
 [libraries]
 commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commons-math3" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
-akit-autolog = { module = "org.littletonrobotics.akit:akit-autolog", version.ref="advantagekit" }
-akit-java = { module = "org.littletonrobotics.akit:akit-java", version.ref="advantagekit" }
-json-simple = { module = "com.googlecode.json-simple:json-simple", version.ref="json-simple" }
-gson = { module = "com.google.code.gson:gson", version.ref="gson" }
-photonlib-java = { module = "org.photonvision:photonlib-java", version.ref="photonlib"}
-photontargeting-java = { module = "org.photonvision:photontargeting-java", version.ref="photonlib"}
-photonlib-jni = { module = "org.photonvision:photontargeting-cpp", version.ref="photonlib"}
-wpilib-newcommands = { module = "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java", version.ref="wpilib" }
+akit-autolog = { module = "org.littletonrobotics.akit:akit-autolog", version.ref = "advantagekit" }
+akit-java = { module = "org.littletonrobotics.akit:akit-java", version.ref = "advantagekit" }
+json-simple = { module = "com.googlecode.json-simple:json-simple", version.ref = "json-simple" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+photonlib-java = { module = "org.photonvision:photonlib-java", version.ref = "photonlib" }
+photontargeting-java = { module = "org.photonvision:photontargeting-java", version.ref = "photonlib" }
+wpilib-newcommands = { module = "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java", version.ref = "wpilib" }
