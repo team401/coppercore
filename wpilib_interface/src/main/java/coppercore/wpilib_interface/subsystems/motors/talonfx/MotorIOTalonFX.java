@@ -26,6 +26,7 @@ import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -305,8 +306,12 @@ public class MotorIOTalonFX implements MotorIO {
         inputs.supplyCurrentAmps = supplyCurrentSignal.getValueAsDouble();
         inputs.rawRotorPositionRadians = rawRotorPositionSignal.getValue().in(Radians);
         inputs.closedLoopOutput = closedLoopOutputSignal.getValue();
-        inputs.closedLoopReference = closedLoopReferenceSignal.getValueAsDouble();
-        inputs.closedLoopReferenceSlope = closedLoopReferenceSlopeSignal.getValueAsDouble();
+        // These 2 status signals report a value in terms of rotations, convert it to radians to
+        // ensure base-unit consistency.
+        inputs.closedLoopReference =
+                Units.rotationsToRadians(closedLoopReferenceSignal.getValueAsDouble());
+        inputs.closedLoopReferenceSlope =
+                Units.rotationsToRadians(closedLoopReferenceSlopeSignal.getValueAsDouble());
     }
 
     @Override

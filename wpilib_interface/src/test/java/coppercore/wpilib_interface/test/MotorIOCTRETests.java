@@ -188,18 +188,19 @@ public class MotorIOCTRETests {
                     }
                     // This line of logging is incredibly useful for tuning, but produces a ton of
                     // output.
-                    //     System.out.println(
-                    //             cancoderInputs.positionRadians
-                    //                     + " -> "
-                    //                     +
-                    // Units.rotationsToRadians(leadMotorInputs.closedLoopReference)
-                    //                     + " outputting "
-                    //                     + leadMotorInputs.closedLoopOutput
-                    //                     + " @ "
-                    //                     + leadMotorInputs.appliedVolts
-                    //                     + "v ("
-                    //                     + DriverStation.isEnabled()
-                    //                     + ")");
+                    System.out.println(
+                            cancoderInputs.positionRadians
+                                    + " -> "
+                                    + leadMotorInputs.closedLoopReference
+                                    + " ("
+                                    + leadMotorInputs.closedLoopReferenceSlope
+                                    + "/sec) outputting "
+                                    + leadMotorInputs.closedLoopOutput
+                                    + " @ "
+                                    + leadMotorInputs.appliedVolts
+                                    + "v ("
+                                    + DriverStation.isEnabled()
+                                    + ")");
                 };
 
         // Wait for library initialization to take place. As soon as a real value is read, it will
@@ -222,13 +223,13 @@ public class MotorIOCTRETests {
         // Drive to 0 and make sure it gets there
         loopForTime(3.0, loop); // Give it enough time to drive to zero
         Assertions.assertEquals(
+                0.0,
                 cancoderInputs.positionRadians,
-                0,
                 1); // Give it a decent delta to account for slight oscillation
 
         // Drive to 10.0 radians and make sure it gets there.
         leadMotor.controlToPositionExpoProfiled(Radians.of(10.0));
         loopForTime(1.0, loop);
-        Assertions.assertEquals(cancoderInputs.positionRadians, 10.0, 1);
+        Assertions.assertEquals(10.0, cancoderInputs.positionRadians, 1);
     }
 }

@@ -77,6 +77,9 @@ public class MotorInputs {
      * The current "mechanism position" that the motor controller is targetting with closed loop
      * control. This value will not be updated if onboard motor closed-loop control isn't supported
      * or used.
+     *
+     * <p>When using position control, this value will be in radians. When using velocity control,
+     * it will be in radians per second.
      */
     public double closedLoopReference = 0.0;
 
@@ -84,6 +87,9 @@ public class MotorInputs {
      * The current "mechanism velocity" that the motor controller is targetting with closed loop
      * control. This value will not be updated if onboard motor closed-loop control isn't supported
      * or used.
+     *
+     * <p>When using position control, this value will be in radians per second. When using velocity
+     * control, it will be in radians per second squared.
      */
     public double closedLoopReferenceSlope = 0.0;
 }
