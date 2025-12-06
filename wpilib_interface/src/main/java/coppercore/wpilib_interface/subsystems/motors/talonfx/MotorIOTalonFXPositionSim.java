@@ -63,8 +63,7 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX implements Testabl
         super(config, talonFXConfig);
 
         this.isFollower = false;
-        // TODO: Figure out how to *correctly* handle inverts so that motor positions aren't always
-        // negative.
+
         this.invertSimRotation = false;
 
         this.talonSimState = this.talon.getSimState();
