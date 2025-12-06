@@ -102,8 +102,8 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX implements Testabl
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param followerIndex An int containing the index of the follower motor (what position in
-     *     config.followerIds this motor is). This IO will automatically follow the lead motor at
-     *     the end of its constructor.
+     *     config.followerMotorConfigs this motor is). This IO will automatically follow the lead
+     *     motor at the end of its constructor.
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
      * @param physicsSimAdapter An ElevatorSimAdapter or SingleJointedArmSimAdapter to use for
@@ -133,8 +133,8 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX implements Testabl
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param followerIndex An int containing the index of the follower motor (what position in
-     *     config.followerIds this motor is). This IO will automatically follow the lead motor at
-     *     the end of its constructor.
+     *     config.followerMotorConfigs this motor is). This IO will automatically follow the lead
+     *     motor at the end of its constructor.
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
      * @param physicsSimAdapter An ElevatorSimAdapter or SingleJointedArmSimAdapter to use for
@@ -165,7 +165,7 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX implements Testabl
      * <p>If this IO is not the leader, it will not update the sim to avoid conflicts/updating
      * multiple times per periodic.
      */
-    private void updateSimState() {
+    protected void updateSimState() {
         talonSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
 
         if (!isFollower) {
