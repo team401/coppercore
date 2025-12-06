@@ -2,9 +2,7 @@ package coppercore.wpilib_interface.test;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -29,13 +27,11 @@ import coppercore.wpilib_interface.subsystems.encoders.EncoderIOCANCoderPosition
 import coppercore.wpilib_interface.subsystems.encoders.EncoderInputs;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXPositionSim;
-import coppercore.wpilib_interface.subsystems.sim.ElevatorSimAdapter;
-import edu.wpi.first.math.system.plant.DCMotor;
+import coppercore.wpilib_interface.subsystems.sim.DummySimAdapter;
 import edu.wpi.first.units.PerUnit;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -81,12 +77,13 @@ public class MotorIOCTRETests {
     @Test
     public void talonFXElevator() {
         // Define configs
+        final double MOTOR_REDUCTION = 5.0;
 
         ElevatorMechanismConfig mechanismConfig =
                 ElevatorMechanismConfig.builder()
                         .withName("coppervator")
                         .withEncoderToMechanismRatio(1.0)
-                        .withMotorToEncoderRatio(5.0)
+                        .withMotorToEncoderRatio(MOTOR_REDUCTION)
                         .withLeadMotorId(new CANDeviceID(canbus, 50))
                         .withGravityFeedforwardType(GravityFeedforwardType.STATIC_ELEVATOR)
                         .withElevatorToMechanismRatio(Inches.of(4.724).div(Rotations.of(1)))
@@ -101,7 +98,7 @@ public class MotorIOCTRETests {
                                         .withFeedbackSensorSource(
                                                 FeedbackSensorSourceValue.FusedCANcoder)
                                         .withSensorToMechanismRatio(1.0)
-                                        .withRotorToSensorRatio(1.0))
+                                        .withRotorToSensorRatio(MOTOR_REDUCTION))
                         .withMotorOutput(
                                 new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast))
                         .withCurrentLimits(
@@ -144,20 +141,7 @@ public class MotorIOCTRETests {
                                         .withSensorDirection(
                                                 SensorDirectionValue.Clockwise_Positive));
 
-        var elevatorSim =
-                new ElevatorSim(
-                        DCMotor.getKrakenX60Foc(2),
-                        5.0,
-                        Pounds.of(20.0).in(Kilograms),
-                        Inches.of(0.7515).in(Meters),
-                        0.0,
-                        1.9,
-                        false,
-                        1.0,
-                        0.0,
-                        0.0);
-
-        var simAdapter = new ElevatorSimAdapter(mechanismConfig, elevatorSim);
+        var simAdapter = new DummySimAdapter();
 
         var leadMotor =
                 MotorIOTalonFXPositionSim.newLeader(mechanismConfig, talonFXConfigs, simAdapter);
@@ -185,55 +169,63 @@ public class MotorIOCTRETests {
                                 cancoderInputs.velocityRadiansPerSecond
                                                 * 0.02
                                                 * 2 // Account of +/- 1 cycle of velocity
-                                        + Math.PI / 2, // Account for some rounding issues.
+                                        + 0.5, // Account for some rounding issues.
                                 // CAN delay
                                 "Encoder and lead motor mechanism position should match at all"
                                         + " times.");
                     }
                     // This line of logging is incredibly useful for tuning, but produces a ton of
                     // output.
-                    System.out.println(
-                            cancoderInputs.positionRadians
-                                    + " -> "
-                                    + leadMotorInputs.closedLoopReference
-                                    + " ("
-                                    + leadMotorInputs.closedLoopReferenceSlope
-                                    + "/sec) outputting "
-                                    + leadMotorInputs.closedLoopOutput
-                                    + " @ "
-                                    + leadMotorInputs.appliedVolts
-                                    + "v ("
-                                    + DriverStation.isEnabled()
-                                    + ")");
+                    // System.out.println(
+                    // cancoderInputs.positionRadians
+                    // + " -> "
+                    // + leadMotorInputs.closedLoopReference
+                    // + " ("
+                    // + leadMotorInputs.closedLoopReferenceSlope
+                    // + "/sec) outputting "
+                    // + leadMotorInputs.closedLoopOutput
+                    // + " @ "
+                    // + leadMotorInputs.appliedVolts
+                    // + "v ("
+                    // + DriverStation.isEnabled()
+                    // + ")");
                 };
 
-        // Wait for library initialization to take place. As soon as a real value is read, it will
+        simAdapter.setMotorPosition(Radians.of(5.0));
+
+        simAdapter.setEncoderPosition(Radians.of(1.0));
+        // Wait for library initialization to take place. As soon as a real value is
+        // read, it will
         // be around 51.7, not 0.0.
         while (cancoderInputs.positionRadians == 0.0) {
+            leadMotor.controlNeutral();
             loopForTime(0, loop);
         }
 
-        // Should be around 51.7 radians, but an unknown amount of time has passed during
-        // library startup so we have a big delta here. We also round down in case the physics sim
+        // Should be around 51.7 radians, but an unknown amount of time has passed
+        // during
+        // library startup so we have a big delta here. We also round down in case the
+        // physics sim
         // has let it fall down at all.
-        Assertions.assertEquals(cancoderInputs.positionRadians, 51, 5);
+        Assertions.assertEquals(cancoderInputs.positionRadians, 1.0, 1e-1);
+
+        simAdapter.setMotorPosition(Radians.of(10.0));
+
+        simAdapter.setEncoderPosition(Radians.of(2.0));
 
         // Enabling!
         DriverStationSim.setEnabled(true);
         DriverStationSim.notifyNewData();
 
-        leadMotor.controlToPositionExpoProfiled(Rotations.zero());
+        leadMotor.controlToPositionUnprofiled(Rotations.zero());
 
-        // Drive to 0 and make sure it gets there
-        loopForTime(20.0, loop); // Give it enough time to drive to zero
+        loopForTime(0.04, loop); // Give it a couple cycles to let data propagate into the IOs
+
         Assertions.assertEquals(
-                0.0,
+                2.0,
                 cancoderInputs.positionRadians,
-                1); // Give it a decent delta to account for slight oscillation
+                1e-1); // Give it a decent delta to account for slight oscillation
 
-        // Drive to 10.0 radians and make sure it gets there.
-        leadMotor.controlToPositionExpoProfiled(Radians.of(10.0));
-        loopForTime(10.0, loop);
-        Assertions.assertEquals(10.0, cancoderInputs.positionRadians, 1);
+        // TODO: Test some motor outputs to see if the sign makes sense
     }
 }

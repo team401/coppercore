@@ -24,6 +24,15 @@ public class MotorIOReplay implements MotorIO {
     public void updateInputs(MotorInputs inputs) {}
 
     @Override
+    public void controlNeutral() {}
+
+    @Override
+    public void controlCoast() {}
+
+    @Override
+    public void controlBrake() {}
+
+    @Override
     public void controlToPositionUnprofiled(Angle positionSetpoint) {}
 
     @Override

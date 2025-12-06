@@ -10,12 +10,15 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DynamicMotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -104,6 +107,19 @@ public class MotorIOTalonFX implements MotorIO {
 
     /** Array of status signals to be easily passed to refreshAll */
     protected final BaseStatusSignal[] signals;
+
+    /** A neutral request to use for basic config-based neutral mode commands */
+    protected final NeutralOut neutralRequest = new NeutralOut();
+
+    /**
+     * A coast request to use when coasting is required, regardless of configured NeutralMode value
+     */
+    protected final CoastOut coastRequest = new CoastOut();
+
+    /**
+     * A brake request to use when braking is required, regardless of configured NeutralMode value
+     */
+    protected final StaticBrake brakeRequest = new StaticBrake();
 
     /** An unprofiled position FOC request for non-profiled position closed-loop control */
     protected final PositionTorqueCurrentFOC unprofiledPositionRequest =
@@ -312,6 +328,21 @@ public class MotorIOTalonFX implements MotorIO {
                 Units.rotationsToRadians(closedLoopReferenceSignal.getValueAsDouble());
         inputs.closedLoopReferenceSlope =
                 Units.rotationsToRadians(closedLoopReferenceSlopeSignal.getValueAsDouble());
+    }
+
+    @Override
+    public void controlNeutral() {
+        talon.setControl(neutralRequest);
+    }
+
+    @Override
+    public void controlCoast() {
+        talon.setControl(coastRequest);
+    }
+
+    @Override
+    public void controlBrake() {
+        talon.setControl(brakeRequest);
     }
 
     @Override

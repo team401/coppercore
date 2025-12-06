@@ -53,8 +53,8 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX implements Testabl
      * @param config A MechanismConfig config to use for CAN IDs
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
-     * @param physicsSimAdapter An ElevatorSimAdapter or SingleJointedArmSimAdapter to use for
-     *     mechanism physics simulation.
+     * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
+     *     simulation.
      */
     public MotorIOTalonFXPositionSim(
             MechanismConfig config,
@@ -81,8 +81,8 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX implements Testabl
      * @param config A MechanismConfig config to use for CAN IDs
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
-     * @param physicsSimAdapter An ElevatorSimAdapter or SingleJointedArmSimAdapter to use for
-     *     mechanism physics simulation.
+     * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
+     *     simulation.
      * @return A new MotorIOTalonFXPositionSim created with the specified parameters, configured as
      *     a lead motor.
      */
@@ -106,8 +106,8 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX implements Testabl
      *     motor at the end of its constructor.
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
-     * @param physicsSimAdapter An ElevatorSimAdapter or SingleJointedArmSimAdapter to use for
-     *     mechanism physics simulation.
+     * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
+     *     simulation.
      */
     public MotorIOTalonFXPositionSim(
             MechanismConfig config,
@@ -137,8 +137,8 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX implements Testabl
      *     motor at the end of its constructor.
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
-     * @param physicsSimAdapter An ElevatorSimAdapter or SingleJointedArmSimAdapter to use for
-     *     mechanism physics simulation.
+     * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
+     *     simulation.
      * @return A new MotorIOTalonFXPositionSim created with the specified parameters, configured as
      *     a lead motor.
      */

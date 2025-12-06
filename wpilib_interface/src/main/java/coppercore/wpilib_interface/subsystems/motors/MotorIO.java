@@ -49,6 +49,15 @@ public interface MotorIO {
      */
     public void updateInputs(MotorInputs inputs);
 
+    /** Command a zero or "neutral" output. If in brake mode, brake. If in coast mode, coast. */
+    public void controlNeutral();
+
+    /** Command a zero/neutral output by allowing the motor to coast (spin freely). */
+    public void controlCoast();
+
+    /** Command a zero/neutral output while telling the motor to brake (resist movement). */
+    public void controlBrake();
+
     /**
      * Control the motor to a certain position setpoint without using a motion profile
      *

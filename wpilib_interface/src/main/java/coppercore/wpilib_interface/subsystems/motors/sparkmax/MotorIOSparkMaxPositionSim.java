@@ -41,8 +41,7 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
      * @param config A MechanismConfig to use for CAN IDs and ratios
      * @param sparkMaxConfig A SparkMaxConfig to apply to the simulated SparkMax
      * @param motorType The motor type, either brushless or brushed
-     * @param physicsSimAdapter An ElevatorSimAdapter or SingleJointedArmSimAdapter to use for
-     *     simulation values
+     * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
      *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
      */
@@ -73,8 +72,7 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
      * @param config A MechanismConfig to use for CAN IDs and ratios
      * @param sparkMaxConfig A SparkMaxConfig to apply to the simulated SparkMax
      * @param motorType The motor type, either brushless or brushed
-     * @param physicsSimAdapter An ElevatorSimAdapter or SingleJointedArmSimAdapter to use for
-     *     simulation values
+     * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
      *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
      * @return a new MotorIOSparkMaxPositionSim configured as the lead motor
@@ -97,8 +95,7 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
      *     config.followerConfigs)
      * @param sparkMaxConfig A SparkMaxConfig to apply to the simulated SparkMax
      * @param motorType The motor type, either brushless or brushed
-     * @param physicsSimAdapter An ElevatorSimAdapter or SingleJointedArmSimAdapter to use for
-     *     simulation values
+     * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
      *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
      */
@@ -131,8 +128,7 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
      *     config.followerConfigs)
      * @param sparkMaxConfig A SparkMaxConfig to apply to the simulated SparkMax
      * @param motorType The motor type, either brushless or brushed
-     * @param physicsSimAdapter An ElevatorSimAdapter or SingleJointedArmSimAdapter to use for
-     *     simulation values
+     * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
      *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
      * @return a new MotorIOSparkMaxPositionSim configured as the follower motor

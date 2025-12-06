@@ -33,8 +33,8 @@ public class EncoderIOCANCoderPositionSim extends EncoderIOCANCoder {
      * @param id A CANDeviceID containing the integer ID and String CAN bus that the device is on.
      * @param cancoderConfig A Phoenix-6 CANcoderConfiguration to apply to the CANcoder. This config
      *     will not be mutated by this IO.
-     * @param physicsSimAdapter An ElevatorSimAdapter or SingleJointedArmSimAdapter to use for
-     *     mechanism physics simulation readings.
+     * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
+     *     simulation readings.
      */
     public EncoderIOCANCoderPositionSim(
             CANDeviceID id,

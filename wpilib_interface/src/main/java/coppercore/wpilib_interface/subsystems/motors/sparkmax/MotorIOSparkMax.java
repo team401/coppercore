@@ -238,6 +238,23 @@ public class MotorIOSparkMax implements MotorIO {
     }
 
     @Override
+    public void controlNeutral() {
+        sparkMax.set(0.0);
+    }
+
+    @Override
+    public void controlCoast() {
+        throw new UnsupportedOperationException(
+                "Explicit brake requests are not supported by MotorIOSparkMax");
+    }
+
+    @Override
+    public void controlBrake() {
+        throw new UnsupportedOperationException(
+                "Explicit brake requests are not supported by MotorIOSparkMax");
+    }
+
+    @Override
     public void controlToPositionUnprofiled(Angle positionSetpoint) {
         controller.setReference(positionSetpoint.in(Rotations), ControlType.kPosition);
     }
