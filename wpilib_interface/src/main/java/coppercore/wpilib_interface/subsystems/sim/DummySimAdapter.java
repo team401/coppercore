@@ -60,7 +60,7 @@ public class DummySimAdapter implements PositionSimAdapter {
 
     /**
      * Get the value of motorAppliedOutput passed into the most recent call to {@link
-     * this#update(Voltage, double)}
+     * DummySimAdapter#update(Voltage, double)}
      *
      * @return A Voltage, the last motorAppliedOutput passed to `update`
      */
@@ -70,7 +70,7 @@ public class DummySimAdapter implements PositionSimAdapter {
 
     /**
      * Get the value of deltaTimeSeconds passed into the most recent call to {@link
-     * this#update(Voltage, double)}
+     * DummySimAdapter#update(Voltage, double)}
      */
     public double getLastDeltaTimeSeconds() {
         return this.lastDeltaTimeSeconds;
