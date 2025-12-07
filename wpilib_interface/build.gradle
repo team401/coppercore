@@ -39,8 +39,7 @@ dependencies {
 	annotationProcessor libs.akit.autolog
 	implementation libs.akit.java
 
-	implementation "com.googlecode.json-simple:json-simple:1.1.1"
-	api "com.revrobotics.frc:REVLib-java:2025.0.3"
+	implementation libs.revlib
 	implementation libs.json.simple
 }
 
