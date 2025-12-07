@@ -12,7 +12,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
@@ -70,15 +70,6 @@ public class VisionLocalizer extends SubsystemBase {
             disconnectedAlerts[i] =
                     new Alert("Vision camera " + i + " is disconnected.", AlertType.kWarning);
         }
-    }
-
-    /**
-     * Returns the X angle to the best target, which can be used for simple servoing with vision.
-     *
-     * @param cameraIndex The index of the camera to use.
-     */
-    public Rotation2d getTargetX(int cameraIndex) {
-        return inputs[cameraIndex].latestTargetObservation.tx();
     }
 
     public boolean hasMultitagResult() {
@@ -162,9 +153,9 @@ public class VisionLocalizer extends SubsystemBase {
         }
 
         // Initialize logging values
-        List<Pose3d> allRobotPoses = new LinkedList<>();
-        List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
-        List<Pose3d> allRobotPosesRejected = new LinkedList<>();
+        List<Pose3d> allRobotPoses = new ArrayList<>();
+        List<Pose3d> allRobotPosesAccepted = new ArrayList<>();
+        List<Pose3d> allRobotPosesRejected = new ArrayList<>();
 
         // Loop over cameras
         for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
@@ -172,9 +163,9 @@ public class VisionLocalizer extends SubsystemBase {
             disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
             // Initialize logging values
-            List<Pose3d> robotPoses = new LinkedList<>();
-            List<Pose3d> robotPosesAccepted = new LinkedList<>();
-            List<Pose3d> robotPosesRejected = new LinkedList<>();
+            List<Pose3d> robotPoses = new ArrayList<>();
+            List<Pose3d> robotPosesAccepted = new ArrayList<>();
+            List<Pose3d> robotPosesRejected = new ArrayList<>();
 
             for (VisionIO.PoseObservation observation : inputs[cameraIndex].poseObservations) {
                 robotPoses.add(observation.pose());
