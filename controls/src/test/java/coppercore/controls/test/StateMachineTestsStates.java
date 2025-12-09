@@ -9,7 +9,7 @@ public class StateMachineTestsStates {
     public static final IdleState IDLE = new IdleState();
     public static final IntakingState INTAKING = new IntakingState();
     public static final WarmingUpState WARMINGUP = new WarmingUpState();
-    public static final ShootingState SHOOTING  = new ShootingState();
+    public static final ShootingState SHOOTING = new ShootingState();
 
     public static class StateMachineWorld {
         public boolean shouldShoot = false;
@@ -22,7 +22,8 @@ public class StateMachineTestsStates {
     public static class IdleState extends State<StateMachineWorld> {
 
         @Override
-        protected void periodic(StateMachine<StateMachineWorld> stateMachine, StateMachineWorld world) {
+        protected void periodic(
+                StateMachine<StateMachineWorld> stateMachine, StateMachineWorld world) {
             world.motorSpeed = 0;
         }
     }
@@ -30,10 +31,11 @@ public class StateMachineTestsStates {
     public static class IntakingState extends State<StateMachineWorld> {
 
         @Override
-        protected void periodic(StateMachine<StateMachineWorld> stateMachine, StateMachineWorld world) {
+        protected void periodic(
+                StateMachine<StateMachineWorld> stateMachine, StateMachineWorld world) {
             world.motorSpeed = -100;
             world.armPos = -1;
-            if (world.hasNote){
+            if (world.hasNote) {
                 finish();
             }
         }
@@ -42,9 +44,11 @@ public class StateMachineTestsStates {
     public static class WarmingUpState extends State<StateMachineWorld> {
 
         @Override
-        protected void periodic(StateMachine<StateMachineWorld> stateMachine, StateMachineWorld world) {
+        protected void periodic(
+                StateMachine<StateMachineWorld> stateMachine, StateMachineWorld world) {
             if (!world.hasNote) {
                 stateMachine.requestState(IDLE);
+                return;
             }
             world.motorSpeed = 50;
             world.armPos = 3;
@@ -55,7 +59,8 @@ public class StateMachineTestsStates {
     public static class ShootingState extends State<StateMachineWorld> {
 
         @Override
-        protected void periodic(StateMachine<StateMachineWorld> stateMachine, StateMachineWorld world) {
+        protected void periodic(
+                StateMachine<StateMachineWorld> stateMachine, StateMachineWorld world) {
             world.motorSpeed = 100;
             if (!world.hasNote) {
                 finish();

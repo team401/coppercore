@@ -94,7 +94,7 @@ public abstract class State<World> {
         _onFinish();
     }
 
-    //TODO: Move this comment to the requestState method in StateMachine.java
+    // TODO: Move this comment to the requestState method in StateMachine.java
     /**
      * Requests a transition to another state. This is different from marking the state as finished.
      * Because of this, requesting a state does not automatically cause a state transition. And the
@@ -135,6 +135,7 @@ public abstract class State<World> {
 
         Transition(State<World> toState, Predicate<World> whenCondition) {
             this.toState = toState;
+            this.whenCondition = whenCondition;
         }
     }
 
@@ -154,7 +155,7 @@ public abstract class State<World> {
             transitions.add(new Transition(toState, condition));
         }
     }
-    
+
     public TransitionConditionBuilder when(Predicate<World> condition) {
         return new TransitionConditionBuilder(condition);
     }
@@ -164,7 +165,9 @@ public abstract class State<World> {
     }
 
     public TransitionConditionBuilder whenRequested(State<World> requestedState) {
-        return when((world) -> requestedState != null && requestedState.equals(this.requestedStateSupplier.get()));
+        return when(
+                (world) ->
+                        requestedState != null
+                                && requestedState.equals(this.requestedStateSupplier.get()));
     }
-
 }

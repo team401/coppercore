@@ -40,8 +40,8 @@ public class StateMachine<World> {
     }
 
     /**
-     * Sets the current state of the state machine.
-     * This will override defined transitions.
+     * Sets the current state of the state machine. This will override defined transitions.
+     *
      * @param newState The new state
      */
     public void setState(State<World> newState) {
@@ -72,6 +72,8 @@ public class StateMachine<World> {
             return;
         }
         setState(currentState.getNextState(world));
+        // Clear requested state after processing
+        this.requestedState = null;
     }
 
     /** Calls the periodic function of the current state. */
@@ -83,6 +85,7 @@ public class StateMachine<World> {
 
     /**
      * Requests a state change to the specified state.
+     *
      * @param state The requested state
      */
     public void requestState(State<World> state) {
