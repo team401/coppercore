@@ -4,6 +4,7 @@ import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.json.annotations.JSONExclude;
 import java.io.File;
+import java.util.Map;
 
 /**
  * Handles the loading and management of environments from a JSON file. Provides methods to retrieve
@@ -20,9 +21,9 @@ public class EnvironmentHandler {
             new JSONSync<>(new EnvironmentHandler(), "", new JSONSyncConfigBuilder().build());
 
     @JSONExclude private String filepath;
-    private Environment[] environments;
-    private String defaults;
-    private String environment;
+    private final Map<String, Environment> environments = new java.util.HashMap<>();
+    private String defaultEnvironmentName;
+    private String selectedEnvironmentName;
 
     /**
      * Private constructor to prevent instantiation. Use the static method getEnvironmentHandler to
@@ -58,11 +59,11 @@ public class EnvironmentHandler {
     /**
      * Sets the current environment.
      *
-     * @param environment the name of the environment to set
+     * @param environmentName the name of the environment to set
      * @return the current instance of EnvironmentHandler for method chaining
      */
-    public EnvironmentHandler setEnvironment(String environment) {
-        this.environment = environment;
+    public EnvironmentHandler setEnvironment(String environmentName) {
+        this.selectedEnvironmentName = environmentName;
         return this;
     }
 
@@ -75,15 +76,23 @@ public class EnvironmentHandler {
      *     environments.
      */
     public EnvironmentPathProvider getEnvironmentPathProvider() {
-        Environment env = null;
-        for (Environment environment1 : environments) {
-            if (environment1.getName().compareTo(environment) == 0) {
-                env = environment1;
-            }
+        if (selectedEnvironmentName == null) {
+            throw new RuntimeException("No environment selected");
         }
-        if (env == null) {
+        Environment selectedEnv = environments.getOrDefault(this.selectedEnvironmentName, null);
+        if (selectedEnv == null) {
             throw new RuntimeException("Environment not found");
         }
-        return new EnvironmentPathProvider(env, filepath, defaults);
+        // Give the environment its name for path purposes
+        selectedEnv.setEnvironmentName(this.selectedEnvironmentName);
+
+        Environment defaultEnv = environments.getOrDefault(this.defaultEnvironmentName, null);
+        String defaultFilepath = null;
+        if (defaultEnv != null) {
+            // Give the default environment its name for path purposes
+            defaultEnv.setEnvironmentName(this.defaultEnvironmentName);
+            defaultFilepath = defaultEnv.getPath();
+        }
+        return new EnvironmentPathProvider(selectedEnv, filepath, defaultFilepath);
     }
 }

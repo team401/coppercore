@@ -1,21 +1,15 @@
 {
-    "environment": "normal",
-    "defaults": "defaults",
-    "environments": [
-      {
-        "name": "defaults"
+    "selectedEnvironmentName": "normal",
+    "defaultEnvironmentName": "defaults",
+    "environments" : {
+      "defaults": {},
+      "normal": {},
+      "custom_path" : {
+        "filepath": "custom" 
       },
-      {
-        "name": "normal"
-      },
-      {
-        "name": "custom_path",
-        "filepath": "custom"
-      },
-      {
-        "name": "isolated",
+      "isolated" : {
         "isolated": true
       }
-    ]
+    }
   }
   

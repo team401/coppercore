@@ -7,19 +7,15 @@ import java.io.File;
  * path, and check for the existence of a file.
  */
 public class Environment {
-    private String name;
+
     private String filepath;
+    private String environmentName;
 
     /** If is isolated only uses files in its directory */
     private final Boolean isolated = false;
 
-    /**
-     * Returns the name of the environment.
-     *
-     * @return the name of the environment
-     */
-    public String getName() {
-        return name;
+    protected void setEnvironmentName(String name) {
+        this.environmentName = name;
     }
 
     /**
@@ -28,7 +24,7 @@ public class Environment {
      * @return the file path, or the name if not set
      */
     public String getPath() {
-        return (filepath != null) ? filepath : name;
+        return (filepath != null) ? filepath : environmentName;
     }
 
     /**
