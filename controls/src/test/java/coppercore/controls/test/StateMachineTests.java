@@ -9,16 +9,11 @@ import org.junit.jupiter.api.Test;
 
 public class StateMachineTests {
 
-    @Test
-    public void StateClassesTest() {
+	// This method exist to keep the Transition Test State Machine and the State Machine Graph State Machine the same
+	StateMachine<StateMachineWorld> createTestStateMachine(StateMachineWorld stateMachineWorld) {
+		StateMachine<StateMachineWorld> stateMachine = new StateMachine<>(stateMachineWorld);
 
-        // ### Setting up the state machine
-        // Creating the State Machine
-        StateMachineWorld stateMachineWorld = new StateMachineWorld();
-
-        StateMachine<StateMachineWorld> stateMachine = new StateMachine<>(stateMachineWorld);
-
-        // Registering States
+		// Registering States
         State<StateMachineWorld> idleState =
                 stateMachine.registerState("Idle", StateMachineTestsStates.IDLE);
         State<StateMachineWorld> intakingState =
@@ -28,7 +23,7 @@ public class StateMachineTests {
         State<StateMachineWorld> shootingState =
                 stateMachine.registerState("Shooting", StateMachineTestsStates.SHOOTING);
 
-        // Defining Transitions
+		// Defining Transitions
 
         // Transitions that can happen from Idle state
         idleState
@@ -56,43 +51,56 @@ public class StateMachineTests {
         shootingState.when((StateMachineWorld world) -> !world.shouldShoot).transitionTo(idleState);
         shootingState.whenRequested(idleState).transitionTo(idleState);
 
-        // Setting initial state
+		// Setting initial state
         stateMachine.setState(idleState);
 
+		return stateMachine;
+	}
+
+
+    @Test
+    public void StateMachineTransitionsTest() {
+
+        // ### Setting up the state machine
+        // Creating the State Machine
+        StateMachineWorld stateMachineWorld = new StateMachineWorld();
+
+        StateMachine<StateMachineWorld> stateMachine = createTestStateMachine(stateMachineWorld);
+
         // Testing
-        assertSame(idleState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.IDLE, stateMachine.getCurrentState());
 
         // ### Ensure that when there is no input, the state remains the same
         stateMachine.periodic();
-        assertSame(idleState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.IDLE, stateMachine.getCurrentState());
 
         // ### Test transition to Intaking
         stateMachineWorld.shouldIntake = true;
         stateMachine.updateStates();
-        assertSame(intakingState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.INTAKING, stateMachine.getCurrentState());
 
         // ### Test transition back to Idle from Intaking when intaking is canceled
         stateMachineWorld.shouldIntake = false;
         stateMachine.updateStates();
-        assertSame(idleState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.IDLE, stateMachine.getCurrentState());
 
         // ### Return to Intaking and simulate note acquisition to test finishing transition
         stateMachineWorld.shouldIntake = true;
         stateMachine.updateStates();
 
         // Ensure we are in Intaking state
-        assertSame(intakingState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.INTAKING, stateMachine.getCurrentState());
 
         // Ensure it does not transition back to Idle without note acquisition
         stateMachine.periodic();
         stateMachine.updateStates();
-        assertSame(intakingState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.INTAKING, stateMachine.getCurrentState());
 
         // Simulate note acquisition
         stateMachineWorld.hasNote = true;
         stateMachine.periodic();
         stateMachine.updateStates();
-        assertSame(idleState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.IDLE, stateMachine.getCurrentState());
 
         // Reset shouldIntake for next test
         stateMachineWorld.shouldIntake = false;
@@ -100,24 +108,24 @@ public class StateMachineTests {
         // ### Test transition to WarmingUp
         stateMachineWorld.shouldShoot = true;
         stateMachine.updateStates();
-        assertSame(warmingUpState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.WARMINGUP, stateMachine.getCurrentState());
 
         // ### Test transition to Idle from WarmingUp when shooting is canceled
         stateMachineWorld.shouldShoot = false;
         stateMachine.updateStates();
-        assertSame(idleState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.IDLE, stateMachine.getCurrentState());
 
         // ### Return to WarmingUp and simulate not having a note in warmup to test requested
         // transition
         stateMachineWorld.shouldShoot = true;
         stateMachine.updateStates();
-        assertSame(warmingUpState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.WARMINGUP, stateMachine.getCurrentState());
 
         // Simulate not having a note
         stateMachineWorld.hasNote = false;
         stateMachine.periodic();
         stateMachine.updateStates();
-        assertSame(idleState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.IDLE, stateMachine.getCurrentState());
 
         // Reset for next test
         stateMachineWorld.shouldShoot = true;
@@ -125,16 +133,16 @@ public class StateMachineTests {
 
         // ### Test transition to Shooting
         stateMachine.updateStates();
-        assertSame(warmingUpState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.WARMINGUP, stateMachine.getCurrentState());
         stateMachine.periodic();
 
         stateMachine.updateStates();
-        assertSame(shootingState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.SHOOTING, stateMachine.getCurrentState());
 
         // ### Test transition back to Idle from Shooting when shooting is canceled
         stateMachineWorld.shouldShoot = false;
         stateMachine.updateStates();
-        assertSame(idleState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.IDLE, stateMachine.getCurrentState());
 
         // ### Return to Shooting and simulate not having a note in shooting to test finishing
         // transition
@@ -142,19 +150,19 @@ public class StateMachineTests {
         stateMachine.updateStates();
 
         // Ensure we are in WarmingUp state
-        assertSame(warmingUpState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.WARMINGUP, stateMachine.getCurrentState());
 
         // Finish WarmingUp to get to Shooting
         stateMachine.periodic();
 
         // Move to Shooting state
         stateMachine.updateStates();
-        assertSame(shootingState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.SHOOTING, stateMachine.getCurrentState());
 
         // Simulate not having a note
         stateMachineWorld.hasNote = false;
         stateMachine.periodic();
         stateMachine.updateStates();
-        assertSame(idleState, stateMachine.getCurrentState());
+        assertSame(StateMachineTestsStates.IDLE, stateMachine.getCurrentState());
     }
 }
