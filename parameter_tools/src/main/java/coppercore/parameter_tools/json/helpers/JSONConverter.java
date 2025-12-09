@@ -31,6 +31,8 @@ public class JSONConverter {
         JSONConverter.addConversion(Pose2d.class, JSONPose2d.class);
 
         // All measure are wrapped by the JSONMeasure class except Per
+        // Per is handled separately below because it needs its own wrapper
+        // And cant be handled by the generic measure wrapper
         JSONConverter.addAdvancedConversion(
                 (Class<?> clazz) -> {
                     if (Measure.class.isAssignableFrom(clazz)) {
@@ -56,6 +58,8 @@ public class JSONConverter {
     /**
      * Registers a function that can provide advanced conversions for classes that may not have a
      * direct mapping.
+     * Also used for complex rules that can not be easily represented in a map.
+     * These functions are tried after the basic map look up fails.
      */
     public static void addAdvancedConversion(
             Function<Class<?>, Class<? extends JSONObject<?>>> func) {
@@ -89,6 +93,8 @@ public class JSONConverter {
 
     /**
      * Tries to find advanced conversions for classes that may not have a direct mapping.
+     * Or for complex rules that can not be easily represented in a map.
+     * Advanced conversions are tried after the basic map look up fails.
      *
      * @param <T> The type of the class to look for.
      * @param clazz The class of the wrapper to look for.
