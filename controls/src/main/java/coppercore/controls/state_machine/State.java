@@ -15,13 +15,23 @@ public abstract class State<World> {
     protected Supplier<State<World>> requestedStateSupplier;
     protected String name;
 
-    /** This constructor sets the name of the state to the simple name of the class. */
+    /** 
+     * This constructor sets the name of the state to the simple name of the class.
+     * It throws an IllegalStateException if the class is anonymous, to enforce
+     * that anonymous classes must use the constructor that takes a name parameter.
+     */
     public State() {
+        // Ensure that this constructor does not work if the class is anonymous?
+        if (this.getClass().isAnonymousClass()) {
+            throw new IllegalStateException("Cannot use zero-argument constructor for anonymous classes, use State(String name) instead");
+        }
         this.name = this.getClass().getSimpleName();
         this.transitions = new ArrayList<>();
     }
 
-    /** Constructs a new State. */
+    /** Constructs a new State with the given name. 
+     * @param name The name of the state
+    */
     public State(String name) {
         this.name = name;
         this.transitions = new ArrayList<>();
