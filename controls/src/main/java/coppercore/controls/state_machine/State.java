@@ -203,4 +203,13 @@ public abstract class State<World> {
     protected List<Transition> getTransitions() {
         return transitions;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String toString() {
+        // Maybe change to include more info later
+        return name;
+    }
 }
