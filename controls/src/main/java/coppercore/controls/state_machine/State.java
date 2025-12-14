@@ -13,9 +13,17 @@ public abstract class State<World> {
     protected boolean finished = false;
     protected final List<Transition> transitions;
     protected Supplier<State<World>> requestedStateSupplier;
+    protected String name;
+
+    /** This constructor sets the name of the state to the simple name of the class. */
+    public State() {
+        this.name = this.getClass().getSimpleName();
+        this.transitions = new ArrayList<>();
+    }
 
     /** Constructs a new State. */
-    public State() {
+    public State(String name) {
+        this.name = name;
         this.transitions = new ArrayList<>();
     }
 
@@ -171,7 +179,7 @@ public abstract class State<World> {
     }
 
     public TransitionConditionBuilder whenFinished() {
-        return whenFinished("finished");
+        return whenFinished("when" + this.name + " finished");
     }
 
     public TransitionConditionBuilder whenRequested(
@@ -184,7 +192,7 @@ public abstract class State<World> {
     }
 
     public TransitionConditionBuilder whenRequested(State<World> requestedState) {
-        return whenRequested(requestedState, "requested");
+        return whenRequested(requestedState, "When" + requestedState.name + " requested");
     }
 
     /**

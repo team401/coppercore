@@ -19,13 +19,13 @@ public class StateMachineTests {
 
         // Registering States
         State<StateMachineWorld> idleState =
-                stateMachine.registerState("Idle", StateMachineTestsStates.IDLE);
+                stateMachine.registerState(StateMachineTestsStates.IDLE);
         State<StateMachineWorld> intakingState =
-                stateMachine.registerState("Intaking", StateMachineTestsStates.INTAKING);
+                stateMachine.registerState(StateMachineTestsStates.INTAKING);
         State<StateMachineWorld> warmingUpState =
-                stateMachine.registerState("WarmingUp", StateMachineTestsStates.WARMINGUP);
+                stateMachine.registerState(StateMachineTestsStates.WARMINGUP);
         State<StateMachineWorld> shootingState =
-                stateMachine.registerState("Shooting", StateMachineTestsStates.SHOOTING);
+                stateMachine.registerState(StateMachineTestsStates.SHOOTING);
 
         // Defining Transitions
 

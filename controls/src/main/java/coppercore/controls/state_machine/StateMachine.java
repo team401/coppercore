@@ -30,8 +30,8 @@ public class StateMachine<World> {
      * @param state The state to be registered
      * @return The registered state
      */
-    public State<World> registerState(String stateName, State<World> state) {
-        states.put(stateName, state);
+    public State<World> registerState(State<World> state) {
+        states.put(state.name, state);
         state.setRequestedStateSupplier(() -> requestedState);
         return state;
     }
@@ -96,10 +96,30 @@ public class StateMachine<World> {
     /** Write a state machine configuration in graphviz format */
     public void writeGraphvizFile(PrintWriter pw) {
         pw.println("digraph {");
+        pw.println();
+        pw.println("  // Default Graphviz settings");
+        pw.println();
+        pw.println(
+                "  rankdir=LR;\r\n"
+                        + "\r\n"
+                        + "  node [\r\n"
+                        + "    shape=box,\r\n"
+                        + "    style=rounded\r\n"
+                        + "  ];\r\n"
+                        + "\r\n"
+                        + "  edge [\r\n"
+                        + "    fontsize=10\r\n"
+                        + "  ];");
+        pw.println();
+        pw.println("  // States");
+        pw.println();
         for (var state : states.entrySet()) {
             var stateName = state.getKey();
             pw.printf("  %s;%n", stateName);
         }
+        pw.println();
+        pw.println("  // Transitions");
+        pw.println();
         for (var entries : states.entrySet()) {
             var stateName = entries.getKey();
             var state = entries.getValue();
@@ -117,6 +137,7 @@ public class StateMachine<World> {
                         "  %s -> %s [label=\"%s\"];%n",
                         stateName, toStateName, transition.description);
             }
+            pw.println();
         }
         pw.println("}");
     }
