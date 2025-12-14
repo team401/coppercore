@@ -1,19 +1,23 @@
 package coppercore.controls.test;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import coppercore.controls.state_machine.State;
 import coppercore.controls.state_machine.StateMachine;
 import coppercore.controls.test.StateMachineTestsStates.StateMachineWorld;
+import java.io.File;
+import java.io.PrintWriter;
 import org.junit.jupiter.api.Test;
 
 public class StateMachineTests {
 
-	// This method exist to keep the Transition Test State Machine and the State Machine Graph State Machine the same
-	StateMachine<StateMachineWorld> createTestStateMachine(StateMachineWorld stateMachineWorld) {
-		StateMachine<StateMachineWorld> stateMachine = new StateMachine<>(stateMachineWorld);
+    // This method exist to keep the Transition Test State Machine and the State Machine Graph State
+    // Machine the same
+    StateMachine<StateMachineWorld> createTestStateMachine(StateMachineWorld stateMachineWorld) {
+        StateMachine<StateMachineWorld> stateMachine = new StateMachine<>(stateMachineWorld);
 
-		// Registering States
+        // Registering States
         State<StateMachineWorld> idleState =
                 stateMachine.registerState("Idle", StateMachineTestsStates.IDLE);
         State<StateMachineWorld> intakingState =
@@ -23,40 +27,45 @@ public class StateMachineTests {
         State<StateMachineWorld> shootingState =
                 stateMachine.registerState("Shooting", StateMachineTestsStates.SHOOTING);
 
-		// Defining Transitions
+        // Defining Transitions
 
         // Transitions that can happen from Idle state
         idleState
-                .when((StateMachineWorld world) -> world.shouldIntake && !world.hasNote)
+                .when(
+                        (StateMachineWorld world) -> world.shouldIntake && !world.hasNote,
+                        "should intake")
                 .transitionTo(intakingState);
         idleState
-                .when((StateMachineWorld world) -> world.shouldShoot && world.hasNote)
+                .when(
+                        (StateMachineWorld world) -> world.shouldShoot && world.hasNote,
+                        "should shoot")
                 .transitionTo(warmingUpState);
 
         // Transitions that can happen from Intaking state
         intakingState.whenFinished().transitionTo(idleState);
         intakingState
-                .when((StateMachineWorld world) -> !world.shouldIntake)
+                .when((StateMachineWorld world) -> !world.shouldIntake, "should not intake")
                 .transitionTo(idleState);
 
         // Transitions that can happen from WarmingUp state
         warmingUpState.whenFinished().transitionTo(shootingState);
         warmingUpState
-                .when((StateMachineWorld world) -> !world.shouldShoot)
+                .when((StateMachineWorld world) -> !world.shouldShoot, "should not shoot")
                 .transitionTo(idleState);
         warmingUpState.whenRequested(idleState).transitionTo(idleState);
 
         // Transitions that can happen from Shooting state
         shootingState.whenFinished().transitionTo(idleState);
-        shootingState.when((StateMachineWorld world) -> !world.shouldShoot).transitionTo(idleState);
+        shootingState
+                .when((StateMachineWorld world) -> !world.shouldShoot, "should not shoot")
+                .transitionTo(idleState);
         shootingState.whenRequested(idleState).transitionTo(idleState);
 
-		// Setting initial state
+        // Setting initial state
         stateMachine.setState(idleState);
 
-		return stateMachine;
-	}
-
+        return stateMachine;
+    }
 
     @Test
     public void StateMachineTransitionsTest() {
@@ -164,5 +173,41 @@ public class StateMachineTests {
         stateMachine.periodic();
         stateMachine.updateStates();
         assertSame(StateMachineTestsStates.IDLE, stateMachine.getCurrentState());
+    }
+
+    @Test
+    public void StateMachineGraphTest() {
+        StateMachineWorld stateMachineWorld = new StateMachineWorld();
+        StateMachine<StateMachineWorld> stateMachine = createTestStateMachine(stateMachineWorld);
+
+        String outputFilePath =
+                new File("").getAbsolutePath()
+                        + File.separator
+                        + "build"
+                        + File.separator
+                        + "resources"
+                        + File.separator
+                        + "test"
+                        + File.separator
+                        + "StateMachineGraphTestOutput.dot";
+
+        try {
+            // Ensure the output directory exists
+            File outputFile = new File(outputFilePath);
+            outputFile.getParentFile().mkdirs();
+
+            // Ensure the file is created if it does not exist
+            if (!outputFile.exists()) {
+                outputFile.createNewFile();
+            }
+
+            PrintWriter pw = new PrintWriter(outputFilePath);
+            // Write the graphviz file
+            stateMachine.writeGraphvizFile(pw);
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 }

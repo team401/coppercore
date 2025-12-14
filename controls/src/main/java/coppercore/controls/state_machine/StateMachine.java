@@ -1,5 +1,6 @@
 package coppercore.controls.state_machine;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -90,5 +91,33 @@ public class StateMachine<World> {
      */
     public void requestState(State<World> state) {
         this.requestedState = state;
+    }
+
+    /** Write a state machine configuration in graphviz format */
+    public void writeGraphvizFile(PrintWriter pw) {
+        pw.println("digraph {");
+        for (var state : states.entrySet()) {
+            var stateName = state.getKey();
+            pw.printf("  %s;%n", stateName);
+        }
+        for (var entries : states.entrySet()) {
+            var stateName = entries.getKey();
+            var state = entries.getValue();
+            var transitions = state.getTransitions();
+            for (var transition : transitions) {
+                var toState = transition.toState;
+                var toStateName = "";
+                for (var e : states.entrySet()) {
+                    if (e.getValue().equals(toState)) {
+                        toStateName = e.getKey();
+                        break;
+                    }
+                }
+                pw.printf(
+                        "  %s -> %s [label=\"%s\"];%n",
+                        stateName, toStateName, transition.description);
+            }
+        }
+        pw.println("}");
     }
 }

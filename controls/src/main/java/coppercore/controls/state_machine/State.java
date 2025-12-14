@@ -132,42 +132,67 @@ public abstract class State<World> {
     public class Transition {
         State<World> toState;
         Predicate<World> whenCondition;
+        String description;
 
-        Transition(State<World> toState, Predicate<World> whenCondition) {
+        Transition(State<World> toState, Predicate<World> whenCondition, String description) {
             this.toState = toState;
             this.whenCondition = whenCondition;
+            this.description = description;
         }
     }
 
     public class TransitionConditionBuilder {
         Predicate<World> condition;
+        // Need to make this more descriptive
+        String description = "";
 
-        TransitionConditionBuilder(Predicate<World> condition) {
+        TransitionConditionBuilder(Predicate<World> condition, String description) {
             this.condition = condition;
+            this.description = description;
         }
 
-        public TransitionConditionBuilder andWhen(Predicate<World> nextCondition) {
+        public TransitionConditionBuilder andWhen(Predicate<World> nextCondition, String label) {
             this.condition = this.condition.and(nextCondition);
+            this.description += " && " + label;
             return this;
         }
 
         public void transitionTo(State<World> toState) {
-            transitions.add(new Transition(toState, condition));
+            transitions.add(new Transition(toState, condition, description));
         }
     }
 
-    public TransitionConditionBuilder when(Predicate<World> condition) {
-        return new TransitionConditionBuilder(condition);
+    public TransitionConditionBuilder when(Predicate<World> condition, String description) {
+        return new TransitionConditionBuilder(condition, description);
+    }
+
+    public TransitionConditionBuilder whenFinished(String description) {
+        return when((world) -> isFinished(), description);
     }
 
     public TransitionConditionBuilder whenFinished() {
-        return when((world) -> isFinished());
+        return whenFinished("finished");
     }
 
-    public TransitionConditionBuilder whenRequested(State<World> requestedState) {
+    public TransitionConditionBuilder whenRequested(
+            State<World> requestedState, String description) {
         return when(
                 (world) ->
                         requestedState != null
-                                && requestedState.equals(this.requestedStateSupplier.get()));
+                                && requestedState.equals(this.requestedStateSupplier.get()),
+                description);
+    }
+
+    public TransitionConditionBuilder whenRequested(State<World> requestedState) {
+        return whenRequested(requestedState, "requested");
+    }
+
+    /**
+     * Gets the list of transitions defined for this state.
+     *
+     * @return The list of transitions
+     */
+    protected List<Transition> getTransitions() {
+        return transitions;
     }
 }
