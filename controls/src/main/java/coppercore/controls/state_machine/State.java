@@ -15,28 +15,37 @@ public abstract class State<World> {
     protected Supplier<State<World>> requestedStateSupplier;
     protected String name;
 
-    /** 
-     * This constructor sets the name of the state to the simple name of the class.
-     * It throws an IllegalStateException if the class is anonymous, to enforce
-     * that anonymous classes must use the constructor that takes a name parameter.
+    /**
+     * This constructor sets the name of the state to the simple name of the class. It throws an
+     * IllegalStateException if the class is anonymous, to enforce that anonymous classes must use
+     * the constructor that takes a name parameter.
      */
     public State() {
         // Ensure that this constructor does not work if the class is anonymous?
         if (this.getClass().isAnonymousClass()) {
-            throw new IllegalStateException("Cannot use zero-argument constructor for anonymous classes, use State(String name) instead");
+            throw new IllegalStateException(
+                    "Cannot use zero-argument constructor for anonymous classes, use State(String"
+                            + " name) instead");
         }
         this.name = this.getClass().getSimpleName();
         this.transitions = new ArrayList<>();
     }
 
-    /** Constructs a new State with the given name. 
+    /**
+     * Constructs a new State with the given name.
+     *
      * @param name The name of the state
-    */
+     */
     public State(String name) {
         this.name = name;
         this.transitions = new ArrayList<>();
     }
 
+    /**
+     * Sets the supplier for the requested state.
+     *
+     * @param supplier The supplier that provides the requested state
+     */
     public void setRequestedStateSupplier(Supplier<State<World>> supplier) {
         this.requestedStateSupplier = supplier;
     }
@@ -112,17 +121,6 @@ public abstract class State<World> {
         _onFinish();
     }
 
-    // TODO: Move this comment to the requestState method in StateMachine.java
-    /**
-     * Requests a transition to another state. This is different from marking the state as finished.
-     * Because of this, requesting a state does not automatically cause a state transition. And the
-     * state machine will only transition to another state if a transition condition is met, and the
-     * state machine is updated. Just because a state is requested does not mean the state machine
-     * will transition to it.
-     *
-     * @param state The StateKey of the requested state
-     */
-
     /**
      * Called when the state is entered. This method is called after a state transition. So it is
      * the first chance to perform any setup or initialization for this state.
@@ -147,11 +145,19 @@ public abstract class State<World> {
      */
     protected abstract void periodic(StateMachine<World> stateMachine, World world);
 
+    /** A class representing a transition from one state to another. */
     public class Transition {
         State<World> toState;
         Predicate<World> whenCondition;
         String description;
 
+        /**
+         * Constructor for Transition.
+         *
+         * @param toState The target state for the transition
+         * @param whenCondition The condition under which the transition occurs
+         * @param description A description of the transition
+         */
         Transition(State<World> toState, Predicate<World> whenCondition, String description) {
             this.toState = toState;
             this.whenCondition = whenCondition;
@@ -159,50 +165,101 @@ public abstract class State<World> {
         }
     }
 
+    /** A builder class for defining transition conditions and target states. */
     public class TransitionConditionBuilder {
         Predicate<World> condition;
         // Need to make this more descriptive
         String description = "";
 
+        /**
+         * Constructor for TransitionConditionBuilder.
+         *
+         * @param condition The condition for the transition
+         * @param description A description for the transition condition
+         */
         TransitionConditionBuilder(Predicate<World> condition, String description) {
             this.condition = condition;
             this.description = description;
         }
 
+        /**
+         * Combines the current condition with another condition using logical AND.
+         *
+         * @param nextCondition The next condition to combine
+         * @param label A label for the next condition
+         * @return The updated TransitionConditionBuilder
+         */
         public TransitionConditionBuilder andWhen(Predicate<World> nextCondition, String label) {
             this.condition = this.condition.and(nextCondition);
             this.description += " && " + label;
             return this;
         }
 
+        /**
+         * Defines the target state for the transition.
+         *
+         * @param toState The state to transition to
+         */
         public void transitionTo(State<World> toState) {
             transitions.add(new Transition(toState, condition, description));
         }
     }
 
+    /**
+     * Creates a transition condition builder with the given condition.
+     *
+     * @param condition The condition for the transition
+     * @param description A description for the transition condition
+     * @return The transition condition builder
+     */
     public TransitionConditionBuilder when(Predicate<World> condition, String description) {
         return new TransitionConditionBuilder(condition, description);
     }
 
+    /**
+     * Creates a transition condition builder that triggers when the state is finished.
+     *
+     * @param description A description for the transition condition
+     * @return The transition condition builder
+     */
     public TransitionConditionBuilder whenFinished(String description) {
         return when((world) -> isFinished(), description);
     }
 
+    /**
+     * Creates a transition condition builder that triggers when the state is finished.
+     *
+     * @return The transition condition builder
+     */
     public TransitionConditionBuilder whenFinished() {
-        return whenFinished("when" + this.name + " finished");
+        return whenFinished("When " + this.name + " finished");
     }
 
+    /**
+     * Creates a transition condition builder that triggers when the specified state is requested.
+     *
+     * @param requestedState The requested state to check for
+     * @param description A description for the transition condition
+     * @return The transition condition builder
+     */
     public TransitionConditionBuilder whenRequested(
             State<World> requestedState, String description) {
         return when(
                 (world) ->
                         requestedState != null
+                                && this.requestedStateSupplier != null
                                 && requestedState.equals(this.requestedStateSupplier.get()),
                 description);
     }
 
+    /**
+     * Creates a transition condition builder that triggers when the specified state is requested.
+     *
+     * @param requestedState The requested state to check for
+     * @return The transition condition builder
+     */
     public TransitionConditionBuilder whenRequested(State<World> requestedState) {
-        return whenRequested(requestedState, "When" + requestedState.name + " requested");
+        return whenRequested(requestedState, "When " + requestedState.name + " requested");
     }
 
     /**
@@ -214,10 +271,21 @@ public abstract class State<World> {
         return transitions;
     }
 
+    /**
+     * Gets the name of the state.
+     *
+     * @return The name of the state
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns a string representation of the state.
+     *
+     * @return A string representing the state
+     */
+    @Override
     public String toString() {
         // Maybe change to include more info later
         return name;

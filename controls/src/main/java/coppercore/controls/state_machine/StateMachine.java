@@ -26,7 +26,6 @@ public class StateMachine<World> {
     /**
      * Registers a new state to the state machine.
      *
-     * @param stateName Name of the new state
      * @param state The state to be registered
      * @return The registered state
      */
@@ -36,6 +35,11 @@ public class StateMachine<World> {
         return state;
     }
 
+    /**
+     * Gets a state by its name.
+     * @param stateName The name of the state
+     * @return The state with the given name, or null if not found
+     */
     public State<World> getStateByName(String stateName) {
         return states.get(stateName);
     }
@@ -53,9 +57,7 @@ public class StateMachine<World> {
             currentState._onExit(this, world);
         }
         currentState = newState;
-        if (currentState != null) {
-            currentState._onEntry(this, world);
-        }
+        currentState._onEntry(this, world);
     }
 
     /**
@@ -93,7 +95,9 @@ public class StateMachine<World> {
         this.requestedState = state;
     }
 
-    /** Write a state machine configuration in graphviz format */
+    /** Write a state machine configuration in graphviz format
+     * @param pw The PrintWriter to write to
+     */
     public void writeGraphvizFile(PrintWriter pw) {
         pw.println("digraph {");
         pw.println();
@@ -120,19 +124,12 @@ public class StateMachine<World> {
         pw.println();
         pw.println("  // Transitions");
         pw.println();
-        for (var entries : states.entrySet()) {
-            var stateName = entries.getKey();
-            var state = entries.getValue();
+        for (var state : states.values()) {
+            var stateName = state.name;
             var transitions = state.getTransitions();
             for (var transition : transitions) {
                 var toState = transition.toState;
-                var toStateName = "";
-                for (var e : states.entrySet()) {
-                    if (e.getValue().equals(toState)) {
-                        toStateName = e.getKey();
-                        break;
-                    }
-                }
+                var toStateName = toState.name;
                 pw.printf(
                         "  %s -> %s [label=\"%s\"];%n",
                         stateName, toStateName, transition.description);

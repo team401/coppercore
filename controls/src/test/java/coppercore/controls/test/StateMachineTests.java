@@ -198,13 +198,15 @@ public class StateMachineTests {
 
             // Ensure the file is created if it does not exist
             if (!outputFile.exists()) {
-                outputFile.createNewFile();
+                if (!outputFile.createNewFile()) {
+                    fail("Failed to create the output file: " + outputFilePath);
+                }
             }
 
-            PrintWriter pw = new PrintWriter(outputFilePath);
-            // Write the graphviz file
-            stateMachine.writeGraphvizFile(pw);
-            pw.close();
+            try (PrintWriter pw = new PrintWriter(outputFilePath)) {
+                // Write the graphviz file
+                stateMachine.writeGraphvizFile(pw);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             fail();
