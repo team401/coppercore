@@ -47,6 +47,8 @@ public class CachedDataReadTest {
         Assertions.assertEquals(stringData.read(), "real");
         stringData.write("fake");
         Assertions.assertEquals(stringData.read(), "fake");
+        stringData.write(null);
+        Assertions.assertEquals(stringData.read(), "fake");
         CachedDataRead<Integer> integerData = new CachedDataRead<>(10);
         integerData.write(100);
         Assertions.assertEquals(integerData.read(), 100);
@@ -72,10 +74,16 @@ public class CachedDataReadTest {
     @Test
     public void readTestNull() {
         CachedDataRead<Integer> integerData = new CachedDataRead<>(10);
+        CachedDataRead<String> stringData = new CachedDataRead<>(10);
         integerData.write(100);
+        stringData.write(null);
         for (int i = 0; i < 10; i++) {
             Assertions.assertEquals(integerData.read(), 100);
         }
+        for (int i = 0; i < 8; i++) {
+            Assertions.assertEquals(stringData.read(), null);
+        }
         Assertions.assertEquals(integerData.read(), null);
+        Assertions.assertEquals(stringData.read(), null);
     }
 }

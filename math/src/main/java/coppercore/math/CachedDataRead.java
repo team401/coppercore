@@ -43,7 +43,7 @@ public class CachedDataRead<Type> {
     /**
      * This class checks if the cache is stale(readcount).
      *
-     * @return A boolean for whether the cache is stale or not
+     * @return true if the cache is stale, false if not
      */
     public boolean isStale() {
         return readCount >= maxReads;

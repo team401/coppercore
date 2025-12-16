@@ -45,7 +45,7 @@ public class CachedDataTime<Type> {
     /**
      * This class checks if the cache is stale based on time.
      *
-     * @return A boolean for whether the cache is stale or not
+     * @return true if the cache is stale, false if not
      */
     public boolean isStale() {
         double currentTime = MathSharedStore.getTimestamp() * 1000;

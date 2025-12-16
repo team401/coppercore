@@ -22,8 +22,6 @@ public class CachedDataTimeTest {
         setMockTimeSeconds(0.0);
     }
 
-    public static void enableMockTime() {}
-
     public static void setMockTime(long time) {}
 
     /**
@@ -38,34 +36,37 @@ public class CachedDataTimeTest {
         WPIUtilJNI.setMockTime((long) Seconds.of(timeSeconds).in(Microseconds));
     }
 
-    public static void disableMockTime() {}
-
     @Test
     public void isStaleTest() {
-        enableMockTime();
         CachedDataTime<Integer> data = new CachedDataTime<>(1.5);
+        setMockTimeSeconds(1.5);
+        Assertions.assertTrue(data.isStale());
         double staletimeTest = 0.1;
         for (int i = 0; i < 7; i++) {
             setMockTimeSeconds(staletimeTest + 0.1 * i);
             Assertions.assertFalse(data.isStale());
+            data.write(67);
+            Assertions.assertEquals(data.read(), 67);
         }
-        setMockTimeSeconds(1.5);
+        setMockTimeSeconds(
+                2.2001); // 0.7+1.5 because everytime it writes it will reset the last update time
+        // so
+        // we need to adjust accordingly
         Assertions.assertTrue(data.isStale());
-        disableMockTime();
     }
 
     @Test
     public void isStaleTest2() {
-        enableMockTime();
         CachedDataTime<Integer> data = new CachedDataTime<>(1.5);
         double staletimeTest = 0.05;
         for (int i = 0; i < 5; i++) {
             setMockTimeSeconds(staletimeTest + 0.05 * i);
             Assertions.assertFalse(data.isStale());
+            data.write(5);
+            Assertions.assertEquals(data.read(), 5);
         }
-        setMockTimeSeconds(1.5);
+        setMockTimeSeconds(1.75); // 1.5 + 0.25 from updates
         Assertions.assertTrue(data.isStale());
-        disableMockTime();
     }
 
     @SuppressWarnings({"rawtypes"})
@@ -75,6 +76,8 @@ public class CachedDataTimeTest {
         stringData.write("real");
         Assertions.assertEquals(stringData.read(), "real");
         stringData.write("fake");
+        Assertions.assertEquals(stringData.read(), "fake");
+        stringData.write(null);
         Assertions.assertEquals(stringData.read(), "fake");
         CachedDataTime<Integer> integerData = new CachedDataTime<>(10);
         integerData.write(100);
@@ -100,20 +103,16 @@ public class CachedDataTimeTest {
 
     @Test
     public void readTestTrue2() {
-        enableMockTime();
         CachedDataTime data = new CachedDataTime(3);
         data.write(-100);
         setMockTimeSeconds(2.0);
         Assertions.assertEquals(data.read(), -100);
-        disableMockTime();
     }
 
     @Test
     public void readTestNull() {
-        enableMockTime();
         CachedDataTime data = new CachedDataTime(1);
         setMockTimeSeconds(1.0);
         Assertions.assertEquals(data.read(), null);
-        disableMockTime();
     }
 }
