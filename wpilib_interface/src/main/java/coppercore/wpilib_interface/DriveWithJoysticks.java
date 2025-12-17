@@ -12,8 +12,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import java.util.function.Supplier;
 
 /**
- * This class allows us to be able to drive with the controller joysticks and get the linear
- * velocity along with controlling it. It also allows us to get the goal speeds.
+ * The DriveWithJoysticks command controls a holonomic drivetrain using the joysticks or suppliers
+ * provided. It translates from the joystick to field coordinates, applies joystick deadbands, and
+ * squares joystick inputs for more precise control at low speeds.
  */
 public class DriveWithJoysticks extends Command {
     private final DriveTemplate drive;
@@ -25,14 +26,20 @@ public class DriveWithJoysticks extends Command {
     private final double joystickDeadband;
 
     /**
-     * This defines a couple of variables that are to be used to help drive with the joysticks.
+     * Create a new DriveWithJoysticks command using CommandJoystick objects.
+     *
+     * <p>An alternate constructor exists for non-CommandJoystick teams that simply takes a
+     * Supplier<Double> for each joystick input.
      *
      * @param drive This is the drive subsystem supplied by the robot project
-     * @param leftJoystick This controls the left joystick
-     * @param rightJoystick This controls the right joystick
-     * @param maxLinearVelocity This sets the maximum linear velocity
-     * @param maxAngularVelocity This sets the maximum angular velocity
-     * @param joystickDeadband This sets the deadband of the joysticks
+     * @param leftJoystick The left (translation) joystick
+     * @param rightJoystick The right (rotation) joystick. The x-axis of this joystick is used as
+     *     rotation velocity input, while the y-axis is ignored.
+     * @param maxLinearVelocity The maximum linear velocity, in meters per second
+     * @param maxAngularVelocity The maximum angular velocity, in radians per second
+     * @param joystickDeadband The deadband of the joysticks, as a fraction (0.0 to 1.0). This value
+     *     is applied in both directions from zero (e.g. a deadband of 0.17 means that inputs from
+     *     -0.17 to 0.17 are ignored).
      */
     public DriveWithJoysticks(
             DriveTemplate drive,
@@ -41,18 +48,35 @@ public class DriveWithJoysticks extends Command {
             double maxLinearVelocity,
             double maxAngularVelocity,
             double joystickDeadband) {
-        this.drive = drive;
-        this.driveXSupplier = () -> leftJoystick.getX();
-        this.driveYSupplier = () -> leftJoystick.getY();
-        this.rotationSupplier = () -> rightJoystick.getX();
-
-        this.maxLinearVelocity = maxLinearVelocity;
-        this.maxAngularVelocity = maxAngularVelocity;
-        this.joystickDeadband = joystickDeadband;
-
-        addRequirements(this.drive);
+        this(
+                drive,
+                leftJoystick::getX,
+                leftJoystick::getY,
+                rightJoystick::getX,
+                maxLinearVelocity,
+                maxAngularVelocity,
+                joystickDeadband);
     }
 
+    /**
+     * Create a new DriveWithJoysticks command using suppliers for joystick inputs.
+     *
+     * <p>An alternate constructor exists for CommandJoystick teams that uses a CommandJoystick for
+     * each stick, rather than suppliers.
+     *
+     * @param drive This is the drive subsystem supplied by the robot project
+     * @param driveXSupplier A supplier for drive translation, in the X axis of the joystick. This
+     *     becomes -y translation in field coordinates.
+     * @param driveYSupplier A supplier for drive translation, in the Y axis of the joystick. This
+     *     becomes -x translation in field coordinates.
+     * @param rotationSupplier A supplier for drive rotation, in the X axis of the joystick. This
+     *     becomes -omega in field coordinates.
+     * @param maxLinearVelocity The maximum linear velocity, in meters per second
+     * @param maxAngularVelocity The maximum angular velocity, in radians per second
+     * @param joystickDeadband The deadband of the joysticks, as a fraction (0.0 to 1.0). This value
+     *     is applied in both directions from zero (e.g. a deadband of 0.17 means that inputs from
+     *     -0.17 to 0.17 are ignored).
+     */
     public DriveWithJoysticks(
             DriveTemplate drive,
             Supplier<Double> driveXSupplier,
@@ -71,6 +95,11 @@ public class DriveWithJoysticks extends Command {
 
         this.maxLinearVelocity = maxLinearVelocity;
         this.maxAngularVelocity = maxAngularVelocity;
+
+        if (joystickDeadband < 0.0 || 1.0 < joystickDeadband) {
+            throw new IllegalArgumentException(
+                    "Joystick deadband must be between 0 and 1 but was " + joystickDeadband);
+        }
         this.joystickDeadband = joystickDeadband;
 
         addRequirements(this.drive);
