@@ -116,7 +116,7 @@ public class DriveWithJoysticks extends Command {
         Translation2d linearSpeeds = getLinearVelocity(-leftJoystickX, -leftJoystickY);
 
         double omega = Deadband.oneAxisDeadband(-rightJoystickX, joystickDeadband);
-        omega = (omega - joystickDeadband) / (1 - joystickDeadband);
+        omega = (omega - Math.signum(omega) * joystickDeadband) / (1 - joystickDeadband);
         omega = Math.copySign(omega * omega, omega);
 
         ChassisSpeeds speeds =
@@ -138,8 +138,12 @@ public class DriveWithJoysticks extends Command {
     public Translation2d getLinearVelocity(double x, double y) {
         double[] deadbands = Deadband.twoAxisDeadband(x, y, joystickDeadband);
 
-        double xDeadband = (deadbands[0] - joystickDeadband) / (1 - joystickDeadband);
-        double yDeadband = (deadbands[1] - joystickDeadband) / (1 - joystickDeadband);
+        double xDeadband =
+                (deadbands[0] - Math.signum(deadbands[0]) * joystickDeadband)
+                        / (1 - joystickDeadband);
+        double yDeadband =
+                (deadbands[1] - Math.signum(deadbands[1]) * joystickDeadband)
+                        / (1 - joystickDeadband);
         double magnitude = Math.hypot(xDeadband, yDeadband);
 
         /*
