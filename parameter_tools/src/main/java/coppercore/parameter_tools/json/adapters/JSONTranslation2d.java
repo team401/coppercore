@@ -1,6 +1,6 @@
 package coppercore.parameter_tools.json.adapters;
 
-import coppercore.parameter_tools.json.JSONObject;
+import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class JSONTranslation2d extends JSONObject<Translation2d> {

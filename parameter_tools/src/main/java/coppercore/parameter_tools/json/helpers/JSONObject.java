@@ -1,4 +1,4 @@
-package coppercore.parameter_tools.json;
+package coppercore.parameter_tools.json.helpers;
 
 public abstract class JSONObject<T> {
     protected JSONObject(T object) {}

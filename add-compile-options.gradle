@@ -1,0 +1,11 @@
+// to activate these compiler options, run
+//
+//  ./gradlew compileJava --init-script add-compile-options.gradle
+// or, if necessary
+//  ./gradlew compileJava --init-script add-compile-options.gradle --rerun-tasks
+//
+allprojects {
+	tasks.withType(JavaCompile).configureEach {
+		options.compilerArgs += ["-Xlint:deprecation", "-Xlint:unchecked"]
+	}
+}

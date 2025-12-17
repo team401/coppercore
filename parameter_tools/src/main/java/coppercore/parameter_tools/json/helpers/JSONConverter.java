@@ -1,4 +1,4 @@
-package coppercore.parameter_tools.json;
+package coppercore.parameter_tools.json.helpers;
 
 import coppercore.parameter_tools.json.adapters.JSONPose2d;
 import coppercore.parameter_tools.json.adapters.JSONRotation2d;
@@ -59,7 +59,6 @@ public class JSONConverter {
 
     @SuppressWarnings("unchecked")
     public static <T> Class<? extends JSONObject<T>> convert(Class<T> clazz) {
-        System.out.println(clazz);
         try {
             return (Class<? extends JSONObject<T>>) jsonMap.get(clazz);
         } catch (ClassCastException e) {
