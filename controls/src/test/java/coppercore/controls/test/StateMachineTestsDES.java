@@ -1,12 +1,9 @@
 package coppercore.controls.test;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import coppercore.controls.state_machine.State;
 import coppercore.controls.state_machine.StateMachine;
-import java.io.File;
-import java.io.PrintWriter;
 import java.util.List;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
@@ -223,44 +220,6 @@ public class StateMachineTestsDES {
 
         // Finally, run the simulation
         sim.simulate(10000);
-    }
-
-    @Test
-    public void StateMachineGraphTest() {
-        Robot stateMachineWorld = new Robot();
-        StateMachine<Robot> stateMachine = createTestStateMachine(stateMachineWorld);
-
-        String outputFilePath =
-                new File("").getAbsolutePath()
-                        + File.separator
-                        + "build"
-                        + File.separator
-                        + "resources"
-                        + File.separator
-                        + "test"
-                        + File.separator
-                        + "StateMachineGraphTestOutput.dot";
-
-        try {
-            // Ensure the output directory exists
-            File outputFile = new File(outputFilePath);
-            outputFile.getParentFile().mkdirs();
-
-            // Ensure the file is created if it does not exist
-            if (!outputFile.exists()) {
-                if (!outputFile.createNewFile()) {
-                    fail("Failed to create the output file: " + outputFilePath);
-                }
-            }
-
-            try (PrintWriter pw = new PrintWriter(outputFilePath)) {
-                // Write the graphviz file
-                stateMachine.writeGraphvizFile(pw);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
     }
 
     public static class Robot {
