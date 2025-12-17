@@ -25,7 +25,7 @@ public class DriveWithJoysticksTests {
     private static double SPEED_EPSILON = 1e-6;
 
     /**
-     * Assert that each field of a given set of ChassisSpeds is within SPEED_EPSILON of an expected
+     * Assert that each field of a given set of ChassisSpeeds is within SPEED_EPSILON of an expected
      * value.
      *
      * <p>Using AssertEquals seems to try pointer comparison and fail, so this method is required
@@ -113,6 +113,79 @@ public class DriveWithJoysticksTests {
                 "Moving all 3 sticks to bottom + right should result in sqrt(2)/2 velocity in the"
                     + " negative direction for both translation axes and -pi angular velocity.");
 
+        assertFieldCentric(dummyDrive);
+    }
+
+    @Test
+    public void testDeadbands() {
+        var dummyDrive = new DummyDriveTemplate();
+        var command =
+                new DriveWithJoysticks(
+                        dummyDrive,
+                        () -> leftStickX,
+                        () -> leftStickY,
+                        () -> rightStickX,
+                        1.0,
+                        Math.PI,
+                        0.5);
+
+        command.initialize();
+
+        command.execute();
+
+        Assertions.assertEquals(
+                new ChassisSpeeds(),
+                dummyDrive.getLastGoalSpeeds(),
+                "Zeros on joysticks should result in zero chassis speeds.");
+        assertFieldCentric(dummyDrive);
+
+        leftStickX = 0.5;
+        leftStickY = 0.5;
+        rightStickX = 0.5;
+        command.execute();
+
+        Assertions.assertEquals(
+                new ChassisSpeeds(),
+                dummyDrive.getLastGoalSpeeds(),
+                "All axes should be zero when within deadband.");
+        assertFieldCentric(dummyDrive);
+
+        leftStickX = 0.0;
+        leftStickY = -0.75;
+        rightStickX = 0.0;
+        command.execute();
+
+        assertChassisSpeeds(
+                dummyDrive.getLastGoalSpeeds(),
+                0.25,
+                0.0,
+                0.0,
+                "50% of the way through post-deadband range of motion should result in a 0.5^2 ="
+                        + " 0.25 output");
+        assertFieldCentric(dummyDrive);
+
+        leftStickY = -0.9;
+        command.execute();
+
+        assertChassisSpeeds(
+                dummyDrive.getLastGoalSpeeds(),
+                0.8 * 0.8,
+                0.0,
+                0.0,
+                "80% of the way through post-deadband range of motion should result in a 0.8^2 ="
+                        + " 0.64 output");
+        assertFieldCentric(dummyDrive);
+
+        leftStickY = -1.0;
+        command.execute();
+
+        assertChassisSpeeds(
+                dummyDrive.getLastGoalSpeeds(),
+                1.0,
+                0.0,
+                0.0,
+                "100% of the way through post-deadband range of motion should result in a 1.0^2 ="
+                        + " 1.0 output");
         assertFieldCentric(dummyDrive);
     }
 }
