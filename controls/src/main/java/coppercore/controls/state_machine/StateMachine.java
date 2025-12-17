@@ -37,6 +37,7 @@ public class StateMachine<World> {
 
     /**
      * Gets a state by its name.
+     *
      * @param stateName The name of the state
      * @return The state with the given name, or null if not found
      */
@@ -95,7 +96,9 @@ public class StateMachine<World> {
         this.requestedState = state;
     }
 
-    /** Write a state machine configuration in graphviz format
+    /**
+     * Write a state machine configuration in graphviz format
+     *
      * @param pw The PrintWriter to write to
      */
     public void writeGraphvizFile(PrintWriter pw) {
