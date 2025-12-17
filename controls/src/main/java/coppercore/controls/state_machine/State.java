@@ -114,7 +114,7 @@ public abstract class State<World> {
      * state machine will only transition to another state if a transition condition is met, and the
      * state machine is updated. But it can be used in conjunction with transitionWhenFinished() to
      * trigger a transition. And it can be used to indicate that the state's work is done. When
-     * finish() is called, the onFinish() method is also called.  If there are multiple calls to
+     * finish() is called, the onFinish() method is also called. If there are multiple calls to
      * finish, onFinish() is called only once.
      */
     protected final void finish() {
