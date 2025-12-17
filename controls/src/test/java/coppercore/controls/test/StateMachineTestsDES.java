@@ -69,7 +69,7 @@ public class StateMachineTestsDES {
 
         DES sim = new DES();
 
-        // Run robot loop every 20ms
+        // Run robot loop every 20ms, that is, at 0, 20, 40, 60 and so on.
         DES.Runnable robotLoop =
                 new DES.Runnable() {
                     @Override
@@ -152,7 +152,8 @@ public class StateMachineTestsDES {
                 });
 
         // XXX FIXME. There's a problem here; going into the idle
-        // state takes two iterations of the loop; it fails with 161-179.
+        // state takes two iterations of the loop; it fails if we tested
+        // at 161 after the next robot loop iteration.
         sim.schedule(181, assertIn.apply(idleState));
 
         // ### Return to WarmingUp and simulate not having a note in warmup to test requested
@@ -181,42 +182,43 @@ public class StateMachineTestsDES {
                     stateMachineWorld.hasNote = true;
                 });
 
-        /* CONTINUE HERE
-
         // ### Test transition to Shooting
-        stateMachine.updateStates();
-        assertSame(warmingUpState, stateMachine.getCurrentState());
-        stateMachine.periodic();
+        sim.schedule(241, assertIn.apply(warmingUpState));
 
-        stateMachine.updateStates();
-        assertSame(shootingState, stateMachine.getCurrentState());
+        // I think there should be an external trigger, such as
+        // note left the robot
+        sim.schedule(261, assertIn.apply(shootingState));
 
         // ### Test transition back to Idle from Shooting when shooting is canceled
-        stateMachineWorld.shouldShoot = false;
-        stateMachine.updateStates();
-        assertSame(idleState, stateMachine.getCurrentState());
+        sim.schedule(
+                265,
+                (_time) -> {
+                    stateMachineWorld.shouldShoot = false;
+                });
+
+        sim.schedule(281, assertIn.apply(idleState));
 
         // ### Return to Shooting and simulate not having a note in shooting to test finishing
-        // transition
-        stateMachineWorld.shouldShoot = true;
-        stateMachine.updateStates();
+        sim.schedule(
+                285,
+                (_time) -> {
+                    stateMachineWorld.shouldShoot = true;
+                });
 
         // Ensure we are in WarmingUp state
-        assertSame(warmingUpState, stateMachine.getCurrentState());
+        sim.schedule(301, assertIn.apply(warmingUpState));
 
         // Finish WarmingUp to get to Shooting
-        stateMachine.periodic();
-
-        // Move to Shooting state
-        stateMachine.updateStates();
-        assertSame(shootingState, stateMachine.getCurrentState());
+        sim.schedule(321, assertIn.apply(shootingState));
 
         // Simulate not having a note
-        stateMachineWorld.hasNote = false;
-        stateMachine.periodic();
-        stateMachine.updateStates();
-        assertSame(idleState, stateMachine.getCurrentState());
-        */
+        sim.schedule(
+                325,
+                (_time) -> {
+                    stateMachineWorld.hasNote = false;
+                });
+
+        sim.schedule(341, assertIn.apply(idleState));
 
         // Finally, run the simulation
         sim.simulate(10000);
