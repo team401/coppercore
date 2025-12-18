@@ -139,8 +139,8 @@ public class DriveWithJoysticksTests {
                 "Zeros on joysticks should result in zero chassis speeds.");
         assertFieldCentric(dummyDrive);
 
-        leftStickX = 0.5;
-        leftStickY = 0.5;
+        leftStickX = 0.5 * Math.cos(Math.PI / 4);
+        leftStickY = 0.5 * Math.sin(Math.PI / 4);
         rightStickX = 0.5;
         command.execute();
 
