@@ -43,6 +43,42 @@ public class Deadband {
     }
 
     /**
+     * Filter out inputs that are inside a radius of `deadband` from 0,0 (applies a circular
+     * deadband). Then, normalizes values so that the magnitude is on a scale from 0-1 beginning
+     * where 0 is the outside ring of the deadband circle and 1 is a circle with radius 1.
+     *
+     * @param inputX The x-value of the input
+     * @param inputY The y-value of the input
+     * @param deadband How big an input can be to still be filtered out
+     * @return A 2-element array of doubles where x is element 0 and y is element 1
+     */
+    public static double[] twoAxisDeadbandNormalized(
+            double inputX, double inputY, double deadband) {
+        if (deadband < 0.0) {
+            throw new IllegalArgumentException(
+                    "Deadband must be zero or positive, but was " + deadband);
+        }
+        double[] output = new double[2];
+
+        double magnitude = Math.hypot(inputX, inputY);
+
+        System.out.print("2ADBN " + inputX + " " + inputY + " " + magnitude + "/" + deadband + ":");
+
+        if (magnitude <= deadband) {
+            output[0] = 0.0;
+            output[1] = 0.0;
+        } else {
+            double newMagnitude = (magnitude - deadband) / (1 - deadband);
+            output[0] = inputX / magnitude * newMagnitude;
+            output[1] = inputY / magnitude * newMagnitude;
+        }
+
+        System.out.println(output[0] + " " + output[1]);
+
+        return output;
+    }
+
+    /**
      * This filters out inputs that are in a 3-D spherical format
      *
      * @param inputX The x-value of the input
