@@ -62,8 +62,6 @@ public class Deadband {
 
         double magnitude = Math.hypot(inputX, inputY);
 
-        System.out.print("2ADBN " + inputX + " " + inputY + " " + magnitude + "/" + deadband + ":");
-
         if (magnitude <= deadband) {
             output[0] = 0.0;
             output[1] = 0.0;
@@ -72,8 +70,6 @@ public class Deadband {
             output[0] = inputX / magnitude * newMagnitude;
             output[1] = inputY / magnitude * newMagnitude;
         }
-
-        System.out.println(output[0] + " " + output[1]);
 
         return output;
     }
