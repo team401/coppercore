@@ -38,9 +38,9 @@ public class DriveWithJoysticks extends Command {
      *     fully deflected. In m/s.
      * @param maxAngularVelocity Maximum steering velocity, which will be commanded when steer
      *     joystick is fully deflected. In rad/s.
-     * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0). This value
-     *     is applied in both directions from zero (e.g. a deadband of 0.17 means that inputs from
-     *     -0.17 to 0.17 are ignored).
+     * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0).
+     *     This value is applied in both directions from zero (e.g. a deadband of 0.17 means that
+     *     inputs from -0.17 to 0.17 are ignored).
      */
     public DriveWithJoysticks(
             DriveTemplate drive,
@@ -77,9 +77,9 @@ public class DriveWithJoysticks extends Command {
      *     fully deflected. In m/s.
      * @param maxAngularVelocity Maximum steering velocity, which will be commanded when steer
      *     joystick is fully deflected. In rad/s.
-     * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0). This value
-     *     is applied in both directions from zero (e.g. a deadband of 0.17 means that inputs from
-     *     -0.17 to 0.17 are ignored).
+     * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0).
+     *     This value is applied in both directions from zero (e.g. a deadband of 0.17 means that
+     *     inputs from -0.17 to 0.17 are ignored).
      */
     public DriveWithJoysticks(
             DriveTemplate drive,
