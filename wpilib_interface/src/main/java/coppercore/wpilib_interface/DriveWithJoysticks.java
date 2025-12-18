@@ -38,7 +38,9 @@ public class DriveWithJoysticks extends Command {
      *     fully deflected. In m/s.
      * @param maxAngularVelocity Maximum steering velocity, which will be commanded when steer
      *     joystick is fully deflected. In rad/s.
-     * @param joystickDeadband Deadband to apply to the joystick inputs.
+     * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0).
+     *     This value is applied in both directions from zero (e.g. a deadband of 0.17 means that
+     *     inputs from -0.17 to 0.17 are ignored).
      */
     public DriveWithJoysticks(
             DriveTemplate drive,
@@ -63,18 +65,21 @@ public class DriveWithJoysticks extends Command {
      * <p>An alternate constructor exists for CommandJoystick teams that uses a CommandJoystick for
      * each stick, rather than suppliers.
      *
-     * @param drive This is the drive subsystem supplied by the robot project
-     * @param driveXSupplier A supplier for drive translation, in the X axis of the joystick. This
-     *     becomes -y translation in field coordinates.
-     * @param driveYSupplier A supplier for drive translation, in the Y axis of the joystick. This
-     *     becomes -x translation in field coordinates.
-     * @param rotationSupplier A supplier for drive rotation, in the X axis of the joystick. This
-     *     becomes -omega in field coordinates.
-     * @param maxLinearVelocity The maximum linear velocity, in meters per second
-     * @param maxAngularVelocity The maximum angular velocity, in radians per second
-     * @param joystickDeadband The deadband of the joysticks, as a fraction (0.0 to 1.0). This value
-     *     is applied in both directions from zero (e.g. a deadband of 0.17 means that inputs from
-     *     -0.17 to 0.17 are ignored).
+     * @param drive The Drive subsystem supplied by the robot project.
+     * @param driveXSupplier A double supplier supplying the X axis of the strafe. joystick. This is
+     *     the left/right drive control as viewed from the top of the joystick, NOT the X axis in
+     *     robot coordinates.
+     * @param driveYSupplier A double supplier supplying the Y axis of the strafe joystick. This is
+     *     the up/down drive control as viewed from the top of the joystick, NOT the Y axis in robot
+     *     coordinates.
+     * @param rotationSupplier A double supplier supplying the steer axis input.
+     * @param maxLinearVelocity Maximum driving velocity, which will be commanded when joystick is
+     *     fully deflected. In m/s.
+     * @param maxAngularVelocity Maximum steering velocity, which will be commanded when steer
+     *     joystick is fully deflected. In rad/s.
+     * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0).
+     *     This value is applied in both directions from zero (e.g. a deadband of 0.17 means that
+     *     inputs from -0.17 to 0.17 are ignored).
      */
     public DriveWithJoysticks(
             DriveTemplate drive,
