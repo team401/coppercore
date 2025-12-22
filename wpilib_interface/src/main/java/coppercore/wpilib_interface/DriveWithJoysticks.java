@@ -12,9 +12,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import java.util.function.Supplier;
 
 /**
- * A command to control a drivetrain using joysticks as input.
- *
- * <p>This command squares the magnitude of the inputs for more precise low-speed control.
+ * The DriveWithJoysticks command controls a holonomic drivetrain using the joysticks or suppliers
+ * provided. It translates from the joystick to field coordinates, applies joystick deadbands, and
+ * squares joystick inputs for more precise control at low speeds.
  */
 public class DriveWithJoysticks extends Command {
     private final DriveTemplate drive;
@@ -29,7 +29,7 @@ public class DriveWithJoysticks extends Command {
      * Initialize a DriveWithJoysticks command using CommandJoysticks for input.
      *
      * <p>If using a controller that does not support CommandJoystick, there is an alternate
-     * initializer that accepts suppliers.
+     * constructor that accepts suppliers.
      *
      * @param drive The drive subsystem supplied by the robot project.
      * @param leftJoystick The left (translation/strafe) joystick.
@@ -38,7 +38,9 @@ public class DriveWithJoysticks extends Command {
      *     fully deflected. In m/s.
      * @param maxAngularVelocity Maximum steering velocity, which will be commanded when steer
      *     joystick is fully deflected. In rad/s.
-     * @param joystickDeadband Deadband to apply to the joystick inputs.
+     * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0).
+     *     This value is applied in both directions from zero (e.g. a deadband of 0.17 means that
+     *     inputs from -0.17 to 0.17 are ignored).
      */
     public DriveWithJoysticks(
             DriveTemplate drive,
@@ -47,16 +49,14 @@ public class DriveWithJoysticks extends Command {
             double maxLinearVelocity,
             double maxAngularVelocity,
             double joystickDeadband) {
-        this.drive = drive;
-        this.driveXSupplier = () -> leftJoystick.getX();
-        this.driveYSupplier = () -> leftJoystick.getY();
-        this.rotationSupplier = () -> rightJoystick.getX();
-
-        this.maxLinearVelocity = maxLinearVelocity;
-        this.maxAngularVelocity = maxAngularVelocity;
-        this.joystickDeadband = joystickDeadband;
-
-        addRequirements(this.drive);
+        this(
+                drive,
+                leftJoystick::getX,
+                leftJoystick::getY,
+                rightJoystick::getX,
+                maxLinearVelocity,
+                maxAngularVelocity,
+                joystickDeadband);
     }
 
     /**
@@ -77,7 +77,9 @@ public class DriveWithJoysticks extends Command {
      *     fully deflected. In m/s.
      * @param maxAngularVelocity Maximum steering velocity, which will be commanded when steer
      *     joystick is fully deflected. In rad/s.
-     * @param joystickDeadband Deadband to apply to the joystick inputs.
+     * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0).
+     *     This value is applied in both directions from zero (e.g. a deadband of 0.17 means that
+     *     inputs from -0.17 to 0.17 are ignored).
      */
     public DriveWithJoysticks(
             DriveTemplate drive,
@@ -97,6 +99,11 @@ public class DriveWithJoysticks extends Command {
 
         this.maxLinearVelocity = maxLinearVelocity;
         this.maxAngularVelocity = maxAngularVelocity;
+
+        if (joystickDeadband < 0.0 || 1.0 < joystickDeadband) {
+            throw new IllegalArgumentException(
+                    "Joystick deadband must be between 0 and 1 but was " + joystickDeadband);
+        }
         this.joystickDeadband = joystickDeadband;
 
         addRequirements(this.drive);
@@ -116,6 +123,7 @@ public class DriveWithJoysticks extends Command {
         Translation2d linearSpeeds = getLinearVelocity(-leftJoystickX, -leftJoystickY);
 
         double omega = Deadband.oneAxisDeadband(-rightJoystickX, joystickDeadband);
+        omega = (omega - Math.signum(omega) * joystickDeadband) / (1 - joystickDeadband);
         omega = Math.copySign(omega * omega, omega);
 
         ChassisSpeeds speeds =
@@ -135,11 +143,9 @@ public class DriveWithJoysticks extends Command {
      * @return Translation2d with directions of velocity
      */
     public Translation2d getLinearVelocity(double x, double y) {
-        double[] deadbands = Deadband.twoAxisDeadband(x, y, joystickDeadband);
+        double[] deadbands = Deadband.twoAxisDeadbandNormalized(x, y, joystickDeadband);
 
-        double xDeadband = deadbands[0];
-        double yDeadband = deadbands[1];
-        double magnitude = Math.hypot(xDeadband, yDeadband);
+        double magnitude = Math.hypot(deadbands[0], deadbands[1]);
 
         /*
          * joystick x/y is opposite of field x/y
