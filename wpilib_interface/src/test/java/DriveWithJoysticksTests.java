@@ -33,7 +33,7 @@ public class DriveWithJoysticksTests {
      *
      * @param speeds The ChassisSpeeds to test
      * @param expectedVx The expected vx in m/s
-     * @param expectedVx The expected vy in m/s
+     * @param expectedVy The expected vy in m/s
      * @param expectedOmega The expected omega (angular velocity) in rad/s
      * @param message The message to pass to each assertEquals call
      */
