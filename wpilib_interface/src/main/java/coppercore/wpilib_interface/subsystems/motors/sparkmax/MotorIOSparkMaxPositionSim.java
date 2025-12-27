@@ -140,7 +140,7 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
             MotorType motorType,
             PositionSimAdapter physicsSimAdapter,
             Function<Integer, DCMotor> motorFactory) {
-        return newFollower(
+        return new MotorIOSparkMaxPositionSim(
                 config, followerIndex, sparkMaxConfig, motorType, physicsSimAdapter, motorFactory);
     }
 
