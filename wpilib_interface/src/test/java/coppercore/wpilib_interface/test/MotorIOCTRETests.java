@@ -1,0 +1,246 @@
+package coppercore.wpilib_interface.test;
+
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
+
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.unmanaged.Unmanaged;
+import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
+import coppercore.wpilib_interface.subsystems.configs.ElevatorMechanismConfig;
+import coppercore.wpilib_interface.subsystems.configs.MechanismConfig.GravityFeedforwardType;
+import coppercore.wpilib_interface.subsystems.encoders.EncoderIOCANCoderPositionSim;
+import coppercore.wpilib_interface.subsystems.encoders.EncoderInputs;
+import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
+import coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXPositionSim;
+import coppercore.wpilib_interface.subsystems.sim.DummySimAdapter;
+import edu.wpi.first.hal.HAL;
+import edu.wpi.first.units.PerUnit;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj.simulation.SimHooks;
+import java.util.function.Supplier;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+/**
+ * The MotorIOCTRETests class contains tests for TalonFX motor IOs and CANCoder encoderIOs using
+ * simulation.
+ *
+ * <p>Most of the constants and gains found here are from
+ * https://github.com/team401/2025-Robot-Code.
+ */
+public class MotorIOCTRETests {
+    private static String canbus = "canivore";
+
+    public static CANDeviceID encoderId = new CANDeviceID(canbus, 52);
+
+    private static double ELEVATOR_MOTOR_REDUCTION = 5.0;
+
+    private static ElevatorMechanismConfig elevatorMechanismConfig =
+            ElevatorMechanismConfig.builder()
+                    .withName("coppervator")
+                    .withEncoderToMechanismRatio(1.0)
+                    .withMotorToEncoderRatio(ELEVATOR_MOTOR_REDUCTION)
+                    .withLeadMotorId(new CANDeviceID(canbus, 50))
+                    .withGravityFeedforwardType(GravityFeedforwardType.STATIC_ELEVATOR)
+                    .withElevatorToMechanismRatio(Inches.of(4.724).div(Rotations.of(1)))
+                    .addFollower(new CANDeviceID(canbus, 51), true)
+                    .build();
+
+    private static Supplier<TalonFXConfiguration> generateElevatorTalonFXConfig =
+            () ->
+                    new TalonFXConfiguration()
+                            .withFeedback(
+                                    new FeedbackConfigs()
+                                            .withFeedbackSensorSource(
+                                                    FeedbackSensorSourceValue.RemoteCANcoder)
+                                            .withFeedbackRemoteSensorID(encoderId.id())
+                                            .withSensorToMechanismRatio(1.0)
+                                            .withRotorToSensorRatio(ELEVATOR_MOTOR_REDUCTION))
+                            .withMotorOutput(
+                                    new MotorOutputConfigs()
+                                            .withNeutralMode(NeutralModeValue.Coast))
+                            .withCurrentLimits(
+                                    new CurrentLimitsConfigs()
+                                            .withStatorCurrentLimitEnable(true)
+                                            .withStatorCurrentLimit(Amps.of(80.0)))
+                            .withSlot0(
+                                    new Slot0Configs()
+                                            .withGravityType(GravityTypeValue.Elevator_Static)
+                                            .withKS(0.0)
+                                            .withKV(0.0)
+                                            .withKA(0.0)
+                                            .withKG(0.0)
+                                            .withKP(1.0)
+                                            .withKI(0.0)
+                                            .withKD(0.0))
+                            .withMotionMagic(
+                                    new MotionMagicConfigs()
+                                            .withMotionMagicCruiseVelocity(
+                                                    // This very convoluted conversion turns 3.0 m/s
+                                                    // goal velocity into a value in radians per
+                                                    // second
+                                                    // by converting meters to radians using the
+                                                    // 4.724
+                                                    // inches of height per spool rotation based on
+                                                    // the
+                                                    // drum radius.
+                                                    RadiansPerSecond.of(
+                                                            3.0 // Meters per second
+                                                                    / Inches.of(4.724)
+                                                                            .div(Rotations.of(1))
+                                                                            .in(
+                                                                                    PerUnit.combine(
+                                                                                            Meters,
+                                                                                            Radians))))
+                                            .withMotionMagicExpo_kA(1)
+                                            .withMotionMagicExpo_kV(0.0));
+
+    @BeforeEach
+    void initializeSimFeatures() {
+        HAL.initialize(500, 2);
+        SimHooks.setHALRuntimeType(2);
+    }
+
+    /**
+     * Emulate the "periodic" loop of the robot by calling `loop` and incrementing the WPIUtilJNI
+     * mock time by 20ms until `timeSeconds` seconds have elapsed.
+     *
+     * @param timeSeconds The duration to simulate. If this is not a multiple of 20 milliseconds,
+     *     the method will round up.
+     * @param loop A Runnable to call before each increment of time and once at the very end.
+     */
+    void loopForTime(double timeSeconds, Runnable loop) {
+        double timeElapsed = 0.0;
+        SimHooks.pauseTiming();
+        while (timeElapsed < timeSeconds || (timeSeconds == 0.0 && timeElapsed == 0.0)) {
+            SimHooks.stepTiming(0.02);
+            if (DriverStation.isEnabled()) {
+                Unmanaged.feedEnable(20);
+            }
+            loop.run();
+
+            Timer.delay(0.02); // Allow phoenix sim thread to run
+
+            timeElapsed += 0.02;
+        }
+        SimHooks.resumeTiming();
+    }
+
+    /** Tests a TalonFX elevator mechanism with a CANcoder and an elevator motor. */
+    @Test
+    public void talonFXElevatorWithFollower() {
+        // Define configs
+        ElevatorMechanismConfig mechanismConfig = elevatorMechanismConfig;
+        TalonFXConfiguration talonFXConfigs = generateElevatorTalonFXConfig.get();
+
+        var cancoderConfig =
+                new CANcoderConfiguration()
+                        .withMagnetSensor(
+                                new MagnetSensorConfigs()
+                                        .withSensorDirection(
+                                                SensorDirectionValue.Clockwise_Positive));
+
+        var simAdapter = new DummySimAdapter();
+
+        var leadMotor =
+                MotorIOTalonFXPositionSim.newLeader(mechanismConfig, talonFXConfigs, simAdapter);
+        var followerMotor =
+                MotorIOTalonFXPositionSim.newFollower(
+                        mechanismConfig, 0, talonFXConfigs, simAdapter);
+        var cancoder = new EncoderIOCANCoderPositionSim(encoderId, cancoderConfig, simAdapter);
+
+        var leadMotorInputs = new MotorInputs();
+        var followerMotorInputs = new MotorInputs();
+        var cancoderInputs = new EncoderInputs();
+
+        Runnable loop =
+                () -> {
+                    leadMotor.updateInputs(leadMotorInputs);
+                    followerMotor.updateInputs(followerMotorInputs);
+                    cancoder.updateInputs(cancoderInputs);
+                };
+
+        // Begin actually testing by setting a position
+        simAdapter.setMotorPosition(Radians.of(5.0));
+        simAdapter.setEncoderPosition(Radians.of(1.0));
+
+        // Wait for library initialization to take place. As soon as a real value is
+        // read, it will be ~1, not 0.0
+        while (cancoderInputs.positionRadians == 0.0
+                || leadMotorInputs.positionRadians == 0.0
+                || followerMotorInputs.positionRadians == 0.0) {
+            leadMotor.controlNeutral();
+            loopForTime(0.02, loop);
+        }
+
+        Assertions.assertEquals(
+                leadMotorInputs.positionRadians,
+                followerMotorInputs.positionRadians,
+                1e-2,
+                "Lead motor and follower mechanism position should match at all times.");
+
+        Assertions.assertEquals(
+                leadMotorInputs.positionRadians,
+                leadMotorInputs.rawRotorPositionRadians / ELEVATOR_MOTOR_REDUCTION,
+                1e-2,
+                "Rotor position ("
+                        + leadMotorInputs.rawRotorPositionRadians
+                        + ") should be mechanism position ("
+                        + leadMotorInputs.positionRadians
+                        + ") * reduction ("
+                        + ELEVATOR_MOTOR_REDUCTION
+                        + ").");
+
+        Assertions.assertEquals(
+                0.0,
+                leadMotorInputs.appliedVolts,
+                1e-2,
+                "Motor should apply zero volts when commanding a neutral output");
+
+        Assertions.assertEquals(1.0, leadMotorInputs.positionRadians, 1e-1);
+        Assertions.assertEquals(5.0, leadMotorInputs.rawRotorPositionRadians, 1e-1);
+        Assertions.assertEquals(1.0, cancoderInputs.positionRadians, 1e-1);
+
+        simAdapter.setMotorPosition(Radians.of(10.0));
+        simAdapter.setEncoderPosition(Radians.of(2.0));
+
+        // Enabling!
+        DriverStationSim.setEnabled(true);
+        DriverStationSim.notifyNewData();
+
+        assert DriverStation.isEnabled();
+
+        // Give it a couple cycles to let data propagate into the IOs
+        leadMotor.controlToPositionUnprofiled(Radians.zero());
+        loopForTime(1.0, loop);
+
+        Assertions.assertEquals(
+                2.0,
+                simAdapter.getEncoderPosition().in(Radians),
+                1e-1); // Give it a decent delta to account for slight oscillation
+
+        Assertions.assertEquals(
+                -1.0,
+                Math.signum(leadMotorInputs.appliedVolts),
+                "Motor should apply a negative voltage when controlling to a position below its"
+                        + " current position");
+    }
+}

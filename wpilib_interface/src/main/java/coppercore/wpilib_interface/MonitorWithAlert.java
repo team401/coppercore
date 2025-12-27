@@ -51,6 +51,7 @@ public class MonitorWithAlert extends Monitor {
      *     specific frame of reference, it is used to detect when conditions have been unnacceptable
      *     for enough time to fault.
      */
+    @Override
     public void periodic(double currentTimeSeconds) {
         super.periodic(currentTimeSeconds);
 
@@ -148,6 +149,7 @@ public class MonitorWithAlert extends Monitor {
          *
          * @return a MonitorWithAlert with the fields set by the builder.
          */
+        @Override
         public MonitorWithAlert build() {
             return new MonitorWithAlert(
                     name,

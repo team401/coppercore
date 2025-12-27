@@ -170,3 +170,6 @@ wpi_interface/src/main/java/frc/robot/BuildConstants.java
 # Ignore gpg keys
 gpg.key
 gpg.pub
+
+# Ignore jdtls files
+*.factorypath
