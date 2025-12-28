@@ -22,8 +22,6 @@ public class CachedDataTimeTest {
         setMockTimeSeconds(0.0);
     }
 
-    public static void setMockTime(long time) {}
-
     /**
      * Set WPIUtilJni's mock time to timeSeconds
      *
@@ -49,9 +47,8 @@ public class CachedDataTimeTest {
             Assertions.assertEquals(data.read(), 67);
         }
         setMockTimeSeconds(
-                2.2001); // 0.7+1.5 because everytime it writes it will reset the last update time
-        // so
-        // we need to adjust accordingly
+                2.2001); // 0.7+1.5 because every time it writes it will reset the last update time
+        // so we need to adjust accordingly
         Assertions.assertTrue(data.isStale());
     }
 
@@ -71,7 +68,7 @@ public class CachedDataTimeTest {
 
     @SuppressWarnings({"rawtypes"})
     @Test
-    public void readTestTrue() {
+    public void testReadReturnsLastWrittenValueForVariousDataTypes() {
         CachedDataTime<String> stringData = new CachedDataTime<>(10);
         stringData.write("real");
         Assertions.assertEquals(stringData.read(), "real");

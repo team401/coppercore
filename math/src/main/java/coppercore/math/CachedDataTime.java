@@ -2,59 +2,71 @@ package coppercore.math;
 
 import edu.wpi.first.math.MathSharedStore;
 
+/**
+ * This class is used for temporarily storing data in a cache and determining whether or not it is
+ * stale using time-based expiration.
+ *
+ * @param <Type> the type of the value to cache
+ */
 public class CachedDataTime<Type> {
 
     private Type value = null;
-    private double lastUpdateTime = 0.0;
-    private double staleTime = -1.0;
+
+    /** The last time the cache was written in milliseconds */
+    private double lastUpdateTimestampMs = 0.0;
+
+    /** The amount of time it takes a chace to be stale in milliseconds */
+    private double staleTimeMs = -1.0;
 
     /**
      * This is a constructor for the Time-based expiration of the Cached Data.
      *
-     * @param staleTime the amount of time it takes a cache to be stale
+     * @param staleTimeSeconds the amount of time it takes a cache to be stale in seconds
      */
-    public CachedDataTime(double staleTime) {
-        this.staleTime = staleTime * 1000; // Convert seconds to milliseconds
-        this.lastUpdateTime = MathSharedStore.getTimestamp() * 1000;
+    public CachedDataTime(double staleTimeSeconds) {
+        this.staleTimeMs = staleTimeSeconds * 1000; // Convert seconds to milliseconds
+        this.lastUpdateTimestampMs = MathSharedStore.getTimestamp() * 1000;
     }
 
     /**
-     * This method is used to write a new signal value(A new cache).
+     * This method is used to write a data value (A cache entry) and it resets the data expiration
+     * timer.
      *
-     * @param signal the signal that is being sent.
+     * @param data the new value to write to the cache.
      */
-    public void write(Type signal) {
-        if (signal != null) {
-            value = signal;
+    public void write(Type data) {
+        if (data != null) {
+            value = data;
             reset();
         }
     }
 
     /**
-     * This method reads the cached value.
+     * This method reads the cached value. If that value is stale, then it will return null, however
+     * the value of the cached value remains the same.
      *
      * @return returns the cached value
      */
     public Type read() {
         if (isStale()) {
-            value = null;
+            return null;
         }
         return value;
     }
 
     /**
-     * This class checks if the cache is stale based on time.
+     * This method checks if the cache is stale based on time.
      *
      * @return true if the cache is stale, false if not
      */
     public boolean isStale() {
         double currentTime = MathSharedStore.getTimestamp() * 1000;
-        return currentTime - lastUpdateTime >= staleTime;
+        return currentTime - lastUpdateTimestampMs >= staleTimeMs;
     }
 
     /** This method resets the expiration tracking value for time based expiration */
     private void reset() {
-        lastUpdateTime =
+        lastUpdateTimestampMs =
                 MathSharedStore.getTimestamp()
                         * 1000; // Reset the last update time for time-based expiration
     }

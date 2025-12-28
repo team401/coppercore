@@ -1,5 +1,11 @@
 package coppercore.math;
 
+/**
+ * This class is used for temporarily storing data in a cache and determining whether or not it is
+ * stale using readcount-based expiration.
+ *
+ * @param <Type> the type of the value to cache
+ */
 public class CachedDataRead<Type> {
     private Type value = null;
     private int readCount = 0;
@@ -16,37 +22,40 @@ public class CachedDataRead<Type> {
     }
 
     /**
-     * This method is used to write a new signal value(A new cache).
+     * This method is used to write a data value (A cache entry) and resets the data expiration
+     * value (readCount = 0).
      *
-     * @param signal the signal that is being sent.
+     * @param data the new value to write to the cache.
      */
-    public void write(Type signal) {
-        if (signal != null) {
-            value = signal;
+    public void write(Type data) {
+        if (data != null) {
+            value = data;
             reset();
         }
     }
 
     /**
-     * This method reads the cached value, increases the readcount, and returns the cached value.
+     * This method increases the readCount and then returns the cached value. If that value is
+     * stale, then it will return null, however the value of the cached value remains the same.
      *
      * @return returns the cached value
      */
     public Type read() {
-        if (isStale()) {
-            value = null;
-        }
         readCount++;
+        if (isStale()) {
+            return null;
+        }
         return value;
     }
 
     /**
-     * This class checks if the cache is stale(readcount).
+     * This method checks if the cache is stale(readcount). If the readCount is more than the
+     * maximum number of reads.
      *
      * @return true if the cache is stale, false if not
      */
     public boolean isStale() {
-        return readCount >= maxReads;
+        return readCount > maxReads;
     }
 
     /** This method resets the expiration tracking value(readCount) */

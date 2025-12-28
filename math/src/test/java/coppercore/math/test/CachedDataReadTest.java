@@ -7,11 +7,10 @@ import coppercore.math.CachedDataRead;
 import edu.wpi.first.units.measure.Distance;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class CachedDataReadTest {
-    @BeforeEach
+
     @SuppressWarnings("unused")
     @Test
     public void isStaleTest1() {
@@ -41,7 +40,7 @@ public class CachedDataReadTest {
 
     @SuppressWarnings({"rawtypes"})
     @Test
-    public void readTestTrue() {
+    public void testReadReturnsLastWrittenValueForVariousDataTypes() {
         CachedDataRead<String> stringData = new CachedDataRead<>(10);
         stringData.write("real");
         Assertions.assertEquals(stringData.read(), "real");
@@ -80,7 +79,7 @@ public class CachedDataReadTest {
         for (int i = 0; i < 10; i++) {
             Assertions.assertEquals(integerData.read(), 100);
         }
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 10; i++) {
             Assertions.assertEquals(stringData.read(), null);
         }
         Assertions.assertEquals(integerData.read(), null);
