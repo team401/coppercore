@@ -237,6 +237,7 @@ public class MotorIOCTRETests {
                 simAdapter.getEncoderPosition().in(Radians),
                 1e-1); // Give it a decent delta to account for slight oscillation
 
+        System.err.println("leadMotorInputs.appliedVolts is " + leadMotorInputs.appliedVolts);
         Assertions.assertEquals(
                 -1.0,
                 Math.signum(leadMotorInputs.appliedVolts),
