@@ -17,7 +17,11 @@ public class StateMachine<World> {
     private final Map<String, State<World>> states;
     private final World world;
 
-    /** Constructs a new StateMachine. */
+    /**
+     * Constructs a new StateMachine.
+     *
+     * @param world - the world in which this state machine lives.
+     */
     public StateMachine(World world) {
         this.states = new HashMap<>();
         this.world = world;

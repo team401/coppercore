@@ -243,7 +243,6 @@ public abstract class State<World> {
      *
      * @param requestedState The requested state to check for
      * @param description A description for the transition condition
-     * @return The transition condition builder
      */
     public void whenRequestedTransitionTo(State<World> requestedState, String description) {
         transitions.add(
@@ -257,7 +256,6 @@ public abstract class State<World> {
      * Creates a transition condition builder that triggers when the specified state is requested.
      *
      * @param requestedState The requested state to check for
-     * @return The transition condition builder
      */
     public void whenRequestedTransitionTo(State<World> requestedState) {
         whenRequestedTransitionTo(requestedState, "When " + requestedState.name + " requested");
