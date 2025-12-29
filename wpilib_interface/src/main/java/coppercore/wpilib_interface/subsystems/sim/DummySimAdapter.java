@@ -108,7 +108,7 @@ public class DummySimAdapter implements PositionSimAdapter {
      *
      * @param encoderAngularVelocity An AngularVelocity, the new encoder angular velocity
      */
-    public void setEncoderAnguarVelocity(AngularVelocity encoderAngularVelocity) {
+    public void setEncoderAngularVelocity(AngularVelocity encoderAngularVelocity) {
         this.encoderAngularVelocity = encoderAngularVelocity;
     }
 

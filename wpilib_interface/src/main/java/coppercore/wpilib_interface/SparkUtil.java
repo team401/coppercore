@@ -78,7 +78,7 @@ public class SparkUtil {
         DriverStation.reportError(
                 "tryUntilOk failed after"
                         + maxTries
-                        + " attemts (deviceId: "
+                        + " attempts (deviceId: "
                         + deviceId
                         + ") with error "
                         + err,

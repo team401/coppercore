@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.Timer;
  * <p>The distinction betewen MotorIOTalonFXPositionSim and MotorIOTalonFXFlywheelSim is that
  * FlywheelSim does not provide an easy way to access position measurements.
  *
- * <p>This class extends MotorIOTaloNFX to ensure that behavior is as close to identical in real
+ * <p>This class extends MotorIOTalonFX to ensure that behavior is as close to identical in real
  * life and simulation as possible.
  */
 public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {

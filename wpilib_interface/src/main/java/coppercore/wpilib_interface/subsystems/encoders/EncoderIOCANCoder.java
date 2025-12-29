@@ -18,7 +18,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 /**
  * The EncoderIOCANCoder class implements the EncoderIO interface for a physical CANCoder device by
- * leveraging Phoenix-6.
+ * leveraging Phoenix-6. A <a
+ * href="https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/cancoder/index.html">CANCoder</a>
+ * is a rotary magnetic encoder made by CTRE that can be attached to a CAN bus. <a
+ * href="https://v6.docs.ctr-electronics.com/en/stable/docs/installation/installation.html">Phoenix-6</a>
+ * is CTRE's software library.
  */
 public class EncoderIOCANCoder implements EncoderIO {
     protected final String deviceName;

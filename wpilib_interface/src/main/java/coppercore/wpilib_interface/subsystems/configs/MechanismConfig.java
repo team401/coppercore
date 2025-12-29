@@ -179,7 +179,7 @@ public class MechanismConfig {
         }
 
         /**
-         * Add a follower motor to this config. Returns this builder fore asy method chaining.
+         * Add a follower motor to this config. Returns this builder for easy method chaining.
          *
          * @param id A CANDeviceID with the follower motor's CAN bus and integer id. The follower
          *     must be on the same CAN bus as the leader motor.
@@ -265,7 +265,7 @@ public class MechanismConfig {
          */
         protected void validateBeforeBuilding() {
             MechanismFollowerMotorConfig[] followerConfigsArray =
-                    followerMotorConfigs.toArray(new MechanismFollowerMotorConfig[] {});
+                    followerMotorConfigs.toArray(MechanismFollowerMotorConfig[]::new);
             Objects.requireNonNull(
                     name, "name must be configured with `withName(...)` prior to calling build()");
             Objects.requireNonNull(
@@ -320,7 +320,7 @@ public class MechanismConfig {
             validateBeforeBuilding();
 
             MechanismFollowerMotorConfig[] followerConfigsArray =
-                    followerMotorConfigs.toArray(new MechanismFollowerMotorConfig[] {});
+                    followerMotorConfigs.toArray(MechanismFollowerMotorConfig[]::new);
 
             return new MechanismConfig(
                     name,

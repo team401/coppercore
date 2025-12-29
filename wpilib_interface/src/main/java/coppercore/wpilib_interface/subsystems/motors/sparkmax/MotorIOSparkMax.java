@@ -29,9 +29,10 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /**
- * The MotorIOSparkMax implements the MotorIO interface for the SparkMax motor controller.
+ * The MotorIOSparkMax implements the MotorIO interface for the <a
+ * href="https://docs.revrobotics.com/brushless/spark-max/overview">SparkMax</a> motor controller.
  *
- * <p>MotorIOSparkMax does not support measuring stator current or raw rotor position. This values
+ * <p>MotorIOSparkMax does not support measuring stator current or raw rotor position. These values
  * will be set to zero when updateInputs is called.
  *
  * <p>This IO implementation also does not support dynamic motion profiles, exponential motion
@@ -312,7 +313,7 @@ public class MotorIOSparkMax implements MotorIO {
     @Override
     public void controlOpenLoopCurrent(Current current) {
         throw new UnsupportedOperationException(
-                "Current open-loop control is not supported by Spark IOs.");
+                "Current-based open-loop control is not supported by Spark IOs.");
     }
 
     @Override
