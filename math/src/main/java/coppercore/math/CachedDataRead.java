@@ -6,10 +6,9 @@ package coppercore.math;
  *
  * @param <Type> the type of the value to cache
  */
-public class CachedDataRead<Type> {
-    private Type value = null;
+public class CachedDataRead<Type> extends CachedDataValue<Type> {
     private int readCount = 0;
-    private int maxReads = 5;
+    private int maxReads;
 
     /**
      * This is a constructor for the readCount-based expiration of the Cached Data.
@@ -18,34 +17,16 @@ public class CachedDataRead<Type> {
      */
     public CachedDataRead(int maxReads) {
         this.maxReads = maxReads;
-        this.readCount = 0;
     }
 
     /**
-     * This method is used to write a data value (A cache entry) and resets the data expiration
-     * value (readCount = 0).
+     * This method increases the readCount and then returns the cached value unless it has expired.
      *
-     * @param data the new value to write to the cache.
-     */
-    public void write(Type data) {
-        if (data != null) {
-            value = data;
-            reset();
-        }
-    }
-
-    /**
-     * This method increases the readCount and then returns the cached value. If that value is
-     * stale, then it will return null, however the value of the cached value remains the same.
-     *
-     * @return returns the cached value
+     * @return returns the cached value if not stale, else null.
      */
     public Type read() {
         readCount++;
-        if (isStale()) {
-            return null;
-        }
-        return value;
+        return super.read();
     }
 
     /**
@@ -54,12 +35,14 @@ public class CachedDataRead<Type> {
      *
      * @return true if the cache is stale, false if not
      */
+    @Override
     public boolean isStale() {
         return readCount > maxReads;
     }
 
-    /** This method resets the expiration tracking value(readCount) */
-    private void reset() {
+    /** This method resets the expiration tracking value (readCount) */
+    @Override
+    protected void reset() {
         readCount = 0; // Reset the read count for read-based expiration
     }
 }

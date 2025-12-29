@@ -8,14 +8,12 @@ import edu.wpi.first.math.MathSharedStore;
  *
  * @param <Type> the type of the value to cache
  */
-public class CachedDataTime<Type> {
-
-    private Type value = null;
+public class CachedDataTime<Type> extends CachedDataValue<Type> {
 
     /** The last time the cache was written in milliseconds */
     private double lastUpdateTimestampMs = 0.0;
 
-    /** The amount of time it takes a chace to be stale in milliseconds */
+    /** The amount of time it takes a cache to be stale in milliseconds */
     private double staleTimeMs = -1.0;
 
     /**
@@ -29,43 +27,19 @@ public class CachedDataTime<Type> {
     }
 
     /**
-     * This method is used to write a data value (A cache entry) and it resets the data expiration
-     * timer.
-     *
-     * @param data the new value to write to the cache.
-     */
-    public void write(Type data) {
-        if (data != null) {
-            value = data;
-            reset();
-        }
-    }
-
-    /**
-     * This method reads the cached value. If that value is stale, then it will return null, however
-     * the value of the cached value remains the same.
-     *
-     * @return returns the cached value
-     */
-    public Type read() {
-        if (isStale()) {
-            return null;
-        }
-        return value;
-    }
-
-    /**
      * This method checks if the cache is stale based on time.
      *
      * @return true if the cache is stale, false if not
      */
+    @Override
     public boolean isStale() {
         double currentTime = MathSharedStore.getTimestamp() * 1000;
         return currentTime - lastUpdateTimestampMs >= staleTimeMs;
     }
 
-    /** This method resets the expiration tracking value for time based expiration */
-    private void reset() {
+    /** This method resets the expiration tracking value for time based expiration. */
+    @Override
+    protected void reset() {
         lastUpdateTimestampMs =
                 MathSharedStore.getTimestamp()
                         * 1000; // Reset the last update time for time-based expiration
