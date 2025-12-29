@@ -32,12 +32,12 @@ public class DES {
     }
 
     /**
-     * Run simulation until endTime is reached.
+     * Run simulation until endTime is reached or we run out of events to simulate.
      *
      * @param endTime time of last event to be simulated, inclusive.
      */
     void simulate(int endTime) {
-        while (!eventQueue.isEmpty() && currentTime <= endTime) {
+        while (!eventQueue.isEmpty() && eventQueue.peek().when <= endTime) {
             Event next = eventQueue.poll();
             currentTime = next.when;
             next.runnable.run(currentTime);
