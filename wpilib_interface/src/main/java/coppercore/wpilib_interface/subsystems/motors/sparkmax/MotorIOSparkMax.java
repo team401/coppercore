@@ -13,6 +13,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import coppercore.wpilib_interface.SparkUtil;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
+import coppercore.wpilib_interface.subsystems.motors.CanBusMotorControllerBase;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
@@ -24,8 +25,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /**
@@ -39,22 +38,12 @@ import edu.wpi.first.wpilibj.DriverStation;
  * profiles, or current/FOC-based open-loop control. Calling any of the aforementioned control
  * methods will result in an UnsupportedOperationException.
  */
-public class MotorIOSparkMax implements MotorIO {
-    protected final MechanismConfig config;
-
-    protected final CANDeviceID id;
-
+public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorIO {
     protected final SparkMaxConfig sparkMaxConfig;
 
     protected final SparkMax sparkMax;
 
     protected final SparkClosedLoopController controller;
-
-    protected final String deviceName;
-
-    private final Alert configFailedToApplyAlert;
-
-    private final Alert disconnectedAlert;
 
     /**
      * Create a new MotorIOSparkMax given a mechanism config, a CANDeviceID, a SparkMaxConfig, and a
@@ -74,10 +63,7 @@ public class MotorIOSparkMax implements MotorIO {
             CANDeviceID id,
             SparkMaxConfig sparkMaxConfig,
             MotorType motorType) {
-        this.config = config;
-        this.id = id;
-
-        this.deviceName = config.name + "_SparkMax_" + id;
+        super(config, id, "_SparkMax_");
 
         // Copy the config since updating follow mode modifies the config in place.
         this.sparkMaxConfig = new SparkMaxConfig().apply(sparkMaxConfig);
@@ -85,14 +71,6 @@ public class MotorIOSparkMax implements MotorIO {
         this.sparkMax = new SparkMax(id.id(), motorType);
 
         this.controller = sparkMax.getClosedLoopController();
-
-        String configFailedToApplyMessage = deviceName + " failed to apply configs.";
-
-        this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, AlertType.kError);
-
-        String disconnectedMessage = deviceName + " disconnected/is reporting an error.";
-
-        this.disconnectedAlert = new Alert(disconnectedMessage, AlertType.kError);
 
         applyConfig();
     }

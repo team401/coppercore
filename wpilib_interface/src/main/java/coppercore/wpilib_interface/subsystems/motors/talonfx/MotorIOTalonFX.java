@@ -26,6 +26,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
+import coppercore.wpilib_interface.subsystems.motors.CanBusMotorControllerBase;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
@@ -37,23 +38,13 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /**
  * A base motor IO that implements closed-loop control for a TalonFX-supporting motor using
  * MotionMagicExpo, MotionMagicVelocity, and TorqueCurrentFOC wherever possible.
  */
-public class MotorIOTalonFX implements MotorIO {
-    /**
-     * MechanismConfig describing the whole mechanism; can be shared between IOs within mechanism
-     */
-    protected final MechanismConfig config;
-
-    /** id encapsulating CAN ID and CAN bus name */
-    protected final CANDeviceID id;
-
+public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO {
     /**
      * TalonFXConfiguration used by the motor. This may be shared between multiple IOs and therefore
      * should be mutated only with extreme caution.
@@ -65,18 +56,6 @@ public class MotorIOTalonFX implements MotorIO {
      * TalonFX controller
      */
     protected final TalonFX talon;
-
-    /** A unique string for this device used for logging when something goes awry */
-    protected final String deviceName;
-
-    /** An alert to be shown whenever a config fails to apply to the motor controller */
-    private final Alert configFailedToApplyAlert;
-
-    /**
-     * An alert to be shown whenever any status signal fails to refresh, which indicates a
-     * disconnected state
-     */
-    private final Alert disconnectedAlert;
 
     /** Position StatusSignal cached for easy repeated access */
     protected final StatusSignal<Angle> positionSignal;
@@ -171,23 +150,11 @@ public class MotorIOTalonFX implements MotorIO {
      */
     protected MotorIOTalonFX(
             MechanismConfig config, CANDeviceID id, TalonFXConfiguration talonFXConfig) {
-        this.id = id;
-
-        this.config = config;
-
-        this.deviceName = config.name + "_TalonFX_" + id;
+        super(config, id, "_TalonFX_");
 
         this.talonFXConfig = talonFXConfig;
 
         this.talon = new TalonFX(id.id(), id.canbus());
-
-        String configFailedToApplyMessage = deviceName + " failed to apply configs.";
-
-        this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, AlertType.kError);
-
-        String disconnectedMessage = deviceName + " disconnected/invalid status code.";
-
-        this.disconnectedAlert = new Alert(disconnectedMessage, AlertType.kError);
 
         CTREUtil.tryUntilOk(
                 () -> talon.getConfigurator().apply(talonFXConfig),
