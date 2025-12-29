@@ -43,14 +43,14 @@ public class StateMachineTestsDES {
         warmingUpState
                 .when((Robot robot) -> !robot.shouldShoot, "should not shoot")
                 .transitionTo(idleState);
-        warmingUpState.whenRequested(idleState).transitionTo(idleState);
+        warmingUpState.whenRequestedTransitionTo(idleState);
 
         // Transitions that can happen from Shooting state
         shootingState.whenFinished().transitionTo(idleState);
         shootingState
                 .when((Robot robot) -> !robot.shouldShoot, "should not shoot")
                 .transitionTo(idleState);
-        shootingState.whenRequested(idleState).transitionTo(idleState);
+        shootingState.whenRequestedTransitionTo(idleState);
 
         // Setting initial state
         stateMachine.setState(idleState);

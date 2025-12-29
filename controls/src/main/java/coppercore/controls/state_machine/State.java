@@ -245,14 +245,12 @@ public abstract class State<World> {
      * @param description A description for the transition condition
      * @return The transition condition builder
      */
-    public TransitionConditionBuilder whenRequested(
-            State<World> requestedState, String description) {
-        return when(
-                (world) ->
-                        requestedState != null
-                                && this.requestedStateSupplier != null
-                                && requestedState.equals(this.requestedStateSupplier.get()),
-                description);
+    public void whenRequestedTransitionTo(State<World> requestedState, String description) {
+        transitions.add(
+                new Transition(
+                        requestedState,
+                        (world) -> requestedState.equals(this.requestedStateSupplier.get()),
+                        description));
     }
 
     /**
@@ -261,8 +259,8 @@ public abstract class State<World> {
      * @param requestedState The requested state to check for
      * @return The transition condition builder
      */
-    public TransitionConditionBuilder whenRequested(State<World> requestedState) {
-        return whenRequested(requestedState, "When " + requestedState.name + " requested");
+    public void whenRequestedTransitionTo(State<World> requestedState) {
+        whenRequestedTransitionTo(requestedState, "When " + requestedState.name + " requested");
     }
 
     /**
