@@ -2,7 +2,9 @@ package coppercore.wpilib_interface.test;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -28,11 +30,15 @@ import coppercore.wpilib_interface.subsystems.encoders.EncoderInputs;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXPositionSim;
 import coppercore.wpilib_interface.subsystems.sim.DummySimAdapter;
+import coppercore.wpilib_interface.subsystems.sim.ElevatorSimAdapter;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.PerUnit;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Assertions;
@@ -158,8 +164,20 @@ public class MotorIOCTRETests {
                                         .withSensorDirection(
                                                 SensorDirectionValue.Clockwise_Positive));
 
-        var simAdapter =
-                new DummySimAdapter(); // TODO: Construct an ElevatorSimAdapter here, referring to
+        var elevatorSim =
+                new ElevatorSim(
+                        DCMotor.getKrakenX60Foc(2),
+                        5.0,
+                        Pounds.of(20.0).in(Kilograms),
+                        Inches.of(0.7515).in(Meters),
+                        0.0,
+                        1.9,
+                        false,
+                        1.0,
+                        0.0,
+                        0.0);
+
+        var simAdapter = new DummySimAdapter(new ElevatorSimAdapter(mechanismConfig, elevatorSim));
         // previous commits when this was an actual physics sim.
 
         var leadMotor =
@@ -230,18 +248,34 @@ public class MotorIOCTRETests {
 
         // Give it a couple cycles to let data propagate into the IOs
         leadMotor.controlToPositionUnprofiled(Radians.zero());
-        loopForTime(1.0, loop);
+        loopForTime(2.00, loop);
 
         Assertions.assertEquals(
-                2.0,
+                0.0,
                 simAdapter.getEncoderPosition().in(Radians),
                 1e-1); // Give it a decent delta to account for slight oscillation
 
+        // Now tell it to control back up and ensure that it both commands upward movement and
+        // successfully moves the sim updward.
+        leadMotor.controlToPositionUnprofiled(Radians.of(1.0));
+        loopForTime(0.06, loop);
         System.err.println("leadMotorInputs.appliedVolts is " + leadMotorInputs.appliedVolts);
         Assertions.assertEquals(
-                -1.0,
+                1.0,
                 Math.signum(leadMotorInputs.appliedVolts),
                 "Motor should apply a negative voltage when controlling to a position below its"
                         + " current position");
+
+        Angle startPosition = simAdapter.getMotorPosition();
+        loopForTime(0.5, loop);
+        Angle endPosition = simAdapter.getMotorPosition();
+
+        Assertions.assertTrue(
+                endPosition.gt(startPosition),
+                "Mechanism position at the end of 1.0 seconds ("
+                        + endPosition.in(Radians)
+                        + "radians) should be greater than starting position ("
+                        + startPosition.in(Radians)
+                        + " radians)");
     }
 }
