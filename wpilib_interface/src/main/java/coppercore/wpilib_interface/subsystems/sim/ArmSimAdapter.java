@@ -73,4 +73,18 @@ public class ArmSimAdapter implements PositionSimAdapter {
         armSim.setInput(motorAppliedOutput.in(Volts));
         armSim.update(deltaTimeSeconds);
     }
+
+    /**
+     * Manually sets the physics sim's position and velocity. This is intended to be used by the
+     * DummySimAdapter to mock different positions and observe how a physics sim responds.
+     *
+     * <p>This method must NOT be called by normal sim code unless you know what you are doing. It
+     * will instantly set the position of a mechanism with no regard for physical limitations.
+     *
+     * @param motorAngle A double representing the position to set, in radians
+     * @param motorVelocity A double representing the velocity to set, in radians per second
+     */
+    protected void setState(Angle motorAngle, AngularVelocity motorVelocity) {
+        armSim.setState(motorAngle.in(Radians), motorVelocity.in(RadiansPerSecond));
+    }
 }

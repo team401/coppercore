@@ -158,7 +158,9 @@ public class MotorIOCTRETests {
                                         .withSensorDirection(
                                                 SensorDirectionValue.Clockwise_Positive));
 
-        var simAdapter = new DummySimAdapter();
+        var simAdapter =
+                new DummySimAdapter(); // TODO: Construct an ElevatorSimAdapter here, referring to
+        // previous commits when this was an actual physics sim.
 
         var leadMotor =
                 MotorIOTalonFXPositionSim.newLeader(mechanismConfig, talonFXConfigs, simAdapter);
@@ -179,8 +181,7 @@ public class MotorIOCTRETests {
                 };
 
         // Begin actually testing by setting a position
-        simAdapter.setMotorPosition(Radians.of(5.0));
-        simAdapter.setEncoderPosition(Radians.of(1.0));
+        simAdapter.setState(Radians.of(5.0), RadiansPerSecond.zero());
 
         // Wait for library initialization to take place. As soon as a real value is
         // read, it will be ~1, not 0.0
@@ -219,8 +220,7 @@ public class MotorIOCTRETests {
         Assertions.assertEquals(5.0, leadMotorInputs.rawRotorPositionRadians, 1e-1);
         Assertions.assertEquals(1.0, cancoderInputs.positionRadians, 1e-1);
 
-        simAdapter.setMotorPosition(Radians.of(10.0));
-        simAdapter.setEncoderPosition(Radians.of(2.0));
+        simAdapter.setState(Radians.of(10.0), RadiansPerSecond.zero());
 
         // Enabling!
         DriverStationSim.setEnabled(true);

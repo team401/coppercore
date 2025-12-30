@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
  * @see coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXPositionSim
  * @see coppercore.wpilib_interface.subsystems.sim.PositionSimAdapter
  */
-public class ElevatorSimAdapter implements PositionSimAdapter {
+public class ElevatorSimAdapter extends BasePositionSimAdapter {
     private final ElevatorMechanismConfig config;
     private final ElevatorSim elevatorSim;
 
@@ -37,6 +37,7 @@ public class ElevatorSimAdapter implements PositionSimAdapter {
      *     in sim.
      */
     public ElevatorSimAdapter(ElevatorMechanismConfig config, ElevatorSim elevatorSim) {
+        super(config);
         this.config = config;
         this.elevatorSim = elevatorSim;
     }
@@ -97,5 +98,36 @@ public class ElevatorSimAdapter implements PositionSimAdapter {
     public void update(Voltage motorAppliedOutput, double deltaTimeSeconds) {
         elevatorSim.setInput(motorAppliedOutput.in(Volts));
         elevatorSim.update(deltaTimeSeconds);
+    }
+
+    /**
+     * Manually sets the physics sim's position and velocity. This is intended to be used by the
+     * DummySimAdapter to mock different positions and observe how a physics sim responds.
+     *
+     * <p>This method must NOT be called by normal sim code unless you know what you are doing. It
+     * will instantly set the position of a mechanism with no regard for physical limitations.
+     *
+     * @param motorAngle An Angle representing the motor angle to set.
+     * @param motorVelocity An AngularVelocity representing the motor velocity to set.
+     */
+    @Override
+    protected void setState(Angle motorAngle, AngularVelocity motorVelocity) {
+        double heightMeters =
+                motorAngle
+                        .div(config.motorToEncoderRatio)
+                        .div(config.encoderToMechanismRatio)
+                        .timesConversionFactor(config.elevatorToMechanismRatio)
+                        .in(Meters);
+
+        double motorVelRotationsPerSecond = motorVelocity.in(RotationsPerSecond);
+        double metersPerRotation = config.elevatorToMechanismRatio.in(Meters.per(Rotations));
+
+        double mechanismVelRotationsPerSecond =
+                motorVelRotationsPerSecond
+                        / config.motorToEncoderRatio
+                        / config.encoderToMechanismRatio;
+        double velocityMetersPerSecond = mechanismVelRotationsPerSecond * metersPerRotation;
+
+        elevatorSim.setState(heightMeters, velocityMetersPerSecond);
     }
 }

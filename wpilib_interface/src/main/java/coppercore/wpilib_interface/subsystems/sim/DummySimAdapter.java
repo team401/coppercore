@@ -1,8 +1,5 @@
 package coppercore.wpilib_interface.subsystems.sim;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Angle;
@@ -11,51 +8,56 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 
 /**
- * The DummySimAdapter class provides a way to manually set the positions used in a
- * PositionSimAdapter. This is intended to be used for unit tests.
+ * The DummySimAdapter class provides a way to manually set the states used in a PositionSimAdapter.
+ * This is intended to be used for unit tests.
+ *
+ * <p>This class wraps an instance of another PositionSimAdapter, keeping track of values flowing in
+ * and out of the sim.
  *
  * <p>DummySimAdapter also keeps track of the last delta time and voltage passed to update (which is
  * a no-op) in case unit tests need to check the values passed into the adapter.
  */
 public class DummySimAdapter implements PositionSimAdapter {
-    private Angle motorPosition = Radians.zero();
-    private AngularVelocity motorAngularVelocity = RadiansPerSecond.zero();
-    private Angle encoderPosition = Radians.zero();
-    private AngularVelocity encoderAngularVelocity = RadiansPerSecond.zero();
-    private Current currentDraw = Amps.zero();
+    private final BasePositionSimAdapter wrappedAdapter;
 
     private Voltage lastMotorAppliedOutput = Volts.zero();
     private double lastDeltaTimeSeconds = 0.0;
 
+    public DummySimAdapter(BasePositionSimAdapter adapter) {
+        this.wrappedAdapter = adapter;
+    }
+
     @Override
     public Angle getMotorPosition() {
-        return this.motorPosition;
+        return wrappedAdapter.getMotorPosition();
     }
 
     @Override
     public AngularVelocity getMotorAngularVelocity() {
-        return this.motorAngularVelocity;
+        return wrappedAdapter.getMotorAngularVelocity();
     }
 
     @Override
     public Angle getEncoderPosition() {
-        return this.encoderPosition;
+        return wrappedAdapter.getEncoderPosition();
     }
 
     @Override
     public AngularVelocity getEncoderAngularVelocity() {
-        return this.encoderAngularVelocity;
+        return wrappedAdapter.getEncoderAngularVelocity();
     }
 
     @Override
     public Current getCurrentDraw() {
-        return this.currentDraw;
+        return wrappedAdapter.getCurrentDraw();
     }
 
     @Override
     public void update(Voltage motorAppliedOutput, double deltaTimeSeconds) {
         this.lastMotorAppliedOutput = motorAppliedOutput;
         this.lastDeltaTimeSeconds = deltaTimeSeconds;
+
+        wrappedAdapter.update(motorAppliedOutput, deltaTimeSeconds);
     }
 
     /**
@@ -77,47 +79,16 @@ public class DummySimAdapter implements PositionSimAdapter {
     }
 
     /**
-     * Update the motor position to be provided to IOs.
+     * Update the motor position and velocity to be provided to IOs by manually setting the state of
+     * the physics sim in the wrapped adapter.
+     *
+     * <p>This method also updates encoder position and velocity based on the ratios specified in
+     * the mechanism config passed to the PositionSimAdapter that this DummySimAdapter is wrapping.
      *
      * @param motorPosition An Angle, the new motor position
+     * @param motorvelocity An AngularVelocity, the new motor angular velocity
      */
-    public void setMotorPosition(Angle motorPosition) {
-        this.motorPosition = motorPosition;
-    }
-
-    /**
-     * Update the motor angular velocity to be provided to IOs.
-     *
-     * @param motorAngularVelocity An AngularVelocity, the new motor angular velocity
-     */
-    public void setMotorAngularVelocity(AngularVelocity motorAngularVelocity) {
-        this.motorAngularVelocity = motorAngularVelocity;
-    }
-
-    /**
-     * Update the encoder position to be provided to IOs.
-     *
-     * @param encoderPosition An Angle, the new encoder position
-     */
-    public void setEncoderPosition(Angle encoderPosition) {
-        this.encoderPosition = encoderPosition;
-    }
-
-    /**
-     * Update the encoder angular velocity to be provided to IOs.
-     *
-     * @param encoderAngularVelocity An AngularVelocity, the new encoder angular velocity
-     */
-    public void setEncoderAngularVelocity(AngularVelocity encoderAngularVelocity) {
-        this.encoderAngularVelocity = encoderAngularVelocity;
-    }
-
-    /**
-     * Update the current draw to be provided to IOs.
-     *
-     * @param currentDraw A Current, the new current draw
-     */
-    public void setCurrentDraw(Current currentDraw) {
-        this.currentDraw = currentDraw;
+    public void setState(Angle motorPosition, AngularVelocity motorVelocity) {
+        wrappedAdapter.setState(motorPosition, motorVelocity);
     }
 }
