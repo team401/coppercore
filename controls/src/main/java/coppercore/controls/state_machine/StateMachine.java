@@ -100,27 +100,19 @@ public class StateMachine<World> {
         this.requestedState = state;
     }
 
+    // NOTE: Consider switching from a String to some other type for graph format
     /**
-     * Write a state machine configuration in graphviz format
+     * Write a state machine configuration in graphviz format with custom graph settings
      *
      * @param pw The PrintWriter to write to
+     * @param graphFormat The graph format settings
      */
-    public void writeGraphvizFile(PrintWriter pw) {
+    public void writeGraphvizFileWithCustomGraphFormat(PrintWriter pw, String graphFormat) {
         pw.println("digraph {");
         pw.println();
-        pw.println("  // Default Graphviz settings");
+        pw.println("  // Graphviz Format settings");
         pw.println();
-        pw.println(
-                "  rankdir=LR;\r\n"
-                        + "\r\n"
-                        + "  node [\r\n"
-                        + "    shape=box,\r\n"
-                        + "    style=rounded\r\n"
-                        + "  ];\r\n"
-                        + "\r\n"
-                        + "  edge [\r\n"
-                        + "    fontsize=10\r\n"
-                        + "  ];");
+        pw.println(graphFormat);
         pw.println();
         pw.println("  // States");
         pw.println();
@@ -144,5 +136,25 @@ public class StateMachine<World> {
             pw.println();
         }
         pw.println("}");
+    }
+
+    /**
+     * Write a state machine configuration in graphviz format
+     *
+     * @param pw The PrintWriter to write to
+     */
+    public void writeGraphvizFile(PrintWriter pw) {
+        writeGraphvizFileWithCustomGraphFormat(
+                pw,
+                "  rankdir=LR;\r\n"
+                        + "  node [\r\n"
+                        + "    shape=box,\r\n"
+                        + "    style=rounded\r\n"
+                        + "  ];\r\n"
+                        + "\r\n"
+                        + "  edge [\r\n"
+                        + "    fontsize=10\r\n"
+                        + "  ];"
+                        + "\r\n");
     }
 }
