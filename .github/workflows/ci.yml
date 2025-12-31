@@ -85,6 +85,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports-${{ matrix.architecture }}
+          name: test-reports-${{ matrix.artifact-name }}
           path: "**/build/reports/tests/test/index.html"
           retention-days: 5
