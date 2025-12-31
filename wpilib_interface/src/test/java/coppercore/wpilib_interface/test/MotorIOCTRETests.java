@@ -125,6 +125,7 @@ public class MotorIOCTRETests {
     void initializeSimFeatures() {
         HAL.initialize(500, 2);
         SimHooks.setHALRuntimeType(2);
+        SimHooks.setProgramStarted();
     }
 
     /**
