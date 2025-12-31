@@ -62,7 +62,9 @@ public abstract class State<World> {
      * @param name The name of the state
      */
     public State(String name) {
-        Objects.requireNonNull(name, "State name cannot be null");
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("State name cannot be null or empty");
+        }
         this.name = name;
         this.transitions = new ArrayList<>();
     }
@@ -117,7 +119,7 @@ public abstract class State<World> {
     }
 
     /**
-     * Called when the state is entered. This is a internal method; use onEntry() to override
+     * Called when the state is entered. This is an internal method; use onEntry() to override
      * behavior.
      */
     protected final void _onEntry(StateMachine<World> stateMachine, World world) {
@@ -127,7 +129,7 @@ public abstract class State<World> {
     }
 
     /**
-     * Called when the state is exited. This is a internal method; use onExit() to override
+     * Called when the state is exited. This is an internal method; use onExit() to override
      * behavior.
      */
     protected final void _onExit(StateMachine<World> stateMachine, World world) {
@@ -135,7 +137,7 @@ public abstract class State<World> {
     }
 
     /**
-     * Called when the state is finished. This is a internal method; use onFinish() to override
+     * Called when the state is finished. This is an internal method; use onFinish() to override
      * behavior.
      */
     protected final void _onFinish() {
@@ -143,7 +145,7 @@ public abstract class State<World> {
     }
 
     /**
-     * Called periodically while in this state. This is a internal method; use periodic() to
+     * Called periodically while in this state. This is an internal method; use periodic() to
      * override behavior.
      */
     protected final void _periodic(StateMachine<World> stateMachine, World world) {
@@ -313,7 +315,7 @@ public abstract class State<World> {
         transitions.add(
                 new Transition(
                         requestedState,
-                        (world) -> requestedState.equals(this.requestedStateSupplier.get()),
+                        (world) -> requestedState.equals(getRequestedState()),
                         description));
     }
 

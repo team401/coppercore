@@ -52,7 +52,7 @@ public class StateMachine<World> {
      * @return The registered state
      */
     public State<World> registerState(State<World> state) {
-        states.put(state.name, state);
+        states.put(state.getName(), state);
         state.setRequestedStateSupplier(() -> requestedState);
         return state;
     }
@@ -98,6 +98,8 @@ public class StateMachine<World> {
      * Updates the state machine, transitioning to the next state if conditions are met. If the next
      * state is the same as the current state, onExit and onEntry will still be called. Raises an
      * exception if currentState is null.
+     *
+     * <p>After processing transitions, the requested state is cleared.
      */
     public void updateStates() {
         Objects.requireNonNull(
@@ -131,6 +133,8 @@ public class StateMachine<World> {
      *
      * <p>If the requested state is the same as the current state, onExit and onEntry will still be
      * called during the next updateStates call if the request is honored.
+     *
+     * <p>The requested state will be cleared after the next updateStates call.
      *
      * @param state The requested state
      */
@@ -185,15 +189,16 @@ public class StateMachine<World> {
     public void writeGraphvizFile(PrintWriter pw) {
         writeGraphvizFileWithCustomGraphFormat(
                 pw,
-                "  rankdir=LR;\r\n"
-                        + "  node [\r\n"
-                        + "    shape=box,\r\n"
-                        + "    style=rounded\r\n"
-                        + "  ];\r\n"
-                        + "\r\n"
-                        + "  edge [\r\n"
-                        + "    fontsize=10\r\n"
-                        + "  ];"
-                        + "\r\n");
+                """
+      rankdir=LR;
+      node [
+        shape=box,
+        style=rounded
+      ];
+
+      edge [
+        fontsize=10
+      ];
+    """);
     }
 }
