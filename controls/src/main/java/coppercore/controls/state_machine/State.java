@@ -6,6 +6,7 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -36,7 +37,7 @@ public abstract class State<World> {
     protected final List<Transition> transitions;
     private Optional<Timer> timer = Optional.empty();
     private double timeout;
-    protected Supplier<State<World>> requestedStateSupplier;
+    private Supplier<State<World>> requestedStateSupplier = () -> null;
     protected String name;
 
     /**
@@ -61,6 +62,7 @@ public abstract class State<World> {
      * @param name The name of the state
      */
     public State(String name) {
+        Objects.requireNonNull(name, "State name cannot be null");
         this.name = name;
         this.transitions = new ArrayList<>();
     }
@@ -70,8 +72,23 @@ public abstract class State<World> {
      *
      * @param supplier The supplier that provides the requested state
      */
-    public void setRequestedStateSupplier(Supplier<State<World>> supplier) {
+    protected void setRequestedStateSupplier(Supplier<State<World>> supplier) {
+        // Prevent null supplier
+        Objects.requireNonNull(supplier, "Requested state supplier cannot be null");
         this.requestedStateSupplier = supplier;
+    }
+
+    /**
+     * Get the supplier for the requested state.
+     *
+     * @return supplier
+     */
+    protected Supplier<State<World>> getRequestedStateSupplier() {
+        return this.requestedStateSupplier;
+    }
+
+    protected State<World> getRequestedState() {
+        return this.requestedStateSupplier.get();
     }
 
     /**
@@ -206,6 +223,8 @@ public abstract class State<World> {
          * @param description A description for the transition condition
          */
         TransitionConditionBuilder(Predicate<World> condition, String description) {
+            Objects.requireNonNull(condition, "Condition cannot be null");
+            Objects.requireNonNull(description, "Description cannot be null");
             this.condition = condition;
             this.description = description;
         }
@@ -218,6 +237,8 @@ public abstract class State<World> {
          * @return The updated TransitionConditionBuilder
          */
         public TransitionConditionBuilder andWhen(Predicate<World> nextCondition, String label) {
+            Objects.requireNonNull(nextCondition, "Next condition cannot be null");
+            Objects.requireNonNull(label, "Label cannot be null");
             this.condition = this.condition.and(nextCondition);
             this.description += " && " + label;
             return this;
@@ -229,6 +250,7 @@ public abstract class State<World> {
          * @param toState The state to transition to
          */
         public void transitionTo(State<World> toState) {
+            Objects.requireNonNull(toState, "Target state cannot be null");
             transitions.add(new Transition(toState, condition, description));
         }
     }
@@ -301,6 +323,7 @@ public abstract class State<World> {
      * @param requestedState The requested state to check for
      */
     public void whenRequestedTransitionTo(State<World> requestedState) {
+        Objects.requireNonNull(requestedState, "Requested state cannot be null");
         whenRequestedTransitionTo(requestedState, "When " + requestedState.name + " requested");
     }
 

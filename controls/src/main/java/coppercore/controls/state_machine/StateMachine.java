@@ -135,7 +135,7 @@ public class StateMachine<World> {
      * @param state The requested state
      */
     public void requestState(State<World> state) {
-        this.requestedState = state;
+        requestedState = state;
     }
 
     // NOTE: Consider switching from a String to some other type for graph format
