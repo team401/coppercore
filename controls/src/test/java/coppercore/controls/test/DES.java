@@ -13,15 +13,7 @@ public class DES {
                     Comparator.comparingInt((Event e) -> e.when)
                             .thenComparing(System::identityHashCode));
 
-    class Event {
-        int when;
-        Runnable runnable;
-
-        Event(int when, Runnable runnable) {
-            this.when = when;
-            this.runnable = runnable;
-        }
-    }
+    record Event(int when, Runnable runnable) {}
 
     @FunctionalInterface
     interface Runnable {
