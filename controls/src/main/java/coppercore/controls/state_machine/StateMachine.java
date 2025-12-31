@@ -25,7 +25,8 @@ import java.util.Objects;
  *
  * <p>It also does not support hierarchical states or parallel states.
  *
- * Warning: Currently the state machine does not check for duplicate state names.
+ * <p>Warning: Currently the state machine does not check for duplicate state names.
+ *
  * @param <World> The type of the world in which this state machine lives.
  */
 public class StateMachine<World> {

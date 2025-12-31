@@ -151,9 +151,12 @@ public class StateMachineTestsDES {
                     stateMachineWorld.shouldShoot = false;
                 });
 
-        // XXX FIXME. There's a problem here; going into the idle
-        // state takes two iterations of the loop; it fails if we tested
-        // at 161 after the next robot loop iteration.
+        // NB. Setting shouldShoot to false here doesn't trigger a
+        // transition to idleState here because it doesn't fire at 160.
+        // Instead, the warmingUpState will finish, which triggers a
+        // transition to shootingState at 160. shootingState finishes
+        // at 180, transitioning to idleState.
+        sim.schedule(161, assertIn.apply(shootingState));
         sim.schedule(181, assertIn.apply(idleState));
 
         // ### Return to WarmingUp and simulate not having a note in warmup to test requested
