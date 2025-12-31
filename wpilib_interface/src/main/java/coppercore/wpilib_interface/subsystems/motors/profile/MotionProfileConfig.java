@@ -54,6 +54,7 @@ public abstract sealed class MotionProfileConfig
      *     required to apply a given acceleration. Is in units of Output Unit / (Rotations per
      *     Second / Second). As a result, when supply voltage is fixed, a higher profile kA results
      *     in a lower profile acceleration.
+     * @return an ImmutableMotionProfileConfig with the specified constraints
      */
     public static ImmutableMotionProfileConfig immutable(
             AngularVelocity maxVelocity,
@@ -81,6 +82,7 @@ public abstract sealed class MotionProfileConfig
      *     required to apply a given acceleration. Is in units of Output Unit / (Rotations per
      *     Second / Second). As a result, when supply voltage is fixed, a higher profile kA results
      *     in a lower profile acceleration.
+     * @return a MutableMotionProfileConfig with the specified constraints
      */
     public static MutableMotionProfileConfig mutable(
             AngularVelocity maxVelocity,

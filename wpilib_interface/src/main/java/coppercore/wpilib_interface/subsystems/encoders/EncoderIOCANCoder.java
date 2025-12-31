@@ -25,12 +25,19 @@ import edu.wpi.first.wpilibj.DriverStation;
  * is CTRE's software library.
  */
 public class EncoderIOCANCoder implements EncoderIO {
+    /**
+     * A string to use for logging and alerts containing the name of the mechanism, the device type
+     * (cancoder), and its can bus and numerical ID.
+     */
     protected final String deviceName;
 
+    /** CANDeviceID encapsulating CAN ID and CAN bus name */
     protected final CANDeviceID deviceID;
 
+    /** CANcoder encoder interface object to interact with a CANcoder */
     protected final CANcoder cancoder;
 
+    /** CANCoderConfiguration applied to the encoder */
     protected final CANcoderConfiguration cancoderConfig;
 
     /** An alert to be shown whenever a config fails to apply */

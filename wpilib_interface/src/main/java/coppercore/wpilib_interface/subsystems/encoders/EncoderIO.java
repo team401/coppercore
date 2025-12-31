@@ -7,6 +7,11 @@ import edu.wpi.first.units.measure.Angle;
  * update inputs and set/seed position.
  */
 public interface EncoderIO {
+    /**
+     * Take a set of inputs and update them with the latest data from the encoder
+     *
+     * @param inputs The inputs object, which will be mutated.
+     */
     public void updateInputs(EncoderInputs inputs);
 
     /**

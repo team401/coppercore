@@ -258,7 +258,7 @@ public class MotorIOCTRETests {
         // Now tell it to control back up and ensure that it both commands upward movement and
         // successfully moves the sim updward.
         leadMotor.controlToPositionUnprofiled(Radians.of(1.0));
-        loopForTime(0.06, loop);
+        loopForTime(0.1, loop); // Give it a few cycles for the sim thread to update
         System.err.println("leadMotorInputs.appliedVolts is " + leadMotorInputs.appliedVolts);
         Assertions.assertEquals(
                 1.0,

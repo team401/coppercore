@@ -2,11 +2,7 @@ package coppercore.wpilib_interface.subsystems.encoders;
 
 import org.littletonrobotics.junction.AutoLog;
 
-/**
- * A generic set of inputs for an encoder.
- *
- * <p>
- */
+/** A generic set of inputs for an encoder. */
 @AutoLog
 public class EncoderInputs {
     /**

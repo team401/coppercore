@@ -83,6 +83,13 @@ public class ElevatorMechanismConfig extends MechanismConfig {
 
         // Only allow ElevatorMechanismConfigBuilder to be created using
         // ElevatorMechanismConfig.builder()
+        /**
+         * Construct a new ElevatorMechanismConfigbuilder, with no followers, 1.0 ratios, and all
+         * other fields null.
+         *
+         * <p>This constructor is protected so that this class may only be instantiated using
+         * ElevatorMechanismConfig.builder()
+         */
         protected ElevatorMechanismConfigBuilder() {}
 
         /**

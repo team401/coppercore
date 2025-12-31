@@ -7,7 +7,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.CANcoderSimState;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.sim.PositionSimAdapter;
-import edu.wpi.first.wpilibj.Timer;
 
 /**
  * The EncoderIOCANCoderPositionSim class uses Phoenix-6 device simulation (CANCoderSimState) to
@@ -20,12 +19,11 @@ import edu.wpi.first.wpilibj.Timer;
  * only read values.
  */
 public class EncoderIOCANCoderPositionSim extends EncoderIOCANCoder {
+    /** Sim adapter to read physics sim values from */
     protected final PositionSimAdapter physicsSimAdapter;
 
+    /** CANcoderSimState handle to interface with the simulated encoder */
     protected final CANcoderSimState cancoderSimState;
-
-    protected final Timer deltaTimer = new Timer();
-    protected double lastTimestamp;
 
     /**
      * Create a new simulated CANcoder IO, initializing a new CANcoder and all required signals.
@@ -45,9 +43,6 @@ public class EncoderIOCANCoderPositionSim extends EncoderIOCANCoder {
         this.cancoderSimState = this.cancoder.getSimState();
 
         this.physicsSimAdapter = physicsSimAdapter;
-
-        deltaTimer.restart();
-        this.lastTimestamp = deltaTimer.get();
     }
 
     @Override

@@ -11,9 +11,18 @@ import edu.wpi.first.units.measure.AngularVelocity;
  * to other classes outside of the project.
  */
 public abstract class BasePositionSimAdapter implements PositionSimAdapter {
+    /**
+     * The MechanismConfig used for this mechanism. This is required to calculate gear ratios
+     * properly for simulation.
+     */
     protected final MechanismConfig config;
 
-    /** Constructs a new BasePositionSim, initializing this class's stored config. */
+    /**
+     * Constructs a new BasePositionSim, initializing this class's stored config.
+     *
+     * @param config The MechanismConfig used for this mechanism. This is required to calculate gear
+     *     ratios properly for simulation.
+     */
     protected BasePositionSimAdapter(MechanismConfig config) {
         this.config = config;
     }
@@ -36,7 +45,7 @@ public abstract class BasePositionSimAdapter implements PositionSimAdapter {
      * <p>This method exists to provide DummySimAdapter a clean interface to wrap an adapter while
      * still providing it with a means to access the mechanism config.
      *
-     * @return
+     * @return The MechanismConfig provided to this sim adapter.
      */
     protected MechanismConfig getConfig() {
         return this.config;

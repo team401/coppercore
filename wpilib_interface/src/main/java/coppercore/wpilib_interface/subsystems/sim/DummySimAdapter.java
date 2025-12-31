@@ -23,6 +23,11 @@ public class DummySimAdapter implements PositionSimAdapter {
     private Voltage lastMotorAppliedOutput = Volts.zero();
     private double lastDeltaTimeSeconds = 0.0;
 
+    /**
+     * Creates a new DummySimAdapter, given a BasePositionSimAdapter to wrap.
+     *
+     * @param adapter The BasePositionSimAdapter to wrap.
+     */
     public DummySimAdapter(BasePositionSimAdapter adapter) {
         this.wrappedAdapter = adapter;
     }
@@ -73,6 +78,8 @@ public class DummySimAdapter implements PositionSimAdapter {
     /**
      * Get the value of deltaTimeSeconds passed into the most recent call to {@link
      * DummySimAdapter#update(Voltage, double)}
+     *
+     * @return a double, the last delta time measured in seconds.
      */
     public double getLastDeltaTimeSeconds() {
         return this.lastDeltaTimeSeconds;
@@ -86,7 +93,7 @@ public class DummySimAdapter implements PositionSimAdapter {
      * the mechanism config passed to the PositionSimAdapter that this DummySimAdapter is wrapping.
      *
      * @param motorPosition An Angle, the new motor position
-     * @param motorvelocity An AngularVelocity, the new motor angular velocity
+     * @param motorVelocity An AngularVelocity, the new motor angular velocity
      */
     public void setState(Angle motorPosition, AngularVelocity motorVelocity) {
         wrappedAdapter.setState(motorPosition, motorVelocity);

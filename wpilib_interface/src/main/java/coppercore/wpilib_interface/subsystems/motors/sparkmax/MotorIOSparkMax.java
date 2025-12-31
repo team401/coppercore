@@ -39,10 +39,21 @@ import edu.wpi.first.wpilibj.DriverStation;
  * methods will result in an UnsupportedOperationException.
  */
 public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorIO {
+    /**
+     * The SparkMaxConfig applied to the motor. This value is protected in case any subclass IOs
+     * need to access the config.
+     */
     protected final SparkMaxConfig sparkMaxConfig;
 
+    /**
+     * The SparkMax object, used to interface with the motor, applying outputs and reading inputs.
+     */
     protected final SparkMax sparkMax;
 
+    /**
+     * The closed loop controller object from the sparkMax, cached to avoid having to call
+     * getController every time a control request is applied.
+     */
     protected final SparkClosedLoopController controller;
 
     /**

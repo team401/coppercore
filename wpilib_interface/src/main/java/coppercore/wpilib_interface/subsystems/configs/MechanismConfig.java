@@ -23,7 +23,21 @@ public class MechanismConfig {
      * an arm)
      */
     public enum GravityFeedforwardType {
+        /**
+         * Gravity Feedforward Type for an Elevator: Gravity is calculated by a static (positive)
+         * value of kG that doesn't change based on the position of the mechanism. This feedforward
+         * type should be used for all mechanisms that don't change orientation or change resistance
+         * based on position.
+         */
         STATIC_ELEVATOR,
+        /**
+         * Gravity Feedforward Type for an Arm: Gravity is calculated by taking the cosine of the
+         * angle and multiplying it by kG. This is useful for systems like an arm, where changing
+         * the angle of the mechanism changes the amount of force that gravity applies on the
+         * system. Systems using this value must be calibrated such that an encoder angle of zero is
+         * horizontal (or the center of mass is horizontal from the pivot) so that feedforward can
+         * be accurately calculated.
+         */
         COSINE_ARM;
 
         /**
@@ -40,11 +54,24 @@ public class MechanismConfig {
         }
     }
 
+    /** The name of the Mechanism, used for logging. */
     public final String name;
+
+    /** The CANDeviceID of the lead motor. */
     public final CANDeviceID leadMotorId;
 
+    /**
+     * An array of MechanismFollowerMotorConfig objects specifying the CANDeviceIDs and inverts of
+     * all followers, if any are present.
+     */
     public final MechanismFollowerMotorConfig[] followerMotorConfigs;
 
+    /**
+     * The type of calculation to use for gravity feedforward.
+     *
+     * @see GravityFeedforwardType The GravityFeedforwardType enum for more information on gravity
+     *     feedforwards and which values may be used here.
+     */
     public final GravityFeedforwardType gravityFeedforwardType;
 
     /**
@@ -78,6 +105,9 @@ public class MechanismConfig {
      *     either STATIC_ELEVATOR or COSINE_ARM.
      * @param motorToEncoderRatio Ratio of motor angle to encoder ratio. Encoder position *
      *     motorToEncoderRatio = motor position .
+     * @param encoderToMechanismRatio A nonzero value representing the ratio of encoder rotations :
+     *     mechanism rotations. This value can be calculated with (mechanism gear teeth / encoder
+     *     gear teeth).
      */
     protected MechanismConfig(
             String name,
@@ -126,10 +156,19 @@ public class MechanismConfig {
         double encoderToMechanismRatio = 1.0;
 
         // Only allow MechanismConfigBuilder to be created using MechanismConfig.builder()
+        /**
+         * Create a new MechanismConfigBuilder with 1.0 ratios, no followers, and all other fields
+         * null.
+         *
+         * <p>This constructor is protected so that this class may only be instantiated using
+         * MechanismConfig.builder()
+         */
         protected MechanismConfigBuilder() {}
 
         /**
          * Return this object, but with the correct type of any builder that may extend this one.
+         *
+         * @return This builder object
          */
         @SuppressWarnings("unchecked")
         protected T self() {

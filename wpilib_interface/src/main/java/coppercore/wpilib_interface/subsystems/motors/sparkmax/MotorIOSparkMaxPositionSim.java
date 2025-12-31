@@ -1,11 +1,11 @@
 package coppercore.wpilib_interface.subsystems.motors.sparkmax;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.sim.SparkMaxSim;
-import com.revrobotics.sim.SparkRelativeEncoderSim;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
@@ -21,14 +21,19 @@ import java.util.function.Function;
  * capabilities for position-based mechanisms by using SparkMaxSim objects.
  */
 public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
+    /** Sim adapter to read physics sim values from and update with simulated motor output */
     private final PositionSimAdapter physicsSimAdapter;
 
+    /** SparkMaxSim handle to interface with the simulated motor */
     private final SparkMaxSim sparkSim;
-    private final SparkRelativeEncoderSim encoderSim;
 
+    /** Timer to fetch timestamps to calculate delta time in sim */
     private final Timer deltaTimer = new Timer();
-    private double lastTimestamp;
 
+    /** Variable to keep track of the last timestamp, in seconds */
+    private double lastTimestampSeconds;
+
+    /** True if this motor is a follower, false if it is the leader */
     private final boolean isFollower;
 
     /**
@@ -36,6 +41,12 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
      * config.
      */
     private final boolean invertSimRotation;
+
+    /**
+     * The number of motors, calculated in the constructor. This value equals 1 plus the length of
+     * the followerMotorConfigs field of the MechanismConfig passed to this simulated IO.
+     */
+    private final int numMotors;
 
     /**
      * Create a new simulated SparkMax IO for a lead motor, initializing a SparkMaxSim object.
@@ -59,15 +70,13 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
 
         this.invertSimRotation = false;
 
-        int numMotors = 1 + config.followerMotorConfigs.length;
-        sparkSim = new SparkMaxSim(sparkMax, motorFactory.apply(numMotors));
-
-        encoderSim = new SparkRelativeEncoderSim(sparkMax);
+        this.numMotors = 1 + config.followerMotorConfigs.length;
+        sparkSim = new SparkMaxSim(sparkMax, motorFactory.apply(this.numMotors));
 
         this.physicsSimAdapter = physicsSimAdapter;
 
-        deltaTimer.start();
-        this.lastTimestamp = deltaTimer.get();
+        this.deltaTimer.start();
+        this.lastTimestampSeconds = deltaTimer.get();
     }
 
     /**
@@ -115,15 +124,13 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
         this.isFollower = true;
         this.invertSimRotation = config.followerMotorConfigs[followerIndex].invert();
 
-        int numMotors = 1 + config.followerMotorConfigs.length;
-        sparkSim = new SparkMaxSim(sparkMax, motorFactory.apply(numMotors));
-
-        encoderSim = new SparkRelativeEncoderSim(sparkMax);
+        this.numMotors = 1 + config.followerMotorConfigs.length;
+        sparkSim = new SparkMaxSim(sparkMax, motorFactory.apply(this.numMotors));
 
         this.physicsSimAdapter = physicsSimAdapter;
 
-        deltaTimer.start();
-        this.lastTimestamp = deltaTimer.get();
+        this.deltaTimer.start();
+        this.lastTimestampSeconds = deltaTimer.get();
     }
 
     /**
@@ -157,13 +164,24 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
         super.updateInputs(inputs);
     }
 
+    /**
+     * Update the state of the physics sim, by:
+     *
+     * <ul>
+     *   <li>Calculating delta time
+     *   <li>If this IO is the leader motor, updating the physics sim adapter with the correct
+     *       applied output based on the SparkMaxSim.
+     *   <li>Updating the SparkMaxSim's position, velocity, and current draw based on the sim
+     *       adapter
+     * </ul>
+     */
     protected void updateSimState() {
         // TODO: Write a system to simulate current draw from multiple subsystems across a project.
         sparkSim.setBusVoltage(RobotController.getBatteryVoltage());
 
         double timestamp = deltaTimer.get();
-        double deltaTimeSeconds = timestamp - this.lastTimestamp;
-        this.lastTimestamp = timestamp;
+        double deltaTimeSeconds = timestamp - this.lastTimestampSeconds;
+        this.lastTimestampSeconds = timestamp;
 
         if (!isFollower) {
             physicsSimAdapter.update(
@@ -173,12 +191,12 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
 
         double invertMultiplier = invertSimRotation ? -1.0 : 1.0;
 
-        encoderSim.setPosition(physicsSimAdapter.getEncoderPosition().in(Rotations));
         sparkSim.setPosition(physicsSimAdapter.getMotorPosition().in(Rotations) * invertMultiplier);
-        double motorVelocityRPM =
-                physicsSimAdapter.getMotorAngularVelocity().in(RPM) * invertMultiplier;
+        sparkSim.setVelocity(physicsSimAdapter.getMotorAngularVelocity().in(RPM));
 
-        encoderSim.iterate(physicsSimAdapter.getEncoderAngularVelocity().in(RPM), deltaTimeSeconds);
-        sparkSim.iterate(motorVelocityRPM, RobotController.getBatteryVoltage(), deltaTimeSeconds);
+        double totalCurrentAmps = physicsSimAdapter.getCurrentDraw().in(Amps);
+        double perMotorCurrentAmps = totalCurrentAmps / this.numMotors;
+
+        sparkSim.setMotorCurrent(perMotorCurrentAmps);
     }
 }
