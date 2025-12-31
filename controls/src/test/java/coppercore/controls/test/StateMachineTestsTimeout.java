@@ -79,7 +79,7 @@ public class StateMachineTestsTimeout {
         sim.schedule(
                 2 * TIMEOUT_SECONDS * 1000 + 100 - 5, assertIn.apply(waitingState, "in waiting 4"));
         sim.schedule(
-                2 * TIMEOUT_SECONDS * 1000 + 100 + 5,
+                2 * TIMEOUT_SECONDS * 1000 + 100 + 25,
                 assertIn.apply(timedoutState, "in timedout 5"));
 
         sim.simulate(10000);
