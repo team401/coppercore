@@ -1,13 +1,10 @@
 package coppercore.wpilib_interface.test;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
+import java.util.function.Supplier;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -22,6 +19,7 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.unmanaged.Unmanaged;
+
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.ElevatorMechanismConfig;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig.GravityFeedforwardType;
@@ -34,16 +32,20 @@ import coppercore.wpilib_interface.subsystems.sim.ElevatorSimAdapter;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.PerUnit;
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
-import java.util.function.Supplier;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 /**
  * The MotorIOCTRETests class contains tests for TalonFX motor IOs and CANCoder encoderIOs using
@@ -248,7 +250,19 @@ public class MotorIOCTRETests {
 
         // Give it a couple cycles to let data propagate into the IOs
         leadMotor.controlToPositionUnprofiled(Radians.zero());
-        loopForTime(2.00, loop);
+        double startTime = Timer.getFPGATimestamp();
+        loopForTime(
+                2.00,
+                () -> {
+                    loop.run();
+                    System.err.println(
+                            "leadMotorInputs.positionRadians is "
+                                    + leadMotorInputs.positionRadians
+                                    + ", leadMotorInputs.appliedVolts is "
+                                    + leadMotorInputs.appliedVolts
+                                    + ", current time since start of loop is "
+                                    + (Timer.getFPGATimestamp() - startTime));
+                });
 
         Assertions.assertEquals(
                 0.0,
