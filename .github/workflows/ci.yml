@@ -82,8 +82,9 @@ jobs:
         run: ./gradlew publishToMavenLocal
 
       - name: Upload test reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
+          name: test-reports-${{ matrix.architecture }}
           path: "**/build/reports/tests/test/index.html"
           retention-days: 5
