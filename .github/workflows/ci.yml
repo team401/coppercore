@@ -80,3 +80,10 @@ jobs:
 
       - name: Publish to Maven Local
         run: ./gradlew publishToMavenLocal
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: **/build/reports/tests/test/index.html
+          retention-days: 5
