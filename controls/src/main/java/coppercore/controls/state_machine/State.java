@@ -1,7 +1,12 @@
 package coppercore.controls.state_machine;
 
+import static edu.wpi.first.units.Units.Seconds;
+
+import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.Timer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -12,6 +17,8 @@ public abstract class State<World> {
 
     protected boolean finished = false;
     protected final List<Transition> transitions;
+    private Optional<Timer> timer = Optional.empty();
+    private double timeout;
     protected Supplier<State<World>> requestedStateSupplier;
     protected String name;
 
@@ -81,6 +88,7 @@ public abstract class State<World> {
      */
     protected final void _onEntry(StateMachine<World> stateMachine, World world) {
         finished = false;
+        timer.ifPresent(t -> t.restart());
         onEntry(stateMachine, world);
     }
 
@@ -236,6 +244,24 @@ public abstract class State<World> {
      */
     public TransitionConditionBuilder whenFinished() {
         return whenFinished("When " + this.name + " finished");
+    }
+
+    private boolean hasTimedOut() {
+        return timer.map(t -> t.hasElapsed(timeout)).orElse(false);
+    }
+
+    /**
+     * Creates a transition condition builder that triggers a transition upon a timeout.
+     *
+     * <p>Each State may be, optionally, associated with exactly one transition that fires on
+     * timeout. The timeout is rearmed every time the state is entered.
+     *
+     * @param durationAfterInit timeout, duration starting when state is entered.
+     */
+    public TransitionConditionBuilder whenTimeout(Time durationAfterInit) {
+        timer = Optional.of(new Timer());
+        timeout = durationAfterInit.in(Seconds);
+        return when((world) -> hasTimedOut(), "timeout");
     }
 
     /**

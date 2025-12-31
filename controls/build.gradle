@@ -26,6 +26,9 @@ dependencies {
 	implementation libs.guava
 }
 
+// injects the JNI extraction dir into java.library.path for tests.
+wpi.java.configureTestTasks(test)
+
 // Add this to each subproject separately.
 mavenPublishing {
 	pom {
