@@ -1,10 +1,10 @@
 name: CI
 
-on: 
+on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ '**' ]
+    branches: ["**"]
 
 jobs:
   build-docker:
@@ -26,14 +26,14 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
-      
+
       - name: Fetch history and metadata
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
 
       - uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
 
       - name: Build with Gradle
         run: ./gradlew build --max-workers 1 ${{ matrix.build-options }}
@@ -44,7 +44,7 @@ jobs:
           path: build/allOutputs
 
   build-host:
-    env: 
+    env:
       MACOSX_DEPLOYMENT_TARGET: 15
     strategy:
       fail-fast: false
@@ -71,8 +71,8 @@ jobs:
 
       - uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
           architecture: ${{ matrix.architecture }}
 
       - name: Build with Gradle
@@ -85,5 +85,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
-          path: **/build/reports/tests/test/index.html
+          path: "**/build/reports/tests/test/index.html"
           retention-days: 5
