@@ -12,7 +12,24 @@ import java.util.function.Supplier;
 
 // TODO: Add missing javadocs
 
-/** An abstract class representing a state in a state machine. */
+/**
+ * An abstract class representing a state in a state machine.
+ *
+ * <p>It supports defining transitions to other states based on conditions, as well as handling
+ * entry, exit, finish, and periodic behavior.
+ *
+ * <p>If a state is marked as finished, it can be used in transition conditions. When a state is
+ * entered, its onEntry method is called. When a state is exited, its onExit method is called. When
+ * a state is finished, its onFinish method is called. The periodic method is called periodically
+ * while in this state. Transitions can be defined using conditions, including timeouts and
+ * requested transitions.
+ *
+ * <p>Each state has a name for identification. If the state is anonymous, it must be given a name
+ * using the constructor that takes a name parameter. Otherwise, the simple name of the class is
+ * used as the state's name. Currently there is no checking for duplicate state names.
+ *
+ * @param <World> The type of the world in which this state lives.
+ */
 public abstract class State<World> {
 
     protected boolean finished = false;
@@ -73,13 +90,13 @@ public abstract class State<World> {
      *
      * @return The next state, or null if no transition is taken
      */
-    protected final State<World> getNextState(World world) {
+    protected final Optional<State<World>> getNextState(World world) {
         for (Transition transition : transitions) {
             if (transition.whenCondition.test(world)) {
-                return transition.toState;
+                return Optional.of(transition.toState);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     /**

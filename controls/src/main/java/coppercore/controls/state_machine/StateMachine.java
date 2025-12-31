@@ -3,13 +3,31 @@ package coppercore.controls.state_machine;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 // TODO: Add missing javadocs
 // TODO: Clear requestedState after a transition or periodic call?
 
 // Note: Some parts of the javadoc were written using Copilot
 
-/** A simple state machine implementation. */
+/**
+ * A simple state machine implementation.
+ *
+ * <p>It supports registering states, defining transitions between states based on conditions, and
+ * updating the current state based on those transitions.
+ *
+ * <p>Before using the state machine, states must be registered and transitions defined. The state
+ * machine must also be initialized with an initial state using setState.
+ *
+ * <p>The state machine can then be updated using the updateStates method, which will evaluate the
+ * transitions and change the current state accordingly. The periodic method can be called to
+ * execute any periodic actions defined in the current state.
+ *
+ * <p>It also does not support hierarchical states or parallel states.
+ *
+ * @warning Currently the state machine does not check for duplicate state names.
+ * @param <World> The type of the world in which this state machine lives.
+ */
 public class StateMachine<World> {
 
     private State<World> currentState;
@@ -50,14 +68,16 @@ public class StateMachine<World> {
     }
 
     /**
-     * Sets the current state of the state machine. This will override defined transitions.
+     * Sets the current state of the state machine. This will override defined transitions. If
+     * newState is equal to currentState, The onExit and onEntry methods will still be called. If
+     * the current state is null / setting the initial state, only the onEntry method will be
+     * called. If the current state is not null, its onExit method will be called before changing
+     * states.
      *
      * @param newState The new state
      */
     public void setState(State<World> newState) {
-        if (newState == null) {
-            return;
-        }
+        Objects.requireNonNull(newState, "Can't set state to null");
         if (currentState != null) {
             currentState._onExit(this, world);
         }
@@ -74,25 +94,43 @@ public class StateMachine<World> {
         return currentState;
     }
 
-    /** Updates the state machine, transitioning to the next state if conditions are met. */
+    /**
+     * Updates the state machine, transitioning to the next state if conditions are met. If the next
+     * state is the same as the current state, onExit and onEntry will still be called. Raises an
+     * exception if currentState is null.
+     */
     public void updateStates() {
-        if (currentState == null) {
-            return;
-        }
-        setState(currentState.getNextState(world));
+        Objects.requireNonNull(
+                currentState,
+                "Can't call updateStates while the currentState is null, this is either a bug in"
+                    + " the State Machine implementation or You forgot to give the state machine an"
+                    + " initial state using setState");
+        currentState.getNextState(world).ifPresent(this::setState);
         // Clear requested state after processing
         this.requestedState = null;
     }
 
-    /** Calls the periodic function of the current state. */
+    /**
+     * Calls the periodic function of the current state. Raises an exception if currentState is
+     * null.
+     */
     public void periodic() {
-        if (currentState != null) {
-            currentState._periodic(this, world);
-        }
+        Objects.requireNonNull(
+                currentState,
+                "Can't call periodic while the currentState is null, this is either a bug in the"
+                        + " State Machine implementation or You forgot to give the state machine an"
+                        + " initial state using setState");
+        currentState._periodic(this, world);
     }
 
     /**
      * Requests a state change to the specified state.
+     *
+     * <p>If multiple states are requested before the next updateStates call, the last requested
+     * state will take precedence. And if the requested state is null, no state change will occur.
+     *
+     * <p>If the requested state is the same as the current state, onExit and onEntry will still be
+     * called during the next updateStates call if the request is honored.
      *
      * @param state The requested state
      */
@@ -139,7 +177,8 @@ public class StateMachine<World> {
     }
 
     /**
-     * Write a state machine configuration in graphviz format
+     * Write a state machine configuration in graphviz format Use a custom default graph format.
+     * Which is a left to right directed graph with rounded box nodes, and fontsize 10 for edges.
      *
      * @param pw The PrintWriter to write to
      */
