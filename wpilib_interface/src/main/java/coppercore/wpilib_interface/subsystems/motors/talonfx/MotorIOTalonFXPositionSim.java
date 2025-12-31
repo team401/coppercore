@@ -1,5 +1,8 @@
 package coppercore.wpilib_interface.subsystems.motors.talonfx;
 
+import static edu.wpi.first.units.Units.Hertz;
+
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -40,6 +43,12 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
      * config.
      */
     private final boolean invertSimRotation;
+
+    /**
+     * Whether or not this IO is being used in a unit test. When this value is true, updateInputs
+     * should wait for all status signals to refresh before continuing.
+     */
+    private boolean isUnitTestMode = false;
 
     /**
      * Create a new Simulated TalonFX IO, initializing a TalonFX and all required StatusSignals.
@@ -151,6 +160,10 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
 
     @Override
     public void updateInputs(MotorInputs inputs) {
+        if (isUnitTestMode) {
+            BaseStatusSignal.waitForAll(1.0, signals);
+        }
+
         updateSimState();
 
         super.updateInputs(inputs);
@@ -186,5 +199,14 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
                 physicsSimAdapter.getMotorPosition().times(invertMultiplier));
         talonSimState.setRotorVelocity(
                 physicsSimAdapter.getMotorAngularVelocity().times(invertMultiplier));
+    }
+
+    /**
+     * Sets the refresh rate of all status signals to 1000 hz and enables waiting for status signals
+     * to refresh in updateInputs. This should hopefully improve consistency in unit tests.
+     */
+    public void enableUnitTestMode() {
+        this.isUnitTestMode = true;
+        BaseStatusSignal.setUpdateFrequencyForAll(Hertz.of(1000), signals);
     }
 }
