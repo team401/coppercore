@@ -57,7 +57,6 @@ public class StateMachineTestsTimeout {
                     @Override
                     public void run(int simulationTime) {
                         stateMachine.periodic();
-                        stateMachine.updateStates();
                         sim.schedule(simulationTime + 20, this);
                         SimHooks.stepTiming(0.02);
                     }

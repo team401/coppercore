@@ -102,7 +102,7 @@ public class StateMachine<World> {
      *
      * <p>After processing transitions, the requested state is cleared.
      */
-    public void updateStates() {
+    protected void updateStates() {
         Objects.requireNonNull(
                 currentState,
                 "Can't call updateStates while the currentState is null, this is either a bug in"
@@ -124,6 +124,7 @@ public class StateMachine<World> {
                         + " State Machine implementation or You forgot to give the state machine an"
                         + " initial state using setState");
         currentState._periodic(this, world);
+        updateStates();
     }
 
     /**

@@ -1,10 +1,11 @@
 package coppercore.controls.test;
 
+import static coppercore.controls.test.StateMachineTests.Robot;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import coppercore.controls.state_machine.State;
 import coppercore.controls.state_machine.StateMachine;
-import java.util.List;
+import coppercore.controls.test.StateMachineTests.Robot;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
@@ -13,79 +14,14 @@ import org.junit.jupiter.api.Test;
  */
 public class StateMachineTestsDES {
 
-    // This method exist to keep the Transition Test State Machine and the State Machine Graph State
-    // Machine the same
-    StateMachine<Robot> createTestStateMachine(Robot stateMachineWorld) {
-        StateMachine<Robot> stateMachine = new StateMachine<>(stateMachineWorld);
-
-        // Registering States
-        List.of(idleState, intakingState, warmingUpState, shootingState)
-                .forEach(stateMachine::registerState);
-
-        // Defining Transitions
-
-        // Transitions that can happen from Idle state
-        idleState
-                .when((Robot robot) -> robot.shouldIntake && !robot.hasNote, "should intake")
-                .transitionTo(intakingState);
-        idleState
-                .when((Robot robot) -> robot.shouldShoot && robot.hasNote, "should shoot")
-                .transitionTo(warmingUpState);
-
-        // Transitions that can happen from Intaking state
-        intakingState.whenFinished().transitionTo(idleState);
-        intakingState
-                .when((Robot robot) -> !robot.shouldIntake, "should not intake")
-                .transitionTo(idleState);
-
-        // Transitions that can happen from WarmingUp state
-        warmingUpState.whenFinished().transitionTo(shootingState);
-        warmingUpState
-                .when((Robot robot) -> !robot.shouldShoot, "should not shoot")
-                .transitionTo(idleState);
-        warmingUpState.whenRequestedTransitionTo(idleState);
-
-        // Transitions that can happen from Shooting state
-        shootingState.whenFinished().transitionTo(idleState);
-        shootingState
-                .when((Robot robot) -> !robot.shouldShoot, "should not shoot")
-                .transitionTo(idleState);
-        shootingState.whenRequestedTransitionTo(idleState);
-
-        // Setting initial state
-        stateMachine.setState(idleState);
-
-        return stateMachine;
-    }
-
-    @Test
-    public void StateMachineTransitionsTest() {
-
-        // ### Setting up the state machine
-        // Creating the State Machine
-        Robot stateMachineWorld = new Robot();
-
-        StateMachine<Robot> stateMachine = createTestStateMachine(stateMachineWorld);
-
-        DES sim = new DES();
-
-        // Run robot loop every 20ms, that is, at 0, 20, 40, 60 and so on.
-        DES.Runnable robotLoop =
-                new DES.Runnable() {
-                    @Override
-                    public void run(int simulationTime) {
-                        stateMachine.periodic();
-                        stateMachine.updateStates();
-                        sim.schedule(simulationTime + 20, this);
-                    }
-                };
-        sim.schedule(0, robotLoop);
-
-        // Testing
-        assertSame(idleState, stateMachine.getCurrentState());
-        final Function<State, DES.Runnable> assertIn =
-                (state) -> _time -> assertSame(state, stateMachine.getCurrentState());
-
+    public void runDESStateMachineTest(
+            DES sim,
+            Function<State, DES.Runnable> assertIn,
+            Robot stateMachineWorld,
+            State<Robot> idleState,
+            State<Robot> intakingState,
+            State<Robot> warmingUpState,
+            State<Robot> shootingState) {
         // ### Ensure that when there is no input, the state remains the same
         sim.schedule(1, assertIn.apply(idleState));
         // ### Test transition to Intaking
@@ -224,59 +160,120 @@ public class StateMachineTestsDES {
         sim.schedule(341, assertIn.apply(idleState));
 
         // Finally, run the simulation
-        sim.simulate(10000);
+        sim.simulate(500);
     }
 
-    public static class Robot {
-        public boolean shouldShoot = false;
-        public boolean shouldIntake = false;
-        public boolean hasNote = false;
-        public double motorSpeed = 0;
-        public double armPos = 0;
+    @Test
+    public void stateMachineDESTransitionsTestInlinedVersion() {
+        State<Robot> idleState =
+                new State<Robot>("Idle") {
+                    @Override
+                    protected void periodic(StateMachine<Robot> stateMachine, Robot world) {
+                        world.motorSpeed = 0;
+                    }
+                };
+
+        State<Robot> intakingState =
+                new State<Robot>("Intaking") {
+                    @Override
+                    protected void periodic(StateMachine<Robot> stateMachine, Robot world) {
+                        world.motorSpeed = -100;
+                        world.armPos = -1;
+                        if (world.hasNote) {
+                            finish();
+                        }
+                    }
+                };
+
+        State<Robot> warmingUpState =
+                new State<Robot>("WarmingUp") {
+                    @Override
+                    protected void periodic(StateMachine<Robot> stateMachine, Robot world) {
+                        if (!world.hasNote) {
+                            stateMachine.requestState(idleState);
+                            return;
+                        }
+                        world.motorSpeed = 50;
+                        world.armPos = 3;
+                        finish();
+                    }
+                };
+
+        State<Robot> shootingState =
+                new State<Robot>("Shooting") {
+                    @Override
+                    protected void periodic(StateMachine<Robot> stateMachine, Robot world) {
+                        world.motorSpeed = 100;
+                        if (!world.hasNote) {
+                            finish();
+                        }
+                    }
+                };
+
+        // ### Setting up the state machine
+        // Creating the State Machine
+        Robot stateMachineWorld = new Robot();
+
+        StateMachine<Robot> stateMachine =
+                StateMachineTests.createTestStateMachine(
+                        stateMachineWorld, idleState, intakingState, warmingUpState, shootingState);
+
+        DES sim = StateMachineTests.createRobotLoopDES(stateMachine);
+
+        // Testing
+        assertSame(idleState, stateMachine.getCurrentState());
+        final Function<State, DES.Runnable> assertIn =
+                (state) ->
+                        _time ->
+                                assertSame(
+                                        state,
+                                        stateMachine.getCurrentState(),
+                                        "Incorrect State at time: " + _time);
+
+        runDESStateMachineTest(
+                sim,
+                assertIn,
+                stateMachineWorld,
+                idleState,
+                intakingState,
+                warmingUpState,
+                shootingState);
     }
 
-    static final State<Robot> idleState =
-            new State<Robot>("Idle") {
-                @Override
-                protected void periodic(StateMachine<Robot> stateMachine, Robot world) {
-                    world.motorSpeed = 0;
-                }
-            };
+    @Test
+    public void stateMachineDESTransitionsTest() {
+        State<Robot> idleState = StateMachineTestsStates.IDLE;
+        State<Robot> intakingState = StateMachineTestsStates.INTAKING;
+        State<Robot> warmingUpState = StateMachineTestsStates.WARMING_UP;
+        State<Robot> shootingState = StateMachineTestsStates.SHOOTING;
 
-    static final State<Robot> intakingState =
-            new State<Robot>("Intaking") {
-                @Override
-                protected void periodic(StateMachine<Robot> stateMachine, Robot world) {
-                    world.motorSpeed = -100;
-                    world.armPos = -1;
-                    if (world.hasNote) {
-                        finish();
-                    }
-                }
-            };
+        // ### Setting up the state machine
+        // Creating the State Machine
+        Robot stateMachineWorld = new Robot();
 
-    static final State<Robot> warmingUpState =
-            new State<Robot>("WarmingUp") {
-                @Override
-                protected void periodic(StateMachine<Robot> stateMachine, Robot world) {
-                    if (!world.hasNote) {
-                        stateMachine.requestState(idleState);
-                        return;
-                    }
-                    world.motorSpeed = 50;
-                    world.armPos = 3;
-                    finish();
-                }
-            };
+        StateMachine<Robot> stateMachine =
+                StateMachineTests.createTestStateMachine(
+                        stateMachineWorld, idleState, intakingState, warmingUpState, shootingState);
 
-    static final State<Robot> shootingState =
-            new State<Robot>("Shooting") {
-                @Override
-                protected void periodic(StateMachine<Robot> stateMachine, Robot world) {
-                    world.motorSpeed = 100;
-                    if (!world.hasNote) {
-                        finish();
-                    }
-                }
-            };
+        DES sim = StateMachineTests.createRobotLoopDES(stateMachine);
+
+        // Testing
+        assertSame(idleState, stateMachine.getCurrentState());
+        final Function<State, DES.Runnable> assertIn =
+                (state) ->
+                        _time ->
+                                assertSame(
+                                        state,
+                                        stateMachine.getCurrentState(),
+                                        "Incorrect State at time: " + _time);
+
+        runDESStateMachineTest(
+                sim,
+                assertIn,
+                stateMachineWorld,
+                idleState,
+                intakingState,
+                warmingUpState,
+                shootingState);
+    }
 }
