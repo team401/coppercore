@@ -144,7 +144,7 @@ public class MotorIOCTRETests {
             }
             loop.run();
 
-            Timer.delay(0.02); // Allow phoenix sim thread to run
+            Timer.delay(0.1); // Allow phoenix sim thread to run
 
             timeElapsed += 0.02;
         }
@@ -246,6 +246,11 @@ public class MotorIOCTRETests {
         // Enabling!
         DriverStationSim.setEnabled(true);
         DriverStationSim.notifyNewData();
+
+        // As per
+        // https://v6.docs.ctr-electronics.com/en/latest/docs/api-reference/wpilib-integration/unit-testing.html
+        // delay ~100ms so the devices can start up and enable
+        Timer.delay(0.100);
 
         assert DriverStation.isEnabled();
 
