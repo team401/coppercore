@@ -2,6 +2,7 @@ package coppercore.controls.test;
 
 import static edu.wpi.first.units.Units.Seconds;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import coppercore.controls.state_machine.State;
 import coppercore.controls.state_machine.StateMachine;
@@ -27,6 +28,14 @@ public class StateMachineTestsTimeout {
 
         // Defining Transitions
         waitingState.whenTimeout(Seconds.of(TIMEOUT_SECONDS)).transitionTo(timedoutState);
+
+        // Adding a second timeout to a state is not supported and should throw
+        assertThrows(
+                UnsupportedOperationException.class,
+                () ->
+                        waitingState
+                                .whenTimeout(Seconds.of(TIMEOUT_SECONDS))
+                                .transitionTo(timedoutState));
 
         stateMachine.setState(waitingState);
         return stateMachine;

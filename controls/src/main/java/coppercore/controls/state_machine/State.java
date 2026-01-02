@@ -300,6 +300,9 @@ public abstract class State<World> {
      * @param durationAfterInit timeout, duration starting when state is entered.
      */
     public TransitionConditionBuilder whenTimeout(Time durationAfterInit) {
+        if (timer.isPresent())
+            throw new UnsupportedOperationException(
+                    "only one timeout transition per state supported.");
         timer = Optional.of(new Timer());
         timeout = durationAfterInit.in(Seconds);
         return when((world) -> hasTimedOut(), "timeout");
