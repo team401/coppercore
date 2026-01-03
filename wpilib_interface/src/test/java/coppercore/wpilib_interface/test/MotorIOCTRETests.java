@@ -144,7 +144,7 @@ public class MotorIOCTRETests {
             }
             loop.run();
 
-            Timer.delay(0.1); // Allow phoenix sim thread to run
+            Timer.delay(0.02); // Allow phoenix sim thread to run
 
             timeElapsed += 0.02;
         }
