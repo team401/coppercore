@@ -62,7 +62,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
     protected final SparkClosedLoopController controller;
 
     /**
-     * Whether or not a relative encoder is expected to be connected. Encoder readings (position &
+     * Whether or not a relative encoder is expected to be connected. Encoder readings (position and
      * velocity) will only be read when this value is true.
      */
     protected boolean encoderEnabled = true;
