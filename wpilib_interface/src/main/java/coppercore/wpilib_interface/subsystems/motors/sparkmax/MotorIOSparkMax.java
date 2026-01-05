@@ -34,6 +34,11 @@ import edu.wpi.first.wpilibj.DriverStation;
  * <p>MotorIOSparkMax does not support measuring stator current or raw rotor position. These values
  * will be set to zero when updateInputs is called.
  *
+ * <p>By default, SparkMax IOs assume that a relative encoder is connected and will attempt to use
+ * said encoder for closed-loop position control. When using this IO for an open-loop system (e.g.
+ * an indexer or shooter without an encoder), call disableEncoder() to prevent the "connected" field
+ * of inputs from being permanently false due to a disconnected encoder.
+ *
  * <p>This IO implementation also does not support dynamic motion profiles, exponential motion
  * profiles, or current/FOC-based open-loop control. Calling any of the aforementioned control
  * methods will result in an UnsupportedOperationException.
@@ -55,6 +60,12 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
      * getController every time a control request is applied.
      */
     protected final SparkClosedLoopController controller;
+
+    /**
+     * Whether or not a relative encoder is expected to be connected. Encoder readings (position &
+     * velocity) will only be read when this value is true.
+     */
+    protected boolean encoderEnabled = true;
 
     /**
      * Create a new MotorIOSparkMax given a mechanism config, a CANDeviceID, a SparkMaxConfig, and a
@@ -183,6 +194,23 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
                 });
     }
 
+    /**
+     * Disable the encoder requirement for this IO, returning the IO for easy method chaining.
+     *
+     * <p>By default, a relative encoder is expected to be attached to this SparkMax and will be
+     * used for position and velocity readings each cycle. However, if not using an encoder,
+     * attempting to read the encoder values will likely result in errors, which will result in
+     * false negatives for the "connected" field of inputs. To avoid this, call this method, which
+     * will disable reading data from the encoder in updateInputs.
+     *
+     * @return This IO, for easy chaining of methods.
+     */
+    public MotorIOSparkMax disableEncoder() {
+        this.encoderEnabled = false;
+
+        return this;
+    }
+
     @Override
     public void updateInputs(MotorInputs inputs) {
         boolean connected = true;
@@ -191,20 +219,24 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         inputs.statorCurrentAmps = 0.0;
         inputs.rawRotorPositionRadians = 0.0;
 
-        connected &=
-                SparkUtil.ifOk(
-                        sparkMax,
-                        () -> sparkMax.getEncoder().getPosition(),
-                        (positionRotations) ->
-                                inputs.positionRadians =
-                                        Units.rotationsToRadians(positionRotations));
-        connected &=
-                SparkUtil.ifOk(
-                        sparkMax,
-                        () -> sparkMax.getEncoder().getVelocity(),
-                        (velocityRPM) ->
-                                inputs.velocityRadiansPerSecond =
-                                        Units.rotationsPerMinuteToRadiansPerSecond(velocityRPM));
+        if (encoderEnabled) {
+            connected &=
+                    SparkUtil.ifOk(
+                            sparkMax,
+                            () -> sparkMax.getEncoder().getPosition(),
+                            (positionRotations) ->
+                                    inputs.positionRadians =
+                                            Units.rotationsToRadians(positionRotations));
+            connected &=
+                    SparkUtil.ifOk(
+                            sparkMax,
+                            () -> sparkMax.getEncoder().getVelocity(),
+                            (velocityRPM) ->
+                                    inputs.velocityRadiansPerSecond =
+                                            Units.rotationsPerMinuteToRadiansPerSecond(
+                                                    velocityRPM));
+        }
+
         connected &=
                 SparkUtil.ifOk(
                         sparkMax,
