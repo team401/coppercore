@@ -1,3 +1,5 @@
+package coppercore.wpilib_interface.test;
+
 import static edu.wpi.first.units.Units.Microseconds;
 import static edu.wpi.first.units.Units.Seconds;
 
