@@ -12,11 +12,8 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
-
-import javax.management.RuntimeErrorException;
-
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -32,11 +29,15 @@ public class VisionLocalizer extends SubsystemBase {
     public AprilTagFieldLayout aprilTagLayout;
     private double[] cameraStdDevFactors;
 
+    private final VisionGainConstants gainConstants;
+
     /**
      * Constructs a new VisionLocalizer instance
      *
      * @param consumer functional interface responsible for adding vision measurements to drive pose
      * @param aprilTagLayout the field layout for current year
+     * @param gainConstants a VisionGainConstants object containing the standard deviation factors
+     *     and pose rejection parameters for this VisionLocalizer.
      * @param cameraStdDevFactors factors to multiply standard deviation. matches camera index
      *     (camera 0 -> index 0 in factors)
      * @param io of each camera, using photon vision or sim
@@ -44,11 +45,13 @@ public class VisionLocalizer extends SubsystemBase {
     public VisionLocalizer(
             VisionConsumer consumer,
             AprilTagFieldLayout aprilTagLayout,
+            VisionGainConstants gainConstants,
             double[] cameraStdDevFactors,
             VisionIO... io) {
         this.consumer = consumer;
         this.io = io;
         this.aprilTagLayout = aprilTagLayout;
+        this.gainConstants = gainConstants;
         this.cameraStdDevFactors = cameraStdDevFactors;
 
         for (int i = 0; i < io.length; i++) {
@@ -69,15 +72,6 @@ public class VisionLocalizer extends SubsystemBase {
         }
     }
 
-    /**
-     * Returns the X angle to the best target, which can be used for simple servoing with vision.
-     *
-     * @param cameraIndex The index of the camera to use.
-     */
-    public Rotation2d getTargetX(int cameraIndex) {
-        return inputs[cameraIndex].latestTargetObservation.tx();
-    }
-
     public boolean hasMultitagResult() {
         boolean hasResult = false;
         for (VisionIOInputsAutoLogged input : inputs) {
@@ -92,7 +86,7 @@ public class VisionLocalizer extends SubsystemBase {
 
     /**
      * boolean that checks whether or not a coprocessor is connected like the BeeLink
-     *
+     * by checking all cameras and returning true when they all come back
      * @return camera inputs are connected
      */
     public boolean coprocessorConnected() {
@@ -105,17 +99,16 @@ public class VisionLocalizer extends SubsystemBase {
     }
 
     /**
-     * @param camera
+     * @param cameraIndex
      * @return specific camera input is connected
      */
-    public boolean coprocessorConnected(int camera) {
-        if (camera < 0 || camera >= inputs.length) {
-            throw new IllegalArgumentException("Camera index out of bounds" + camera);
+    public boolean cameraConnected(int cameraIndex) {
+        if (cameraIndex < 0 || cameraIndex >= inputs.length) {
+            throw new IllegalArgumentException("Camera index out of bounds" + cameraIndex);
         }
         
-        return inputs[camera].connected;
+        return inputs[cameraIndex].connected;
     }
-    
 
     /**
      * calculates the strafing and forward / reverse required for drive to be in line with a
@@ -177,9 +170,9 @@ public class VisionLocalizer extends SubsystemBase {
         }
 
         // Initialize logging values
-        List<Pose3d> allRobotPoses = new LinkedList<>();
-        List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
-        List<Pose3d> allRobotPosesRejected = new LinkedList<>();
+        List<Pose3d> allRobotPoses = new ArrayList<>();
+        List<Pose3d> allRobotPosesAccepted = new ArrayList<>();
+        List<Pose3d> allRobotPosesRejected = new ArrayList<>();
 
         // Loop over cameras
         for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
@@ -187,9 +180,9 @@ public class VisionLocalizer extends SubsystemBase {
             disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
             // Initialize logging values
-            List<Pose3d> robotPoses = new LinkedList<>();
-            List<Pose3d> robotPosesAccepted = new LinkedList<>();
-            List<Pose3d> robotPosesRejected = new LinkedList<>();
+            List<Pose3d> robotPoses = new ArrayList<>();
+            List<Pose3d> robotPosesAccepted = new ArrayList<>();
+            List<Pose3d> robotPosesRejected = new ArrayList<>();
 
             for (VisionIO.PoseObservation observation : inputs[cameraIndex].poseObservations) {
                 robotPoses.add(observation.pose());
@@ -228,15 +221,14 @@ public class VisionLocalizer extends SubsystemBase {
      */
     private boolean shouldRejectPose(VisionIO.PoseObservation observation) {
         return observation.tagCount() == 0 // Must have at least one tag
+                // Cannot be high ambiguity if single tag
                 || (observation.tagCount() == 1
-                        && observation.ambiguity()
-                                > CoreVisionConstants
-                                        .maxSingleTagAmbiguity) // Cannot be high ambiguity if
-                // single tag
+                        && observation.ambiguity() > gainConstants.maxSingleTagAmbiguity)
+                // Multi-tag criteria:
                 || Math.abs(observation.pose().getZ())
-                        > CoreVisionConstants.maxZCutoff // Must have realistic Z coordinate
-                || observation.averageTagDistance() > CoreVisionConstants.maxAcceptedDistanceMeters
-                || observation.ambiguity() > 0.3
+                        > gainConstants.maxZCutoff // Must have realistic Z coordinate
+                || observation.averageTagDistance() > gainConstants.maxAcceptedDistanceMeters
+                || observation.ambiguity() > gainConstants.maxAmbiguity
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
                 || observation.pose().getX() > aprilTagLayout.getFieldLength()
@@ -256,13 +248,9 @@ public class VisionLocalizer extends SubsystemBase {
         double avgDistanceFromTarget = observation.averageTagDistance();
         int numTags = observation.tagCount();
         double linearStdDev =
-                CoreVisionConstants.linearStdDevFactor
-                        * Math.pow(avgDistanceFromTarget, 2)
-                        / numTags;
+                gainConstants.linearStdDevFactor * Math.pow(avgDistanceFromTarget, 2) / numTags;
         double angularStdDev =
-                CoreVisionConstants.angularStdDevFactor
-                        * Math.pow(avgDistanceFromTarget, 2)
-                        / numTags;
+                gainConstants.angularStdDevFactor * Math.pow(avgDistanceFromTarget, 2) / numTags;
 
         // adjustment based on position of camera
         if (cameraIndex < this.cameraStdDevFactors.length) {
@@ -276,7 +264,7 @@ public class VisionLocalizer extends SubsystemBase {
     /**
      * logs individual camera data to advantage kit realOutputs under Vision/camera/index
      *
-     * @param cameraIndex index of camera to liog
+     * @param cameraIndex index of camera to log
      * @param robotPoses list of all poses found by camera
      * @param robotPosesAccepted list of poses NOT REJECTED by shouldRejectPose
      * @param robotPosesRejected list of poses REJECTED by shouldRejectPose
