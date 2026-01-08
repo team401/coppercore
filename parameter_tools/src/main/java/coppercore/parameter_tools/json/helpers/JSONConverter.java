@@ -1,13 +1,19 @@
 package coppercore.parameter_tools.json.helpers;
 
 import coppercore.parameter_tools.json.adapters.JSONPose2d;
+import coppercore.parameter_tools.json.adapters.JSONPose3d;
 import coppercore.parameter_tools.json.adapters.JSONRotation2d;
+import coppercore.parameter_tools.json.adapters.JSONRotation3d;
 import coppercore.parameter_tools.json.adapters.JSONTranslation2d;
+import coppercore.parameter_tools.json.adapters.JSONTranslation3d;
 import coppercore.parameter_tools.json.adapters.measure.JSONMeasure;
 import coppercore.parameter_tools.json.adapters.measure.JSONPer;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.Per;
 import java.util.ArrayList;
@@ -29,6 +35,10 @@ public class JSONConverter {
         JSONConverter.addConversion(Translation2d.class, JSONTranslation2d.class);
         JSONConverter.addConversion(Rotation2d.class, JSONRotation2d.class);
         JSONConverter.addConversion(Pose2d.class, JSONPose2d.class);
+
+        JSONConverter.addConversion(Translation3d.class, JSONTranslation3d.class);
+        JSONConverter.addConversion(Rotation3d.class, JSONRotation3d.class);
+        JSONConverter.addConversion(Pose3d.class, JSONPose3d.class);
 
         // All measure are wrapped by the JSONMeasure class except Per
         // Per is handled separately below because it needs its own wrapper
@@ -57,8 +67,7 @@ public class JSONConverter {
 
     /**
      * Registers a function that can provide advanced conversions for classes that may not have a
-     * direct mapping.
-     * Also used for complex rules that can not be easily represented in a map.
+     * direct mapping. Also used for complex rules that can not be easily represented in a map.
      * These functions are tried after the basic map look up fails.
      */
     public static void addAdvancedConversion(
@@ -92,9 +101,9 @@ public class JSONConverter {
     }
 
     /**
-     * Tries to find advanced conversions for classes that may not have a direct mapping.
-     * Or for complex rules that can not be easily represented in a map.
-     * Advanced conversions are tried after the basic map look up fails.
+     * Tries to find advanced conversions for classes that may not have a direct mapping. Or for
+     * complex rules that can not be easily represented in a map. Advanced conversions are tried
+     * after the basic map look up fails.
      *
      * @param <T> The type of the class to look for.
      * @param clazz The class of the wrapper to look for.
