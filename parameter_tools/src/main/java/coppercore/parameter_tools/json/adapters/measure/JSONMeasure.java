@@ -1,12 +1,13 @@
 package coppercore.parameter_tools.json.adapters.measure;
 
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.function.Function;
+
 import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.Units;
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.function.Function;
 
 /** A JSON representation of a Measure object. */
 @SuppressWarnings("rawtypes")
@@ -209,24 +210,16 @@ public class JSONMeasure extends JSONObject<Measure> {
         // ## Feedforward Units ##
         JSONMeasure.registerUnit(
                 Units.VoltsPerMeterPerSecond,
-                "VoltsPerMeterPerSecond",
-                "Volts/Meter/Second",
                 "V/(m/s)");
         JSONMeasure.registerUnit(
                 Units.VoltsPerMeterPerSecondSquared,
-                "VoltsPerMeterPerSecondSquared",
-                "Volts/Meter/Second^2",
                 "V/(m/s²)",
                 "V/(m/s^2)");
         JSONMeasure.registerUnit(
                 Units.VoltsPerRadianPerSecond,
-                "VoltsPerRadianPerSecond",
-                "Volts/Radian/Second",
                 "V/(rad/s)");
         JSONMeasure.registerUnit(
                 Units.VoltsPerRadianPerSecondSquared,
-                "VoltsPerRadianPerSecondSquared",
-                "Volts/Radian/Second^2",
                 "V/(rad/s²)",
                 "V/(rad/s^2)");
     }
