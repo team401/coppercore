@@ -50,6 +50,10 @@ public class JSONMeasure extends JSONObject<Measure> {
                 JSONMeasure.registerUnit(<YOUR UNIT>);
                 JSONMeasure.registerUnit(<YOUR UNIT>, "CustomName1", "CustomName2", ...);
                 JSONMeasure.registerUnit("CustomName", <Converter to your unit>);
+
+                Note: The unit must be registered before deserializing or serializing any
+                Measure of the Unit. You only need to register each unit once, typically
+                should be done in a static context.
             """);
         }
     }
