@@ -86,11 +86,28 @@ public class VisionLocalizer extends SubsystemBase {
 
     /**
      * boolean that checks whether or not a coprocessor is connected like the BeeLink
-     *
+     * by checking all cameras and returning true when they all come back
      * @return camera inputs are connected
      */
     public boolean coprocessorConnected() {
-        return inputs[0].connected;
+        for (VisionIOInputsAutoLogged input : inputs) {
+            if (!input.connected) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param cameraIndex
+     * @return specific camera input is connected
+     */
+    public boolean cameraConnected(int cameraIndex) {
+        if (cameraIndex < 0 || cameraIndex >= inputs.length) {
+            throw new IllegalArgumentException("Camera index out of bounds" + cameraIndex);
+        }
+        
+        return inputs[cameraIndex].connected;
     }
 
     /**
