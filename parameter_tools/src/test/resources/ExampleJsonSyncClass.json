@@ -4,5 +4,29 @@
     "testInt": 2,
     "rotation": {
         "radians": 1.0
-    }
+    },
+    "testPer": {
+        "dividend": {
+        "value": 10,
+        "unit": "Degree"
+        },
+        "divisor": {
+        "value": 1.0,
+        "unit": "Second"
+        }
+    },
+    "actions": [
+        {
+            "debug": true,
+            "printMessage": false,
+            "message": "LoadingTest",
+            "type": "start"
+        },
+        {
+            "reason": "Random Reason",
+            "printMessage": true,
+            "message": "Testing123",
+            "type": "finish"
+        }
+    ]
 }

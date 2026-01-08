@@ -1,8 +1,9 @@
 package coppercore.wpilib_interface;
 
-import coppercore.parameter_tools.json.JSONExclude;
+
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.annotations.JSONExclude;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -23,9 +24,9 @@ public class Controllers {
                     new Controllers(), "filePath", new JSONSyncConfigBuilder().build());
 
     public static class Controller {
-        public int port = -1;
+        public Integer port = -1;
         public String type = null;
-        public boolean hasPov = false;
+        public Boolean hasPov = false;
         public List<Button> buttons = null;
         public List<Axis> axes = null;
         @JSONExclude public transient CommandGenericHID commandHID;
@@ -58,6 +59,24 @@ public class Controllers {
             throw new RuntimeException("Button not found " + command);
         }
 
+        public Trigger getButton(int id) {
+            return commandHID.button(id);
+        }
+
+        public boolean hasButton(String command) {
+            for (Button button : buttons) {
+                if (button.command.equals(command)) return true;
+            }
+            return false;
+        }
+
+        public boolean hasAxis(String command) {
+            for (Axis axis : axes) {
+                if (axis.command.equals(command)) return true;
+            }
+            return false;
+        }
+
         public DoubleSupplier getAxis(String command) {
             for (Axis axis : axes) {
                 if (axis.command.equals(command)) return axis.getSupplier();
@@ -76,7 +95,7 @@ public class Controllers {
     public static class Button {
         public String command = null;
         public String button = null;
-        public boolean isPov = false;
+        public Boolean isPov = false;
         @JSONExclude public Trigger trigger = null;
 
         public void setupTrigger(CommandGenericHID commandHID) {
@@ -84,9 +103,11 @@ public class Controllers {
             try {
                 id = Integer.valueOf(button, 10);
             } catch (NumberFormatException e) {
-                if (!Controllers.synced.getObject().buttonShorthands.containsKey(button))
+                if (!Controllers.synced.getObject().buttonShorthands.containsKey(button)) {
+
                     throw new RuntimeException(
                             "Button ID not found as integer or in shorthands " + button);
+                }
                 id = Controllers.synced.getObject().buttonShorthands.get(button);
             }
             if (isPov) trigger = commandHID.pov(id);
@@ -97,7 +118,7 @@ public class Controllers {
     public static class Axis {
         public String command = null;
         public String axis = null;
-        public boolean negate = false;
+        public Boolean negate = false;
         @JSONExclude public int axisNum = -1;
         @JSONExclude public DoubleSupplier supplier = null;
 
@@ -109,7 +130,7 @@ public class Controllers {
                     throw new RuntimeException("Axis ID not found " + axis);
                 axisNum = Controllers.synced.getObject().axesShorthands.get(axis);
             }
-            supplier = () -> ((negate) ? 1 : -1) * commandHID.getRawAxis(axisNum);
+            supplier = () -> ((negate) ? -1 : 1) * commandHID.getRawAxis(axisNum);
         }
 
         public DoubleSupplier getSupplier() {

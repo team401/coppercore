@@ -1,17 +1,151 @@
+import com.vanniktech.maven.publish.SonatypeHost
+import com.vanniktech.maven.publish.JavaLibrary
+import com.vanniktech.maven.publish.JavadocJar
+
 plugins {
-	id "com.vanniktech.maven.publish" version "0.30.0" apply false
+	alias(libs.plugins.spotless)
+	alias(libs.plugins.maven.publish).apply(false)
 }
 
 subprojects {
 	apply plugin: 'java'
+	apply plugin: 'com.diffplug.spotless'
+	apply plugin: 'com.vanniktech.maven.publish'
 	
 	group = 'io.github.team401.coppercore'
+
+	// As of 12/2025, all robot software requires Java 17
+	java {
+		toolchain {
+			languageVersion = JavaLanguageVersion.of(17)
+		}
+	}
+
+	// Repositories from which to resolve dependencies.
+	// Order matters
+	repositories {
+		// Use Maven Central for resolving dependencies.
+		mavenCentral()
+		maven {
+			// FRC/wpilib maven repository
+			url 'https://frcmaven.wpi.edu/artifactory/release/'
+		}
+		maven {
+			// AdvantageKit maven repository
+			url "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
+		}
+		maven {
+			// PhotonVision internal maven repository
+			url "https://maven.photonvision.org/repository/internal"
+		}
+		maven {
+			// PhotonVision snapshots maven repository
+			url "https://maven.photonvision.org/repository/snapshots"
+		}
+		maven {
+			// REV maven repository (for REVLib)
+			url "https://maven.revrobotics.com/"
+		}
+		gradlePluginPortal()
+		mavenLocal()	// this is local to your machine
+	}
 
 	javadoc {
 		if(JavaVersion.current().isJava9Compatible()) {
 			options.addBooleanOption('html5', true)
 		}
 
+        options.linkSource(true)
 		exclude 'frc/robot/**'
 	}
+
+	// For documentation on spotless, see
+	// https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/code-formatting.html#configuration
+	// and https://github.com/diffplug/spotless/tree/main/plugin-gradle#-spotless-plugin-for-gradle
+	spotless {
+		// optional: limit format enforcement to just the files changed by this feature branch
+		ratchetFrom 'origin/main'
+
+		format 'misc', {
+			// define the files to apply `misc` to
+			target '*.gradle', '.gitattributes', '.gitignore'
+
+			// define the steps to apply to those files
+			trimTrailingWhitespace()
+			indentWithTabs() // or spaces. Takes an integer argument if you don't like 4
+			endWithNewline()
+		}
+
+		java {
+			// don't need to set target, it is inferred from java
+			// Allow ignoring certain parts in formatting using // spotless:off/on.
+			toggleOffOn()
+			// apply a specific flavor of google-java-format
+			googleJavaFormat('1.19.2').aosp().reflowLongStrings()
+			// fix formatting of type annotations
+			formatAnnotations()
+		}
+	}
+
+	// Automatically format code on build.
+	compileJava.dependsOn 'spotlessApply'
+
+	tasks.named('test') {
+		// Use JUnit Platform for unit tests.
+		useJUnitPlatform()
+		systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+	}
+
+	// shared dependencies
+	dependencies {
+		// Use JUnit Jupiter for testing for all subprojects.
+		testImplementation libs.junit.jupiter	// read junit version from gradle/libs.versions.toml
+		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	}
+
+    mavenPublishing {
+        configure(new JavaLibrary(new JavadocJar.Javadoc(), true))
+        publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+
+        // Project release information.
+        coordinates(group, project.name, version)
+        pom {
+            name = project.name
+            inceptionYear = "2024"
+            url = 'http://www.github.com/team401/coppercore'
+            licenses {
+                license {
+                    name = 'MIT License'
+                    url = 'https://opensource.org/license/mit'
+                }
+            }
+            developers {
+                developer {
+                    id = 'aidnem'
+                    name = 'Aiden Mathai'
+                }
+                developer {
+                    id = 'linglejack'
+                    name = 'Jack Lingle'
+                }
+                developer {
+                    id = 'avidraccoon'
+                    name = 'Nathan Smith'
+                }
+                developer {
+                    id = 'minhlpnguyen'
+                    name = 'Minh Nguyen'
+                }
+                developer {
+                    id = 'jkleiber'
+                    name = 'Justin Kleiber'
+                }
+            }
+            scm {
+                url = "https://github.com/team401/coppercore/"
+                connection = "scm:git:git://github.com/team401/coppercore.git"
+                developerConnection = "scm:git:ssh://git@github.com/team401/coppercore.git"
+            }
+        }
+    }
 }

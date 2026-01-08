@@ -6,16 +6,25 @@ import com.google.gson.TypeAdapterFactory;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import coppercore.parameter_tools.json.adapters.measure.JSONMeasure;
+import coppercore.parameter_tools.json.helpers.JSONConverter;
+import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.units.Measure;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 public class JSONTypeAdapterFactory implements TypeAdapterFactory {
 
+    private JSONSyncConfig config;
+
+    public JSONTypeAdapterFactory(JSONSyncConfig config) {
+        this.config = config;
+    }
+
     @Override
     public <T> TypeAdapter<T> create(Gson gson, com.google.gson.reflect.TypeToken<T> type) {
         @SuppressWarnings("unchecked")
         Class<T> rawType = (Class<T>) type.getRawType();
+
         if (!JSONConverter.has(rawType)) {
             return null;
         }
