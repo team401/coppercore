@@ -21,6 +21,12 @@ subprojects {
 		}
 	}
 
+	test {
+		testLogging {
+			showStandardStreams = true
+		}
+	}
+
 	// Repositories from which to resolve dependencies.
 	// Order matters
 	repositories {
