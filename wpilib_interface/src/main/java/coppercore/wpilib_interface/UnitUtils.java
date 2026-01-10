@@ -1,7 +1,15 @@
 package coppercore.wpilib_interface;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
+import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.PerUnit;
 import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.VoltageUnit;
 
 /** Utilities for dealing with the WPILib units library. */
 public final class UnitUtils {
@@ -34,4 +42,22 @@ public final class UnitUtils {
 
         return measure;
     }
+
+    /**
+     * A unit for measuring angular mechanisms' feedforward voltages based on a model of the system
+     * and a desired commanded angular velocity.
+     *
+     * <p>Defined as Volts / (Rotations / Second)
+     */
+    public static final PerUnit<VoltageUnit, AngularVelocityUnit> VoltsPerRotationPerSecond =
+            Volts.per(RotationsPerSecond);
+
+    /**
+     * A unit for measuring angular mechanisms' feedforward voltages based on a model of the system
+     * and a desired commanded angular acceleration.
+     *
+     * <p>Defined as Volts / ((Rotations / Second) / Second)
+     */
+    public static final PerUnit<VoltageUnit, AngularAccelerationUnit>
+            VoltsPerRotationPerSecondSquared = Volts.per(RotationsPerSecondPerSecond);
 }

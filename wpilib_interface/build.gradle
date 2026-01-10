@@ -39,6 +39,7 @@ dependencies {
 	annotationProcessor libs.akit.autolog
 	implementation libs.akit.java
 
+	implementation libs.revlib
 	implementation libs.json.simple
 }
 
