@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-// TODO: Add missing javadocs
-// TODO: Clear requestedState after a transition or periodic call?
-
 // Note: Some parts of the javadoc were written using Copilot
 
 /**
@@ -116,6 +113,8 @@ public class StateMachine<World> {
     /**
      * Calls the periodic function of the current state. Raises an exception if currentState is
      * null.
+     *
+     * <p>Note: This method also calls updateStates after executing the periodic function.
      */
     public void periodic() {
         Objects.requireNonNull(
@@ -131,7 +130,8 @@ public class StateMachine<World> {
      * Requests a state change to the specified state.
      *
      * <p>If multiple states are requested before the next updateStates call, the last requested
-     * state will take precedence. And if the requested state is null, no state change will occur.
+     * state will take precedence and replace the current requested state. And if the requested
+     * state is null, no state change will occur.
      *
      * <p>If the requested state is the same as the current state, onExit and onEntry will still be
      * called during the next updateStates call if the request is honored.

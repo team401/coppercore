@@ -33,12 +33,18 @@ import java.util.function.Supplier;
  */
 public abstract class State<World> {
 
+    /** Flag that indicates whether the state has finished its operation */
     protected boolean finished = false;
+
+    /** List of transitions for the state */
     protected final List<Transition> transitions;
+
+    /** Name of the state. Is used as identifier in State Machine. */
+    protected final String name;
+
     private Optional<Timer> timer = Optional.empty();
     private double timeout;
     private Supplier<State<World>> requestedStateSupplier = () -> null;
-    protected String name;
 
     /**
      * This constructor sets the name of the state to the simple name of the class. It throws an
@@ -89,6 +95,11 @@ public abstract class State<World> {
         return this.requestedStateSupplier;
     }
 
+    /**
+     * Get the requested state.
+     *
+     * @return requested state
+     */
     protected State<World> getRequestedState() {
         return this.requestedStateSupplier.get();
     }
@@ -107,7 +118,8 @@ public abstract class State<World> {
      * Determines the next state based on the defined transitions. Multiple transitions may be
      * defined; the first whose condition is true is taken.
      *
-     * @return The next state, or null if no transition is taken
+     * @param world The current world state
+     * @return An optional containing the next state, or empty if no transition is taken
      */
     protected final Optional<State<World>> getNextState(World world) {
         for (Transition transition : transitions) {
@@ -121,6 +133,9 @@ public abstract class State<World> {
     /**
      * Called when the state is entered. This is an internal method; use onEntry() to override
      * behavior.
+     *
+     * @param stateMachine The state machine this state belongs to
+     * @param world The current world state
      */
     protected final void _onEntry(StateMachine<World> stateMachine, World world) {
         finished = false;
@@ -131,6 +146,9 @@ public abstract class State<World> {
     /**
      * Called when the state is exited. This is an internal method; use onExit() to override
      * behavior.
+     *
+     * @param stateMachine The state machine this state belongs to
+     * @param world The current world state
      */
     protected final void _onExit(StateMachine<World> stateMachine, World world) {
         onExit(stateMachine, world);
@@ -147,6 +165,9 @@ public abstract class State<World> {
     /**
      * Called periodically while in this state. This is an internal method; use periodic() to
      * override behavior.
+     *
+     * @param stateMachine The state machine this state belongs to
+     * @param world The current world state
      */
     protected final void _periodic(StateMachine<World> stateMachine, World world) {
         periodic(stateMachine, world);
@@ -171,12 +192,18 @@ public abstract class State<World> {
     /**
      * Called when the state is entered. This method is called after a state transition. So it is
      * the first chance to perform any setup or initialization for this state.
+     *
+     * @param stateMachine The state machine this state belongs to
+     * @param world The current world state
      */
     protected void onEntry(StateMachine<World> stateMachine, World world) {}
 
     /**
      * Called when the state is exited. This method is called before a state transition. So it is
      * the last chance to perform any cleanup or final actions in this state.
+     *
+     * @param stateMachine The state machine this state belongs to
+     * @param world The current world state
      */
     protected void onExit(StateMachine<World> stateMachine, World world) {}
 
@@ -189,6 +216,9 @@ public abstract class State<World> {
     /**
      * Called periodically while in this state. This method is called by the state machine's
      * periodic update.
+     *
+     * @param stateMachine The state machine this state belongs to
+     * @param world The current world state
      */
     protected abstract void periodic(StateMachine<World> stateMachine, World world);
 
@@ -298,6 +328,7 @@ public abstract class State<World> {
      * timeout. The timeout is rearmed every time the state is entered.
      *
      * @param durationAfterInit timeout, duration starting when state is entered.
+     * @return The transition condition builder
      */
     public TransitionConditionBuilder whenTimeout(Time durationAfterInit) {
         if (timer.isPresent())
