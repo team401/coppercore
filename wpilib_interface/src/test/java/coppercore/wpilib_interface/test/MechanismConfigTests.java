@@ -3,6 +3,7 @@ package coppercore.wpilib_interface.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.ctre.phoenix6.CANBus;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig.GravityFeedforwardType;
@@ -73,7 +74,7 @@ public class MechanismConfigTests {
                 NullPointerException.class,
                 () -> {
                     MechanismConfig.builder()
-                            .withLeadMotorId(new CANDeviceID("rio", 1))
+                            .withLeadMotorId(new CANDeviceID(CANBus.roboRIO(), 1))
                             .withGravityFeedforwardType(GravityFeedforwardType.STATIC_ELEVATOR)
                             .build();
                 });
@@ -98,7 +99,7 @@ public class MechanismConfigTests {
                 () -> {
                     MechanismConfig.builder()
                             .withName("TestMechanism")
-                            .withLeadMotorId(new CANDeviceID("rio", 1))
+                            .withLeadMotorId(new CANDeviceID(CANBus.roboRIO(), 1))
                             .build();
                 });
     }
@@ -110,28 +111,29 @@ public class MechanismConfigTests {
                 () ->
                         MechanismConfig.builder()
                                 .withName("TestMechanism")
-                                .withLeadMotorId(new CANDeviceID("correct_bus", 1))
+                                .withLeadMotorId(new CANDeviceID(new CANBus("correct_bus"), 1))
                                 .withGravityFeedforwardType(GravityFeedforwardType.COSINE_ARM)
-                                .addFollower(new CANDeviceID("incorrect_bus", 2), false)
+                                .addFollower(new CANDeviceID(new CANBus("incorrect_bus"), 2), false)
                                 .build());
     }
 
     @Test
     public void dataIsCorrect() {
+        CANBus rio = CANBus.roboRIO();
         MechanismConfig config =
                 MechanismConfig.builder()
                         .withName("TestMechanism")
-                        .withLeadMotorId(new CANDeviceID("rio", 11))
+                        .withLeadMotorId(new CANDeviceID(rio, 11))
                         .withGravityFeedforwardType(GravityFeedforwardType.STATIC_ELEVATOR)
-                        .addFollower(new CANDeviceID("rio", 12), false)
-                        .addFollower(new CANDeviceID("rio", 13), true)
+                        .addFollower(new CANDeviceID(rio, 12), false)
+                        .addFollower(new CANDeviceID(rio, 13), true)
                         .build();
 
         assertEquals(config.name, "TestMechanism");
-        assertEquals(config.leadMotorId, new CANDeviceID("rio", 11));
+        assertEquals(config.leadMotorId, new CANDeviceID(rio, 11));
         assertEquals(config.gravityFeedforwardType, GravityFeedforwardType.STATIC_ELEVATOR);
         assertEquals(config.followerMotorConfigs.length, 2);
-        assertEquals(config.followerMotorConfigs[0].id(), new CANDeviceID("rio", 12));
-        assertEquals(config.followerMotorConfigs[1].id(), new CANDeviceID("rio", 13));
+        assertEquals(config.followerMotorConfigs[0].id(), new CANDeviceID(rio, 12));
+        assertEquals(config.followerMotorConfigs[1].id(), new CANDeviceID(rio, 13));
     }
 }
