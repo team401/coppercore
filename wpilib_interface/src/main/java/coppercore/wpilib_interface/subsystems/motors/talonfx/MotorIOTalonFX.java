@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -154,7 +155,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
         this.talonFXConfig = talonFXConfig;
 
-        this.talon = new TalonFX(id.id(), id.canbus());
+        this.talon = new TalonFX(id.id(), new CANBus(id.canbus()));
 
         CTREUtil.tryUntilOk(
                 () -> talon.getConfigurator().apply(talonFXConfig),
@@ -192,10 +193,10 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
         this.dynamicProfiledPositionRequest =
                 new DynamicMotionMagicTorqueCurrentFOC(
-                        0.0,
-                        talonFXConfig.MotionMagic.MotionMagicCruiseVelocity,
-                        talonFXConfig.MotionMagic.MotionMagicAcceleration,
-                        talonFXConfig.MotionMagic.MotionMagicJerk);
+                                0,
+                                talonFXConfig.MotionMagic.MotionMagicCruiseVelocity,
+                                talonFXConfig.MotionMagic.MotionMagicAcceleration)
+                        .withJerk(talonFXConfig.MotionMagic.MotionMagicJerk);
     }
 
     /**
@@ -376,7 +377,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void follow(int leaderId, boolean opposeLeaderDirection) {
-        talon.setControl(new Follower(leaderId, opposeLeaderDirection));
+        talon.setControl(
+                new Follower(leaderId, CTREUtil.translateFollowerInvert(opposeLeaderDirection)));
     }
 
     @Override
