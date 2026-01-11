@@ -28,8 +28,8 @@ public class DriveWithJoysticks extends Command {
     /**
      * Create a new DriveWithJoysticks command using CommandJoystick objects.
      *
-     * <p>An alternate constructor exists for non-CommandJoystick teams that simply takes a
-     * Supplier<Double> for each joystick input.
+     * <p>An alternate constructor exists for non-CommandJoystick teams that simply takes a Double
+     * Supplier for each joystick input.
      *
      * @param drive The drive subsystem supplied by the robot project.
      * @param leftJoystick The left (translation/strafe) joystick.
