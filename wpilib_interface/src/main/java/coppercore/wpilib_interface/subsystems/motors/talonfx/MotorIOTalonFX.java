@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -155,7 +154,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
         this.talonFXConfig = talonFXConfig;
 
-        this.talon = new TalonFX(id.id(), new CANBus(id.canbus()));
+        this.talon = new TalonFX(id.id(), id.canbus());
 
         CTREUtil.tryUntilOk(
                 () -> talon.getConfigurator().apply(talonFXConfig),
