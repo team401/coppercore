@@ -1,12 +1,14 @@
 package coppercore.wpilib_interface;
 
-import coppercore.math.Deadband;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import java.util.function.Supplier;
@@ -14,7 +16,7 @@ import java.util.function.Supplier;
 /**
  * The DriveWithJoysticks command controls a holonomic drivetrain using the joysticks or suppliers
  * provided. It translates from the joystick to field coordinates, applies joystick deadbands, and
- * squares joystick inputs for more precise control at low speeds.
+ * applies a configurable exponent to input magnitudes for more precise control.
  */
 public class DriveWithJoysticks extends Command {
     private final DriveTemplate drive;
@@ -24,6 +26,7 @@ public class DriveWithJoysticks extends Command {
     private double maxLinearVelocity;
     private double maxAngularVelocity;
     private final double joystickDeadband;
+    private final double magnitudeExponent;
 
     /**
      * Create a new DriveWithJoysticks command using CommandJoystick objects.
@@ -41,6 +44,9 @@ public class DriveWithJoysticks extends Command {
      * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0).
      *     This value is applied in both directions from zero (e.g. a deadband of 0.17 means that
      *     inputs from -0.17 to 0.17 are ignored).
+     * @param magnitudeExponent The exponent that all joystick inputs will be raised to. Must be
+     *     positive. For example, a (post-deadband) magnitude of 0.5 with a magnitudeExponent of 2.0
+     *     would result in a command of 0.25 * max velocity.
      */
     public DriveWithJoysticks(
             DriveTemplate drive,
@@ -48,7 +54,8 @@ public class DriveWithJoysticks extends Command {
             CommandJoystick rightJoystick,
             double maxLinearVelocity,
             double maxAngularVelocity,
-            double joystickDeadband) {
+            double joystickDeadband,
+            double magnitudeExponent) {
         this(
                 drive,
                 leftJoystick::getX,
@@ -56,7 +63,8 @@ public class DriveWithJoysticks extends Command {
                 rightJoystick::getX,
                 maxLinearVelocity,
                 maxAngularVelocity,
-                joystickDeadband);
+                joystickDeadband,
+                magnitudeExponent);
     }
 
     /**
@@ -80,6 +88,9 @@ public class DriveWithJoysticks extends Command {
      * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0).
      *     This value is applied in both directions from zero (e.g. a deadband of 0.17 means that
      *     inputs from -0.17 to 0.17 are ignored).
+     * @param magnitudeExponent The exponent that all joystick inputs will be raised to. Must be
+     *     positive. For example, a (post-deadband) magnitude of 0.5 with a magnitudeExponent of 2.0
+     *     would result in a command of 0.25 * max velocity.
      */
     public DriveWithJoysticks(
             DriveTemplate drive,
@@ -88,7 +99,8 @@ public class DriveWithJoysticks extends Command {
             Supplier<Double> rotationSupplier,
             double maxLinearVelocity,
             double maxAngularVelocity,
-            double joystickDeadband) {
+            double joystickDeadband,
+            double magnitudeExponent) {
 
         this.drive = drive;
 
@@ -106,6 +118,12 @@ public class DriveWithJoysticks extends Command {
         }
         this.joystickDeadband = joystickDeadband;
 
+        if (magnitudeExponent <= 0.0) {
+            throw new IllegalArgumentException(
+                    "Magnitude Exponent must be positive but was " + magnitudeExponent);
+        }
+        this.magnitudeExponent = magnitudeExponent;
+
         addRequirements(this.drive);
     }
 
@@ -122,9 +140,8 @@ public class DriveWithJoysticks extends Command {
 
         Translation2d linearSpeeds = getLinearVelocity(-leftJoystickX, -leftJoystickY);
 
-        double omega = Deadband.oneAxisDeadband(-rightJoystickX, joystickDeadband);
-        omega = (omega - Math.signum(omega) * joystickDeadband) / (1 - joystickDeadband);
-        omega = Math.copySign(omega * omega, omega);
+        double omega = MathUtil.applyDeadband(-rightJoystickX, joystickDeadband);
+        omega = MathUtil.copyDirectionPow(omega, magnitudeExponent);
 
         ChassisSpeeds speeds =
                 new ChassisSpeeds(
@@ -136,16 +153,16 @@ public class DriveWithJoysticks extends Command {
     }
 
     /**
-     * calculates a translation with squared magnitude
+     * calculates a Translation2d representing linear speeds with magnitude raised to the
+     * magnitudeExponent power
      *
      * @param x represents the x value of velocity
      * @param y represents the y value of velocity
      * @return Translation2d with directions of velocity
      */
     public Translation2d getLinearVelocity(double x, double y) {
-        double[] deadbands = Deadband.twoAxisDeadbandNormalized(x, y, joystickDeadband);
-
-        double magnitude = Math.hypot(deadbands[0], deadbands[1]);
+        Vector<N2> deadbandedTranslation =
+                MathUtil.applyDeadband(VecBuilder.fill(x, y), joystickDeadband);
 
         /*
          * joystick x/y is opposite of field x/y
@@ -153,11 +170,12 @@ public class DriveWithJoysticks extends Command {
          * BEWARE: not flipping will cause forward on joystick to drive right on field
          */
         Rotation2d direction = new Rotation2d(Math.atan2(x, y));
-        double squaredMagnitude = magnitude * magnitude;
+        double curvedMagnitude =
+                MathUtil.copyDirectionPow(deadbandedTranslation.norm(), magnitudeExponent);
 
         Translation2d linearVelocity =
                 new Pose2d(new Translation2d(), direction)
-                        .transformBy(new Transform2d(squaredMagnitude, 0.0, new Rotation2d()))
+                        .transformBy(new Transform2d(curvedMagnitude, 0.0, new Rotation2d()))
                         .getTranslation();
 
         return linearVelocity;

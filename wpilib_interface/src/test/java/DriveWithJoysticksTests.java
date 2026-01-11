@@ -60,7 +60,8 @@ public class DriveWithJoysticksTests {
                         () -> rightStickX,
                         1.0,
                         Math.PI,
-                        0.0);
+                        0.0,
+                        2.0);
 
         command.initialize();
 
@@ -127,7 +128,8 @@ public class DriveWithJoysticksTests {
                         () -> rightStickX,
                         1.0,
                         Math.PI,
-                        0.5);
+                        0.5,
+                        2.0);
 
         command.initialize();
 
