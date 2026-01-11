@@ -1,5 +1,8 @@
 package coppercore.wpilib_interface;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
@@ -9,6 +12,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import java.util.function.Supplier;
@@ -23,8 +28,8 @@ public class DriveWithJoysticks extends Command {
     private final Supplier<Double> driveXSupplier;
     private final Supplier<Double> driveYSupplier;
     private final Supplier<Double> rotationSupplier;
-    private double maxLinearVelocity;
-    private double maxAngularVelocity;
+    private LinearVelocity maxLinearVelocity;
+    private AngularVelocity maxAngularVelocity;
     private final double joystickDeadband;
     private final double magnitudeExponent;
 
@@ -38,9 +43,9 @@ public class DriveWithJoysticks extends Command {
      * @param leftJoystick The left (translation/strafe) joystick.
      * @param rightJoystick The right (steer) joystick.
      * @param maxLinearVelocity Maximum driving velocity, which will be commanded when joystick is
-     *     fully deflected. In m/s.
+     *     fully deflected.
      * @param maxAngularVelocity Maximum steering velocity, which will be commanded when steer
-     *     joystick is fully deflected. In rad/s.
+     *     joystick is fully deflected.
      * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0).
      *     This value is applied in both directions from zero (e.g. a deadband of 0.17 means that
      *     inputs from -0.17 to 0.17 are ignored).
@@ -52,8 +57,8 @@ public class DriveWithJoysticks extends Command {
             DriveTemplate drive,
             CommandJoystick leftJoystick,
             CommandJoystick rightJoystick,
-            double maxLinearVelocity,
-            double maxAngularVelocity,
+            LinearVelocity maxLinearVelocity,
+            AngularVelocity maxAngularVelocity,
             double joystickDeadband,
             double magnitudeExponent) {
         this(
@@ -82,9 +87,9 @@ public class DriveWithJoysticks extends Command {
      *     coordinates.
      * @param rotationSupplier A double supplier supplying the steer axis input.
      * @param maxLinearVelocity Maximum driving velocity, which will be commanded when joystick is
-     *     fully deflected. In m/s.
+     *     fully deflected.
      * @param maxAngularVelocity Maximum steering velocity, which will be commanded when steer
-     *     joystick is fully deflected. In rad/s.
+     *     joystick is fully deflected.
      * @param joystickDeadband Deadband to apply to the joystick inputs, as a fraction (0.0 to 1.0).
      *     This value is applied in both directions from zero (e.g. a deadband of 0.17 means that
      *     inputs from -0.17 to 0.17 are ignored).
@@ -97,8 +102,8 @@ public class DriveWithJoysticks extends Command {
             Supplier<Double> driveXSupplier,
             Supplier<Double> driveYSupplier,
             Supplier<Double> rotationSupplier,
-            double maxLinearVelocity,
-            double maxAngularVelocity,
+            LinearVelocity maxLinearVelocity,
+            AngularVelocity maxAngularVelocity,
             double joystickDeadband,
             double magnitudeExponent) {
 
@@ -145,9 +150,9 @@ public class DriveWithJoysticks extends Command {
 
         ChassisSpeeds speeds =
                 new ChassisSpeeds(
-                        linearSpeeds.getX() * maxLinearVelocity,
-                        linearSpeeds.getY() * maxLinearVelocity,
-                        omega * maxAngularVelocity);
+                        linearSpeeds.getX() * maxLinearVelocity.in(MetersPerSecond),
+                        linearSpeeds.getY() * maxLinearVelocity.in(MetersPerSecond),
+                        omega * maxAngularVelocity.in(RadiansPerSecond));
 
         drive.setGoalSpeeds(speeds, true);
     }
@@ -160,7 +165,7 @@ public class DriveWithJoysticks extends Command {
      * @param y represents the y value of velocity
      * @return Translation2d with directions of velocity
      */
-    public Translation2d getLinearVelocity(double x, double y) {
+    private Translation2d getLinearVelocity(double x, double y) {
         Vector<N2> deadbandedTranslation =
                 MathUtil.applyDeadband(VecBuilder.fill(x, y), joystickDeadband);
 
@@ -184,10 +189,10 @@ public class DriveWithJoysticks extends Command {
     /**
      * Update the maximum linear and angular velocities.
      *
-     * @param maxLinearVelocity The new maximum allowed linear velocity in m/s.
-     * @param maxAngularVelocity The new maximum allowed angular velocity in rad/s.
+     * @param maxLinearVelocity The new maximum allowed linear velocity
+     * @param maxAngularVelocity The new maximum allowed angular velocity
      */
-    public void setMaxSpeeds(double maxLinearVelocity, double maxAngularVelocity) {
+    public void setMaxSpeeds(LinearVelocity maxLinearVelocity, AngularVelocity maxAngularVelocity) {
         this.maxLinearVelocity = maxLinearVelocity;
         this.maxAngularVelocity = maxAngularVelocity;
     }

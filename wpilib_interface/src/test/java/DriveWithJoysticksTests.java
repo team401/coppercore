@@ -1,3 +1,6 @@
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import coppercore.wpilib_interface.DriveWithJoysticks;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import org.junit.jupiter.api.Assertions;
@@ -28,8 +31,7 @@ public class DriveWithJoysticksTests {
      * Assert that each field of a given set of ChassisSpeeds is within SPEED_EPSILON of an expected
      * value.
      *
-     * <p>Using AssertEquals seems to try pointer comparison and fail, so this method is required
-     * instead.
+     * <p>Using AssertEquals compares doubles internally, so this method is required instead.
      *
      * @param speeds The ChassisSpeeds to test
      * @param expectedVx The expected vx in m/s
@@ -58,8 +60,8 @@ public class DriveWithJoysticksTests {
                         () -> leftStickX,
                         () -> leftStickY,
                         () -> rightStickX,
-                        1.0,
-                        Math.PI,
+                        MetersPerSecond.of(1.0),
+                        RadiansPerSecond.of(Math.PI),
                         0.0,
                         2.0);
 
@@ -126,8 +128,8 @@ public class DriveWithJoysticksTests {
                         () -> leftStickX,
                         () -> leftStickY,
                         () -> rightStickX,
-                        1.0,
-                        Math.PI,
+                        MetersPerSecond.of(1.0),
+                        RadiansPerSecond.of(Math.PI),
                         0.5,
                         2.0);
 

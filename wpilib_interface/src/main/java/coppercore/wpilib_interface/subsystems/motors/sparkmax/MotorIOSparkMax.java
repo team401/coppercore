@@ -3,12 +3,13 @@ package coppercore.wpilib_interface.subsystems.motors.sparkmax;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Rotations;
 
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import coppercore.wpilib_interface.SparkUtil;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
@@ -278,12 +279,12 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void controlToPositionUnprofiled(Angle positionSetpoint) {
-        controller.setReference(positionSetpoint.in(Rotations), ControlType.kPosition);
+        controller.setSetpoint(positionSetpoint.in(Rotations), ControlType.kPosition);
     }
 
     @Override
     public void controlToPositionProfiled(Angle positionSetpoint) {
-        controller.setReference(
+        controller.setSetpoint(
                 positionSetpoint.in(Rotations), ControlType.kMAXMotionPositionControl);
     }
 
@@ -318,12 +319,12 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void controlToVelocityUnprofiled(AngularVelocity velocitySetpoint) {
-        controller.setReference(velocitySetpoint.in(RPM), ControlType.kVelocity);
+        controller.setSetpoint(velocitySetpoint.in(RPM), ControlType.kVelocity);
     }
 
     @Override
     public void controlToVelocityProfiled(AngularVelocity velocitySetpoint) {
-        controller.setReference(velocitySetpoint.in(RPM), ControlType.kMAXMotionVelocityControl);
+        controller.setSetpoint(velocitySetpoint.in(RPM), ControlType.kMAXMotionVelocityControl);
     }
 
     @Override
@@ -355,7 +356,8 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
     public void setGains(
             double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
         // TODO: Decide on whether adding manual calculation of feedforward is worth it
-        sparkMaxConfig.closedLoop.pidf(kP, kI, kD, kV);
+        sparkMaxConfig.closedLoop.pid(kP, kI, kD);
+        sparkMaxConfig.closedLoop.apply(new FeedForwardConfig().kV(kV).kA(kA).kS(kS).kG(kG));
         applyConfig();
     }
 
