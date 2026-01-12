@@ -192,10 +192,10 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
         this.dynamicProfiledPositionRequest =
                 new DynamicMotionMagicTorqueCurrentFOC(
-                        0.0,
-                        talonFXConfig.MotionMagic.MotionMagicCruiseVelocity,
-                        talonFXConfig.MotionMagic.MotionMagicAcceleration,
-                        talonFXConfig.MotionMagic.MotionMagicJerk);
+                                0,
+                                talonFXConfig.MotionMagic.MotionMagicCruiseVelocity,
+                                talonFXConfig.MotionMagic.MotionMagicAcceleration)
+                        .withJerk(talonFXConfig.MotionMagic.MotionMagicJerk);
     }
 
     /**
@@ -376,7 +376,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void follow(int leaderId, boolean opposeLeaderDirection) {
-        talon.setControl(new Follower(leaderId, opposeLeaderDirection));
+        talon.setControl(
+                new Follower(leaderId, CTREUtil.translateFollowerInvert(opposeLeaderDirection)));
     }
 
     @Override

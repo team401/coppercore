@@ -1,6 +1,7 @@
 package coppercore.wpilib_interface;
 
 import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO.NeutralMode;
@@ -82,5 +83,17 @@ public final class CTREUtil {
             case Coast -> NeutralModeValue.Coast;
             case Brake -> NeutralModeValue.Brake;
         };
+    }
+
+    /**
+     * Convert a boolean representing whether or not to invert a follower motor into a Phoenix6
+     * MotorAlignmentValue.
+     *
+     * @param invertFollower True if the follower motor should spin in the opposite direction as the
+     *     leader, false if they should spin in the same direction.
+     * @return Opposed if invertFollower is true, Aligned if invertFollower is false
+     */
+    public static MotorAlignmentValue translateFollowerInvert(boolean invertFollower) {
+        return invertFollower ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned;
     }
 }

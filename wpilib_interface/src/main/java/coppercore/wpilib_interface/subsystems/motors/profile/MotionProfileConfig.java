@@ -177,6 +177,6 @@ public abstract sealed class MotionProfileConfig
     public MAXMotionConfig asMaxMotionConfig() {
         return new MAXMotionConfig()
                 .maxAcceleration(this.getMaxAcceleration().in(RPM.per(Second)))
-                .maxVelocity(this.getMaxVelocity().in(RPM));
+                .cruiseVelocity(this.getMaxVelocity().in(RPM));
     }
 }
