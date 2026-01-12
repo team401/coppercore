@@ -1,172 +1,206 @@
 package coppercore.controls.state_machine;
 
-import coppercore.controls.state_machine.state.PeriodicStateInterface;
-import coppercore.controls.state_machine.state.StateConfiguration;
-import coppercore.controls.state_machine.state.StateContainer;
-import coppercore.controls.state_machine.state.StateInterface;
-import coppercore.controls.state_machine.transition.Transition;
-import coppercore.controls.state_machine.transition.TransitionInfo;
-import java.util.Optional;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
-/** Generic State Machine */
-public class StateMachine<State, Trigger> {
-    private final StateMachineConfiguration<State, Trigger> configuration;
-    private TransitionInfo<State, Trigger> transitionInfo;
-    private State currentState;
+// Note: Some parts of the javadoc were written using Copilot
+
+/**
+ * A simple state machine implementation.
+ *
+ * <p>It supports registering states, defining transitions between states based on conditions, and
+ * updating the current state based on those transitions.
+ *
+ * <p>Before using the state machine, states must be registered and transitions defined. The state
+ * machine must also be initialized with an initial state using setState.
+ *
+ * <p>The state machine can then be updated using the updateStates method, which will evaluate the
+ * transitions and change the current state accordingly. The periodic method can be called to
+ * execute any periodic actions defined in the current state.
+ *
+ * <p>It also does not support hierarchical states or parallel states.
+ *
+ * <p>Warning: Currently the state machine does not check for duplicate state names.
+ *
+ * @param <World> The type of the world in which this state machine lives.
+ */
+public class StateMachine<World> {
+
+    private State<World> currentState;
+    private State<World> requestedState;
+    private final Map<String, State<World>> states;
+    private final World world;
 
     /**
-     * Creates a StateMachine in the given state with the given configuration
+     * Constructs a new StateMachine.
      *
-     * @param config The state machine configuration
-     * @param initialState default state
+     * @param world - the world in which this state machine lives.
      */
-    public StateMachine(StateMachineConfiguration<State, Trigger> config, State initialState) {
-        configuration = config;
-        currentState = initialState;
+    public StateMachine(World world) {
+        this.states = new HashMap<>();
+        this.world = world;
     }
 
     /**
-     * Method to transition States based on given trigger
+     * Registers a new state to the state machine.
      *
-     * @param trigger Trigger event to run
+     * @param state The state to be registered
+     * @return The registered state
      */
-    public void fire(Trigger trigger) {
-        transitionInfo = new TransitionInfo<>(currentState, trigger);
-        Optional<Transition<State, Trigger>> transitionOptional =
-                configuration.getTransition(currentState, trigger);
-        if (transitionOptional.isEmpty()) {
-            transitionInfo.fail();
-            return;
-        }
-        Transition<State, Trigger> transition = transitionOptional.get();
-        if (!transition.canTransition()) {
-            transitionInfo.fail();
-            return;
-        }
-        transitionInfo.setTransition(transition);
-        if (!transition.isInternal()) {
-            Optional<StateConfiguration<State, Trigger>> currentStateConfigurationOptional =
-                    configuration.getStateConfiguration(currentState);
-            Optional<StateConfiguration<State, Trigger>> nextStateConfigurationOptional =
-                    configuration.getStateConfiguration(transition.getDestination());
-            if (currentStateConfigurationOptional.isPresent()) {
-                StateConfiguration<State, Trigger> config = currentStateConfigurationOptional.get();
-                if (config.doRunDefaultExitAction() && configuration.hasExitAction()) {
-                    configuration.runOnExit(transition);
-                } else if (config.hasExitAction()) {
-                    config.runOnExit(transition);
-                } else {
-                    runOnExit(transition);
-                }
-            } else {
-                configuration.runOnExit(transition);
-            }
-            transition.runAction();
-            currentState = transition.getDestination();
-            if (nextStateConfigurationOptional.isPresent()) {
-                StateConfiguration<State, Trigger> config = nextStateConfigurationOptional.get();
-                if (config.doRunDefaultExitAction() && configuration.hasEntryAction()) {
-                    configuration.runOnEntry(transition);
-                } else if (config.hasEntryAction()) {
-                    config.runOnEntry(transition);
-                } else {
-                    runOnEntry(transition);
-                }
-            } else {
-                configuration.runOnEntry(transition);
-            }
-        } else {
-            currentState = transition.getDestination();
-        }
+    public State<World> registerState(State<World> state) {
+        states.put(state.getName(), state);
+        state.setRequestedStateSupplier(() -> requestedState);
+        return state;
     }
 
     /**
-     * Returns current state
+     * Gets a state by its name.
      *
-     * @return current state
+     * @param stateName The name of the state
+     * @return The state with the given name, or null if not found
      */
-    public State getCurrentState() {
+    public State<World> getStateByName(String stateName) {
+        return states.get(stateName);
+    }
+
+    /**
+     * Sets the current state of the state machine. This will override defined transitions. If
+     * newState is equal to currentState, The onExit and onEntry methods will still be called. If
+     * the current state is null / setting the initial state, only the onEntry method will be
+     * called. If the current state is not null, its onExit method will be called before changing
+     * states.
+     *
+     * @param newState The new state
+     */
+    public void setState(State<World> newState) {
+        Objects.requireNonNull(newState, "Can't set state to null");
+        if (currentState != null) {
+            currentState._onExit(this, world);
+        }
+        currentState = newState;
+        currentState._onEntry(this, world);
+    }
+
+    /**
+     * Gets the current state of the state machine.
+     *
+     * @return The current State
+     */
+    public State<World> getCurrentState() {
         return currentState;
     }
 
-    /** Runs states Period if is periodic */
+    /**
+     * Updates the state machine, transitioning to the next state if conditions are met. If the next
+     * state is the same as the current state, onExit and onEntry will still be called. Raises an
+     * exception if currentState is null.
+     *
+     * <p>After processing transitions, the requested state is cleared.
+     */
+    protected void updateStates() {
+        Objects.requireNonNull(
+                currentState,
+                "Can't call updateStates while the currentState is null, this is either a bug in"
+                    + " the State Machine implementation or You forgot to give the state machine an"
+                    + " initial state using setState");
+        currentState.getNextState(world).ifPresent(this::setState);
+        // Clear requested state after processing
+        this.requestedState = null;
+    }
+
+    /**
+     * Calls the periodic function of the current state. Raises an exception if currentState is
+     * null.
+     *
+     * <p>Note: This method also calls updateStates after executing the periodic function.
+     */
     public void periodic() {
-        if (currentState instanceof PeriodicStateInterface) {
-            ((PeriodicStateInterface) currentState).periodic();
-        } else {
-            periodicContainer();
-        }
-    }
-
-    /** Runs states Period if is periodic (This method is for if state is in Container) */
-    public void periodicContainer() {
-        if (currentState instanceof StateContainer) {
-            StateInterface state = ((StateContainer) currentState).getState();
-            if (state instanceof PeriodicStateInterface) {
-                ((PeriodicStateInterface) state).periodic();
-            }
-        }
-    }
-
-    private void runOnEntry(Transition transition) {
-        if (currentState instanceof StateInterface) {
-            ((StateInterface) currentState).onEntry(transition);
-        } else {
-            runOnEntryContainer(transition);
-        }
-    }
-
-    private void runOnEntryContainer(Transition transition) {
-        if (currentState instanceof StateContainer) {
-            StateInterface state = ((StateContainer) currentState).getState();
-            if (state instanceof StateInterface) {
-                ((StateInterface) state).onEntry(transition);
-            }
-        }
-    }
-
-    private void runOnExit(Transition transition) {
-        if (currentState instanceof StateInterface) {
-            ((StateInterface) currentState).onEntry(transition);
-        } else {
-            runOnExitContainer(transition);
-        }
-    }
-
-    private void runOnExitContainer(Transition transition) {
-        if (currentState instanceof StateContainer) {
-            StateInterface state = ((StateContainer) currentState).getState();
-            if (state instanceof StateInterface) {
-                ((StateInterface) state).onExit(transition);
-            }
-        }
+        Objects.requireNonNull(
+                currentState,
+                "Can't call periodic while the currentState is null, this is either a bug in the"
+                        + " State Machine implementation or You forgot to give the state machine an"
+                        + " initial state using setState");
+        currentState._periodic(this, world);
+        updateStates();
     }
 
     /**
-     * Returns if last transition was successful
+     * Requests a state change to the specified state.
      *
-     * @return success
+     * <p>If multiple states are requested before the next updateStates call, the last requested
+     * state will take precedence and replace the current requested state. And if the requested
+     * state is null, no state change will occur.
+     *
+     * <p>If the requested state is the same as the current state, onExit and onEntry will still be
+     * called during the next updateStates call if the request is honored.
+     *
+     * <p>The requested state will be cleared after the next updateStates call.
+     *
+     * @param state The requested state
      */
-    public boolean successfulTransition() {
-        return !transitionInfo.wasFail();
+    public void requestState(State<World> state) {
+        requestedState = state;
+    }
+
+    // NOTE: Consider switching from a String to some other type for graph format
+    /**
+     * Write a state machine configuration in graphviz format with custom graph settings
+     *
+     * @param pw The PrintWriter to write to
+     * @param graphFormat The graph format settings
+     */
+    public void writeGraphvizFileWithCustomGraphFormat(PrintWriter pw, String graphFormat) {
+        pw.println("digraph {");
+        pw.println();
+        pw.println("  // Graphviz Format settings");
+        pw.println();
+        pw.println(graphFormat);
+        pw.println();
+        pw.println("  // States");
+        pw.println();
+        for (var state : states.entrySet()) {
+            var stateName = state.getKey();
+            pw.printf("  %s;%n", stateName);
+        }
+        pw.println();
+        pw.println("  // Transitions");
+        pw.println();
+        for (var state : states.values()) {
+            var stateName = state.name;
+            var transitions = state.getTransitions();
+            for (var transition : transitions) {
+                var toState = transition.toState;
+                var toStateName = toState.name;
+                pw.printf(
+                        "  %s -> %s [label=\"%s\"];%n",
+                        stateName, toStateName, transition.description);
+            }
+            pw.println();
+        }
+        pw.println("}");
     }
 
     /**
-     * Returns infomation about last transtion
+     * Write a state machine configuration in graphviz format Use a custom default graph format.
+     * Which is a left to right directed graph with rounded box nodes, and fontsize 10 for edges.
      *
-     * @return information of last transiton
+     * @param pw The PrintWriter to write to
      */
-    public TransitionInfo<State, Trigger> getTransitionInfo() {
-        return transitionInfo;
-    }
+    public void writeGraphvizFile(PrintWriter pw) {
+        writeGraphvizFileWithCustomGraphFormat(
+                pw,
+                """
+      rankdir=LR;
+      node [
+        shape=box,
+        style=rounded
+      ];
 
-    /**
-     * Tests if in state
-     *
-     * @param state target state
-     * @return if in state
-     */
-    public boolean inState(State state) {
-        return currentState.equals(state);
+      edge [
+        fontsize=10
+      ];
+    """);
     }
 }

@@ -63,6 +63,7 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
                 return null;
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public void write(JsonWriter out, T value) throws IOException {
                 try {
