@@ -7,13 +7,28 @@ import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.json.annotations.JSONName;
 import java.lang.reflect.Field;
 
+/**
+ * This class implements a naming strategy for JSON serialization and deserialization using Gson. It
+ * allows for custom field naming through the use of the @JSONName annotation. If the annotation is
+ * not present, it falls back to a specified FieldNamingPolicy.
+ */
 public class JSONNamingStrategy implements FieldNamingStrategy {
 
     protected FieldNamingPolicy policy = FieldNamingPolicy.IDENTITY;
     protected JSONSyncConfig config = new JSONSyncConfigBuilder().build();
 
+    /**
+     * Default constructor for JSONNamingStrategy, its fall back policy will be {@link
+     * FieldNamingPolicy#IDENTITY}
+     */
     public JSONNamingStrategy() {}
 
+    /**
+     * Constructor for JSONNamingStrategy.
+     *
+     * @param policy the fall back policy
+     * @param config the JSONSyncConfig to use for serialization and deserialization
+     */
     public JSONNamingStrategy(FieldNamingPolicy policy, JSONSyncConfig config) {
         this.policy = policy;
         this.config = config;
