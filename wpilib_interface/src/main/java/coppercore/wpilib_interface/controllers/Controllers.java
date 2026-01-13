@@ -1,6 +1,8 @@
 package coppercore.wpilib_interface.controllers;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import edu.wpi.first.wpilibj.GenericHID;
@@ -148,6 +150,87 @@ public class Controllers {
                 .addAxisShorthand("leftY", 1)
                 .addAxisShorthand("rightX", 3)
                 .addAxisShorthand("rightY", 4)
+        );
+    }
+
+    // Will add more fields later
+    public List<Controller> controllers = List.of();
+    
+    public Controllers(){}
+
+    public Controllers(List<Controller> controllers){
+        this.controllers = controllers;
+    }
+
+    public Controller getControllerByIndex(int index){
+        return controllers.get(index);
+    }
+
+    public Controller getControllerByPort(int port){
+        for(Controller controller : controllers){
+            if(controller.port == port){
+                return controller;
+            }
+        }
+        throw new RuntimeException("No controller found on port: " + port);
+    }
+
+    private Controller.ControllerInterface getFromAllControllers(BiFunction<Controller, String, Boolean> func, BiFunction<Controller, String, Controller.ControllerInterface> getter, String command) {
+        for (Controller controller : controllers) {
+            if (func.apply(controller, command)) {
+                return getter.apply(controller, command);
+            }
+        }
+        throw new RuntimeException("No controller interface found for command: " + command);
+    }
+
+    public Controller.ControllerInterface getInterface(String command) {
+        return getFromAllControllers(
+            (controller, cmd) -> controller.hasControllerInterface(cmd),
+            (controller, cmd) -> controller.getControllerInterface(cmd),
+            command
+        );
+    }
+
+    public Controller.Button getButton(String command) {
+        return (Controller.Button) getFromAllControllers(
+            (controller, cmd) -> {
+                if (!controller.hasControllerInterface(cmd)) {
+                    return false;
+                }
+                Controller.ControllerInterface ci = controller.getControllerInterface(cmd);
+                return ci instanceof Controller.Button;
+            },
+            (controller, cmd) -> controller.getControllerInterface(cmd),
+            command
+        );
+    }
+
+    public Controller.Axis getAxis(String command) {
+        return (Controller.Axis) getFromAllControllers(
+            (controller, cmd) -> {
+                if (!controller.hasControllerInterface(cmd)) {
+                    return false;
+                }
+                Controller.ControllerInterface ci = controller.getControllerInterface(cmd);
+                return ci instanceof Controller.Axis;
+            },
+            (controller, cmd) -> controller.getControllerInterface(cmd),
+            command
+        );
+    }
+
+    public Controller.POV getPOV(String command) {
+        return (Controller.POV) getFromAllControllers(
+            (controller, cmd) -> {
+                if (!controller.hasControllerInterface(cmd)) {
+                    return false;
+                }
+                Controller.ControllerInterface ci = controller.getControllerInterface(cmd);
+                return ci instanceof Controller.POV;
+            },
+            (controller, cmd) -> controller.getControllerInterface(cmd),
+            command
         );
     }
 

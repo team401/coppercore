@@ -1,15 +1,16 @@
 package coppercore.wpilib_interface.controllers;
 
 import java.util.HashMap;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import coppercore.parameter_tools.json.annotations.AfterJsonLoad;
 import coppercore.parameter_tools.json.annotations.JSONExclude;
 import coppercore.parameter_tools.json.annotations.JSONName;
 import coppercore.parameter_tools.json.annotations.JsonSubtype;
 import coppercore.parameter_tools.json.annotations.JsonType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class Controller {
@@ -33,8 +34,36 @@ public class Controller {
         return controllerType;
     }
 
+    public boolean hasControllerInterface(String command) {
+        return controllerInterfaces.containsKey(command);
+    }
+
     public ControllerInterface getControllerInterface(String command) {
         return controllerInterfaces.get(command);
+    }
+
+    public boolean hasButton(String command) {
+        return buttons.containsKey(command);
+    }
+
+    public Button getButton(String command) {
+        return buttons.get(command);
+    }
+
+    public boolean hasAxis(String command) {
+        return axes.containsKey(command);
+    }
+
+    public Axis getAxis(String command) {
+        return axes.get(command);
+    }
+
+    public boolean hasPOV(String command) {
+        return povs.containsKey(command);
+    }
+
+    public POV getPOV(String command) {
+        return povs.get(command);
     }
 
     private static double clampRange(double value, double min, double max) {
@@ -207,9 +236,16 @@ public class Controller {
         public void initilizeInterface(Controller controller) {
             rawInterface.initilizeInterface(controller);
         }
+
+        public Supplier<Double> getSupplier() {
+            return this::getValue;
+        }
+
+        public DoubleSupplier getPrimitiveSupplier() {
+            return this::getValue;
+        }
     }
 
-    
     public static class Button extends ControllerInterface {
         public Double threshold = 0.0; // This is the value above which the button is considered pressed
         public Double thresholdRange = null; // This is the range above the threshold for hysteresis
@@ -258,6 +294,14 @@ public class Controller {
             return applyToggle(pressed);
         }
 
+        public Supplier<Boolean> getIsPressedSupplier() {
+            return this::isPressed;
+        }
+
+        public BooleanSupplier getPrimitiveIsPressedSupplier() {
+            return this::isPressed;
+        }
+
         public Trigger getTrigger() {
             return trigger;
         }
@@ -271,7 +315,7 @@ public class Controller {
         @Override
         public void initilizeInterface(Controller controller) {
             super.initilizeInterface(controller);
-            trigger = new Trigger(this::isPressed);
+            trigger = new Trigger(CommandScheduler.getInstance().getDefaultButtonLoop(), this::isPressed);
         }
     }
 
@@ -286,13 +330,6 @@ public class Controller {
             return getPreparedValue();
         }
 
-        public Supplier<Double> getSupplier() {
-            return () -> getValue();
-        }
-
-        public DoubleSupplier getPrimitiveSupplier() {
-            return this::getValue;
-        }
     }
 
     public static class POV extends ControllerInterface {
@@ -305,6 +342,7 @@ public class Controller {
         public double getValue() {
             return getPreparedValue();
         }
+
     }
 
     protected void finishControllerLoading() {
