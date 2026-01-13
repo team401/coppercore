@@ -5,12 +5,15 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+
+import coppercore.parameter_tools.json.annotations.AfterJsonLoad;
 import coppercore.parameter_tools.json.helpers.JSONConverter;
 import coppercore.parameter_tools.json.helpers.JSONObject;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * A factory for creating TypeAdapters that convert between Java objects and their JSON
@@ -56,7 +59,15 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
             @Override
             public T read(JsonReader reader) throws IOException {
                 try {
-                    return ((JSONObject<T>) gson.fromJson(reader, jsonObject)).toJava();
+                    var obj = ((JSONObject<T>) gson.fromJson(reader, jsonObject)).toJava();
+                    Class<?> clazz = obj.getClass();
+                    Method[] methods = clazz.getMethods();
+                    var filteredMethods = Arrays.stream(methods)
+                        .filter((Method method) -> method.isAnnotationPresent(AfterJsonLoad.class));
+                    if (filteredMethods.count() > 1) {
+                        throw new RuntimeException("Multiple AfterJsonLoad annotations on methods in one class");
+                    }
+                    
                 } catch (ClassCastException e) {
                     System.err.println("Could not find JavaObject for " + rawType.getName());
                 }
