@@ -1,7 +1,9 @@
 package coppercore.parameter_tools.test;
 
+import coppercore.parameter_tools.json.JSONHandler;
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.annotations.AfterJsonLoad;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -246,5 +248,48 @@ public class JSONSyncTests {
                                 .setPrimitiveCheckCrash(true)
                                 .build());
         Assertions.assertThrows(RuntimeException.class, synced::saveData);
+    }
+
+    /** Class to test the primitive check crash feature with a private field. */
+    public static class AfterJsonLoadsClass {
+        public Boolean methodRun = false;
+
+        @AfterJsonLoad
+        public void testMethod() {
+            methodRun = true;
+        }
+    }
+
+    public static class AfterJsonLoadsCrashClass {
+        public Boolean methodRun = false;
+
+        @AfterJsonLoad
+        public void testMethod() {
+            methodRun = true;
+        }
+
+        @AfterJsonLoad
+        public void testMethod2() {
+            methodRun = null;
+        }
+    }
+
+    @Test
+    public void JsonSyncAfterJsonLoadTest() {
+        System.out.println("Starting AfterJsonLoad Test");
+        JSONHandler handler = new JSONHandler(new UnitTestingPathProvider());
+        AfterJsonLoadsClass badObject = new AfterJsonLoadsClass();
+
+        Assertions.assertFalse(badObject.methodRun);
+
+        var goodObject = handler.getObject(new AfterJsonLoadsClass(), "AfterJsonLoads.json");
+
+        Assertions.assertTrue(goodObject.methodRun);
+
+        Assertions.assertThrows(
+                RuntimeException.class,
+                () -> {
+                    handler.getObject(new AfterJsonLoadsCrashClass(), "AfterJsonLoads.json");
+                });
     }
 }
