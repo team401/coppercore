@@ -1,10 +1,5 @@
 package coppercore.wpilib_interface.controllers;
 
-import java.util.HashMap;
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-
 import coppercore.parameter_tools.json.annotations.JSONExclude;
 import coppercore.parameter_tools.json.annotations.JSONName;
 import coppercore.parameter_tools.json.annotations.JsonSubtype;
@@ -12,9 +7,13 @@ import coppercore.parameter_tools.json.annotations.JsonType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import java.util.HashMap;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class Controller {
-    
+
     int port = -1;
     ControllerType controllerType;
     HashMap<String, Integer> buttonShorthands = null;
@@ -24,7 +23,6 @@ public class Controller {
     HashMap<String, Button> buttons = new HashMap<>();
     HashMap<String, Axis> axes = new HashMap<>();
     HashMap<String, POV> povs = new HashMap<>();
-
 
     public int getPort() {
         return port;
@@ -71,7 +69,8 @@ public class Controller {
     }
 
     // Might be able to optimize this
-    private static double adjustRange(double value, double oldMin, double oldMax, double newMin, double newMax) {
+    private static double adjustRange(
+            double value, double oldMin, double oldMax, double newMin, double newMax) {
         // Ensure value is inside old range
         double clampedValue = clampRange(value, newMin, newMax);
         // Need to double check this formula
@@ -81,28 +80,29 @@ public class Controller {
     }
 
     @JsonType(
-        property = "controllerType",
-        subtypes = {
-            @JsonSubtype(clazz = RawButton.class, name = "button"),
-            @JsonSubtype(clazz = RawAxis.class, name = "axis"),
-            @JsonSubtype(clazz = RawPOV.class, name = "pov"),
-        }
-    )
-    public static abstract class RawControllerInterface {
+            property = "controllerType",
+            subtypes = {
+                @JsonSubtype(clazz = RawButton.class, name = "button"),
+                @JsonSubtype(clazz = RawAxis.class, name = "axis"),
+                @JsonSubtype(clazz = RawPOV.class, name = "pov"),
+            })
+    public abstract static class RawControllerInterface {
         public String controllerType;
+
         @JSONName("id")
         public String stringID;
+
         public Boolean inverted = false;
         public Double minValue;
         public Double maxValue;
         public Boolean clampValue = false;
-        @JSONExclude
-        protected int id;
-        @JSONExclude
-        protected int port;
+        @JSONExclude protected int id;
+        @JSONExclude protected int port;
 
         protected double fixRange(double value, double oldMin, double oldMax) {
-            return (clampValue) ? clampRange(value, minValue, maxValue) : adjustRange(value, oldMin, oldMax, minValue, maxValue);
+            return (clampValue)
+                    ? clampRange(value, minValue, maxValue)
+                    : adjustRange(value, oldMin, oldMax, minValue, maxValue);
         }
 
         protected double applyInversion(double value) {
@@ -117,7 +117,7 @@ public class Controller {
             return applyInversion(fixRange(value, oldMin, oldMax));
         }
 
-        public void initilizeInterface(Controller controller) {
+        public void initializeInterface(Controller controller) {
             this.port = controller.getPort();
 
             Integer resolvedID = null;
@@ -136,7 +136,9 @@ public class Controller {
                 try {
                     resolvedID = Integer.parseInt(stringID);
                 } catch (NumberFormatException e) {
-                    throw new RuntimeException("Could not resolve ID for controller interface with string ID: " + stringID);
+                    throw new RuntimeException(
+                            "Could not resolve ID for controller interface with string ID: "
+                                    + stringID);
                 }
             }
             this.id = resolvedID;
@@ -156,7 +158,6 @@ public class Controller {
             boolean pressed = DriverStation.getStickButton(port, id);
             return prepareValue((pressed) ? 1.0 : 0.0, 0.0, 1.0);
         }
-
     }
 
     public static class RawAxis extends RawControllerInterface {
@@ -197,20 +198,19 @@ public class Controller {
         public double getValue() {
             return prepareValue(DriverStation.getStickPOV(port, id), 0, 360);
         }
-
     }
 
     @JsonType(
-     property = "commandType",
-     subtypes = {
-        @JsonSubtype(clazz = Button.class, name = "button"),
-        @JsonSubtype(clazz = Axis.class, name = "axis"),
-        @JsonSubtype(clazz = POV.class, name = "pov"),
-     }
-    )
-    public static abstract class ControllerInterface {
+            property = "commandType",
+            subtypes = {
+                @JsonSubtype(clazz = Button.class, name = "button"),
+                @JsonSubtype(clazz = Axis.class, name = "axis"),
+                @JsonSubtype(clazz = POV.class, name = "pov"),
+            })
+    public abstract static class ControllerInterface {
         @JSONName("controllerInterface")
         RawControllerInterface rawInterface;
+
         public String command;
         public String commandType;
         public Boolean inverted = false;
@@ -219,7 +219,14 @@ public class Controller {
         public Boolean clampValue = false;
 
         protected double fixRange(double value) {
-            return (clampValue) ? clampRange(value, minValue, maxValue) : adjustRange(value, rawInterface.minValue, rawInterface.maxValue, minValue, maxValue);
+            return (clampValue)
+                    ? clampRange(value, minValue, maxValue)
+                    : adjustRange(
+                            value,
+                            rawInterface.minValue,
+                            rawInterface.maxValue,
+                            minValue,
+                            maxValue);
         }
 
         protected double applyInversion(double value) {
@@ -233,8 +240,8 @@ public class Controller {
 
         public abstract double getValue();
 
-        public void initilizeInterface(Controller controller) {
-            rawInterface.initilizeInterface(controller);
+        public void initializeInterface(Controller controller) {
+            rawInterface.initializeInterface(controller);
         }
 
         public Supplier<Double> getSupplier() {
@@ -247,9 +254,12 @@ public class Controller {
     }
 
     public static class Button extends ControllerInterface {
-        public Double threshold = 0.0; // This is the value above which the button is considered pressed
+        public Double threshold =
+                0.0; // This is the value above which the button is considered pressed
         public Double thresholdRange = null; // This is the range above the threshold for hysteresis
-        public Double hysteresis = null; // This is the amount the value must drop below the threshold to be considered released
+        public Double hysteresis =
+                null; // This is the amount the value must drop below the threshold to be considered
+        // released
         public Boolean isToggle = false;
         public Boolean isToggled = false;
         public Boolean lastState = false;
@@ -311,11 +321,13 @@ public class Controller {
             boolean isPressed = isPressed();
             return isPressed ? maxValue : minValue;
         }
-    
+
         @Override
-        public void initilizeInterface(Controller controller) {
-            super.initilizeInterface(controller);
-            trigger = new Trigger(CommandScheduler.getInstance().getDefaultButtonLoop(), this::isPressed);
+        public void initializeInterface(Controller controller) {
+            super.initializeInterface(controller);
+            trigger =
+                    new Trigger(
+                            CommandScheduler.getInstance().getDefaultButtonLoop(), this::isPressed);
         }
     }
 
@@ -329,7 +341,6 @@ public class Controller {
         public double getValue() {
             return getPreparedValue();
         }
-
     }
 
     public static class POV extends ControllerInterface {
@@ -342,12 +353,11 @@ public class Controller {
         public double getValue() {
             return getPreparedValue();
         }
-
     }
 
     protected void finishControllerLoading() {
         for (ControllerInterface controllerInterface : controllerInterfaces.values()) {
-            controllerInterface.initilizeInterface(this);
+            controllerInterface.initializeInterface(this);
         }
     }
 }
