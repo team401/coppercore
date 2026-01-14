@@ -7,9 +7,20 @@ repositories {
 	mavenCentral()
 }
 ```
-**Note:** if you are using the maven local distribution, make sure to include `mavenLocal()` in the repositories block as well.
+**Note:** if you are using the maven local distribution for testing/development, make sure
+to include `mavenLocal()` in the repositories block as well, as make sure it appears before `mavenCentral`, like so:
 
-Then, you can include any of the following dependencies as you need in your `dependencies` block of your `build.gradle`:
+```
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+```
+See below for instructions how to publish to your local maven.
+Using the local maven will allow you to test and use a local version of coppercore that
+you built rather than the last published version on Maven central.
+
+In the Robot code project, include any of the following dependencies as you need in your `dependencies` block of your `build.gradle`:
 ```
 dependencies {
     ...
@@ -20,10 +31,14 @@ dependencies {
 	implementation "io.github.team401.coppercore:parameter_tools:VERSION"
 	implementation "io.github.team401.coppercore:vision:VERSION"
     implementation "io.github.team401.coppercore:wpilib_interface:VERSION"
+    implementation "io.github.team401.coppercore:metadata:VERSION"
     ...
 }
 ```
 where `VERSION` is available for selection from the GitHub releases or you can look it up [on the central portal](https://central.sonatype.com/search?q=coppercore) directly.
+
+The metadata package provides a class `coppercore.metadata.CopperCoreMetadata` that includes
+constants about the version, which you set in `gradle.properties`.
 
 ## Maven Central
 This project is available on maven central! The instructions below outline how to set this up.
@@ -93,3 +108,6 @@ To publish the package on your computer's local maven (typically `~/.m2/`), run 
 ```
 ./gradlew publishToMavenLocal
 ```
+
+Make sure you have set the version correctly in `gradle.properties`.
+In your project, use `--refresh-dependencies` to pick up an updated version.
