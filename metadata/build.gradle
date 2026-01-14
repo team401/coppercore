@@ -34,6 +34,8 @@ tasks.register("generateCopperCoreMetadata") {
 		new File(pkgDir, "CopperCoreMetadata.java").text = """\
 package ${pkg};
 
+import java.io.PrintStream;
+
 public final class CopperCoreMetadata {
 private CopperCoreMetadata() {}
 
@@ -44,6 +46,20 @@ public static final int MINOR = ${minor};
 
 public static final String BUILD_TIME = "${buildTime}";
 public static final String BUILD_USER = "${userName}";
+
+public static void printInfo(PrintStream out) {
+	out.println("CopperCore build information:");
+	out.println("  Version     : " + VERSION);
+	out.println("  Year        : " + YEAR);
+	out.println("  Major       : " + MAJOR);
+	out.println("  Minor       : " + MINOR);
+	out.println("  Build time  : " + BUILD_TIME);
+	out.println("  Build user  : " + BUILD_USER);
+}
+
+public static void printInfo() {
+	printInfo(System.out);
+}
 }
 """.stripIndent()
 	}
