@@ -30,18 +30,19 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
         this.config = config;
     }
 
+    private List<Method> findAfterJsonLoadAnnotatedMethods(Class<?> clazz) {
+        return Arrays.stream(clazz.getMethods())
+                .filter((Method method) -> method.isAnnotationPresent(AfterJsonLoad.class))
+                .toList();
+    }
+
     public boolean needsAfterLoadAdapter(Class<?> rawType) {
 
         if (jsonAfterLoadClasses.contains(rawType)) {
             return false;
         }
 
-        Method[] methods = rawType.getMethods();
-        var filteredMethods =
-                Arrays.stream(methods)
-                        .filter((Method method) -> method.isAnnotationPresent(AfterJsonLoad.class))
-                        .toList();
-        return filteredMethods.size() > 0;
+        return findAfterJsonLoadAnnotatedMethods(rawType).size() > 0;
     }
 
     public <T> TypeAdapter<T> wrapAdapterWithAfterLoad(TypeAdapter<T> adapter) {
@@ -52,27 +53,18 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
                 T obj = adapter.read(reader);
                 if (obj != null) {
                     Class<?> clazz = obj.getClass();
-                    Method[] methods = clazz.getMethods();
-                    var filteredMethods =
-                            Arrays.stream(methods)
-                                    .filter(
-                                            (Method method) ->
-                                                    method.isAnnotationPresent(AfterJsonLoad.class))
-                                    .toList();
-                    if (filteredMethods.size() > 1) {
+                    var annotatedMethods = findAfterJsonLoadAnnotatedMethods(clazz);
+                    if (annotatedMethods.size() > 1) {
                         throw new RuntimeException(
                                 "Multiple AfterJsonLoad annotations on methods in one class");
                     }
-                    filteredMethods.forEach(
-                            (method) -> {
-                                try {
-                                    method.invoke(obj);
-                                } catch (IllegalAccessException
-                                        | IllegalArgumentException
-                                        | InvocationTargetException e) {
-                                    e.printStackTrace();
-                                }
-                            });
+                    try {
+                        annotatedMethods.get(0).invoke(obj);
+                    } catch (IllegalAccessException
+                            | IllegalArgumentException
+                            | InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return obj;
             }
