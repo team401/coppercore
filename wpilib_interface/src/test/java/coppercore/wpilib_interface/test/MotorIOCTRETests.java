@@ -95,7 +95,7 @@ public class MotorIOCTRETests {
                                             .withKV(0.0)
                                             .withKA(0.0)
                                             .withKG(0.0)
-                                            .withKP(1.0)
+                                            .withKP(2.0)
                                             .withKI(0.0)
                                             .withKD(0.0))
                             .withMotionMagic(
