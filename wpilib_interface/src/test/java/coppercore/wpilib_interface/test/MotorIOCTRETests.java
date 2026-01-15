@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
@@ -53,7 +54,7 @@ import org.junit.jupiter.api.Test;
  * https://github.com/team401/2025-Robot-Code.
  */
 public class MotorIOCTRETests {
-    private static String canbus = "canivore";
+    private static CANBus canbus = new CANBus("canivore");
 
     public static CANDeviceID encoderId = new CANDeviceID(canbus, 52);
 
@@ -261,6 +262,7 @@ public class MotorIOCTRETests {
                 2.00,
                 () -> {
                     loop.run();
+                    /* Debugging; CI still fails mysteriously on OSX
                     System.err.println(
                             "leadMotorInputs.positionRadians is "
                                     + leadMotorInputs.positionRadians
@@ -268,6 +270,7 @@ public class MotorIOCTRETests {
                                     + leadMotorInputs.appliedVolts
                                     + ", current time since start of loop is "
                                     + (Timer.getFPGATimestamp() - startTime));
+                    */
                 });
 
         Assertions.assertEquals(
@@ -279,7 +282,7 @@ public class MotorIOCTRETests {
         // successfully moves the sim updward.
         leadMotor.controlToPositionUnprofiled(Radians.of(1.0));
         loopForTime(0.1, loop); // Give it a few cycles for the sim thread to update
-        System.err.println("leadMotorInputs.appliedVolts is " + leadMotorInputs.appliedVolts);
+        // System.err.println("leadMotorInputs.appliedVolts is " + leadMotorInputs.appliedVolts);
         Assertions.assertEquals(
                 1.0,
                 Math.signum(leadMotorInputs.appliedVolts),

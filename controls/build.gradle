@@ -1,17 +1,33 @@
 plugins {
 	// Apply the java-library plugin for API and implementation separation.
 	id 'java-library'
+	alias(libs.plugins.gradlerio)
 }
 
 dependencies {
+	annotationProcessor wpi.java.deps.wpilibAnnotations()
+	implementation wpi.java.deps.wpilib()
+	implementation wpi.java.vendor.java()
+
+	nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+	nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
+	simulationDebug wpi.sim.enableDebug()
+
+	nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
+	nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
+	simulationRelease wpi.sim.enableRelease()
+
 	annotationProcessor libs.akit.autolog
+
 	// This dependency is exported to consumers, that is to say found on their compile classpath.
 	api libs.commons.math3
 
 	// This dependency is used internally, and not exposed to consumers on their own compile classpath.
 	implementation libs.guava
-	//implementation project(":parameter_tools")
 }
+
+// injects the JNI extraction dir into java.library.path for tests.
+wpi.java.configureTestTasks(test)
 
 // Add this to each subproject separately.
 mavenPublishing {

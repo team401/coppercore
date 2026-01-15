@@ -2,7 +2,6 @@ package coppercore.parameter_tools.test;
 
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
-import java.io.File;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,23 +16,17 @@ import org.junit.jupiter.api.Test;
  */
 public class JSONSyncTests {
 
-    /** Directory paths for storing and accessing test JSON files. */
-    public static final String DIRECTORY = new File("").getAbsolutePath();
-
-    public static final String BUILD_DIRECTORY = DIRECTORY + "/build";
-    public static final String RESOURCE_DIRECTORY = BUILD_DIRECTORY + "/resources/test";
-
     /**
      * Prepares a new {@link JSONSync} instance with a predefined configuration and file path before
      * each test.
      */
     @BeforeEach
     public void TestPrep() {
-        System.out.println("Test Prep");
         ExampleJsonSyncClass.synced =
                 new JSONSync<>(
                         new ExampleJsonSyncClass(),
-                        RESOURCE_DIRECTORY + "/ExampleJsonSyncClass.json",
+                        "ExampleJsonSyncClass.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setUpPolymorphAdapter(ExampleJsonSyncClass.Action.class)
@@ -70,7 +63,7 @@ public class JSONSyncTests {
      */
     @Test
     public void JsonSyncSetFileTest() {
-        ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "/SetFileTest.json");
+        ExampleJsonSyncClass.synced.setFile("SetFileTest.json");
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
         Assertions.assertEquals(10.0, instance.testDouble, "testDouble should be 10.0");
@@ -88,11 +81,18 @@ public class JSONSyncTests {
      */
     @Test
     public void JsonSyncSaveFileTest() {
+        Integer saved_int = 106454;
+        Integer random_int = 102130324;
         ExampleJsonSyncClass.synced.loadData();
         ExampleJsonSyncClass instance = ExampleJsonSyncClass.synced.getObject();
-        instance.testingIntField = 10;
-        ExampleJsonSyncClass.synced.setFile(RESOURCE_DIRECTORY + "/SaveFileTest.json");
+        instance.testingIntField = saved_int;
+        ExampleJsonSyncClass.synced.setFile("SaveFileTest.json");
         ExampleJsonSyncClass.synced.saveData();
+        instance.testingIntField = random_int;
+        ExampleJsonSyncClass.synced.loadData();
+        instance = ExampleJsonSyncClass.synced.getObject();
+        Assertions.assertEquals(
+                saved_int, instance.testingIntField, "testInt should be " + saved_int);
     }
 
     private static class PrimitiveClass {
@@ -106,20 +106,17 @@ public class JSONSyncTests {
     /** Written with help from CoPilot */
     @Test
     public void JsonSyncPrimitiveCrashTest() {
-        Exception e =
-                Assertions.assertThrows(
-                        RuntimeException.class,
-                        () -> {
-                            JSONSync<PrimitiveClass> sync =
-                                    new JSONSync<>(
-                                            new PrimitiveClass(0),
-                                            RESOURCE_DIRECTORY + "/PrimitiveClass.json",
-                                            new JSONSyncConfigBuilder()
-                                                    .setPrettyPrinting(true)
-                                                    .build());
-                            sync.loadData();
-                        });
-        System.out.println(e);
+        Assertions.assertThrows(
+                RuntimeException.class,
+                () -> {
+                    JSONSync<PrimitiveClass> sync =
+                            new JSONSync<>(
+                                    new PrimitiveClass(0),
+                                    "PrimitiveClass.json",
+                                    new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
+                                    new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
+                    sync.saveData();
+                });
     }
 
     /** Class to test the primitive check crash feature. */
@@ -133,7 +130,8 @@ public class JSONSyncTests {
         JSONSync<PrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new PrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/PrimitiveCheckCrash.json",
+                        "PrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)
@@ -155,7 +153,8 @@ public class JSONSyncTests {
         JSONSync<PrivatePrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new PrivatePrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/PrivatePrimitiveCheckCrash.json",
+                        "PrivatePrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)
@@ -174,7 +173,8 @@ public class JSONSyncTests {
         JSONSync<DoublePrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new DoublePrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/DoublePrimitiveCheckCrash.json",
+                        "DoublePrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)
@@ -193,7 +193,8 @@ public class JSONSyncTests {
         JSONSync<BooleanPrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new BooleanPrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/BooleanPrimitiveCheckCrash.json",
+                        "BooleanPrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)
@@ -212,7 +213,8 @@ public class JSONSyncTests {
         JSONSync<BytePrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new BytePrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/BytePrimitiveCheckCrash.json",
+                        "BytePrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)
@@ -231,7 +233,8 @@ public class JSONSyncTests {
         JSONSync<ShortPrimitiveCheckCrash> synced =
                 new JSONSync<>(
                         new ShortPrimitiveCheckCrash(),
-                        RESOURCE_DIRECTORY + "/ShortPrimitiveCheckCrash.json",
+                        "ShortPrimitiveCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
                         new JSONSyncConfigBuilder()
                                 .setPrettyPrinting(true)
                                 .setPrimitiveCheckCrash(true)
