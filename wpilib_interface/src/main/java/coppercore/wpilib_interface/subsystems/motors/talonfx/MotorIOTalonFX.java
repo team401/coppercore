@@ -11,16 +11,16 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
-import com.ctre.phoenix6.controls.DynamicMotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
-import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import coppercore.wpilib_interface.CTREUtil;
@@ -42,7 +42,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 /**
  * A base motor IO that implements closed-loop control for a TalonFX-supporting motor using
- * MotionMagicExpo, MotionMagicVelocity, and TorqueCurrentFOC wherever possible.
+ * MotionMagicExpo, and MotionMagicVelocity wherever possible.
+ *
+ * <p>This IO uses .withEnableFOC(true) on all control requests to utilize the performance gains of
+ * FOC. However, it utilizes voltage requests to make tuning easier. This means that all gains
+ * should be in terms of Volts, not Amps.
  */
 public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO {
     /**
@@ -100,34 +104,33 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      */
     protected final StaticBrake brakeRequest = new StaticBrake();
 
-    /** An unprofiled position FOC request for non-profiled position closed-loop control */
-    protected final PositionTorqueCurrentFOC unprofiledPositionRequest =
-            new PositionTorqueCurrentFOC(Rotations.zero());
+    /** An unprofiled position request for non-profiled position closed-loop control */
+    protected final PositionVoltage unprofiledPositionRequest =
+            new PositionVoltage(Rotations.zero()).withEnableFOC(true);
 
     /**
      * A Motion-Magic profiled position FOC request for non-expo profiled position closed-loop
      * control
      */
-    protected final MotionMagicTorqueCurrentFOC profiledPositionRequest =
-            new MotionMagicTorqueCurrentFOC(Rotations.zero());
+    protected final MotionMagicVoltage profiledPositionRequest =
+            new MotionMagicVoltage(Rotations.zero()).withEnableFOC(true);
 
     /**
-     * A Dynamic Motion-Magic position FOC request for dynamically profiled position closed-loop
-     * control
+     * A Dynamic Motion-Magic position request for dynamically profiled position closed-loop control
      */
-    protected final DynamicMotionMagicTorqueCurrentFOC dynamicProfiledPositionRequest;
+    protected final DynamicMotionMagicVoltage dynamicProfiledPositionRequest;
 
-    /** A Motion-Magic-Expo profiled FOC request for expo profiled position closed-loop control */
-    protected final MotionMagicExpoTorqueCurrentFOC expoProfiledPositionRequest =
-            new MotionMagicExpoTorqueCurrentFOC(Rotations.zero());
+    /** A Motion-Magic-Expo profiled request for expo profiled position closed-loop control */
+    protected final MotionMagicExpoVoltage expoProfiledPositionRequest =
+            new MotionMagicExpoVoltage(Rotations.zero()).withEnableFOC(true);
 
-    /** An unprofiled velocity FOC request for unprofiled velocity closed-loop control */
-    protected final VelocityTorqueCurrentFOC unprofiledVelocityRequest =
-            new VelocityTorqueCurrentFOC(RotationsPerSecond.zero());
+    /** An unprofiled velocity request for unprofiled velocity closed-loop control */
+    protected final VelocityVoltage unprofiledVelocityRequest =
+            new VelocityVoltage(RotationsPerSecond.zero()).withEnableFOC(true);
 
-    /** A Motion-Magic profiled velocity FOC request for profiled velocity closed-loop control */
-    protected final MotionMagicVelocityTorqueCurrentFOC profiledVelocityRequest =
-            new MotionMagicVelocityTorqueCurrentFOC(RotationsPerSecond.zero());
+    /** A Motion-Magic profiled velocity request for profiled velocity closed-loop control */
+    protected final MotionMagicVelocityVoltage profiledVelocityRequest =
+            new MotionMagicVelocityVoltage(RotationsPerSecond.zero()).withEnableFOC(true);
 
     /** A voltage request to use for all open-loop voltage control */
     protected final VoltageOut voltageRequest = new VoltageOut(0.0);
@@ -191,7 +194,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         CTREUtil.tryUntilOk(() -> talon.optimizeBusUtilization(), id, (code) -> {});
 
         this.dynamicProfiledPositionRequest =
-                new DynamicMotionMagicTorqueCurrentFOC(
+                new DynamicMotionMagicVoltage(
                                 0,
                                 talonFXConfig.MotionMagic.MotionMagicCruiseVelocity,
                                 talonFXConfig.MotionMagic.MotionMagicAcceleration)
