@@ -104,7 +104,8 @@ public class VisionLocalizer extends SubsystemBase {
      */
     public boolean cameraConnected(int cameraIndex) {
         if (cameraIndex < 0 || cameraIndex >= inputs.length) {
-            throw new IllegalArgumentException("Camera index out of bounds" + cameraIndex);
+            System.err.println("Camera index out of bounds" + cameraIndex);
+            return false;
         }
         
         return inputs[cameraIndex].connected;
