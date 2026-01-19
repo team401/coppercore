@@ -1,4 +1,7 @@
 // courtesy GPT 5.2
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
+import org.gradle.plugins.signing.Sign
+
 plugins {
 	id 'java-library'
 	id 'maven-publish'
@@ -75,6 +78,13 @@ sourceSets {
 ["compileJava", "spotlessJava", "sourcesJar"].each { t ->
 	tasks.matching { it.name == t }.configureEach {
 		dependsOn("generateCopperCoreMetadata")
+	}
+}
+
+plugins.withId("maven-publish") {
+	// Make every publish-to-repo task depend on signing tasks in this project
+	tasks.withType(PublishToMavenRepository).configureEach {
+		dependsOn(tasks.withType(Sign))
 	}
 }
 
