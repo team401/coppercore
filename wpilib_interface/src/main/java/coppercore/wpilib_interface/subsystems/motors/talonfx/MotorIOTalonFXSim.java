@@ -6,6 +6,8 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
+import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.sim.CoppercoreSimAdapter;
@@ -151,6 +153,22 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
             TalonFXConfiguration talonFXConfig,
             CoppercoreSimAdapter physicsSimAdapter) {
         return new MotorIOTalonFXSim(config, followerIndex, talonFXConfig, physicsSimAdapter);
+    }
+
+    /**
+     * Updates this IO's TalonFX sim state's motor type (either KrakenX60 or KrakenX44), returning
+     * this IO for easy chaining.
+     *
+     * <p>By default, KrakenX60 is assumed, and so this method only needs to be called for KrakenX44
+     * simulations.
+     *
+     * @param motorType The MotorType, KrakenX60 or KrakenX44, to send to the TalonFXSimState.
+     * @return This MotorIOTalonFXSim, to allow for easy method chaining or a builder-style
+     *     declaration.
+     */
+    public MotorIOTalonFXSim withMotorType(MotorType motorType) {
+        CTREUtil.tryUntilOk(() -> talonSimState.setMotorType(motorType), id, (code) -> {});
+        return this;
     }
 
     @Override
