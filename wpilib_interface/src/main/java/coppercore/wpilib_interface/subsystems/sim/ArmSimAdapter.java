@@ -14,12 +14,12 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 /**
  * The ElevatorSimAdapter class adapts the wpilib SingleJointedArmSim for use with coppercore's
- * MotorIO{TalonFX/SparkMax}PositionSim by implementing PositionSimAdapter.
+ * MotorIO{TalonFX/SparkMax}Sim by implementing CoppercoreSimAdapter.
  *
  * <p>It does this by converting an arm angle reported by the SingleJointedArmSim to a motor or
  * encoder position using ratios configured in the mechanism config.
  */
-public class ArmSimAdapter implements PositionSimAdapter {
+public class ArmSimAdapter implements CoppercoreSimAdapter {
     private final MechanismConfig config;
     private final SingleJointedArmSim armSim;
 
