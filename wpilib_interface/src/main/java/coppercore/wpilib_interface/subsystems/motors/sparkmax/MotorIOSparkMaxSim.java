@@ -8,7 +8,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
-import coppercore.wpilib_interface.subsystems.sim.PositionSimAdapter;
+import coppercore.wpilib_interface.subsystems.sim.CoppercoreSimAdapter;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
@@ -17,17 +17,17 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * The MotorIOSparkMaxPositionSim class extends the MotorIOSparkMax class to provide simulation
- * capabilities for position-based mechanisms by using SparkMaxSim objects.
+ * The MotorIOSparkMaxSim class extends the MotorIOSparkMax class to provide simulation capabilities
+ * for position-based mechanisms by using SparkMaxSim objects.
  *
  * @deprecated This class has not yet been fully implemented or tested, and does NOT function as
  *     intended. It has been left in coppercore to provide the opportunity for it to be fixed and
  *     iterated upon in the future without having to start from a blank slate.
  */
 @Deprecated
-public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
+public class MotorIOSparkMaxSim extends MotorIOSparkMax {
     /** Sim adapter to read physics sim values from and update with simulated motor output */
-    private final PositionSimAdapter physicsSimAdapter;
+    private final CoppercoreSimAdapter physicsSimAdapter;
 
     /** SparkMaxSim handle to interface with the simulated motor */
     private final SparkMaxSim sparkSim;
@@ -69,11 +69,11 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
      *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
      */
-    public MotorIOSparkMaxPositionSim(
+    public MotorIOSparkMaxSim(
             MechanismConfig config,
             SparkMaxConfig sparkMaxConfig,
             MotorType motorType,
-            PositionSimAdapter physicsSimAdapter,
+            CoppercoreSimAdapter physicsSimAdapter,
             Function<Integer, DCMotor> motorFactory) {
         super(config, sparkMaxConfig, motorType);
 
@@ -100,15 +100,15 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
      *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
-     * @return a new MotorIOSparkMaxPositionSim configured as the lead motor
+     * @return a new MotorIOSparkMaxSim configured as the lead motor
      */
-    public static MotorIOSparkMaxPositionSim newLeader(
+    public static MotorIOSparkMaxSim newLeader(
             MechanismConfig config,
             SparkMaxConfig sparkMaxConfig,
             MotorType motorType,
-            PositionSimAdapter physicsSimAdapter,
+            CoppercoreSimAdapter physicsSimAdapter,
             Function<Integer, DCMotor> motorFactory) {
-        return new MotorIOSparkMaxPositionSim(
+        return new MotorIOSparkMaxSim(
                 config, sparkMaxConfig, motorType, physicsSimAdapter, motorFactory);
     }
 
@@ -127,12 +127,12 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
      *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
      */
-    public MotorIOSparkMaxPositionSim(
+    public MotorIOSparkMaxSim(
             MechanismConfig config,
             int followerIndex,
             SparkMaxConfig sparkMaxConfig,
             MotorType motorType,
-            PositionSimAdapter physicsSimAdapter,
+            CoppercoreSimAdapter physicsSimAdapter,
             Function<Integer, DCMotor> motorFactory) {
         super(config, followerIndex, sparkMaxConfig, motorType);
 
@@ -162,16 +162,16 @@ public class MotorIOSparkMaxPositionSim extends MotorIOSparkMax {
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
      *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
-     * @return a new MotorIOSparkMaxPositionSim configured as the follower motor
+     * @return a new MotorIOSparkMaxSim configured as the follower motor
      */
-    public static MotorIOSparkMaxPositionSim newFollower(
+    public static MotorIOSparkMaxSim newFollower(
             MechanismConfig config,
             int followerIndex,
             SparkMaxConfig sparkMaxConfig,
             MotorType motorType,
-            PositionSimAdapter physicsSimAdapter,
+            CoppercoreSimAdapter physicsSimAdapter,
             Function<Integer, DCMotor> motorFactory) {
-        return new MotorIOSparkMaxPositionSim(
+        return new MotorIOSparkMaxSim(
                 config, followerIndex, sparkMaxConfig, motorType, physicsSimAdapter, motorFactory);
     }
 
