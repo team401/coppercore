@@ -14,16 +14,16 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
 /**
- * The ElevatorSimAdapter class adapts wpilib ElevatorSim for use with
- * MotorIO{TalonFX/SparkMax}PositionSim by implementing PositionSimAdapter.
+ * The ElevatorSimAdapter class adapts wpilib ElevatorSim for use with MotorIO{TalonFX/SparkMax}Sim
+ * by implementing CoppercoreSimAdapter.
  *
  * <p>It does this by converting an elevator position yielded by the ElevatorSim to a motor angle
  * using the elevatorToMotorRatio in the ElevatorMechanismConfig. It does the same for velocities.
  *
- * @see coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXPositionSim
- * @see coppercore.wpilib_interface.subsystems.sim.PositionSimAdapter
+ * @see coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXSim
+ * @see coppercore.wpilib_interface.subsystems.sim.CoppercoreSimAdapter
  */
-public class ElevatorSimAdapter extends BasePositionSimAdapter {
+public class ElevatorSimAdapter extends BaseSimAdapter {
     private final ElevatorMechanismConfig config;
     private final ElevatorSim elevatorSim;
 

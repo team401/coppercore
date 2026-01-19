@@ -13,10 +13,10 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 /**
- * The DCMotorSimAdapter class wraps a DCMotorSim to implement the PositionSimAdapter interface,
+ * The DCMotorSimAdapter class wraps a DCMotorSim to implement the CoppercoreSimAdapter interface,
  * allowing DCMotorSim to be used with Coppercore motor IOs in simulation.
  */
-public class DCMotorSimAdapter extends BasePositionSimAdapter {
+public class DCMotorSimAdapter extends BaseSimAdapter {
     protected final DCMotorSim dcMotorSim;
 
     public DCMotorSimAdapter(MechanismConfig config, DCMotorSim dcMotorSim) {
