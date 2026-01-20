@@ -1,30 +1,44 @@
 package coppercore.wpilib_interface.controllers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-
-import edu.wpi.first.wpilibj.GenericHID;
 
 /**
- * 
+ * This class manages controller types and a collection of controllers
+ * It includes methods to register and retrieve controller types
+ * It also includes methods to get controllers and their interfaces by command
  */
 public class Controllers {
 
-    public static HashMap<String, ControllerType> controllerTypes = new HashMap<>();
+    private static HashMap<String, ControllerType> controllerTypes = new HashMap<>();
 
-    public static void registerControllerType(String name, Function<Integer, GenericHID> hidFunction){
+    /**
+     * Register a controller type with a simple constructor function
+     * @param name The name of the controller type
+     */
+    public static void registerControllerType(String name){
         registerControllerType(
             name,
             ControllerType.createSimpleControllerType(name)
         );
     }
 
+    /**
+     * Register a controller type
+     * @param name The name of the controller type
+     * @param type The controller type
+     */
     public static void registerControllerType(String name, ControllerType type){
         controllerTypes.put(name, type);
     }
 
+    /**
+     * Get a registered controller type
+     * @param name The name of the controller type
+     * @return The controller type
+     */
     public static ControllerType getControllerType(String name){
         ControllerType type = controllerTypes.get(name);
         if(type == null){
@@ -156,16 +170,35 @@ public class Controllers {
     // Will add more fields later
     public List<Controller> controllers = List.of();
     
-    public Controllers(){}
+    /**
+     * Creates an empty Controllers object
+     */
+    public Controllers(){
+        this.controllers = new ArrayList<>();
+    }
 
+    /**
+     * Creates a Controllers object with the given controllers
+     * @param controllers
+     */
     public Controllers(List<Controller> controllers){
         this.controllers = controllers;
     }
 
+    /**
+     * Get controller by index
+     * @param index The index of the controller
+     * @return The controller at the given index
+     */
     public Controller getControllerByIndex(int index){
         return controllers.get(index);
     }
 
+    /**
+     * Get controller by port
+     * @param port The port of the controller
+     * @return The controller at the given port
+     */
     public Controller getControllerByPort(int port){
         for(Controller controller : controllers){
             if(controller.port == port){
@@ -175,6 +208,13 @@ public class Controllers {
         throw new RuntimeException("No controller found on port: " + port);
     }
 
+    /**
+     * Get controller interface by command
+     * @param func Function to check if controller has the interface
+     * @param getter Function to get the interface from the controller
+     * @param command The command to get the interface for
+     * @return The controller interface
+     */
     private Controller.ControllerInterface getFromAllControllers(BiFunction<Controller, String, Boolean> func, BiFunction<Controller, String, Controller.ControllerInterface> getter, String command) {
         for (Controller controller : controllers) {
             if (func.apply(controller, command)) {
@@ -184,6 +224,11 @@ public class Controllers {
         throw new RuntimeException("No controller interface found for command: " + command);
     }
 
+    /**
+     * Get controller interface by command
+     * @param command The command to get the interface for
+     * @return The controller interface
+     */
     public Controller.ControllerInterface getInterface(String command) {
         return getFromAllControllers(
             (controller, cmd) -> controller.hasControllerInterface(cmd),
@@ -192,44 +237,41 @@ public class Controllers {
         );
     }
 
+    /**
+     * Get button by command
+     * @param command The command to get the button for
+     * @return The button
+     */
     public Controller.Button getButton(String command) {
         return (Controller.Button) getFromAllControllers(
-            (controller, cmd) -> {
-                if (!controller.hasControllerInterface(cmd)) {
-                    return false;
-                }
-                Controller.ControllerInterface ci = controller.getControllerInterface(cmd);
-                return ci instanceof Controller.Button;
-            },
-            (controller, cmd) -> controller.getControllerInterface(cmd),
+            (controller, cmd) -> controller.hasButton(cmd),
+            (controller, cmd) -> controller.getButton(cmd),
             command
         );
     }
 
+    /**
+     * Get axis by command
+     * @param command The command to get the axis for
+     * @return The axis
+     */
     public Controller.Axis getAxis(String command) {
         return (Controller.Axis) getFromAllControllers(
-            (controller, cmd) -> {
-                if (!controller.hasControllerInterface(cmd)) {
-                    return false;
-                }
-                Controller.ControllerInterface ci = controller.getControllerInterface(cmd);
-                return ci instanceof Controller.Axis;
-            },
-            (controller, cmd) -> controller.getControllerInterface(cmd),
+            (controller, cmd) -> controller.hasAxis(cmd),
+            (controller, cmd) -> controller.getAxis(cmd),
             command
         );
     }
 
+    /**
+     * Get POV by command
+     * @param command The command to get the POV for
+     * @return The POV
+     */
     public Controller.POV getPOV(String command) {
         return (Controller.POV) getFromAllControllers(
-            (controller, cmd) -> {
-                if (!controller.hasControllerInterface(cmd)) {
-                    return false;
-                }
-                Controller.ControllerInterface ci = controller.getControllerInterface(cmd);
-                return ci instanceof Controller.POV;
-            },
-            (controller, cmd) -> controller.getControllerInterface(cmd),
+            (controller, cmd) -> controller.hasPOV(cmd),
+            (controller, cmd) -> controller.getPOV(cmd),
             command
         );
     }

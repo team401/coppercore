@@ -4,7 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import coppercore.parameter_tools.json.helpers.JSONObject;
 
-public class JsonController extends JSONObject<Controller> {
+/**
+ * JSON representation of a Controller
+ * 
+ * This class is used for JSON serialization and deserialization of Controller objects
+ * The toJava method converts the JSON representation back to a Controller object
+ * This class should not be instantiated directly
+ */
+public class ControllerJsonRepresentation extends JSONObject<Controller> {
     
     int port;
     String type;
@@ -13,12 +20,20 @@ public class JsonController extends JSONObject<Controller> {
     HashMap<String, Integer> axisShorthands = new HashMap<>();
     HashMap<String, Integer> povShorthands = new HashMap<>();
     
-    public JsonController(Controller controller) {
+    /**
+     * Constructor for JSON deserialization
+     * @param controller
+     */
+    public ControllerJsonRepresentation(Controller controller) {
         super(controller);
         throw new RuntimeException("This method should not be called");
     }
 
+    @SuppressWarnings("unchecked")
     @Override
+    /**
+     * Convert json representation to Java object
+     */
     public Controller toJava() {
         Controller controller = new Controller();
         controller.port = this.port;
