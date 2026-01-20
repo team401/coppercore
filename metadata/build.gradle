@@ -96,3 +96,9 @@ publishing {
 		}
 	}
 }
+
+mavenPublishing {
+	pom {
+		description = 'FRC 401 metadata library'
+	}
+}
