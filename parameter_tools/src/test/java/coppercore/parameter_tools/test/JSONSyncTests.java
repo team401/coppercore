@@ -260,7 +260,7 @@ public class JSONSyncTests {
         }
     }
 
-    public static class AfterJsonLoadsCrashClass {
+    public static class MultipleAfterJsonLoadMethodsAreInvalid {
         public Boolean methodRun = false;
 
         @AfterJsonLoad
@@ -289,7 +289,8 @@ public class JSONSyncTests {
         Assertions.assertThrows(
                 RuntimeException.class,
                 () -> {
-                    handler.getObject(new AfterJsonLoadsCrashClass(), "AfterJsonLoads.json");
+                    handler.getObject(
+                            new MultipleAfterJsonLoadMethodsAreInvalid(), "AfterJsonLoads.json");
                 });
     }
 }
