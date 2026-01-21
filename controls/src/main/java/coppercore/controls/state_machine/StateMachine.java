@@ -49,7 +49,7 @@ public class StateMachine<World> {
      * @param state The state to be registered
      * @return The registered state
      */
-    public State<World> registerState(State<World> state) {
+    public <T extends State<World>> T registerState(T state) {
         states.put(state.getName(), state);
         state.setRequestedStateSupplier(() -> requestedState);
         return state;
