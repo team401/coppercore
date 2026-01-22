@@ -169,6 +169,13 @@ public abstract class State<World> {
      * @param world The current world state
      */
     protected final void _periodic(StateMachine<World> stateMachine, World world) {
+        if (finished) {
+            System.err.println(
+                    "State machine bug: finished state: "
+                            + this
+                            + " did not transition out of a finished state, skipping its periodic");
+            return;
+        }
         periodic(stateMachine, world);
     }
 
