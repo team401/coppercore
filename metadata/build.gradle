@@ -1,0 +1,104 @@
+// courtesy GPT 5.2
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
+import org.gradle.plugins.signing.Sign
+
+plugins {
+	id 'java-library'
+	id 'maven-publish'
+}
+
+def generatedDir = layout.buildDirectory.dir("generated/sources/metadata/java/main")
+
+def coppercore = project.group.toString().tokenize('.').last()
+def pkg = "${coppercore}.${project.name}"
+
+tasks.register("generateCopperCoreMetadata") {
+	outputs.dir(generatedDir)
+
+	doLast {
+		def v = project.version.toString()
+		def base = v.split('-', 2)[0]   // safe for SNAPSHOT later
+		def parts = base.tokenize('.')
+		if (parts.size() != 3) {
+			throw new GradleException("Expected version format YYYY.M.m, got: ${v}")
+		}
+
+		def year  = parts[0]
+		def major = parts[1]
+		def minor = parts[2]
+
+		def buildTime = OffsetDateTime.now().toString()
+		def userName = System.getProperty("user.name") ?: "unknown"
+
+		def outDir = generatedDir.get().asFile
+		def pkgDir = new File(outDir, pkg.replace('.', '/'))
+		pkgDir.mkdirs()
+
+		new File(pkgDir, "CopperCoreMetadata.java").text = """\
+package ${pkg};
+
+import java.io.PrintStream;
+
+public final class CopperCoreMetadata {
+private CopperCoreMetadata() {}
+
+public static final String VERSION = "${v}";
+public static final int YEAR  = ${year};
+public static final int MAJOR = ${major};
+public static final int MINOR = ${minor};
+
+public static final String BUILD_TIME = "${buildTime}";
+public static final String BUILD_USER = "${userName}";
+
+public static void printInfo(PrintStream out) {
+	out.println("CopperCore build information:");
+	out.println("  Version     : " + VERSION);
+	out.println("  Year        : " + YEAR);
+	out.println("  Major       : " + MAJOR);
+	out.println("  Minor       : " + MINOR);
+	out.println("  Build time  : " + BUILD_TIME);
+	out.println("  Build user  : " + BUILD_USER);
+}
+
+public static void printInfo() {
+	printInfo(System.out);
+}
+}
+""".stripIndent()
+	}
+}
+
+sourceSets {
+	main {
+		java { srcDir generatedDir }
+	}
+}
+
+// these tasks depend on generateCopperCoreMetadata
+["compileJava", "spotlessJava", "sourcesJar"].each { t ->
+	tasks.matching { it.name == t }.configureEach {
+		dependsOn("generateCopperCoreMetadata")
+	}
+}
+
+plugins.withId("maven-publish") {
+	// Make every publish-to-repo task depend on signing tasks in this project
+	tasks.withType(PublishToMavenRepository).configureEach {
+		dependsOn(tasks.withType(Sign))
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			artifactId = project.name   // "metadata"
+		}
+	}
+}
+
+mavenPublishing {
+	pom {
+		description = 'FRC 401 metadata library'
+	}
+}

@@ -26,10 +26,10 @@ import com.ctre.phoenix6.unmanaged.Unmanaged;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.ElevatorMechanismConfig;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig.GravityFeedforwardType;
-import coppercore.wpilib_interface.subsystems.encoders.EncoderIOCANCoderPositionSim;
+import coppercore.wpilib_interface.subsystems.encoders.EncoderIOCANCoderSim;
 import coppercore.wpilib_interface.subsystems.encoders.EncoderInputs;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
-import coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXPositionSim;
+import coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXSim;
 import coppercore.wpilib_interface.subsystems.sim.DummySimAdapter;
 import coppercore.wpilib_interface.subsystems.sim.ElevatorSimAdapter;
 import edu.wpi.first.hal.HAL;
@@ -182,14 +182,12 @@ public class MotorIOCTRETests {
         var simAdapter = new DummySimAdapter(new ElevatorSimAdapter(mechanismConfig, elevatorSim));
         // previous commits when this was an actual physics sim.
 
-        var leadMotor =
-                MotorIOTalonFXPositionSim.newLeader(mechanismConfig, talonFXConfigs, simAdapter);
+        var leadMotor = MotorIOTalonFXSim.newLeader(mechanismConfig, talonFXConfigs, simAdapter);
         leadMotor.enableUnitTestMode();
         var followerMotor =
-                MotorIOTalonFXPositionSim.newFollower(
-                        mechanismConfig, 0, talonFXConfigs, simAdapter);
+                MotorIOTalonFXSim.newFollower(mechanismConfig, 0, talonFXConfigs, simAdapter);
         followerMotor.enableUnitTestMode();
-        var cancoder = new EncoderIOCANCoderPositionSim(encoderId, cancoderConfig, simAdapter);
+        var cancoder = new EncoderIOCANCoderSim(encoderId, cancoderConfig, simAdapter);
 
         var leadMotorInputs = new MotorInputs();
         var followerMotorInputs = new MotorInputs();

@@ -6,18 +6,21 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 
 /**
- * The PositionSimAdapter interface provides the MotorIO{TalonFX/SparkMax}PositionSim classes a
- * common interface to interact with ElevatorSim and SingleJointedArmSim to avoid having to
- * duplicate the IO to interface with elevators and arms.
+ * The CoppercoreSimAdapter interface provides the MotorIO{TalonFX/SparkMax}Sim classes with a
+ * common interface to interact with DCMotorSim, ElevatorSim, and SingleJointedArmSim to avoid
+ * having to duplicate the IO to interface with different simulated mechanisms.
  *
- * <p>Adapters implementing PositionSimAdapter should take in whatever parameters are required to
- * convert all values to be in terms of motor position and velocity.
+ * <p>This is necessary because the physics simulation classes that WPILib provides, while all
+ * extending LinearSystemSim, don't provide any common interface for interacting with the simulation
+ * that is consistent across the different types of mechanism. CoppercoreSimAdapter implementations
+ * serve to "translate" between the individual interface of a WPILib physics simulation and the
+ * universal interface expected by a coppercore sim IO.
  *
- * @see coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXPositionSim
+ * @see coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXSim
  * @see edu.wpi.first.wpilibj.simulation.SingleJointedArmSim
  * @see edu.wpi.first.wpilibj.simulation.ElevatorSim
  */
-public interface PositionSimAdapter {
+public interface CoppercoreSimAdapter {
     /**
      * Get the current position of the motor, calculated by converting the physics sim's position to
      * a motor position.
