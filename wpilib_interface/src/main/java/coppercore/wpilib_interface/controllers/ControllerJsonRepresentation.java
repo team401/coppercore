@@ -35,7 +35,7 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
     public Controller toJava() {
         Controller controller = new Controller();
         controller.port = this.port;
-        controller.controllerType = Controllers.getControllerType(this.type);
+        controller.controllerType = ControllerType.getControllerType(this.type);
         controller.buttonShorthands =
                 new HashMap<String, Integer>(controller.controllerType.ButtonShorthands);
         controller.axisShorthands =
