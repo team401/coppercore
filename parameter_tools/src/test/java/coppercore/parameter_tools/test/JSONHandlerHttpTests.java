@@ -96,4 +96,33 @@ public class JSONHandlerHttpTests {
         assertTrue(
                 response2.contains("\"second\""), "Response2 should contain second: " + response2);
     }
+
+    @Test
+    void addRoute_isIdempotent_canBeCalledMultipleTimes() throws IOException {
+        JSONHandler handler = new JSONHandler();
+
+        TestData data1 = new TestData();
+        data1.name = "original";
+        data1.value = 100;
+
+        TestData data2 = new TestData();
+        data2.name = "updated";
+        data2.value = 200;
+
+        // Add route twice with same path - should not throw
+        handler.addRoute("/idempotent", data1);
+        handler.addRoute("/idempotent", data2);
+
+        // Verify route is still accessible and serves the latest data
+        URL url = new URL("http://localhost:8088/default/idempotent");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        assertEquals(200, conn.getResponseCode());
+        String response = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertTrue(
+                response.contains("\"updated\""),
+                "Response should contain updated value: " + response);
+        assertTrue(response.contains("200"), "Response should contain 200 value: " + response);
+    }
 }

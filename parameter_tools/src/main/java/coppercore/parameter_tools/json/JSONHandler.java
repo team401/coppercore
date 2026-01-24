@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 /** Handler to create JSONSync objects with given config and path provider */
 public final class JSONHandler {
@@ -22,6 +24,7 @@ public final class JSONHandler {
     private static final int PORT = 8088;
     private static HttpServer server;
     private static final Object serverLock = new Object();
+    private static final Set<String> registeredPaths = new HashSet<>();
 
     private final JSONSyncConfig config;
     private final PathProvider path_provider;
@@ -154,6 +157,13 @@ public final class JSONHandler {
         ensureServerStarted();
         String environment = getEnvironmentName();
         String fullPath = "/" + environment + path;
+
+        synchronized (serverLock) {
+            if (registeredPaths.contains(fullPath)) {
+                server.removeContext(fullPath);
+            }
+            registeredPaths.add(fullPath);
+        }
 
         server.createContext(
                 fullPath,
