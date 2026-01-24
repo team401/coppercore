@@ -30,7 +30,7 @@ public class Controller {
     HashMap<String, Integer> buttonShorthands = null;
     HashMap<String, Integer> axisShorthands = null;
     HashMap<String, Integer> povShorthands = null;
-    HashMap<String, ControllerInterface> controllerInterfaces = new HashMap<>();
+    HashMap<String, ControlElement> controllerElements = new HashMap<>();
     HashMap<String, Button> buttons = new HashMap<>();
     HashMap<String, Axis> axes = new HashMap<>();
     HashMap<String, POV> povs = new HashMap<>();
@@ -57,7 +57,7 @@ public class Controller {
      * @return True if the controller has the interface, false otherwise
      */
     public boolean hasControllerInterface(String command) {
-        return controllerInterfaces.containsKey(command);
+        return controllerElements.containsKey(command);
     }
 
     /**
@@ -65,8 +65,8 @@ public class Controller {
      * @param command The command to get the interface for
      * @return The controller interface
      */
-    public ControllerInterface getControllerInterface(String command) {
-        return controllerInterfaces.get(command);
+    public ControlElement getControllerInterface(String command) {
+        return controllerElements.get(command);
     }
 
     /**
@@ -148,11 +148,12 @@ public class Controller {
     )
     
     /**
-     * Raw controller interface class
+     * Raw control element
      * 
-     * These represents the raw interfaces directly tied to the controller hardware
+     * These represents the raw control elements directly tied to the controller hardware
+     * Such as a button or an axis
      */
-    public static abstract class RawControllerInterface {
+    public static abstract class HumanControlElement {
         public String controllerType;
 
         @JSONName("id")
@@ -216,7 +217,7 @@ public class Controller {
      * It also includes no debouncing or toggling
      * 
      */
-    public static class RawButton extends RawControllerInterface {
+    public static class RawButton extends HumanControlElement {
 
         public RawButton() {
             if (minValue == null) minValue = 0.0;
@@ -239,7 +240,7 @@ public class Controller {
      * It includes deadband handling
      * 
      */
-    public static class RawAxis extends RawControllerInterface {
+    public static class RawAxis extends HumanControlElement {
         public Double deadband = 0.0;
         public Boolean remapDeadbanded = false;
 
@@ -275,7 +276,7 @@ public class Controller {
      * Values range from 0 to 360 degrees
      * It returns -1 when not pressed
      */
-    public static class RawPOV extends RawControllerInterface {
+    public static class RawPOV extends HumanControlElement {
 
         public RawPOV() {
             if (minValue == null) minValue = -1.0;
@@ -298,11 +299,14 @@ public class Controller {
     /**
      * Controller interface class
      * 
-     * These represents the interfaces that the code will interact with
+     * These represents the ControlElements that the code will interact with
+     * They wrap around the raw interfaces to provide additional functionality
+     * Such as thresholds, hysteresis, and toggling for buttons
+     * Also includes range adjustment and inversion for all interfaces
      */
-    public static abstract class ControllerInterface {
+    public static abstract class ControlElement {
         @JSONName("controllerInterface")
-        RawControllerInterface rawInterface;
+        HumanControlElement rawInterface;
 
         public String command;
         public String commandType;
@@ -359,7 +363,7 @@ public class Controller {
      * 
      * This includes thresholds, hysteresis, and toggling
      */
-    public static class Button extends ControllerInterface {
+    public static class Button extends ControlElement {
         public Double threshold =
                 0.0; // This is the value above which the button is considered pressed
         public Double thresholdRange = null; // This is the range above the threshold for hysteresis
@@ -442,7 +446,7 @@ public class Controller {
      * 
      * This represents an axis for code interaction
      */
-    public static class Axis extends ControllerInterface {
+    public static class Axis extends ControlElement {
         public Axis() {
             if (minValue == null) minValue = -1.0;
             if (maxValue == null) maxValue = 1.0;
@@ -459,7 +463,7 @@ public class Controller {
      * 
      * This represents a POV for code interaction
      */
-    public static class POV extends ControllerInterface {
+    public static class POV extends ControlElement {
         public POV() {
             if (minValue == null) minValue = -1.0;
             if (maxValue == null) maxValue = 360.0;
@@ -475,8 +479,8 @@ public class Controller {
      * Finish loading the controller by initializing all controller interfaces
      */
     protected void finishControllerLoading() {
-        for (ControllerInterface controllerInterface : controllerInterfaces.values()) {
-            controllerInterface.initializeInterface(this);
+        for (ControlElement controlElement : controllerElements.values()) {
+            controlElement.initializeInterface(this);
         }
     }
 }

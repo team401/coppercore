@@ -205,9 +205,9 @@ public class Controllers {
      * @param command The command to get the interface for
      * @return The controller interface
      */
-    private Controller.ControllerInterface getFromAllControllers(
+    private Controller.ControlElement getFromAllControllers(
             BiFunction<Controller, String, Boolean> func,
-            BiFunction<Controller, String, Controller.ControllerInterface> getter,
+            BiFunction<Controller, String, Controller.ControlElement> getter,
             String command) {
         for (Controller controller : controllers) {
             if (func.apply(controller, command)) {
@@ -222,7 +222,7 @@ public class Controllers {
      * @param command The command to get the interface for
      * @return The controller interface
      */
-    public Controller.ControllerInterface getInterface(String command) {
+    public Controller.ControlElement getInterface(String command) {
         return getFromAllControllers(
                 (controller, cmd) -> controller.hasControllerInterface(cmd),
                 (controller, cmd) -> controller.getControllerInterface(cmd),

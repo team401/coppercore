@@ -15,7 +15,7 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
     
     int port;
     String type;
-    List<Controller.ControllerInterface> controllerInterfaces;
+    List<Controller.ControlElement> controllerElements;
     HashMap<String, Integer> buttonShorthands = new HashMap<>();
     HashMap<String, Integer> axisShorthands = new HashMap<>();
     HashMap<String, Integer> povShorthands = new HashMap<>();
@@ -29,7 +29,6 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
         throw new RuntimeException("This method should not be called");
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     /**
      * Convert json representation to Java object
@@ -49,26 +48,26 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
         controller.axisShorthands.putAll(this.axisShorthands);
         controller.povShorthands.putAll(this.povShorthands);
 
-        for (Controller.ControllerInterface controllerInterface : this.controllerInterfaces) {
-            switch (controllerInterface.commandType) {
+        for (Controller.ControlElement controlElement : this.controllerElements) {
+            switch (controlElement.commandType) {
                 case "button":
                     controller.buttons.put(
-                            controllerInterface.command, (Controller.Button) controllerInterface);
+                            controlElement.command, (Controller.Button) controlElement);
                     break;
                 case "axis":
                     controller.axes.put(
-                            controllerInterface.command, (Controller.Axis) controllerInterface);
+                            controlElement.command, (Controller.Axis) controlElement);
                     break;
                 case "pov":
                     controller.povs.put(
-                            controllerInterface.command, (Controller.POV) controllerInterface);
+                            controlElement.command, (Controller.POV) controlElement);
                     break;
                 default:
                     throw new RuntimeException(
                             "Unknown controller interface type: "
-                                    + controllerInterface.commandType);
+                                    + controlElement.commandType);
             }
-            controller.controllerInterfaces.put(controllerInterface.command, controllerInterface);
+            controller.controllerElements.put(controlElement.command, controlElement);
         }
 
         controller.finishControllerLoading();
