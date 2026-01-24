@@ -8,10 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-
-// TODO: Add missing javadocs
 
 /**
  * An abstract class representing a state in a state machine.
@@ -170,6 +169,13 @@ public abstract class State<World> {
      * @param world The current world state
      */
     protected final void _periodic(StateMachine<World> stateMachine, World world) {
+        if (finished) {
+            System.err.println(
+                    "State machine bug: finished state: "
+                            + this
+                            + " did not transition out of a finished state, skipping its periodic");
+            return;
+        }
         periodic(stateMachine, world);
     }
 
@@ -277,6 +283,17 @@ public abstract class State<World> {
         }
 
         /**
+         * Combines the current condition with another condition using logical AND.
+         *
+         * @param nextCondition The next condition to combine
+         * @param label A label for the next condition
+         * @return The updated TransitionConditionBuilder
+         */
+        public TransitionConditionBuilder andWhen(BooleanSupplier nextCondition, String label) {
+            return andWhen(world -> nextCondition.getAsBoolean(), label);
+        }
+
+        /**
          * Defines the target state for the transition.
          *
          * @param toState The state to transition to
@@ -296,6 +313,17 @@ public abstract class State<World> {
      */
     public TransitionConditionBuilder when(Predicate<World> condition, String description) {
         return new TransitionConditionBuilder(condition, description);
+    }
+
+    /**
+     * Creates a transition condition builder with the given condition.
+     *
+     * @param condition The condition for the transition
+     * @param description A description for the transition condition
+     * @return The transition condition builder
+     */
+    public TransitionConditionBuilder when(BooleanSupplier condition, String description) {
+        return when(world -> condition.getAsBoolean(), description);
     }
 
     /**
