@@ -6,30 +6,28 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
+import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
-import coppercore.wpilib_interface.subsystems.sim.PositionSimAdapter;
+import coppercore.wpilib_interface.subsystems.sim.CoppercoreSimAdapter;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
- * A MotorIOTalonFXPositionSim uses Phoenix-6 simulation features (TalonFX sim state) to read and
- * update an ElevatorSim or SingleJointedArmSim periodically and propagate its values into the
+ * A MotorIOTalonFXSim uses Phoenix-6 simulation features (TalonFX sim state) to read and update a
+ * DCMotorSim, ElevatorSim, or SingleJointedArmSim periodically and propagate its values into the
  * SimState of the motor.
  *
- * <p>The same PositionSimAdapter should (and can safely) be passed to all
- * MotorIOTalonFXPositionSims and CANCoderIOSims for each mechanism because only the lead motor
- * MotorIOTalonFXPositionSim will actually update the input the sim while the others will only read
- * values.
- *
- * <p>The distinction betewen MotorIOTalonFXPositionSim and MotorIOTalonFXFlywheelSim is that
- * FlywheelSim does not provide an easy way to access position measurements.
+ * <p>The same CoppercoreSimAdapter should (and can safely) be passed to all MotorIOTalonFXSims and
+ * CANCoderIOSims for each mechanism because only the lead motor MotorIOTalonFXSim will actually
+ * update the input the sim while the others will only read values.
  *
  * <p>This class extends MotorIOTalonFX to ensure that behavior is as close to identical in real
  * life and simulation as possible.
  */
-public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
-    private final PositionSimAdapter physicsSimAdapter;
+public class MotorIOTalonFXSim extends MotorIOTalonFX {
+    private final CoppercoreSimAdapter physicsSimAdapter;
 
     private final TalonFXSimState talonSimState;
 
@@ -54,8 +52,8 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
      * Create a new Simulated TalonFX IO, initializing a TalonFX and all required StatusSignals.
      *
      * <p>This constructor is for a lead motor. Use {@link
-     * MotorIOTalonFXPositionSim#MotorIOTalonFXPositionSim(MechanismConfig, int,
-     * TalonFXConfiguration, PositionSimAdapter)} to create a follower.
+     * MotorIOTalonFXSim#MotorIOTalonFXSim(MechanismConfig, int, TalonFXConfiguration,
+     * CoppercoreSimAdapter)} to create a follower.
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
@@ -63,10 +61,10 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
      *     simulation.
      */
-    public MotorIOTalonFXPositionSim(
+    public MotorIOTalonFXSim(
             MechanismConfig config,
             TalonFXConfiguration talonFXConfig,
-            PositionSimAdapter physicsSimAdapter) {
+            CoppercoreSimAdapter physicsSimAdapter) {
         super(config, talonFXConfig);
 
         this.isFollower = false;
@@ -90,22 +88,22 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
      *     modified by this IO, so there's no need to copy it.
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
      *     simulation.
-     * @return A new MotorIOTalonFXPositionSim created with the specified parameters, configured as
-     *     a lead motor.
+     * @return A new MotorIOTalonFXSim created with the specified parameters, configured as a lead
+     *     motor.
      */
-    public static MotorIOTalonFXPositionSim newLeader(
+    public static MotorIOTalonFXSim newLeader(
             MechanismConfig config,
             TalonFXConfiguration talonFXConfig,
-            PositionSimAdapter physicsSimAdapter) {
-        return new MotorIOTalonFXPositionSim(config, talonFXConfig, physicsSimAdapter);
+            CoppercoreSimAdapter physicsSimAdapter) {
+        return new MotorIOTalonFXSim(config, talonFXConfig, physicsSimAdapter);
     }
 
     /**
      * Create a new Simulated TalonFX IO, initializing a TalonFX and all required StatusSignals.
      *
      * <p>This constructor is for a follower. Use {@link
-     * MotorIOTalonFXPositionSim#MotorIOTalonFXPositionSim(MechanismConfig, TalonFXConfiguration,
-     * PositionSimAdapter)} to create a lead motor.
+     * MotorIOTalonFXSim#MotorIOTalonFXSim(MechanismConfig, TalonFXConfiguration,
+     * CoppercoreSimAdapter)} to create a lead motor.
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param followerIndex An int containing the index of the follower motor (what position in
@@ -116,11 +114,11 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
      *     simulation.
      */
-    public MotorIOTalonFXPositionSim(
+    public MotorIOTalonFXSim(
             MechanismConfig config,
             int followerIndex,
             TalonFXConfiguration talonFXConfig,
-            PositionSimAdapter physicsSimAdapter) {
+            CoppercoreSimAdapter physicsSimAdapter) {
         super(config, followerIndex, talonFXConfig);
 
         this.isFollower = true;
@@ -146,16 +144,31 @@ public class MotorIOTalonFXPositionSim extends MotorIOTalonFX {
      *     modified by this IO, so there's no need to copy it.
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
      *     simulation.
-     * @return A new MotorIOTalonFXPositionSim created with the specified parameters, configured as
-     *     a lead motor.
+     * @return A new MotorIOTalonFXSim created with the specified parameters, configured as a lead
+     *     motor.
      */
-    public static MotorIOTalonFXPositionSim newFollower(
+    public static MotorIOTalonFXSim newFollower(
             MechanismConfig config,
             int followerIndex,
             TalonFXConfiguration talonFXConfig,
-            PositionSimAdapter physicsSimAdapter) {
-        return new MotorIOTalonFXPositionSim(
-                config, followerIndex, talonFXConfig, physicsSimAdapter);
+            CoppercoreSimAdapter physicsSimAdapter) {
+        return new MotorIOTalonFXSim(config, followerIndex, talonFXConfig, physicsSimAdapter);
+    }
+
+    /**
+     * Updates this IO's TalonFX sim state's motor type (either KrakenX60 or KrakenX44), returning
+     * this IO for easy chaining.
+     *
+     * <p>By default, KrakenX60 is assumed, and so this method only needs to be called for KrakenX44
+     * simulations.
+     *
+     * @param motorType The MotorType, KrakenX60 or KrakenX44, to send to the TalonFXSimState.
+     * @return This MotorIOTalonFXSim, to allow for easy method chaining or a builder-style
+     *     declaration.
+     */
+    public MotorIOTalonFXSim withMotorType(MotorType motorType) {
+        CTREUtil.tryUntilOk(() -> talonSimState.setMotorType(motorType), id, (code) -> {});
+        return this;
     }
 
     @Override

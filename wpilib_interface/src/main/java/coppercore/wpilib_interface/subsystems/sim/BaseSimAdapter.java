@@ -5,12 +5,12 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 /**
- * The BasePositionSimAdapter class serves as a base class for classes that implement
- * PositionSimAdapter and defines interfaces for protected abstract methods for DummySimAdapter to
- * use to directly modify the state of PositionSimAdapters without publicly exposing these methods
- * to other classes outside of the project.
+ * The BaseSimAdapter class serves as a base class for classes that implement CoppercoreSimAdapter
+ * and defines interfaces for protected abstract methods for DummySimAdapter to use to directly
+ * modify the state of CoppercoreSimAdapters without publicly exposing these methods to other
+ * classes outside of the project.
  */
-public abstract class BasePositionSimAdapter implements PositionSimAdapter {
+public abstract class BaseSimAdapter implements CoppercoreSimAdapter {
     /**
      * The MechanismConfig used for this mechanism. This is required to calculate gear ratios
      * properly for simulation.
@@ -18,12 +18,12 @@ public abstract class BasePositionSimAdapter implements PositionSimAdapter {
     protected final MechanismConfig config;
 
     /**
-     * Constructs a new BasePositionSim, initializing this class's stored config.
+     * Constructs a new BaseSimAdapter, initializing this class's stored config.
      *
      * @param config The MechanismConfig used for this mechanism. This is required to calculate gear
      *     ratios properly for simulation.
      */
-    protected BasePositionSimAdapter(MechanismConfig config) {
+    protected BaseSimAdapter(MechanismConfig config) {
         this.config = config;
     }
 
