@@ -24,7 +24,6 @@ public class JSONSyncTests {
      */
     @BeforeEach
     public void TestPrep() {
-        System.out.println("Test Prep");
         ExampleJsonSyncClass.synced =
                 new JSONSync<>(
                         new ExampleJsonSyncClass(),
@@ -109,22 +108,17 @@ public class JSONSyncTests {
     /** Written with help from CoPilot */
     @Test
     public void JsonSyncPrimitiveCrashTest() {
-        Exception e =
-                Assertions.assertThrows(
-                        RuntimeException.class,
-                        () -> {
-                            JSONSync<PrimitiveClass> sync =
-                                    new JSONSync<>(
-                                            new PrimitiveClass(0),
-                                            "PrimitiveClass.json",
-                                            new UnitTestingPathProvider()
-                                                    .getDirectory("JSONSyncTests"),
-                                            new JSONSyncConfigBuilder()
-                                                    .setPrettyPrinting(true)
-                                                    .build());
-                            sync.saveData();
-                        });
-        System.out.println(e);
+        Assertions.assertThrows(
+                RuntimeException.class,
+                () -> {
+                    JSONSync<PrimitiveClass> sync =
+                            new JSONSync<>(
+                                    new PrimitiveClass(0),
+                                    "PrimitiveClass.json",
+                                    new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
+                                    new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
+                    sync.saveData();
+                });
     }
 
     /** Class to test the primitive check crash feature. */
