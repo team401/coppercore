@@ -8,14 +8,15 @@ import java.util.List;
  * JSON representation of a Controller
  *
  * <p>This class is used for JSON serialization and deserialization of Controller objects The toJava
- * method converts the JSON representation back to a Controller object This class should not be
- * instantiated directly
+ * method converts the JSON representation back to a Controller object.
+ *
+ * <p>This class should not be instantiated directly
  */
 public class ControllerJsonRepresentation extends JSONObject<Controller> {
 
     int port;
     String type;
-    List<Controller.ControlElement> controllerElements;
+    List<Controller.ControlElement> controlElements;
     HashMap<String, Integer> buttonShorthands = new HashMap<>();
     HashMap<String, Integer> axisShorthands = new HashMap<>();
     HashMap<String, Integer> povShorthands = new HashMap<>();
@@ -25,9 +26,9 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
      *
      * @param controller
      */
-    public ControllerJsonRepresentation(Controller controller) {
+    private ControllerJsonRepresentation(Controller controller) {
         super(controller);
-        throw new RuntimeException("This method should not be called");
+        throw new RuntimeException("This method should not be called directly");
     }
 
     @Override
@@ -47,7 +48,7 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
         controller.axisShorthands.putAll(this.axisShorthands);
         controller.povShorthands.putAll(this.povShorthands);
 
-        for (Controller.ControlElement controlElement : this.controllerElements) {
+        for (Controller.ControlElement controlElement : this.controlElements) {
             switch (controlElement.commandType) {
                 case "button":
                     controller.buttons.put(
@@ -61,12 +62,12 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
                     break;
                 default:
                     throw new RuntimeException(
-                            "Unknown controller interface type: " + controlElement.commandType);
+                            "Unknown control element type: " + controlElement.commandType);
             }
-            controller.controllerElements.put(controlElement.command, controlElement);
+            controller.addControlElementForCommand(controlElement);
         }
 
-        controller.finishControllerLoading();
+        controller.initializeControlElements();
 
         return controller;
     }

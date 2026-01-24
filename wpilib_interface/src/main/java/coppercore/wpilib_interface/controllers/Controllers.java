@@ -6,16 +6,16 @@ import java.util.function.BiFunction;
 
 /**
  * This class manages a collection of controllers. It includes methods to get controllers and their
- * interfaces by command.
+ * control elements by command.
  */
 public class Controllers {
 
     // Will add more fields later
-    public List<Controller> controllers = List.of();
+    private List<Controller> controllers = List.of();
 
     /** Creates an empty Controllers object */
     public Controllers() {
-        this.controllers = new ArrayList<>();
+        this(new ArrayList<>());
     }
 
     /**
@@ -53,47 +53,47 @@ public class Controllers {
     }
 
     /**
-     * Get controller interface by command
+     * Find and return the first matching control element for a given command.
      *
-     * @param func Function to check if controller has the interface
-     * @param getter Function to get the interface from the controller
+     * @param pred Predicate to apply to (Controller, Command)
+     * @param getter Function to get the element from the controller
      * @param command The command to get the interface for
-     * @return The controller interface
+     * @return The control element
      */
-    private Controller.ControlElement getFromAllControllers(
-            BiFunction<Controller, String, Boolean> func,
+    private Controller.ControlElement findFirstMatchingControlElement(
+            BiFunction<Controller, String, Boolean> matchPred,
             BiFunction<Controller, String, Controller.ControlElement> getter,
             String command) {
         for (Controller controller : controllers) {
-            if (func.apply(controller, command)) {
+            if (matchPred.apply(controller, command)) {
                 return getter.apply(controller, command);
             }
         }
-        throw new RuntimeException("No controller interface found for command: " + command);
+        throw new RuntimeException("No control element found for command: " + command);
     }
 
     /**
-     * Get controller interface by command
+     * Get controller element by command.
      *
-     * @param command The command to get the interface for
-     * @return The controller interface
+     * @param command The command to get the element for
+     * @return The first matching controller element.
      */
     public Controller.ControlElement getInterface(String command) {
-        return getFromAllControllers(
-                (controller, cmd) -> controller.hasControllerInterface(cmd),
-                (controller, cmd) -> controller.getControllerInterface(cmd),
+        return findFirstMatchingControlElement(
+                (controller, cmd) -> controller.hasControlElement(cmd),
+                (controller, cmd) -> controller.getControlElement(cmd),
                 command);
     }
 
     /**
-     * Get button by command
+     * Get button by command.
      *
      * @param command The command to get the button for
-     * @return The button
+     * @return The first matching button
      */
     public Controller.Button getButton(String command) {
         return (Controller.Button)
-                getFromAllControllers(
+                findFirstMatchingControlElement(
                         (controller, cmd) -> controller.hasButton(cmd),
                         (controller, cmd) -> controller.getButton(cmd),
                         command);
@@ -103,11 +103,11 @@ public class Controllers {
      * Get axis by command
      *
      * @param command The command to get the axis for
-     * @return The axis
+     * @return The first matching axis.
      */
     public Controller.Axis getAxis(String command) {
         return (Controller.Axis)
-                getFromAllControllers(
+                findFirstMatchingControlElement(
                         (controller, cmd) -> controller.hasAxis(cmd),
                         (controller, cmd) -> controller.getAxis(cmd),
                         command);
@@ -117,11 +117,11 @@ public class Controllers {
      * Get POV by command
      *
      * @param command The command to get the POV for
-     * @return The POV
+     * @return The first matching POV.
      */
     public Controller.POV getPOV(String command) {
         return (Controller.POV)
-                getFromAllControllers(
+                findFirstMatchingControlElement(
                         (controller, cmd) -> controller.hasPOV(cmd),
                         (controller, cmd) -> controller.getPOV(cmd),
                         command);

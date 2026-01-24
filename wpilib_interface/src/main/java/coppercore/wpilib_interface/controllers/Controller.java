@@ -16,9 +16,9 @@ import java.util.function.Supplier;
 /**
  * Controller class
  *
- * <p>This represents a physical controller and its interfaces It includes methods to get the
- * controller interfaces Within each interface, there are methods to get the value of the interface
- * Also includes raw interfaces that directly interact with the hardware
+ * <p>This represents a physical controller and its control elements. It includes methods to get the
+ * control elements. Each element has methods to get the value (current state) of the control
+ * element. Also includes raw interfaces that directly interact with the hardware.
  *
  * <p>Gets input from WPILib's DriverStation class
  */
@@ -26,10 +26,11 @@ public class Controller {
 
     int port = -1;
     ControllerType controllerType;
+    // initialized in ControllerJsonRepresentation.toJava
     HashMap<String, Integer> buttonShorthands = null;
     HashMap<String, Integer> axisShorthands = null;
     HashMap<String, Integer> povShorthands = null;
-    HashMap<String, ControlElement> controllerElements = new HashMap<>();
+    private HashMap<String, ControlElement> controllerElements = new HashMap<>();
     HashMap<String, Button> buttons = new HashMap<>();
     HashMap<String, Axis> axes = new HashMap<>();
     HashMap<String, POV> povs = new HashMap<>();
@@ -53,22 +54,22 @@ public class Controller {
     }
 
     /**
-     * Check if the controller has a controller interface for the given command
+     * Check if the controller has a control element for the given command
      *
      * @param command The command to check
-     * @return True if the controller has the interface, false otherwise
+     * @return True if the controller has the element, false otherwise
      */
-    public boolean hasControllerInterface(String command) {
+    public boolean hasControlElement(String command) {
         return controllerElements.containsKey(command);
     }
 
     /**
-     * Get the controller interface for the given command
+     * Get the control element for the given command
      *
-     * @param command The command to get the interface for
-     * @return The controller interface
+     * @param command The command to get the control element for
+     * @return The controller element.
      */
-    public ControlElement getControllerInterface(String command) {
+    public ControlElement getControlElement(String command) {
         return controllerElements.get(command);
     }
 
@@ -132,6 +133,15 @@ public class Controller {
         return povs.get(command);
     }
 
+    /**
+     * Add a control element to this controller.
+     *
+     * @param controlElement to be added.
+     */
+    void addControlElementForCommand(ControlElement controlElement) {
+        controllerElements.put(controlElement.command, controlElement);
+    }
+
     private static double applyInversion(
             double value, boolean inverted, double minValue, double maxValue) {
         return (inverted) ? maxValue + minValue - value : value;
@@ -151,18 +161,18 @@ public class Controller {
     @JsonType(
             property = "controllerType",
             subtypes = {
-                @JsonSubtype(clazz = RawButton.class, name = "button"),
-                @JsonSubtype(clazz = RawAxis.class, name = "axis"),
-                @JsonSubtype(clazz = RawPOV.class, name = "pov"),
+                @JsonSubtype(clazz = LowLevelButton.class, name = "button"),
+                @JsonSubtype(clazz = LowLevelAxis.class, name = "axis"),
+                @JsonSubtype(clazz = LowLevelPOV.class, name = "pov"),
             })
 
     /**
-     * Raw control element
+     * Low-level control element
      *
-     * <p>These represents the raw control elements directly tied to the controller hardware Such as
-     * a button or an axis
+     * <p>These represents the raw, low-level control elements directly tied to the controller
+     * hardware such as a button or an axis
      */
-    public abstract static class HumanControlElement {
+    public abstract static class LowLevelControlElement {
         public String controllerType;
 
         @JSONName("id")
@@ -185,7 +195,7 @@ public class Controller {
             return applyInversion(fixRange(value, oldMin, oldMax), inverted, minValue, maxValue);
         }
 
-        public void initializeInterface(Controller controller) {
+        public void initialize(Controller controller) {
             this.port = controller.getPort();
 
             Integer resolvedID = null;
@@ -225,9 +235,9 @@ public class Controller {
      * <p>It returns 1.0 when pressed and 0.0 when not pressed It also includes no debouncing or
      * toggling
      */
-    public static class RawButton extends HumanControlElement {
+    public static class LowLevelButton extends LowLevelControlElement {
 
-        public RawButton() {
+        public LowLevelButton() {
             if (minValue == null) minValue = 0.0;
             if (maxValue == null) maxValue = 1.0;
         }
@@ -247,11 +257,11 @@ public class Controller {
      *
      * <p>It includes deadband handling
      */
-    public static class RawAxis extends HumanControlElement {
+    public static class LowLevelAxis extends LowLevelControlElement {
         public Double deadband = 0.0;
         public Boolean remapDeadbanded = false;
 
-        public RawAxis() {
+        public LowLevelAxis() {
             if (minValue == null) minValue = -1.0;
             if (maxValue == null) maxValue = 1.0;
         }
@@ -280,11 +290,11 @@ public class Controller {
      *
      * <p>This represents a POV (D-pad) on the controller
      *
-     * <p>Values range from 0 to 360 degrees It returns -1 when not pressed
+     * <p>Values range from 0 to 360 degrees. The value is -1 when not pressed
      */
-    public static class RawPOV extends HumanControlElement {
+    public static class LowLevelPOV extends LowLevelControlElement {
 
-        public RawPOV() {
+        public LowLevelPOV() {
             if (minValue == null) minValue = -1.0;
             if (maxValue == null) maxValue = 360.0;
         }
@@ -302,15 +312,16 @@ public class Controller {
                 @JsonSubtype(clazz = POV.class, name = "pov"),
             })
     /**
-     * Controller interface class
+     * Control element base class
      *
-     * <p>These represents the ControlElements that the code will interact with They wrap around the
-     * raw interfaces to provide additional functionality Such as thresholds, hysteresis, and
-     * toggling for buttons Also includes range adjustment and inversion for all interfaces
+     * <p>These represents the ControlElements that the code will interact with. They wrap around
+     * the low-level, raw interfaces to provide additional functionality Such as thresholds,
+     * hysteresis, and toggling for buttons. Also includes range adjustment and inversion for all
+     * interfaces
      */
     public abstract static class ControlElement {
         @JSONName("controllerInterface")
-        HumanControlElement rawInterface;
+        LowLevelControlElement lowLevelControlElement;
 
         public String command;
         public String commandType;
@@ -324,14 +335,15 @@ public class Controller {
                     ? MathUtil.clamp(value, minValue, maxValue)
                     : adjustRange(
                             value,
-                            rawInterface.minValue,
-                            rawInterface.maxValue,
+                            lowLevelControlElement.minValue,
+                            lowLevelControlElement.maxValue,
                             minValue,
                             maxValue);
         }
 
         protected double getPreparedValue() {
-            return applyInversion(fixRange(rawInterface.getValue()), inverted, minValue, maxValue);
+            return applyInversion(
+                    fixRange(lowLevelControlElement.getValue()), inverted, minValue, maxValue);
         }
 
         /**
@@ -346,8 +358,8 @@ public class Controller {
          *
          * @param controller The controller to initialize with
          */
-        public void initializeInterface(Controller controller) {
-            rawInterface.initializeInterface(controller);
+        public void initialize(Controller controller) {
+            lowLevelControlElement.initialize(controller);
         }
 
         /**
@@ -446,8 +458,8 @@ public class Controller {
         }
 
         @Override
-        public void initializeInterface(Controller controller) {
-            super.initializeInterface(controller);
+        public void initialize(Controller controller) {
+            super.initialize(controller);
             trigger =
                     new Trigger(
                             CommandScheduler.getInstance().getDefaultButtonLoop(), this::isPressed);
@@ -489,9 +501,9 @@ public class Controller {
     }
 
     /** Finish loading the controller by initializing all controller interfaces */
-    protected void finishControllerLoading() {
+    protected void initializeControlElements() {
         for (ControlElement controlElement : controllerElements.values()) {
-            controlElement.initializeInterface(this);
+            controlElement.initialize(this);
         }
     }
 }
