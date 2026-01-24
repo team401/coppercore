@@ -100,7 +100,7 @@ public class CachedDataTimeTest {
 
     @Test
     public void readTestTrue2() {
-        CachedDataTime data = new CachedDataTime(3);
+        var data = new CachedDataTime<Integer>(3);
         data.write(-100);
         setMockTimeSeconds(2.0);
         Assertions.assertEquals(data.read(), -100);

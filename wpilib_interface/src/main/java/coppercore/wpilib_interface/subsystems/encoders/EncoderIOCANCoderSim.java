@@ -6,21 +6,21 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.CANcoderSimState;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
-import coppercore.wpilib_interface.subsystems.sim.PositionSimAdapter;
+import coppercore.wpilib_interface.subsystems.sim.CoppercoreSimAdapter;
 
 /**
  * The EncoderIOCANCoderPositionSim class uses Phoenix-6 device simulation (CANCoderSimState) to
- * read values from a PositionSimAdapter periodically and update its values to a CANCoderSimState,
+ * read values from a CoppercoreSimAdapter periodically and update its values to a CANCoderSimState,
  * while performing the same code-side behavior as the real life EncoderIOCANCoder.
  *
- * <p>The same PositionSimAdapter should (and can safely) be passed to all
+ * <p>The same CoppercoreSimAdapter should (and can safely) be passed to all
  * MotorIOTalonFXPositionSims and EncoderIOCANCoderPositionSims for each mechanism because only the
  * lead motor MotorIOTalonFXPositionSim will actually update the input the sim while the others will
  * only read values.
  */
-public class EncoderIOCANCoderPositionSim extends EncoderIOCANCoder {
+public class EncoderIOCANCoderSim extends EncoderIOCANCoder {
     /** Sim adapter to read physics sim values from */
-    protected final PositionSimAdapter physicsSimAdapter;
+    protected final CoppercoreSimAdapter physicsSimAdapter;
 
     /** CANcoderSimState handle to interface with the simulated encoder */
     protected final CANcoderSimState cancoderSimState;
@@ -34,10 +34,10 @@ public class EncoderIOCANCoderPositionSim extends EncoderIOCANCoder {
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
      *     simulation readings.
      */
-    public EncoderIOCANCoderPositionSim(
+    public EncoderIOCANCoderSim(
             CANDeviceID id,
             CANcoderConfiguration cancoderConfig,
-            PositionSimAdapter physicsSimAdapter) {
+            CoppercoreSimAdapter physicsSimAdapter) {
         super(id, cancoderConfig);
 
         this.cancoderSimState = this.cancoder.getSimState();
