@@ -6,22 +6,23 @@ import java.util.List;
 
 /**
  * JSON representation of a Controller
- * 
- * This class is used for JSON serialization and deserialization of Controller objects
- * The toJava method converts the JSON representation back to a Controller object
- * This class should not be instantiated directly
+ *
+ * <p>This class is used for JSON serialization and deserialization of Controller objects The toJava
+ * method converts the JSON representation back to a Controller object This class should not be
+ * instantiated directly
  */
 public class ControllerJsonRepresentation extends JSONObject<Controller> {
-    
+
     int port;
     String type;
     List<Controller.ControlElement> controllerElements;
     HashMap<String, Integer> buttonShorthands = new HashMap<>();
     HashMap<String, Integer> axisShorthands = new HashMap<>();
     HashMap<String, Integer> povShorthands = new HashMap<>();
-    
+
     /**
      * Constructor for JSON deserialization
+     *
      * @param controller
      */
     public ControllerJsonRepresentation(Controller controller) {
@@ -30,9 +31,7 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
     }
 
     @Override
-    /**
-     * Convert json representation to Java object
-     */
+    /** Convert json representation to Java object */
     public Controller toJava() {
         Controller controller = new Controller();
         controller.port = this.port;
@@ -55,17 +54,14 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
                             controlElement.command, (Controller.Button) controlElement);
                     break;
                 case "axis":
-                    controller.axes.put(
-                            controlElement.command, (Controller.Axis) controlElement);
+                    controller.axes.put(controlElement.command, (Controller.Axis) controlElement);
                     break;
                 case "pov":
-                    controller.povs.put(
-                            controlElement.command, (Controller.POV) controlElement);
+                    controller.povs.put(controlElement.command, (Controller.POV) controlElement);
                     break;
                 default:
                     throw new RuntimeException(
-                            "Unknown controller interface type: "
-                                    + controlElement.commandType);
+                            "Unknown controller interface type: " + controlElement.commandType);
             }
             controller.controllerElements.put(controlElement.command, controlElement);
         }

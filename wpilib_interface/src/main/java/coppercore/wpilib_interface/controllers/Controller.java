@@ -15,13 +15,12 @@ import java.util.function.Supplier;
 
 /**
  * Controller class
- * 
- * This represents a physical controller and its interfaces
- * It includes methods to get the controller interfaces
- * Within each interface, there are methods to get the value of the interface
+ *
+ * <p>This represents a physical controller and its interfaces It includes methods to get the
+ * controller interfaces Within each interface, there are methods to get the value of the interface
  * Also includes raw interfaces that directly interact with the hardware
- * 
- * Gets input from WPILib's DriverStation class
+ *
+ * <p>Gets input from WPILib's DriverStation class
  */
 public class Controller {
 
@@ -37,6 +36,7 @@ public class Controller {
 
     /**
      * Get the port number of the controller
+     *
      * @return The port number
      */
     public int getPort() {
@@ -45,6 +45,7 @@ public class Controller {
 
     /**
      * Get the type of the controller
+     *
      * @return The controller type
      */
     public ControllerType getControllerType() {
@@ -53,6 +54,7 @@ public class Controller {
 
     /**
      * Check if the controller has a controller interface for the given command
+     *
      * @param command The command to check
      * @return True if the controller has the interface, false otherwise
      */
@@ -62,6 +64,7 @@ public class Controller {
 
     /**
      * Get the controller interface for the given command
+     *
      * @param command The command to get the interface for
      * @return The controller interface
      */
@@ -71,6 +74,7 @@ public class Controller {
 
     /**
      * Check if the controller has a button for the given command
+     *
      * @param command The command to check
      * @return True if the controller has the button, false otherwise
      */
@@ -80,6 +84,7 @@ public class Controller {
 
     /**
      * Get the button for the given command
+     *
      * @param command The command to get the button for
      * @return The button
      */
@@ -89,6 +94,7 @@ public class Controller {
 
     /**
      * Check if the controller has an axis for the given command
+     *
      * @param command The command to check
      * @return True if the controller has the axis, false otherwise
      */
@@ -98,6 +104,7 @@ public class Controller {
 
     /**
      * Get the axis for the given command
+     *
      * @param command The command to get the axis for
      * @return The axis
      */
@@ -107,6 +114,7 @@ public class Controller {
 
     /**
      * Check if the controller has a POV for the given command
+     *
      * @param command The command to check
      * @return True if the controller has the POV, false otherwise
      */
@@ -116,6 +124,7 @@ public class Controller {
 
     /**
      * Get the POV for the given command
+     *
      * @param command The command to get the POV for
      * @return The POV
      */
@@ -123,7 +132,8 @@ public class Controller {
         return povs.get(command);
     }
 
-    private static double applyInversion(double value, boolean inverted, double minValue, double maxValue) {
+    private static double applyInversion(
+            double value, boolean inverted, double minValue, double maxValue) {
         return (inverted) ? maxValue + minValue - value : value;
     }
 
@@ -139,21 +149,20 @@ public class Controller {
     }
 
     @JsonType(
-        property = "controllerType",
-        subtypes = {
-            @JsonSubtype(clazz = RawButton.class, name = "button"),
-            @JsonSubtype(clazz = RawAxis.class, name = "axis"),
-            @JsonSubtype(clazz = RawPOV.class, name = "pov"),
-        }
-    )
-    
+            property = "controllerType",
+            subtypes = {
+                @JsonSubtype(clazz = RawButton.class, name = "button"),
+                @JsonSubtype(clazz = RawAxis.class, name = "axis"),
+                @JsonSubtype(clazz = RawPOV.class, name = "pov"),
+            })
+
     /**
      * Raw control element
-     * 
-     * These represents the raw control elements directly tied to the controller hardware
-     * Such as a button or an axis
+     *
+     * <p>These represents the raw control elements directly tied to the controller hardware Such as
+     * a button or an axis
      */
-    public static abstract class HumanControlElement {
+    public abstract static class HumanControlElement {
         public String controllerType;
 
         @JSONName("id")
@@ -167,7 +176,7 @@ public class Controller {
         @JSONExclude protected int port;
 
         protected double fixRange(double value, double oldMin, double oldMax) {
-            return (clampValue) 
+            return (clampValue)
                     ? MathUtil.clamp(value, minValue, maxValue)
                     : adjustRange(value, oldMin, oldMax, minValue, maxValue);
         }
@@ -208,14 +217,13 @@ public class Controller {
 
     /**
      * Raw button interface
-     * 
-     * This represents a button on the controller
-     * 
-     * Values range from 0.0 (not pressed) to 1.0 (pressed)
-     * 
-     * It returns 1.0 when pressed and 0.0 when not pressed
-     * It also includes no debouncing or toggling
-     * 
+     *
+     * <p>This represents a button on the controller
+     *
+     * <p>Values range from 0.0 (not pressed) to 1.0 (pressed)
+     *
+     * <p>It returns 1.0 when pressed and 0.0 when not pressed It also includes no debouncing or
+     * toggling
      */
     public static class RawButton extends HumanControlElement {
 
@@ -232,13 +240,12 @@ public class Controller {
 
     /**
      * Raw axis interface
-     * 
-     * This represents an axis on the controller
-     * 
-     * Values range from -1.0 to 1.0 
-     * 
-     * It includes deadband handling
-     * 
+     *
+     * <p>This represents an axis on the controller
+     *
+     * <p>Values range from -1.0 to 1.0
+     *
+     * <p>It includes deadband handling
      */
     public static class RawAxis extends HumanControlElement {
         public Double deadband = 0.0;
@@ -270,11 +277,10 @@ public class Controller {
 
     /**
      * Raw POV interface
-     * 
-     * This represents a POV (D-pad) on the controller
-     * 
-     * Values range from 0 to 360 degrees
-     * It returns -1 when not pressed
+     *
+     * <p>This represents a POV (D-pad) on the controller
+     *
+     * <p>Values range from 0 to 360 degrees It returns -1 when not pressed
      */
     public static class RawPOV extends HumanControlElement {
 
@@ -289,22 +295,20 @@ public class Controller {
     }
 
     @JsonType(
-     property = "commandType",
-     subtypes = {
-        @JsonSubtype(clazz = Button.class, name = "button"),
-        @JsonSubtype(clazz = Axis.class, name = "axis"),
-        @JsonSubtype(clazz = POV.class, name = "pov"),
-     }
-    )
+            property = "commandType",
+            subtypes = {
+                @JsonSubtype(clazz = Button.class, name = "button"),
+                @JsonSubtype(clazz = Axis.class, name = "axis"),
+                @JsonSubtype(clazz = POV.class, name = "pov"),
+            })
     /**
      * Controller interface class
-     * 
-     * These represents the ControlElements that the code will interact with
-     * They wrap around the raw interfaces to provide additional functionality
-     * Such as thresholds, hysteresis, and toggling for buttons
-     * Also includes range adjustment and inversion for all interfaces
+     *
+     * <p>These represents the ControlElements that the code will interact with They wrap around the
+     * raw interfaces to provide additional functionality Such as thresholds, hysteresis, and
+     * toggling for buttons Also includes range adjustment and inversion for all interfaces
      */
-    public static abstract class ControlElement {
+    public abstract static class ControlElement {
         @JSONName("controllerInterface")
         HumanControlElement rawInterface;
 
@@ -316,9 +320,14 @@ public class Controller {
         public Boolean clampValue = false;
 
         protected double fixRange(double value) {
-            return (clampValue) 
+            return (clampValue)
                     ? MathUtil.clamp(value, minValue, maxValue)
-                    : adjustRange(value, rawInterface.minValue, rawInterface.maxValue, minValue, maxValue);
+                    : adjustRange(
+                            value,
+                            rawInterface.minValue,
+                            rawInterface.maxValue,
+                            minValue,
+                            maxValue);
         }
 
         protected double getPreparedValue() {
@@ -327,12 +336,14 @@ public class Controller {
 
         /**
          * Get the value of the controller interface
+         *
          * @return The value
          */
         public abstract double getValue();
 
         /**
          * Initialize the controller interface
+         *
          * @param controller The controller to initialize with
          */
         public void initializeInterface(Controller controller) {
@@ -341,6 +352,7 @@ public class Controller {
 
         /**
          * Get a Supplier for the value of the controller interface
+         *
          * @return The Supplier
          */
         public Supplier<Double> getSupplier() {
@@ -349,6 +361,7 @@ public class Controller {
 
         /**
          * Get a DoubleSupplier for the value of the controller interface
+         *
          * @return The DoubleSupplier
          */
         public DoubleSupplier getPrimitiveSupplier() {
@@ -358,10 +371,10 @@ public class Controller {
 
     /**
      * Button interface
-     * 
-     * This represents a button for code interaction
-     * 
-     * This includes thresholds, hysteresis, and toggling
+     *
+     * <p>This represents a button for code interaction
+     *
+     * <p>This includes thresholds, hysteresis, and toggling
      */
     public static class Button extends ControlElement {
         public Double threshold =
@@ -443,8 +456,8 @@ public class Controller {
 
     /**
      * Axis interface
-     * 
-     * This represents an axis for code interaction
+     *
+     * <p>This represents an axis for code interaction
      */
     public static class Axis extends ControlElement {
         public Axis() {
@@ -460,8 +473,8 @@ public class Controller {
 
     /**
      * POV interface
-     * 
-     * This represents a POV for code interaction
+     *
+     * <p>This represents a POV for code interaction
      */
     public static class POV extends ControlElement {
         public POV() {
@@ -475,9 +488,7 @@ public class Controller {
         }
     }
 
-    /**
-     * Finish loading the controller by initializing all controller interfaces
-     */
+    /** Finish loading the controller by initializing all controller interfaces */
     protected void finishControllerLoading() {
         for (ControlElement controlElement : controllerElements.values()) {
             controlElement.initializeInterface(this);
