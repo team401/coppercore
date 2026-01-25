@@ -154,7 +154,7 @@ public final class JSONHandler {
      *
      * @param <T> Type of the object
      * @param path the route path (should start with /)
-     * @param instance the object to serialize and serve
+     * @param instance of the object to serialize and serve
      */
     public <T> void addRoute(String path, T instance) {
         ensureServerStarted();
