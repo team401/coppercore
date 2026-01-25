@@ -10,9 +10,12 @@ import coppercore.parameter_tools.json.strategies.JSONExcludeExclusionStrategy;
 import coppercore.parameter_tools.json.strategies.JSONNamingStrategy;
 import coppercore.parameter_tools.json.strategies.JSONPrimitiveCheckStrategy;
 import coppercore.parameter_tools.path_provider.PathProvider;
+import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.wpilibj.RobotController;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
@@ -176,6 +179,42 @@ public final class JSONHandler {
                         os.write(response);
                     }
                 });
+
+        String host = getHostAddress();
+        String url = "http://" + host + ":" + PORT + fullPath;
+        System.out.println(
+                "added route for "
+                        + environment
+                        + path
+                        + "; use\ncurl "
+                        + url
+                        + "\nto retrieve the data");
+    }
+
+    /**
+     * Gets the host address for constructing URLs. On the roboRIO, computes the IP address from the
+     * team number using the FRC TE.AM notation (10.TE.AM.2). In simulation or if the team number
+     * cannot be determined, falls back to the local host address.
+     *
+     * @return the host address
+     */
+    private String getHostAddress() {
+        try {
+            HAL.initialize(500, 0);
+            int team = RobotController.getTeamNumber();
+            if (team > 0) {
+                int te = team / 100;
+                int am = team % 100;
+                return "10." + te + "." + am + ".2";
+            }
+        } catch (Throwable t) {
+            // Fall through to local host lookup (catches UnsatisfiedLinkError when HAL not loaded)
+        }
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e) {
+            return "localhost";
+        }
     }
 
     /**

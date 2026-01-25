@@ -35,6 +35,9 @@ dependencies {
 
 }
 
+// injects the JNI extraction dir into java.library.path for tests.
+wpi.java.configureTestTasks(test)
+
 mavenPublishing {
 	pom {
 		description = 'FRC 401 parameter tools library'
