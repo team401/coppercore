@@ -410,6 +410,17 @@ public class Controller {
                 @JsonSubtype(clazz = LowLevelPOV.class, name = "pov"),
             })
     public abstract static class LowLevelControlElement {
+        /**
+         * A short, stable identifier describing this controller element's type or category.
+         *
+         * <p>Used to determine how the element should be interpreted, processed, or rendered at
+         * runtime and during (de)serialization. Typical values include simple names such as {@code
+         * "button"}, {@code "axis"}, {@code "pov"} or {@code "joystick"}, or a fully-qualified
+         * class name when a concrete implementation must be referenced.
+         *
+         * <p>Keep values stable if they are persisted or communicated between components. May be
+         * {@code null} if the type is unspecified.
+         */
         public String elementType;
 
         @JSONName("id")
@@ -550,6 +561,16 @@ public class Controller {
      */
     public static class LowLevelButton extends LowLevelControlElement {
 
+        /**
+         * Constructs a LowLevelButton instance.
+         *
+         * <p>Initializes the elementType to "button". If the numeric range bounds are not already
+         * set, this constructor assigns default values to the wrapper fields: - minValue is set to
+         * 0.0 if it is null - maxValue is set to 1.0 if it is null
+         *
+         * <p>These defaults provide a canonical minimum and maximum for the button's value,
+         * ensuring downstream code can rely on a defined range for normalization or validation.
+         */
         public LowLevelButton() {
             elementType = "button";
             if (minValue == null) minValue = 0.0;
@@ -634,9 +655,43 @@ public class Controller {
      * @see DriverStation#getStickAxis(int, int)
      */
     public static class LowLevelAxis extends LowLevelControlElement {
+        /**
+         * Deadband threshold applied to controller input values.
+         *
+         * <p>Any input whose absolute value is less than this threshold should be treated as zero.
+         * This filters out small unintended joystick or sensor noise.
+         *
+         * <p>Expected range is 0.0 (no deadband) to 1.0 (maximum deadband); default is 0.0. Inputs
+         * are assumed to be normalized (e.g., in the range [-1.0, 1.0]).
+         *
+         * <p>Note: this field is a Double and may be null; callers should handle null appropriately
+         * (for example, treating null as 0.0).
+         */
         public Double deadband = 0.0;
+
+        /**
+         * If true, remap controller input after applying the deadband.
+         *
+         * <p>When enabled, small input values within the configured deadband are treated as zero
+         * and the remaining input range outside the deadband is rescaled to preserve full-scale
+         * responsiveness. This reduces unintentional drift around the center while maintaining
+         * correct maximum output.
+         *
+         * <p>When disabled, inputs inside the deadband are set to zero but the values outside the
+         * deadband are not rescaled.
+         *
+         * <p>Default: true.
+         */
         public Boolean remapDeadband = true;
 
+        /**
+         * Constructs a LowLevelAxis and ensures sensible default values.
+         *
+         * <p>This constructor identifies the object as an axis by setting the elementType field to
+         * "axis". It also guarantees that the axis bounds are initialized: if minValue is null it
+         * will be set to -1.0, and if maxValue is null it will be set to 1.0. Existing non-null
+         * bounds are left unchanged.
+         */
         public LowLevelAxis() {
             elementType = "axis";
             if (minValue == null) minValue = -1.0;
@@ -738,6 +793,17 @@ public class Controller {
      */
     public static class LowLevelPOV extends LowLevelControlElement {
 
+        /**
+         * Constructs a LowLevelPOV and establishes sensible defaults for POV elements.
+         *
+         * <p>This constructor sets the element type to "pov". If minValue or maxValue have not been
+         * initialized (are null), it assigns default bounds for the POV hat: a minimum of -1.0
+         * (commonly used to indicate "no direction" / not pressed) and a maximum of 360.0
+         * (degrees).
+         *
+         * <p>These defaults provide consistent range semantics for consumers that expect POV values
+         * in degrees and a sentinel value when the POV is inactive.
+         */
         public LowLevelPOV() {
             elementType = "pov";
             if (minValue == null) minValue = -1.0;
@@ -1009,157 +1075,182 @@ public class Controller {
         }
 
         /**
-         * Returns a DoubleSupplier that supplies the current primitive double value from this controller.
+         * Returns a DoubleSupplier that supplies the current primitive double value from this
+         * controller.
          *
-         * <p>The supplier delegates to {@link #getValue()}, providing the value as a primitive double
-         * (avoiding boxing) each time it is invoked.
+         * <p>The supplier delegates to {@link #getValue()}, providing the value as a primitive
+         * double (avoiding boxing) each time it is invoked.
          *
-         * @return a {@link java.util.function.DoubleSupplier} that invokes {@link #getValue()} to obtain the current value
+         * @return a {@link java.util.function.DoubleSupplier} that invokes {@link #getValue()} to
+         *     obtain the current value
          */
         public DoubleSupplier getPrimitiveSupplier() {
             return this::getValue;
         }
     }
 
-
     /**
-     * Represents a configurable button-style control element that interprets a numeric input
-     * value as a boolean "pressed" state with optional threshold, range, hysteresis and toggle
-     * behavior. This is a static nested class extending ControlElement and is intended to be
-     * used where an analog or continuous input should behave like a discrete button.
+     * A configurable "button" ControlElement that interprets a numeric input as a boolean pressed
+     * state, with optional thresholding, hysteresis and toggle behavior.
      *
-     * Features and behavior:
-     * - threshold: The central value above which (or within a range around which) the button
-     *   is considered pressed. If null, behavior depends on minValue/maxValue from the
-     *   enclosing ControlElement.
-     * - thresholdRange: Optional symmetric range around threshold. When provided, the accepted
-     *   region is [threshold - thresholdRange/2, threshold + thresholdRange/2].
-     * - hysteresis: Optional hysteresis amount that adjusts the computed lower/upper bounds
-     *   based on the previous button state (lastState). When lastState is true the bounds
-     *   are expanded by hysteresis (making it easier to remain pressed); when lastState is
-     *   false the bounds are contracted by hysteresis (making it harder to become pressed).
-     *   This reduces chattering around the threshold.
-     * - isToggle / isToggled: When isToggle is true, the button acts as a toggle: on each
-     *   rising edge (pressed && !lastState) isToggled flips and becomes the effective pressed
-     *   state returned by isPressed(). lastState is updated to track the raw pressed signal
-     *   for edge detection. When isToggle is false, isPressed() simply reflects the measured
-     *   pressed value.
-     * - lastState: Tracks the previous raw pressed state used for hysteresis and toggle
-     *   edge-detection logic.
+     * <p>Summary
      *
-     * Key methods:
-     * - testThreshold(double value): Computes whether the given value lies within the
-     *   threshold-based bounds, taking thresholdRange and hysteresis into account.
-     * - applyToggle(boolean pressed): Applies toggle semantics if enabled; otherwise returns
-     *   the raw pressed value. Updates lastState appropriately for toggle edge detection.
-     * - isPressed(): Reads the prepared/normalized input value, clamps it to minValue/maxValue,
-     *   tests it against the threshold rules and returns the effective boolean pressed state
-     *   (respecting toggle mode if enabled).
-     * - getIsPressedSupplier(), getPrimitiveIsPressedSupplier(): Convenience suppliers for
-     *   use with APIs that accept Supplier<Boolean> or BooleanSupplier.
-     * - getValue(): Returns maxValue when the button is considered pressed, otherwise minValue.
-     * - initialize(Controller): Initializes the button and creates a Trigger that samples the
-     *   button state on the CommandScheduler's default button loop using this::isPressed.
+     * <ul>
+     *   <li>Takes a numeric input (from the underlying LowLevelControlElement) and decides whether
+     *       it is "pressed" according to a configurable threshold and optional range/hysteresis.
+     *   <li>Supports toggle mode where each rising edge flips a latched boolean state instead of
+     *       reflecting the instantaneous input.
+     *   <li>Provides suppliers and a WPILib Trigger for integration with command bindings.
+     * </ul>
      *
-     * Defaults:
-     * - The constructor ensures minValue defaults to 0.0 and maxValue defaults to 1.0 if not set.
+     * <p>Configuration and semantics
      *
-     * Notes:
-     * - isPressed() clamps the raw value using MathUtil.clamp(minValue, maxValue) before
-     *   threshold testing.
-     * - The hysteresis implementation adjusts both lower and upper bounds based on the
-     *   previous state; callers should be aware of this behavior when tuning hysteresis.
+     * <ul>
+     *   <li>threshold: Central activation value. If the prepared input lies inside the computed
+     *       acceptance window, the button is considered pressed.
+     *   <li>thresholdRange (nullable): If non-null, the acceptance window is [threshold -
+     *       thresholdRange/2, threshold + thresholdRange/2]. If null, the window defaults to
+     *       [threshold, maxValue] (with optional hysteresis adjustment).
+     *   <li>hysteresis (nullable): When non-null, hysteresis modifies the computed lower/upper
+     *       bounds based on the previous raw pressed state (lastState). This reduces chatter near
+     *       the boundary: when lastState==true the window is expanded, and when lastState==false
+     *       the window is contracted.
+     *   <li>isToggle: When true, a rising edge (pressed && !lastState) flips the internal latched
+     *       state isToggled. When false, the reported pressed state simply reflects the threshold
+     *       test result.
+     * </ul>
+     *
+     * <p>Behavioral notes
+     *
+     * <ul>
+     *   <li>Applying threshold/hysteresis: testThreshold(double) computes inclusive bounds and
+     *       returns true if value is within them. When thresholdRange is null the upper bound
+     *       defaults to maxValue (and may be enlarged by hysteresis to avoid missing brief
+     *       activations).
+     *   <li>Toggle semantics: applyToggle(boolean) updates lastState and flips isToggled on a
+     *       rising edge when isToggle==true. lastState always tracks the most recent raw pressed
+     *       signal and is used for both toggle edge detection and hysteresis decisions.
+     *   <li>Threading: instances are not synchronized. Concurrent reads are fine, but concurrent
+     *       mutations (for example toggling configuration fields or calling initialize while
+     *       reading) must be externally synchronized.
+     * </ul>
+     *
+     * <p>Lifecycle
+     *
+     * <ul>
+     *   <li>The constructor ensures minValue defaults to 0.0 and maxValue defaults to 1.0 if they
+     *       are unset, guaranteeing a usable numeric range.
+     *   <li>initialize(Controller) delegates to the superclass to initialize the low-level element
+     *       and then creates a Trigger on the CommandScheduler default button loop that polls
+     *       this::isPressed.
+     * </ul>
+     *
+     * <p>Provided helper methods (high level)
+     *
+     * <ul>
+     *   <li>testThreshold(value) — returns whether the supplied value falls inside the computed
+     *       acceptance window (considering thresholdRange and hysteresis).
+     *   <li>applyToggle(pressed) — applies toggle behavior when enabled and updates internal state
+     *       for edge detection.
+     *   <li>isPressed() — obtains the prepared numeric input, clamps to [minValue,maxValue], runs
+     *       the threshold test and returns the (possibly toggled) boolean pressed state.
+     *   <li>getValue() — returns maxValue when pressed, otherwise minValue.
+     * </ul>
+     *
+     * <p>Example usage
+     *
+     * <pre>
+     *   // JSON-configured: threshold = 0.5, thresholdRange = 0.2, isToggle = true
+     *   // A short push above ~0.4 will toggle the latched state; hysteresis can be used to tune
+     *   // robustness around the boundary.
+     * </pre>
+     *
+     * <p>See also: ControlElement.getPreparedValue() for how the numeric input is produced.
      */
     public static class Button extends ControlElement {
         /**
          * Deadband threshold for controller inputs.
          *
-         * <p>Inputs with absolute value less than this threshold are treated as zero and
-         * should be ignored by input processing. Default value is 0.0.
+         * <p>Inputs with absolute value less than this threshold are treated as zero and should be
+         * ignored by input processing. Default value is 0.0.
          *
-         * <p>Expected to be used with controller input values on the same scale
-         * (commonly -1.0 to 1.0). Adjust as needed to filter out small/intentional noise.
+         * <p>Expected to be used with controller input values on the same scale (commonly -1.0 to
+         * 1.0). Adjust as needed to filter out small/intentional noise.
          */
         public Double threshold = 0.0;
+
         /**
          * Optional tolerance or hysteresis width applied around the controller's primary threshold.
          *
-         * This nullable Double represents an additional range (radius) around a configured
+         * <p>This nullable Double represents an additional range (radius) around a configured
          * threshold value. When non-null, values within this range are treated as inside the
-         * threshold band, allowing for tolerance or hysteresis in threshold comparisons.
-         * When null, no additional range is applied and comparisons should be strict.
+         * threshold band, allowing for tolerance or hysteresis in threshold comparisons. When null,
+         * no additional range is applied and comparisons should be strict.
          *
-         * Expected usage:
-         * - Set to a non-negative Double to enable a threshold band.
-         * - Leave as null to indicate "no range configured".
+         * <p>Expected usage: - Set to a non-negative Double to enable a threshold band. - Leave as
+         * null to indicate "no range configured".
          *
-         * Note: Negative values are not meaningful and should be avoided.
+         * <p>Note: Negative values are not meaningful and should be avoided.
          */
         public Double thresholdRange = null;
+
         /**
          * Hysteresis threshold for the controller.
          *
-         * When non-null, changes smaller than this absolute threshold (i.e. within
-         * +/- hysteresis) are considered insignificant and will not cause the
-         * controller to change its output or to consider the setpoint reached. This
-         * is useful for preventing rapid oscillation when the measured value hovers
-         * near the setpoint.
+         * <p>When non-null, changes smaller than this absolute threshold (i.e. within +/-
+         * hysteresis) are considered insignificant and will not cause the controller to change its
+         * output or to consider the setpoint reached. This is useful for preventing rapid
+         * oscillation when the measured value hovers near the setpoint.
          *
-         * The value uses the same units and scale as the controller's inputs/outputs.
-         * A null value disables hysteresis (default). Callers should provide a
-         * non-negative value when enabling hysteresis; negative values are considered
-         * invalid.
+         * <p>The value uses the same units and scale as the controller's inputs/outputs. A null
+         * value disables hysteresis (default). Callers should provide a non-negative value when
+         * enabling hysteresis; negative values are considered invalid.
          */
         public Double hysteresis = null;
+
         /**
-         * If true, this controller input is treated as a toggle: each activation flips the logical state
-         * rather than directly mirroring the raw input. When false, the control behaves as a momentary
-         * (non-latching) input and simply reflects the current input state.
+         * If true, this controller input is treated as a toggle: each activation flips the logical
+         * state rather than directly mirroring the raw input. When false, the control behaves as a
+         * momentary (non-latching) input and simply reflects the current input state.
          *
-         * Default: false
+         * <p>Default: false
          */
         public Boolean isToggle = false;
+
         @JSONExclude private boolean isToggled = false;
         @JSONExclude private boolean lastState = false;
         @JSONExclude private Trigger trigger;
 
-
         /**
-         * Determines whether the supplied value lies within the controller's computed
-         * threshold window.
+         * Determines whether the supplied value lies within the controller's computed threshold
+         * window.
          *
-         * The window (lowerBound..upperBound) is computed as follows:
-         * - If {@code thresholdRange} is non-null, the window is centered on
-         *   {@code threshold} with half-width {@code thresholdRange / 2.0}:
-         *     lowerBound = threshold - thresholdRange/2.0
-         *     upperBound = threshold + thresholdRange/2.0
-         * - If {@code thresholdRange} is null, the lower bound is {@code threshold}
-         *   and the upper bound defaults to {@code maxValue}. In this case, if
-         *   {@code hysteresis} is non-null the upper bound is first increased by
-         *   {@code hysteresis} to help tolerate a jump over the threshold.
+         * <p>The window (lowerBound..upperBound) is computed as follows: - If {@code
+         * thresholdRange} is non-null, the window is centered on {@code threshold} with half-width
+         * {@code thresholdRange / 2.0}: lowerBound = threshold - thresholdRange/2.0 upperBound =
+         * threshold + thresholdRange/2.0 - If {@code thresholdRange} is null, the lower bound is
+         * {@code threshold} and the upper bound defaults to {@code maxValue}. In this case, if
+         * {@code hysteresis} is non-null the upper bound is first increased by {@code hysteresis}
+         * to help tolerate a jump over the threshold.
          *
-         * If {@code hysteresis} is non-null, an additional adjustment is applied using
-         * the current {@code lastState}:
-         * - A multiplier of +1.0 is used when {@code lastState} is true, and -1.0
-         *   when false.
-         * - The lower bound is adjusted by subtracting {@code hysteresis * multiplier},
-         *   and the upper bound is adjusted by adding {@code hysteresis * multiplier}.
-         *   Effectively, when {@code lastState} is true the window is expanded outward
-         *   by {@code hysteresis}; when false the window is moved inward by
-         *   {@code hysteresis}.
+         * <p>If {@code hysteresis} is non-null, an additional adjustment is applied using the
+         * current {@code lastState}: - A multiplier of +1.0 is used when {@code lastState} is true,
+         * and -1.0 when false. - The lower bound is adjusted by subtracting {@code hysteresis *
+         * multiplier}, and the upper bound is adjusted by adding {@code hysteresis * multiplier}.
+         * Effectively, when {@code lastState} is true the window is expanded outward by {@code
+         * hysteresis}; when false the window is moved inward by {@code hysteresis}.
          *
-         * Comparison is inclusive: the method returns {@code true} if
-         * {@code value >= lowerBound && value <= upperBound}.
+         * <p>Comparison is inclusive: the method returns {@code true} if {@code value >= lowerBound
+         * && value <= upperBound}.
          *
-         * Notes:
-         * - This method relies on instance fields: {@code threshold}, {@code maxValue},
-         *   {@code thresholdRange}, {@code hysteresis}, and {@code lastState}.
-         * - {@code thresholdRange} and {@code hysteresis} may be {@code null}; the
-         *   method handles those cases as described above.
+         * <p>Notes: - This method relies on instance fields: {@code threshold}, {@code maxValue},
+         * {@code thresholdRange}, {@code hysteresis}, and {@code lastState}. - {@code
+         * thresholdRange} and {@code hysteresis} may be {@code null}; the method handles those
+         * cases as described above.
          *
          * @param value the value to test against the computed threshold window
-         * @return {@code true} if the value falls within the inclusive computed bounds,
-         *         otherwise {@code false}
+         * @return {@code true} if the value falls within the inclusive computed bounds, otherwise
+         *     {@code false}
          */
         protected boolean testThreshold(double value) {
             double lowerBound = threshold;
@@ -1167,7 +1258,7 @@ public class Controller {
             if (thresholdRange != null) {
                 lowerBound = threshold - thresholdRange / 2.0;
                 upperBound = threshold + thresholdRange / 2.0;
-            }else {
+            } else {
                 // This is to handle the case where only threshold is set
                 // and there is hysteresis and the value jumps over the threshold
                 // when there is no thresholdRange such as jumping from 0.0 to 1.0
@@ -1185,21 +1276,21 @@ public class Controller {
         /**
          * Applies toggle semantics to a raw button input.
          *
-         * <p>When toggle mode (isToggle) is enabled, a rising edge (pressed == true and lastState == false)
-         * flips the internal isToggled flag. lastState is updated to the current pressed value and the
-         * method returns the current toggled state.</p>
+         * <p>When toggle mode (isToggle) is enabled, a rising edge (pressed == true and lastState
+         * == false) flips the internal isToggled flag. lastState is updated to the current pressed
+         * value and the method returns the current toggled state.
          *
          * <p>When toggle mode is disabled, the method returns the raw pressed value.
          *
-         * <p>Side effects: updates lastState and may update isToggled when a rising edge is detected.</p>
+         * <p>Side effects: updates lastState and may update isToggled when a rising edge is
+         * detected.
          *
          * @param pressed the current raw input state (true if the control is currently pressed)
-         * @return the effective output state after applying toggle logic:
-         *         - if isToggle is true, the current toggled state (isToggled);
-         *         - otherwise, the raw pressed value
-         *
-         * Implementation Note: This method is protected and not synchronized. If accessed concurrently from multiple
-         *           threads, external synchronization is required to ensure correctness.
+         * @return the effective output state after applying toggle logic: - if isToggle is true,
+         *     the current toggled state (isToggled); - otherwise, the raw pressed value
+         *     <p>Implementation Note: This method is protected and not synchronized. If accessed
+         *     concurrently from multiple threads, external synchronization is required to ensure
+         *     correctness.
          */
         protected boolean applyToggle(boolean pressed) {
             if (isToggle) {
@@ -1216,43 +1307,96 @@ public class Controller {
         /**
          * Constructs a new Button and ensures its value bounds are initialized.
          *
-         * <p>If the instance fields {@code minValue} or {@code maxValue} are {@code null},
-         * they are assigned default bounds: {@code minValue} becomes {@code 0.0} and
-         * {@code maxValue} becomes {@code 1.0}. This guarantees a valid numeric range
-         * for consumers of the Button and prevents {@code NullPointerException}s when
-         * the bounds are accessed or used in computations.</p>
+         * <p>If the instance fields {@code minValue} or {@code maxValue} are {@code null}, they are
+         * assigned default bounds: {@code minValue} becomes {@code 0.0} and {@code maxValue}
+         * becomes {@code 1.0}. This guarantees a valid numeric range for consumers of the Button
+         * and prevents {@code NullPointerException}s when the bounds are accessed or used in
+         * computations.
          *
-         * <p>Note: existing non-null values are left unchanged.</p>
+         * <p>Note: existing non-null values are left unchanged.
          */
         public Button() {
             if (minValue == null) minValue = 0.0;
             if (maxValue == null) maxValue = 1.0;
         }
 
+        /**
+         * Determines whether this controller input is considered "pressed".
+         *
+         * <p>This method: 1. Retrieves the prepared input value via {@code getPreparedValue()}. 2.
+         * Clamps that value to the configured {@code minValue} and {@code maxValue}. 3. Evaluates
+         * whether the clamped value meets the activation criteria using {@code testThreshold(...)}.
+         * 4. Passes the resulting boolean through {@code applyToggle(...)} before returning, so the
+         * final result may reflect any toggle state managed by the controller.
+         *
+         * @return {@code true} if the (possibly toggled) input state is considered pressed; {@code
+         *     false} otherwise
+         */
         public boolean isPressed() {
             double value = getPreparedValue();
             boolean pressed = testThreshold(MathUtil.clamp(value, minValue, maxValue));
             return applyToggle(pressed);
         }
 
+        /**
+         * Returns a Supplier that provides the current "pressed" state of this controller. The
+         * supplier delegates to this instance's {@link #isPressed()} method each time it is
+         * invoked.
+         *
+         * @return a non-null {@code Supplier<Boolean>} which yields {@code true} when the
+         *     controller is pressed and {@code false} otherwise
+         */
         public Supplier<Boolean> getIsPressedSupplier() {
             return this::isPressed;
         }
 
+        /**
+         * Returns a {@link java.util.function.BooleanSupplier} that delegates to this instance's
+         * {@code isPressed()} method.
+         *
+         * <p>Each invocation of the returned supplier calls {@code isPressed()} on this controller
+         * and therefore reflects the controller's current pressed state at the time of the call.
+         *
+         * @return a {@link java.util.function.BooleanSupplier} that supplies {@code true} when this
+         *     controller is pressed and {@code false} otherwise
+         */
         public BooleanSupplier getPrimitiveIsPressedSupplier() {
             return this::isPressed;
         }
 
+        /**
+         * Returns the {@link Trigger} associated with this controller.
+         *
+         * @return the Trigger used by this controller
+         */
         public Trigger getTrigger() {
             return trigger;
         }
 
+        /**
+         * Returns the numeric value representing the current pressed state of this controller
+         * input.
+         *
+         * <p>This method queries {@link #isPressed()} at the time of invocation. If the input is
+         * pressed, the method returns {@code maxValue}; otherwise it returns {@code minValue}.
+         *
+         * @return {@code maxValue} when {@link #isPressed()} is true, otherwise {@code minValue}
+         */
         @Override
         public double getValue() {
             boolean isPressed = isPressed();
             return isPressed ? maxValue : minValue;
         }
 
+        /**
+         * Initializes this controller instance.
+         *
+         * <p>Performs superclass initialization and creates a {@code Trigger} that polls this
+         * controller's pressed state on the CommandScheduler's default button loop. The resulting
+         * trigger can be used to schedule commands or respond to button events.
+         *
+         * @param controller the controller to initialize
+         */
         @Override
         public void initialize(Controller controller) {
             super.initialize(controller);
@@ -1263,16 +1407,42 @@ public class Controller {
     }
 
     /**
-     * Axis interface
+     * Represents an analog axis control element of a controller.
      *
-     * <p>This represents an axis for code interaction
+     * <p>Axis instances model continuous two-directional inputs (for example joystick axes or
+     * triggers treated as axes). The constructor ensures a sensible default range by initializing
+     * {@code minValue} to -1.0 and {@code maxValue} to 1.0 when they are null.
+     *
+     * <p>The current axis reading is exposed via {@link #getValue()}, which returns the prepared
+     * value (i.e., the result of {@link #getPreparedValue()}, after any normalization, deadbanding,
+     * scaling or filtering provided by the superclass).
+     *
+     * <p>See {@link ControlElement} for shared behavior and lifecycle details.
      */
     public static class Axis extends ControlElement {
+        /**
+         * Constructs an Axis instance and ensures default axis bounds.
+         *
+         * <p>If the instance fields {@code minValue} or {@code maxValue} are {@code null}, they are
+         * initialized to -1.0 and 1.0 respectively. Existing non-null values are left unchanged.
+         * After this constructor completes, {@code minValue} and {@code maxValue} will be non-null.
+         */
         public Axis() {
             if (minValue == null) minValue = -1.0;
             if (maxValue == null) maxValue = 1.0;
         }
 
+        /**
+         * Returns the controller's current prepared value.
+         *
+         * <p>The returned value is the result of any preprocessing applied to the raw input (for
+         * example: deadband removal, scaling, smoothing, or other transformations) performed by
+         * getPreparedValue(). Use this method to obtain the controller's ready-to-use numeric
+         * output for control logic.
+         *
+         * @return the prepared controller value after preprocessing
+         * @see #getPreparedValue()
+         */
         @Override
         public double getValue() {
             return getPreparedValue();
@@ -1280,23 +1450,74 @@ public class Controller {
     }
 
     /**
-     * POV interface
+     * A ControlElement representing a POV (point-of-view / hat) switch on a controller.
      *
-     * <p>This represents a POV for code interaction
+     * <p>This element uses angular degrees to represent the hat position and reserves -1.0 to
+     * indicate the hat is not pressed/centered. The constructor initializes sensible defaults for
+     * the value range:
+     *
+     * <ul>
+     *   <li>minValue = -1.0 (sentinel for "not pressed")
+     *   <li>maxValue = 360.0 (maximum angle in degrees)
+     * </ul>
+     *
+     * <p>getValue() returns the prepared/normalized value provided by
+     * ControlElement#getPreparedValue(), typically yielding the current POV angle in degrees or
+     * -1.0 when the POV is not engaged.
      */
     public static class POV extends ControlElement {
+        /**
+         * Constructs a POV object and ensures default bounds are set.
+         *
+         * <p>If the instance fields for range limits are not already assigned, this constructor
+         * initializes them to sensible defaults: minValue is set to -1.0 and maxValue is set to
+         * 360.0. These defaults provide a sentinel lower bound and a full-circle upper bound in
+         * degrees.
+         */
         public POV() {
             if (minValue == null) minValue = -1.0;
             if (maxValue == null) maxValue = 360.0;
         }
 
+        /**
+         * Returns the current prepared value for this controller.
+         *
+         * <p>This method delegates to {@link #getPreparedValue()} and exposes the numeric
+         * representation of the controller's current state (for example, an axis or trigger
+         * position). The returned value should reflect any preprocessing or normalization performed
+         * by {@code getPreparedValue()}.
+         *
+         * @return the prepared controller value as a {@code double}
+         * @see #getPreparedValue()
+         */
         @Override
         public double getValue() {
             return getPreparedValue();
         }
     }
 
-    /** Finish loading the controller by initializing all controller interfaces */
+    /**
+     * Initialize all ControlElement instances managed by this controller.
+     *
+     * <p>The method iterates over the controller's collection of control elements and calls each
+     * element's initialize method, providing this controller as the initializing context. This
+     * allows each ControlElement to perform setup such as binding callbacks, registering listeners,
+     * or setting initial state that depends on the controller.
+     *
+     * <p>Subclasses may override to customize initialization order or behavior, but should call
+     * super.initializeControlElements() if they want the default bulk-initialization behavior
+     * preserved.
+     *
+     * <p>Notes:
+     *
+     * <ul>
+     *   <li>Assumes the controller's collection of elements is non-null; callers are responsible
+     *       for ensuring the collection is initialized before invoking this method.
+     *   <li>Exceptions thrown by individual elements' initialize implementations may prevent
+     *       subsequent elements from being initialized; callers or overrides may choose to
+     *       handle/log exceptions to ensure best-effort initialization.
+     * </ul>
+     */
     protected void initializeControlElements() {
         for (ControlElement controlElement : controllerElements.values()) {
             controlElement.initialize(this);
