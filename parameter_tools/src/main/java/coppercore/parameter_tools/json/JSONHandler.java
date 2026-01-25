@@ -257,10 +257,15 @@ public final class JSONHandler {
                 JSONPrimitiveCheckStrategy.checkForPrimitives(jsonNameStrategy, this.config);
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapterFactory(new JSONTypeAdapterFactory(this.config));
-        if (this.config.serializeNulls()) builder.serializeNulls();
-        if (this.config.prettyPrinting()) builder.setPrettyPrinting();
-        if (this.config.excludeFieldsWithoutExposeAnnotation())
+        if (this.config.serializeNulls()) {
+            builder.serializeNulls();
+        }
+        if (this.config.prettyPrinting()) {
+            builder.setPrettyPrinting();
+        }
+        if (this.config.excludeFieldsWithoutExposeAnnotation()) {
             builder.excludeFieldsWithoutExposeAnnotation();
+        }
         builder.setFieldNamingStrategy(jsonNameStrategy)
                 .setLongSerializationPolicy(this.config.longSerializationPolicy())
                 .addDeserializationExclusionStrategy(jsonExcludeStrategy)
