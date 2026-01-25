@@ -13,6 +13,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+
+// Some Javadoc written by Copilot based on user description
+
 /**
  * Controller class
  *
@@ -21,6 +24,77 @@ import java.util.function.Supplier;
  * element. Also includes raw interfaces that directly interact with the hardware.
  *
  * <p>Gets input from WPILib's DriverStation class
+ */
+/**
+ * High-level representation of a human interface controller and its mapped control elements.
+ *
+ * <p>This class encapsulates a physical controller (joystick/gamepad) connected to the robot and
+ * a collection of logical control elements (buttons, axes, POVs) that are exposed to the rest of
+ * the codebase by command names. A Controller is responsible for:
+ *
+ * <ul>
+ *   <li>Storing the hardware port and controller type.</li>
+ *   <li>Holding shorthand-to-id mappings for buttons, axes and POVs (used when resolving
+ *       human-readable identifiers such as "A" or "left_x" to numeric hardware IDs).</li>
+ *   <li>Maintaining a registry of low-level hardware bindings (LowLevelControlElement) and
+ *       higher-level ControlElement wrappers (Button, Axis, POV) keyed by command name.</li>
+ *   <li>Initializing all low-level and high-level elements so they become ready to read values
+ *       from the DriverStation and to participate in the command scheduler loop.</li>
+ * </ul>
+ *
+ * Usage and lifecycle
+ * <ol>
+ *   <li>A Controller is typically created by a JSON-to-Java loader (e.g. ControllerJsonRepresentation)
+ *       which populates fields and shorthand maps.</li>
+ *   <li>One or more ControlElement instances (which wrap LowLevelControlElement instances) are
+ *       registered with this Controller using addControlElementForCommand(...).</li>
+ *   <li>Once the Controller is fully configured and assigned a hardware port, initializeControlElements()
+ *       should be called. This resolves textual IDs to numeric IDs, assigns the controller port
+ *       into each low-level element, and initializes any button Triggers so they are wired into the
+ *       CommandScheduler default button loop.</li>
+ *   <li>After initialization the rest of the robot code can obtain Suppliers or primitive suppliers
+ *       (for example via ControlElement#getSupplier or getPrimitiveSupplier, or Button#getIsPressedSupplier)
+ *       to poll values or attach commands.</li>
+ * </ol>
+ *
+ * Value transformation and behavior
+ * <p>ControlElements support configurable inversion, clamping or linear remapping between arbitrary
+ * input and output ranges. Low-level elements expose raw hardware reads (via DriverStation) and
+ * provide helpers for deadband handling (axes) and POV semantics. Buttons additionally provide
+ * thresholding, hysteresis, and optional toggle behavior; toggled state is persisted in the Button
+ * instance and updated when the configured press threshold is crossed.
+ *
+ * Threading and performance
+ * <p>Reading control values ultimately queries the DriverStation and is expected to be called from
+ * robot-periodic contexts (main loop or default button loop). Calls are intended to be inexpensive,
+ * but any heavy processing should be avoided in tight control loops. The Controller and its element
+ * maps are not inherently thread-safe with respect to concurrent modification; construct and initialize
+ * controllers on robot startup and avoid mutating them from multiple threads.
+ *
+ * Error handling
+ * <p>During initialization low-level elements resolve their numeric IDs from shorthand maps or by
+ * parsing the configured string ID. If resolution fails (for example the shorthand is missing and
+ * the string is not an integer) initialization will throw a RuntimeException; callers should ensure
+ * JSON/configuration correctness or catch and surface initialization errors during robot setup.
+ *
+ * Interactions with other systems
+ * <ul>
+ *   <li>Control elements create Trigger instances wired to CommandScheduler#getDefaultButtonLoop()
+ *       when Buttons are initialized.</li>
+ *   <li>LowLevelControlElement implementations call DriverStation API methods to obtain current
+ *       hardware state.</li>
+ * </ul>
+ *
+ * Convenience accessors
+ * <p>Controller exposes typed lookup helpers (hasButton/getButton, hasAxis/getAxis, hasPOV/getPOV)
+ * and a generic hasControlElement/getControlElement API for programs that treat controls polymorphically.
+ *
+ * See Also:
+ * <ul>
+ *   <li>Controller.LowLevelControlElement — raw hardware binding and value preparation helpers</li>
+ *   <li>Controller.ControlElement, Controller.Button, Controller.Axis, Controller.POV — higher-level
+ *       wrappers providing application-facing behavior (thresholds, toggles, deadbands, mapping)</li>
+ * </ul>
  */
 public class Controller {
 
@@ -147,14 +221,13 @@ public class Controller {
         return (inverted) ? maxValue + minValue - value : value;
     }
 
-    // Might be able to optimize this
     private static double adjustRange(
             double value, double oldMin, double oldMax, double newMin, double newMax) {
         // Ensure value is inside old range
         double clampedValue = MathUtil.clamp(value, newMin, newMax);
-        // Need to double check this formula
+        // Calculate normalized value in old range
         double t = (clampedValue - oldMin) / (oldMax - oldMin);
-        // Also need to double check this formula
+        // Map the normalized value to the new range
         return t * (newMax - newMin) + newMin;
     }
 
@@ -173,7 +246,7 @@ public class Controller {
      * hardware such as a button or an axis
      */
     public abstract static class LowLevelControlElement {
-        public String controllerType;
+        public String elementType;
 
         @JSONName("id")
         public String stringID;
@@ -185,21 +258,80 @@ public class Controller {
         @JSONExclude protected int id;
         @JSONExclude protected int port;
 
+        /**
+         * Adjusts an input value to the controller's configured output range.
+         *
+         * <p>If the controller is configured to clamp values (the {@code clampValue} flag),
+         * the input {@code value} is constrained to lie within the controller's {@code minValue}
+         * and {@code maxValue} bounds using a clamping operation. Otherwise, the input {@code value}
+         * is linearly mapped from the source range defined by {@code oldMin}..{@code oldMax}
+         * into the target range defined by {@code minValue}..{@code maxValue}.
+         *
+         * @param value the input value to be adjusted
+         * @param oldMin the lower bound of the input (source) range
+         * @param oldMax the upper bound of the input (source) range
+         * @return the adjusted value either clamped to [minValue, maxValue] or scaled into that range
+         */
         protected double fixRange(double value, double oldMin, double oldMax) {
             return (clampValue)
                     ? MathUtil.clamp(value, minValue, maxValue)
                     : adjustRange(value, oldMin, oldMax, minValue, maxValue);
         }
 
+        
+        /**
+         * Prepare a raw input value for use by the controller.
+         *
+         * <p>The method first constrains the supplied {@code value} to the provided input range
+         * [{@code oldMin}, {@code oldMax}] (via {@code fixRange}), then applies the controller's
+         * inversion and output-range transformation (via {@code applyInversion}) using the instance
+         * configuration for {@code inverted}, {@code minValue}, and {@code maxValue}.
+         *
+         * @param value  the raw input value to normalize and transform
+         * @param oldMin the lower bound of the original input range (inclusive)
+         * @param oldMax the upper bound of the original input range (inclusive)
+         * @return the value clamped to the input range and then mapped/possibly inverted into the
+         *         controller's configured output range
+         * @see #fixRange(double, double, double)
+         * @see #applyInversion(double, boolean, double, double)
+         */
         protected double prepareValue(double value, double oldMin, double oldMax) {
             return applyInversion(fixRange(value, oldMin, oldMax), inverted, minValue, maxValue);
         }
 
+        /**
+         * Initialize this controller-binding instance using the provided Controller.
+         *
+         * <p>This method performs two main actions:
+         * <ol>
+         *   <li>Sets this.port to the value returned by controller.getPort().</li>
+         *   <li>Resolves a numeric ID for this instance from the instance field {@code stringID}:
+         *     <ul>
+         *       <li>If {@code elementType} equals {@code "button"}, {@code "axis"} or {@code "pov"},
+         *           the method first attempts to look up the numeric ID in the corresponding
+         *           shorthand map on the provided {@code controller} ({@code buttonShorthands},
+         *           {@code axisShorthands} or {@code povShorthands}).</li>
+         *       <li>If no mapping is found, the method attempts to parse {@code stringID} as an
+         *           integer using {@link Integer#parseInt(String)}.</li>
+         *     </ul>
+         *   </li>
+         *   <li>When a numeric ID is successfully resolved, it is assigned to this instance's
+         *       {@code id} field.</li>
+         * </ol>
+         *
+         * <p>Note: {@code elementType} and {@code stringID} are expected to be fields of the
+         * containing object; they are consulted during resolution.
+         *
+         * @param controller the Controller used to obtain the port and any shorthand mappings;
+         *                   must not be {@code null}
+         * @throws RuntimeException if {@code stringID} cannot be resolved to an integer via
+         *                          the controller's shorthand maps or by parsing
+         */
         public void initialize(Controller controller) {
             this.port = controller.getPort();
 
             Integer resolvedID = null;
-            switch (controllerType) {
+            switch (elementType) {
                 case "button":
                     resolvedID = controller.buttonShorthands.get(stringID);
                     break;
@@ -222,26 +354,63 @@ public class Controller {
             this.id = resolvedID;
         }
 
+        /**
+         * Returns the current numeric value represented by this controller.
+         *
+         * <p>The exact meaning, units, and valid range of the returned value are implementation-dependent.
+         * Concrete subclasses should document whether the value represents, for example, a joystick axis
+         * (commonly in the range -1.0 to 1.0), a sensor measurement, a computed control output, or another quantity.
+         *
+         * <p>Implementations should aim for this method to be side-effect free and inexpensive to call,
+         * as it may be invoked frequently by control loops, logging, or telemetry systems.
+         *
+         * @return the current value of this controller as a double
+         */
         public abstract double getValue();
     }
 
     /**
-     * Raw button interface
+     * Low-level control element representing a digital button on a joystick or controller.
      *
-     * <p>This represents a button on the controller
+     * <p>This class maps a digital press/release state to a numeric value suitable for
+     * the controller framework. By default the elementType is set to "button" and the
+     * numeric range is initialized to [0.0, 1.0], reflecting the binary nature of a
+     * button (released = 0.0, pressed = 1.0).
      *
-     * <p>Values range from 0.0 (not pressed) to 1.0 (pressed)
+     * <p>Instances are thin wrappers around the underlying hardware input and do not
+     * cache state; callers should invoke {@code getValue()} from an appropriate control
+     * context (for example the main robot loop) to obtain fresh readings.
      *
-     * <p>It returns 1.0 when pressed and 0.0 when not pressed It also includes no debouncing or
-     * toggling
+     * @see LowLevelControlElement
      */
     public static class LowLevelButton extends LowLevelControlElement {
 
         public LowLevelButton() {
+            elementType = "button";
             if (minValue == null) minValue = 0.0;
             if (maxValue == null) maxValue = 1.0;
         }
 
+        /**
+         * Returns the current numeric value for this controller input.
+         *
+         * <p>This method queries the DriverStation for the digital state of the button
+         * identified by this controller's port and id. The boolean pressed state is
+         * converted to a numeric value (1.0 when pressed, 0.0 when not pressed) and
+         * then passed to {@code prepareValue(double, double, double)} with a dead zone
+         * of 0.0 and a maximum of 1.0. Any normalization, filtering, or clamping done
+         * by {@code prepareValue} will be applied to the result.
+         *
+         * <p>Note: This reads hardware state from the DriverStation; call it from
+         * appropriate robot control contexts (for example the main control loop) and
+         * avoid calling it excessively from non-real-time threads if {@code prepareValue}
+         * is expensive.
+         *
+         * @return a normalized value in the range [0.0, 1.0]: 1.0 if the underlying
+         *         button is pressed, 0.0 if not, after applying {@code prepareValue}.
+         * @see edu.wpi.first.wpilibj.DriverStation#getStickButton(int, int)
+         * @see #prepareValue(double, double, double)
+         */
         public double getValue() {
             boolean pressed = DriverStation.getStickButton(port, id);
             return prepareValue((pressed) ? 1.0 : 0.0, 0.0, 1.0);
@@ -262,10 +431,39 @@ public class Controller {
         public Boolean remapDeadbanded = false;
 
         public LowLevelAxis() {
+            elementType = "axis";
             if (minValue == null) minValue = -1.0;
             if (maxValue == null) maxValue = 1.0;
         }
 
+        /**
+         * Applies the configured deadband to a joystick/controller input value.
+         *
+         * <p>Behavior depends on the instance flags and thresholds:
+         * <ul>
+         *   <li>If {@code remapDeadbanded} is {@code false}, the method simply clips small inputs:
+         *       returns {@code 0.0} when {@code Math.abs(value) < deadband}, otherwise returns the
+         *       original {@code value} unchanged.</li>
+         *   <li>If {@code remapDeadbanded} is {@code true}, inputs inside the deadband are mapped to
+         *       {@code 0.0}, while inputs outside the deadband are linearly rescaled so that the
+         *       remaining range {@code [deadband, 1.0]} is remapped to {@code [0.0, 1.0]}. The original
+         *       sign of {@code value} is preserved.</li>
+         * </ul>
+         *
+         * <p>Example (when remapping enabled):
+         * adjustedValue = (|value| - deadband) / (1.0 - deadband); result = sign(value) * adjustedValue
+         *
+         * @param value the input value to process (commonly in the range -1.0 to 1.0)
+         * @return the value after applying the deadband and optional remapping. The return value will
+         *         be {@code 0.0} for inputs within the deadband, and otherwise will preserve the sign of
+         *         the original input. When remapping is enabled, non-zero outputs are scaled to occupy
+         *         the full output range outside the deadband.
+         *
+         * @implNote This method relies on the instance fields {@code deadband} (expected in the range
+         *           [0.0, 1.0)) and {@code remapDeadbanded}. If {@code deadband} is equal to or greater
+         *           than {@code 1.0}, remapping will cause a division by zero; such values are not
+         *           supported and should be avoided or validated elsewhere.
+         */
         protected double applyDeadband(double value) {
             if (remapDeadbanded == false) {
                 return (Math.abs(value) < deadband) ? 0.0 : value;
@@ -279,6 +477,19 @@ public class Controller {
             }
         }
 
+        /**
+         * Returns the current processed axis value for this controller.
+         *
+         * <p>This method reads the raw axis value from the DriverStation using this
+         * controller's configured port and axis id, applies the configured deadband to
+         * ignore small inputs, and then prepares the value (for example scaling or
+         * clamping) into the configured minimum/maximum range via {@code prepareValue}.
+         *
+         * <p>The raw axis value is typically in the range [-1.0, 1.0]; the returned
+         * value will be constrained to [minValue, maxValue] after preparation.
+         *
+         * @return the processed axis value after deadband filtering and range preparation
+         */
         public double getValue() {
             double value = DriverStation.getStickAxis(port, id);
             return prepareValue(applyDeadband(value), minValue, maxValue);
@@ -295,6 +506,7 @@ public class Controller {
     public static class LowLevelPOV extends LowLevelControlElement {
 
         public LowLevelPOV() {
+            elementType = "pov";
             if (minValue == null) minValue = -1.0;
             if (maxValue == null) maxValue = 360.0;
         }
