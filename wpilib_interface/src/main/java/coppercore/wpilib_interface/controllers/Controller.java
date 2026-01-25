@@ -112,57 +112,58 @@ public class Controller {
      * Port index identifying which hardware/controller port this Controller is bound to.
      *
      * <p>Uses -1 as a sentinel value to indicate that the port has not been assigned
-     * (uninitialized). When assigned, the value should be a non-negative integer
-     * corresponding to a valid hardware mapping or driver-station port index.
+     * (uninitialized). When assigned, the value should be a non-negative integer corresponding to a
+     * valid hardware mapping or driver-station port index.
      *
-     * <p>Consumers should validate the port value before using it (e.g. port >= 0)
-     * and set it during initialization to avoid relying on the sentinel value.
+     * <p>Consumers should validate the port value before using it (e.g. port >= 0) and set it
+     * during initialization to avoid relying on the sentinel value.
      */
     int port = -1;
+
     /**
      * The type of controller associated with this object.
      *
-     * Identifies the specific ControllerType (for example, XBOX, PLAYSTATION, GENERIC, etc.)
+     * <p>Identifies the specific ControllerType (for example, XBOX, PLAYSTATION, GENERIC, etc.)
      * used to interpret button/axis mappings and controller-specific behavior. This field is
      * consulted when translating hardware input into logical commands and when applying any
      * controller-dependent processing.
      *
-     * May be null if no controller type has been set.
+     * <p>May be null if no controller type has been set.
      *
      * @see ControllerType
      */
     ControllerType controllerType;
+
     /**
-     * Maps human-friendly button shorthand names to their integer identifiers used by the controller.
+     * Maps human-friendly button shorthand names to their integer identifiers used by the
+     * controller.
      *
-     * <p>For example: "A" -> 1, "B" -> 2, "TRIGGER" -> 0. The map is initially null and is expected to
-     * be populated during controller initialization or configuration loading.
+     * <p>For example: "A" -> 1, "B" -> 2, "TRIGGER" -> 0. The map is initially null and is expected
+     * to be populated during controller initialization or configuration loading.
      *
-     * <p>Contract and usage notes:
-     * - Keys: non-null String shorthand (case conventions should be documented/normalized by the
-     *   initializer).
-     * - Values: Integer button indices/IDs as expected by the underlying WPILib interface.
-     * - The field may be mutated after initialization; callers should not assume immutability.
-     * - If this field remains null, callers must initialize it before use to avoid
-     *   NullPointerException.
-     * - If accessed concurrently, ensure external synchronization or replace with a concurrent map
-     *   implementation (e.g., ConcurrentHashMap).
+     * <p>Contract and usage notes: - Keys: non-null String shorthand (case conventions should be
+     * documented/normalized by the initializer). - Values: Integer button indices/IDs as expected
+     * by the underlying WPILib interface. - The field may be mutated after initialization; callers
+     * should not assume immutability. - If this field remains null, callers must initialize it
+     * before use to avoid NullPointerException. - If accessed concurrently, ensure external
+     * synchronization or replace with a concurrent map implementation (e.g., ConcurrentHashMap).
      */
     HashMap<String, Integer> buttonShorthands = null;
+
     /**
      * Maps human-readable axis names to their numeric axis IDs for the controller.
      *
-     * Example entries: "LX" -> 0, "LY" -> 1, "RX" -> 2, etc. This allows code to refer to
-     * axes by name instead of hard-coded integers.
+     * <p>Example entries: "LX" -> 0, "LY" -> 1, "RX" -> 2, etc. This allows code to refer to axes
+     * by name instead of hard-coded integers.
      *
-     * Notes:
-     * - Keys are non-null axis name strings; values are non-null Integer axis indices.
-     * - The field is initialized to null and should be populated during controller setup.
-     * - Not thread-safe: synchronize externally if accessed from multiple threads.
+     * <p>Notes: - Keys are non-null axis name strings; values are non-null Integer axis indices. -
+     * The field is initialized to null and should be populated during controller setup. - Not
+     * thread-safe: synchronize externally if accessed from multiple threads.
      *
      * @see java.util.HashMap
      */
     HashMap<String, Integer> axisShorthands = null;
+
     /**
      * Mapping of POV (hat/D-pad) shorthand identifiers to their corresponding integer angle values.
      *
@@ -176,61 +177,61 @@ public class Controller {
      * synchronization is required.
      */
     HashMap<String, Integer> povShorthands = null;
+
     /**
      * Maps controller element identifiers to their corresponding ControlElement instances.
      *
      * <p>Keys are String identifiers (for example button or axis names) used to look up elements.
-     * Values are the ControlElement objects that represent logical inputs of the controller.</p>
+     * Values are the ControlElement objects that represent logical inputs of the controller.
      *
      * <p>The map is initialized empty and is intended to be managed through the class's
      * registration and lookup methods rather than accessed directly. Note that HashMap is not
-     * thread-safe; synchronize externally if this field may be accessed from multiple threads.</p>
+     * thread-safe; synchronize externally if this field may be accessed from multiple threads.
      */
     private HashMap<String, ControlElement> controllerElements = new HashMap<>();
+
     /**
      * Maps button identifiers to their associated Button objects for this controller.
      *
-     * Each entry associates a unique String key (typically a button name or ID)
-     * with a Button instance that encapsulates that button's state and behavior.
+     * <p>Each entry associates a unique String key (typically a button name or ID) with a Button
+     * instance that encapsulates that button's state and behavior.
      *
-     * This map is used to register, retrieve, and manage the buttons exposed by
-     * the controller implementation. Note that HashMap is not thread-safe; if
-     * buttons may be accessed or modified from multiple threads concurrently,
-     * external synchronization is required.
+     * <p>This map is used to register, retrieve, and manage the buttons exposed by the controller
+     * implementation. Note that HashMap is not thread-safe; if buttons may be accessed or modified
+     * from multiple threads concurrently, external synchronization is required.
      */
     HashMap<String, Button> buttons = new HashMap<>();
+
     /**
      * Maps axis identifiers to their corresponding Axis objects.
      *
-     * Each entry associates a String key (the axis name or identifier) with an
-     * Axis instance that represents an analog axis on the controller. The map is
-     * initialized empty and is intended to be populated during controller setup so
-     * callers can look up axes by name.
+     * <p>Each entry associates a String key (the axis name or identifier) with an Axis instance
+     * that represents an analog axis on the controller. The map is initialized empty and is
+     * intended to be populated during controller setup so callers can look up axes by name.
      *
-     * Note: The map is mutable. If it may be accessed concurrently, callers should
-     * perform appropriate synchronization or use a concurrent map implementation.
+     * <p>Note: The map is mutable. If it may be accessed concurrently, callers should perform
+     * appropriate synchronization or use a concurrent map implementation.
      */
     HashMap<String, Axis> axes = new HashMap<>();
+
     /**
      * Maps POV (point-of-view / D-pad) identifiers to their corresponding POV objects.
      *
-     * <p>The map stores the set of POV inputs associated with this controller, keyed by a
-     * string identifier for each POV (for example a name or index). It is initialized empty
-     * and intended to be populated and updated as POVs are discovered or their states change.
+     * <p>The map stores the set of POV inputs associated with this controller, keyed by a string
+     * identifier for each POV (for example a name or index). It is initialized empty and intended
+     * to be populated and updated as POVs are discovered or their states change.
      *
-     * <p>Clients may use standard Map operations (get/put/remove) to query and modify entries.
-     * Note that this is a plain HashMap and therefore not thread-safe; synchronize externally
-     * if concurrent access from multiple threads is possible.
+     * <p>Clients may use standard Map operations (get/put/remove) to query and modify entries. Note
+     * that this is a plain HashMap and therefore not thread-safe; synchronize externally if
+     * concurrent access from multiple threads is possible.
      */
     HashMap<String, POV> povs = new HashMap<>();
 
-    /**
-     * Static initializer to register JSON conversion for Controller class.
-     */
+    /** Static initializer to register JSON conversion for Controller class. */
     static {
         JSONConverter.addConversion(Controller.class, ControllerJsonRepresentation.class);
     }
-    
+
     /**
      * Returns the port number associated with this controller.
      *
@@ -651,8 +652,8 @@ public class Controller {
          *   <li>If {@code remapDeadband} is {@code false}, the method simply clips small inputs:
          *       returns {@code 0.0} when {@code Math.abs(value) < deadband}, otherwise returns the
          *       original {@code value} unchanged.
-         *   <li>If {@code remapDeadband} is {@code true}, inputs inside the deadband are mapped
-         *       to {@code 0.0}, while inputs outside the deadband are linearly rescaled so that the
+         *   <li>If {@code remapDeadband} is {@code true}, inputs inside the deadband are mapped to
+         *       {@code 0.0}, while inputs outside the deadband are linearly rescaled so that the
          *       remaining range {@code [deadband, 1.0]} is remapped to {@code [0.0, 1.0]}. The
          *       original sign of {@code value} is preserved.
          * </ul>
@@ -666,9 +667,9 @@ public class Controller {
          *     sign of the original input. When remapping is enabled, non-zero outputs are scaled to
          *     occupy the full output range outside the deadband.
          *     <p>Implementation note: This method relies on the instance fields {@code deadband}
-         *     (expected in the range [0.0, 1.0)) and {@code remapDeadband}. If {@code deadband}
-         *     is equal to or greater than {@code 1.0}, remapping will cause a division by zero;
-         *     such values are not supported and should be avoided or validated elsewhere.
+         *     (expected in the range [0.0, 1.0)) and {@code remapDeadband}. If {@code deadband} is
+         *     equal to or greater than {@code 1.0}, remapping will cause a division by zero; such
+         *     values are not supported and should be avoided or validated elsewhere.
          */
         protected double applyDeadband(double value) {
             if (remapDeadband == false) {
@@ -846,13 +847,96 @@ public class Controller {
         @JSONName("controllerInterface")
         LowLevelControlElement lowLevelControlElement;
 
+        /**
+         * Logical command identifier for this control element.
+         *
+         * <p>A short, human-readable key that names the action or command represented by this
+         * control (for example "shoot", "drive_forward", "intake_toggle"). This string is used as:
+         *
+         * <ul>
+         *   <li>a lookup key in the Controller's element maps (buttons/axes/povs)
+         *   <li>a stable identifier in JSON configuration and persistence
+         *   <li>a label for telemetry, logging and command bindings
+         * </ul>
+         *
+         * <p>Guidelines and semantics:
+         *
+         * <ul>
+         *   <li>Must be non-null and ideally unique within a single Controller instance.
+         *   <li>Prefer a concise, machine-friendly format (e.g. lower_snake_case, camelCase or
+         *       kebab-case).
+         *   <li>Avoid leading/trailing whitespace; do not rely on this field for localization.
+         *   <li>Changes to this value will affect configuration lookups and persisted mappings.
+         * </ul>
+         *
+         * <p>Example: "arm_extend", "climb_toggle", "left_x". The field is intended for
+         * identification only and does not change runtime behavior of the element itself.
+         */
         public String command;
+
+        /**
+         * Identifier for the type of command this controller represents.
+         *
+         * <p>This string describes how input associated with the controller should be interpreted
+         * (for example: "button", "axis", "trigger", "dpad", etc.) and is used to select the
+         * appropriate handling or routing logic.
+         *
+         * <p>Values should correspond to the set of supported command types in the application.
+         * Consumers should treat this value as meaningful only when it is non-null and matches an
+         * expected command type identifier.
+         */
         public String commandType;
+
+        /**
+         * When true, the element's output is inverted within its configured [minValue, maxValue]
+         * range by mapping a value to (minValue + maxValue - value). This preserves the configured
+         * output range and works for asymmetric ranges (for example [-1,1], [0,1], or any custom
+         * min/max). It is NOT a simple sign flip; it mirrors the value around the midpoint of the
+         * configured range.
+         *
+         * <p>When false, values are passed through unchanged.
+         */
         public Boolean inverted = false;
+
+        /**
+         * Configured minimum of the element's output range.
+         *
+         * <p>If null, this indicates "use the low-level element's minimum" or that a subclass will
+         * supply a sensible default (for example Axis -> -1.0, Button -> 0.0, POV -> -1.0).
+         */
         public Double minValue;
+
+        /**
+         * Configured maximum of the element's output range.
+         *
+         * <p>If null, this indicates "use the low-level element's maximum" or that a subclass will
+         * supply a sensible default (for example Axis -> 1.0, Button -> 1.0, POV -> 360.0).
+         */
         public Double maxValue;
+
+        /**
+         * Determines how values are adjusted into the configured range.
+         *
+         * <p>If true, values produced or consumed by this controller are constrained to the
+         * controller's valid range (for example, clamping to -1.0..1.0). When false, values sre
+         * scaled or adjusted from the low-level element's range into the configured range
+         *
+         * <p>Default value is false.
+         */
         public Boolean clampValue = false;
 
+        /**
+         * Constrains or maps a raw input value into this controller's configured output range.
+         *
+         * <p>If {@code clampValue} is {@code true}, the input is clamped to the inclusive range
+         * {@code [minValue, maxValue]} using {@code MathUtil.clamp}. Otherwise the input is
+         * linearly mapped from the low-level control element's range {@code
+         * [lowLevelControlElement.minValue, lowLevelControlElement.maxValue]} into the controller's
+         * target range {@code [minValue, maxValue]} using {@code adjustRange}.
+         *
+         * @param value the raw input value to be constrained or mapped
+         * @return the value coerced into this controller's range (either clamped or adjusted)
+         */
         protected double fixRange(double value) {
             return (clampValue)
                     ? MathUtil.clamp(value, minValue, maxValue)
@@ -864,72 +948,231 @@ public class Controller {
                             maxValue);
         }
 
+        /**
+         * Returns the prepared control value ready for higher-level use.
+         *
+         * <p>The method obtains the raw value from the low-level control element, corrects it with
+         * fixRange(...), and then applies optional inversion and scaling via applyInversion(...),
+         * using the inverted flag and the configured minValue and maxValue bounds.
+         *
+         * @return the processed control value after range correction and optional inversion
+         *     (constrained to the configured min/max)
+         */
         protected double getPreparedValue() {
             return applyInversion(
                     fixRange(lowLevelControlElement.getValue()), inverted, minValue, maxValue);
         }
 
         /**
-         * Get the value of the controller interface
+         * Returns the current value produced by this controller.
          *
-         * @return The value
+         * <p>Implementations should provide a double representing the current state of the
+         * controller (for example an axis position, trigger level, or a computed control signal).
+         * The precise meaning, scaling and valid range of the returned value are defined by the
+         * concrete implementation.
+         *
+         * @return the current controller value
          */
         public abstract double getValue();
 
         /**
-         * Initialize the controller interface
+         * Initializes this controller by delegating to the encapsulated low-level control element.
          *
-         * @param controller The controller to initialize with
+         * <p>The provided {@code controller} is forwarded to {@code
+         * lowLevelControlElement.initialize(controller)}, allowing the low-level element to perform
+         * any necessary setup or resource allocation required for subsequent control operations.
+         *
+         * @param controller the Controller instance used to initialize the low-level element; must
+         *     not be null
+         * @throws NullPointerException if {@code controller} is null
          */
         public void initialize(Controller controller) {
             lowLevelControlElement.initialize(controller);
         }
 
         /**
-         * Get a Supplier for the value of the controller interface
+         * Returns a Supplier that, when invoked, retrieves the current numeric value from this
+         * controller.
          *
-         * @return The Supplier
+         * <p>The returned {@code Supplier<Double>} delegates to {@link #getValue()} each time it is
+         * called, so it always reflects the controller's most recent value rather than caching a
+         * previous result.
+         *
+         * <p>Note: the supplier object itself is non-null; however, thread-safety and any side
+         * effects depend on the implementation of {@link #getValue()}.
+         *
+         * @return a non-null {@code Supplier<Double>} that obtains the current value by calling
+         *     {@link #getValue()}
          */
         public Supplier<Double> getSupplier() {
             return this::getValue;
         }
 
         /**
-         * Get a DoubleSupplier for the value of the controller interface
+         * Returns a DoubleSupplier that supplies the current primitive double value from this controller.
          *
-         * @return The DoubleSupplier
+         * <p>The supplier delegates to {@link #getValue()}, providing the value as a primitive double
+         * (avoiding boxing) each time it is invoked.
+         *
+         * @return a {@link java.util.function.DoubleSupplier} that invokes {@link #getValue()} to obtain the current value
          */
         public DoubleSupplier getPrimitiveSupplier() {
             return this::getValue;
         }
     }
 
+
     /**
-     * Button interface
+     * Represents a configurable button-style control element that interprets a numeric input
+     * value as a boolean "pressed" state with optional threshold, range, hysteresis and toggle
+     * behavior. This is a static nested class extending ControlElement and is intended to be
+     * used where an analog or continuous input should behave like a discrete button.
      *
-     * <p>This represents a button for code interaction
+     * Features and behavior:
+     * - threshold: The central value above which (or within a range around which) the button
+     *   is considered pressed. If null, behavior depends on minValue/maxValue from the
+     *   enclosing ControlElement.
+     * - thresholdRange: Optional symmetric range around threshold. When provided, the accepted
+     *   region is [threshold - thresholdRange/2, threshold + thresholdRange/2].
+     * - hysteresis: Optional hysteresis amount that adjusts the computed lower/upper bounds
+     *   based on the previous button state (lastState). When lastState is true the bounds
+     *   are expanded by hysteresis (making it easier to remain pressed); when lastState is
+     *   false the bounds are contracted by hysteresis (making it harder to become pressed).
+     *   This reduces chattering around the threshold.
+     * - isToggle / isToggled: When isToggle is true, the button acts as a toggle: on each
+     *   rising edge (pressed && !lastState) isToggled flips and becomes the effective pressed
+     *   state returned by isPressed(). lastState is updated to track the raw pressed signal
+     *   for edge detection. When isToggle is false, isPressed() simply reflects the measured
+     *   pressed value.
+     * - lastState: Tracks the previous raw pressed state used for hysteresis and toggle
+     *   edge-detection logic.
      *
-     * <p>This includes thresholds, hysteresis, and toggling
+     * Key methods:
+     * - testThreshold(double value): Computes whether the given value lies within the
+     *   threshold-based bounds, taking thresholdRange and hysteresis into account.
+     * - applyToggle(boolean pressed): Applies toggle semantics if enabled; otherwise returns
+     *   the raw pressed value. Updates lastState appropriately for toggle edge detection.
+     * - isPressed(): Reads the prepared/normalized input value, clamps it to minValue/maxValue,
+     *   tests it against the threshold rules and returns the effective boolean pressed state
+     *   (respecting toggle mode if enabled).
+     * - getIsPressedSupplier(), getPrimitiveIsPressedSupplier(): Convenience suppliers for
+     *   use with APIs that accept Supplier<Boolean> or BooleanSupplier.
+     * - getValue(): Returns maxValue when the button is considered pressed, otherwise minValue.
+     * - initialize(Controller): Initializes the button and creates a Trigger that samples the
+     *   button state on the CommandScheduler's default button loop using this::isPressed.
+     *
+     * Defaults:
+     * - The constructor ensures minValue defaults to 0.0 and maxValue defaults to 1.0 if not set.
+     *
+     * Notes:
+     * - isPressed() clamps the raw value using MathUtil.clamp(minValue, maxValue) before
+     *   threshold testing.
+     * - The hysteresis implementation adjusts both lower and upper bounds based on the
+     *   previous state; callers should be aware of this behavior when tuning hysteresis.
      */
     public static class Button extends ControlElement {
-        public Double threshold =
-                0.0; // This is the value above which the button is considered pressed
-        public Double thresholdRange = null; // This is the range above the threshold for hysteresis
-        public Double hysteresis =
-                null; // This is the amount the value must drop below the threshold to be considered
-        // released
+        /**
+         * Deadband threshold for controller inputs.
+         *
+         * <p>Inputs with absolute value less than this threshold are treated as zero and
+         * should be ignored by input processing. Default value is 0.0.
+         *
+         * <p>Expected to be used with controller input values on the same scale
+         * (commonly -1.0 to 1.0). Adjust as needed to filter out small/intentional noise.
+         */
+        public Double threshold = 0.0;
+        /**
+         * Optional tolerance or hysteresis width applied around the controller's primary threshold.
+         *
+         * This nullable Double represents an additional range (radius) around a configured
+         * threshold value. When non-null, values within this range are treated as inside the
+         * threshold band, allowing for tolerance or hysteresis in threshold comparisons.
+         * When null, no additional range is applied and comparisons should be strict.
+         *
+         * Expected usage:
+         * - Set to a non-negative Double to enable a threshold band.
+         * - Leave as null to indicate "no range configured".
+         *
+         * Note: Negative values are not meaningful and should be avoided.
+         */
+        public Double thresholdRange = null;
+        /**
+         * Hysteresis threshold for the controller.
+         *
+         * When non-null, changes smaller than this absolute threshold (i.e. within
+         * +/- hysteresis) are considered insignificant and will not cause the
+         * controller to change its output or to consider the setpoint reached. This
+         * is useful for preventing rapid oscillation when the measured value hovers
+         * near the setpoint.
+         *
+         * The value uses the same units and scale as the controller's inputs/outputs.
+         * A null value disables hysteresis (default). Callers should provide a
+         * non-negative value when enabling hysteresis; negative values are considered
+         * invalid.
+         */
+        public Double hysteresis = null;
+        /**
+         * If true, this controller input is treated as a toggle: each activation flips the logical state
+         * rather than directly mirroring the raw input. When false, the control behaves as a momentary
+         * (non-latching) input and simply reflects the current input state.
+         *
+         * Default: false
+         */
         public Boolean isToggle = false;
-        public Boolean isToggled = false;
-        public Boolean lastState = false;
-        public Trigger trigger;
+        @JSONExclude private boolean isToggled = false;
+        @JSONExclude private boolean lastState = false;
+        @JSONExclude private Trigger trigger;
 
-        // Maybe optimize this by storing the bounds instead of calculating them every time
+
+        /**
+         * Determines whether the supplied value lies within the controller's computed
+         * threshold window.
+         *
+         * The window (lowerBound..upperBound) is computed as follows:
+         * - If {@code thresholdRange} is non-null, the window is centered on
+         *   {@code threshold} with half-width {@code thresholdRange / 2.0}:
+         *     lowerBound = threshold - thresholdRange/2.0
+         *     upperBound = threshold + thresholdRange/2.0
+         * - If {@code thresholdRange} is null, the lower bound is {@code threshold}
+         *   and the upper bound defaults to {@code maxValue}. In this case, if
+         *   {@code hysteresis} is non-null the upper bound is first increased by
+         *   {@code hysteresis} to help tolerate a jump over the threshold.
+         *
+         * If {@code hysteresis} is non-null, an additional adjustment is applied using
+         * the current {@code lastState}:
+         * - A multiplier of +1.0 is used when {@code lastState} is true, and -1.0
+         *   when false.
+         * - The lower bound is adjusted by subtracting {@code hysteresis * multiplier},
+         *   and the upper bound is adjusted by adding {@code hysteresis * multiplier}.
+         *   Effectively, when {@code lastState} is true the window is expanded outward
+         *   by {@code hysteresis}; when false the window is moved inward by
+         *   {@code hysteresis}.
+         *
+         * Comparison is inclusive: the method returns {@code true} if
+         * {@code value >= lowerBound && value <= upperBound}.
+         *
+         * Notes:
+         * - This method relies on instance fields: {@code threshold}, {@code maxValue},
+         *   {@code thresholdRange}, {@code hysteresis}, and {@code lastState}.
+         * - {@code thresholdRange} and {@code hysteresis} may be {@code null}; the
+         *   method handles those cases as described above.
+         *
+         * @param value the value to test against the computed threshold window
+         * @return {@code true} if the value falls within the inclusive computed bounds,
+         *         otherwise {@code false}
+         */
         protected boolean testThreshold(double value) {
             double lowerBound = threshold;
-            double upperBound = threshold;
+            double upperBound = maxValue;
             if (thresholdRange != null) {
                 lowerBound = threshold - thresholdRange / 2.0;
                 upperBound = threshold + thresholdRange / 2.0;
+            }else {
+                // This is to handle the case where only threshold is set
+                // and there is hysteresis and the value jumps over the threshold
+                // when there is no thresholdRange such as jumping from 0.0 to 1.0
+                // when threshold is 0.5 and hysteresis is greater than 0.0
+                upperBound += (hysteresis != null) ? hysteresis : 0.0;
             }
             if (hysteresis != null) {
                 double hysteresis_multiplier = lastState ? 1.0 : -1.0;
@@ -939,6 +1182,25 @@ public class Controller {
             return value >= lowerBound && value <= upperBound;
         }
 
+        /**
+         * Applies toggle semantics to a raw button input.
+         *
+         * <p>When toggle mode (isToggle) is enabled, a rising edge (pressed == true and lastState == false)
+         * flips the internal isToggled flag. lastState is updated to the current pressed value and the
+         * method returns the current toggled state.</p>
+         *
+         * <p>When toggle mode is disabled, the method returns the raw pressed value.
+         *
+         * <p>Side effects: updates lastState and may update isToggled when a rising edge is detected.</p>
+         *
+         * @param pressed the current raw input state (true if the control is currently pressed)
+         * @return the effective output state after applying toggle logic:
+         *         - if isToggle is true, the current toggled state (isToggled);
+         *         - otherwise, the raw pressed value
+         *
+         * Implementation Note: This method is protected and not synchronized. If accessed concurrently from multiple
+         *           threads, external synchronization is required to ensure correctness.
+         */
         protected boolean applyToggle(boolean pressed) {
             if (isToggle) {
                 if (pressed && !lastState) {
@@ -951,6 +1213,17 @@ public class Controller {
             }
         }
 
+        /**
+         * Constructs a new Button and ensures its value bounds are initialized.
+         *
+         * <p>If the instance fields {@code minValue} or {@code maxValue} are {@code null},
+         * they are assigned default bounds: {@code minValue} becomes {@code 0.0} and
+         * {@code maxValue} becomes {@code 1.0}. This guarantees a valid numeric range
+         * for consumers of the Button and prevents {@code NullPointerException}s when
+         * the bounds are accessed or used in computations.</p>
+         *
+         * <p>Note: existing non-null values are left unchanged.</p>
+         */
         public Button() {
             if (minValue == null) minValue = 0.0;
             if (maxValue == null) maxValue = 1.0;
