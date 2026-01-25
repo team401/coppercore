@@ -109,6 +109,7 @@ public class ControllerType {
         return this;
     }
 
+    //TODO: Add pov shorthands to some controller types below if needed
     static {
         registerControllerType(
                 "joystick",

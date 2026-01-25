@@ -4,6 +4,7 @@ import coppercore.parameter_tools.json.annotations.JSONExclude;
 import coppercore.parameter_tools.json.annotations.JSONName;
 import coppercore.parameter_tools.json.annotations.JsonSubtype;
 import coppercore.parameter_tools.json.annotations.JsonType;
+import coppercore.parameter_tools.json.helpers.JSONConverter;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -106,21 +107,134 @@ import java.util.function.Supplier;
  */
 public class Controller {
 
+    // These fields are initialized in ControllerJsonRepresentation.toJava
+    /**
+     * Port index identifying which hardware/controller port this Controller is bound to.
+     *
+     * <p>Uses -1 as a sentinel value to indicate that the port has not been assigned
+     * (uninitialized). When assigned, the value should be a non-negative integer
+     * corresponding to a valid hardware mapping or driver-station port index.
+     *
+     * <p>Consumers should validate the port value before using it (e.g. port >= 0)
+     * and set it during initialization to avoid relying on the sentinel value.
+     */
     int port = -1;
+    /**
+     * The type of controller associated with this object.
+     *
+     * Identifies the specific ControllerType (for example, XBOX, PLAYSTATION, GENERIC, etc.)
+     * used to interpret button/axis mappings and controller-specific behavior. This field is
+     * consulted when translating hardware input into logical commands and when applying any
+     * controller-dependent processing.
+     *
+     * May be null if no controller type has been set.
+     *
+     * @see ControllerType
+     */
     ControllerType controllerType;
-    // initialized in ControllerJsonRepresentation.toJava
+    /**
+     * Maps human-friendly button shorthand names to their integer identifiers used by the controller.
+     *
+     * <p>For example: "A" -> 1, "B" -> 2, "TRIGGER" -> 0. The map is initially null and is expected to
+     * be populated during controller initialization or configuration loading.
+     *
+     * <p>Contract and usage notes:
+     * - Keys: non-null String shorthand (case conventions should be documented/normalized by the
+     *   initializer).
+     * - Values: Integer button indices/IDs as expected by the underlying WPILib interface.
+     * - The field may be mutated after initialization; callers should not assume immutability.
+     * - If this field remains null, callers must initialize it before use to avoid
+     *   NullPointerException.
+     * - If accessed concurrently, ensure external synchronization or replace with a concurrent map
+     *   implementation (e.g., ConcurrentHashMap).
+     */
     HashMap<String, Integer> buttonShorthands = null;
+    /**
+     * Maps human-readable axis names to their numeric axis IDs for the controller.
+     *
+     * Example entries: "LX" -> 0, "LY" -> 1, "RX" -> 2, etc. This allows code to refer to
+     * axes by name instead of hard-coded integers.
+     *
+     * Notes:
+     * - Keys are non-null axis name strings; values are non-null Integer axis indices.
+     * - The field is initialized to null and should be populated during controller setup.
+     * - Not thread-safe: synchronize externally if accessed from multiple threads.
+     *
+     * @see java.util.HashMap
+     */
     HashMap<String, Integer> axisShorthands = null;
+    /**
+     * Mapping of POV (hat/D-pad) shorthand identifiers to their corresponding integer angle values.
+     *
+     * <p>This map is used to translate human-readable or shorthand direction names (for example
+     * "up", "down", "left", "right" or abbreviations like "u", "d") into the numeric POV values
+     * expected by WPILib (typically degrees such as 0, 90, 180, 270).
+     *
+     * <p>May be null until the controller is initialized; callers should check for null or ensure
+     * initialization before use. The map is mutable and intended to be configured at setup time.
+     * Access is not synchronized—if the controller is accessed from multiple threads, external
+     * synchronization is required.
+     */
     HashMap<String, Integer> povShorthands = null;
+    /**
+     * Maps controller element identifiers to their corresponding ControlElement instances.
+     *
+     * <p>Keys are String identifiers (for example button or axis names) used to look up elements.
+     * Values are the ControlElement objects that represent logical inputs of the controller.</p>
+     *
+     * <p>The map is initialized empty and is intended to be managed through the class's
+     * registration and lookup methods rather than accessed directly. Note that HashMap is not
+     * thread-safe; synchronize externally if this field may be accessed from multiple threads.</p>
+     */
     private HashMap<String, ControlElement> controllerElements = new HashMap<>();
+    /**
+     * Maps button identifiers to their associated Button objects for this controller.
+     *
+     * Each entry associates a unique String key (typically a button name or ID)
+     * with a Button instance that encapsulates that button's state and behavior.
+     *
+     * This map is used to register, retrieve, and manage the buttons exposed by
+     * the controller implementation. Note that HashMap is not thread-safe; if
+     * buttons may be accessed or modified from multiple threads concurrently,
+     * external synchronization is required.
+     */
     HashMap<String, Button> buttons = new HashMap<>();
+    /**
+     * Maps axis identifiers to their corresponding Axis objects.
+     *
+     * Each entry associates a String key (the axis name or identifier) with an
+     * Axis instance that represents an analog axis on the controller. The map is
+     * initialized empty and is intended to be populated during controller setup so
+     * callers can look up axes by name.
+     *
+     * Note: The map is mutable. If it may be accessed concurrently, callers should
+     * perform appropriate synchronization or use a concurrent map implementation.
+     */
     HashMap<String, Axis> axes = new HashMap<>();
+    /**
+     * Maps POV (point-of-view / D-pad) identifiers to their corresponding POV objects.
+     *
+     * <p>The map stores the set of POV inputs associated with this controller, keyed by a
+     * string identifier for each POV (for example a name or index). It is initialized empty
+     * and intended to be populated and updated as POVs are discovered or their states change.
+     *
+     * <p>Clients may use standard Map operations (get/put/remove) to query and modify entries.
+     * Note that this is a plain HashMap and therefore not thread-safe; synchronize externally
+     * if concurrent access from multiple threads is possible.
+     */
     HashMap<String, POV> povs = new HashMap<>();
 
     /**
-     * Get the port number of the controller
+     * Static initializer to register JSON conversion for Controller class.
+     */
+    static {
+        JSONConverter.addConversion(Controller.class, ControllerJsonRepresentation.class);
+    }
+    
+    /**
+     * Returns the port number associated with this controller.
      *
-     * @return The port number
+     * @return the controller's hardware port index
      */
     public int getPort() {
         return port;
@@ -491,7 +605,7 @@ public class Controller {
      *   <li>{@code public Double deadband} — Fractional dead zone size. Expected in [0.0, 1.0).
      *       Values less than or equal to 0.0 disable the deadband. Values approaching or equal to
      *       1.0 are invalid for remapping (would cause division by zero).
-     *   <li>{@code public Boolean remapDeadbanded} — When {@code false} inputs inside the deadband
+     *   <li>{@code public Boolean remapDeadband} — When {@code false} inputs inside the deadband
      *       are clipped to {@code 0.0} and values outside are passed through unchanged. When {@code
      *       true} inputs outside the deadband are linearly rescaled so the range {@code [deadband,
      *       1.0]} maps to {@code [0.0, 1.0]} (sign preserved).
@@ -511,7 +625,7 @@ public class Controller {
      * </ul>
      *
      * <p>Implementation Note: Inputs are normally expected in the range [-1.0, 1.0]. The
-     * deadband/remap logic preserves the sign of the input. When {@code remapDeadbanded} is enabled
+     * deadband/remap logic preserves the sign of the input. When {@code remapDeadband} is enabled
      * the non-zero outputs are expanded to occupy the full dynamic range outside the deadband
      * using: sign(value) * ((|value| - deadband) / (1.0 - deadband)).
      *
@@ -520,7 +634,7 @@ public class Controller {
      */
     public static class LowLevelAxis extends LowLevelControlElement {
         public Double deadband = 0.0;
-        public Boolean remapDeadbanded = false;
+        public Boolean remapDeadband = true;
 
         public LowLevelAxis() {
             elementType = "axis";
@@ -534,10 +648,10 @@ public class Controller {
          * <p>Behavior depends on the instance flags and thresholds:
          *
          * <ul>
-         *   <li>If {@code remapDeadbanded} is {@code false}, the method simply clips small inputs:
+         *   <li>If {@code remapDeadband} is {@code false}, the method simply clips small inputs:
          *       returns {@code 0.0} when {@code Math.abs(value) < deadband}, otherwise returns the
          *       original {@code value} unchanged.
-         *   <li>If {@code remapDeadbanded} is {@code true}, inputs inside the deadband are mapped
+         *   <li>If {@code remapDeadband} is {@code true}, inputs inside the deadband are mapped
          *       to {@code 0.0}, while inputs outside the deadband are linearly rescaled so that the
          *       remaining range {@code [deadband, 1.0]} is remapped to {@code [0.0, 1.0]}. The
          *       original sign of {@code value} is preserved.
@@ -552,21 +666,15 @@ public class Controller {
          *     sign of the original input. When remapping is enabled, non-zero outputs are scaled to
          *     occupy the full output range outside the deadband.
          *     <p>Implementation note: This method relies on the instance fields {@code deadband}
-         *     (expected in the range [0.0, 1.0)) and {@code remapDeadbanded}. If {@code deadband}
+         *     (expected in the range [0.0, 1.0)) and {@code remapDeadband}. If {@code deadband}
          *     is equal to or greater than {@code 1.0}, remapping will cause a division by zero;
          *     such values are not supported and should be avoided or validated elsewhere.
          */
         protected double applyDeadband(double value) {
-            if (remapDeadbanded == false) {
+            if (remapDeadband == false) {
                 return (Math.abs(value) < deadband) ? 0.0 : value;
             }
-            if (Math.abs(value) < deadband) {
-                return 0.0;
-            } else {
-                double sign = Math.signum(value);
-                double adjustedValue = (Math.abs(value) - deadband) / (1.0 - deadband);
-                return sign * adjustedValue;
-            }
+            return MathUtil.applyDeadband(value, deadband);
         }
 
         /**
