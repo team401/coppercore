@@ -231,20 +231,58 @@ public class Controller {
         return t * (newMax - newMin) + newMin;
     }
 
+    /**
+     * Low-level abstraction for a single physical control on a human interface device
+     * (for example: a button, an axis, or a POV / hat switch).
+     *
+     * <p>This abstract class represents the raw binding between a JSON-configured controller
+     * descriptor and the WPILib DriverStation input APIs. Subclasses must implement {@link #getValue()}
+     * to return the current numeric reading for the underlying hardware input. The class provides
+     * common configuration fields and helpers used by all low-level control types:
+     *
+     * <ul>
+     *   <li>elementType — discriminator used for JSON polymorphic deserialization.</li>
+     *   <li>stringID — textual identifier from configuration (shorthand or integer string).</li>
+     *   <li>inverted, minValue, maxValue, clampValue — output-range and inversion configuration.</li>
+     *   <li>id, port — resolved numeric id and the controller port (populated by {@link #initialize}).</li>
+     * </ul>
+     *
+     * <p>Provided utilities:
+     * <ul>
+     *   <li>{@link #fixRange(double,double,double)} — either clamp or linearly map an input value
+     *       from a source range into the configured output range depending on {@code clampValue}.</li>
+     *   <li>{@link #prepareValue(double,double,double)} — apply input-range clamping/mapping and then
+     *       inversion according to this instance's configuration (convenience around {@link #fixRange}
+     *       and {@link Controller#applyInversion(double,boolean,double,double)}).</li>
+     *   <li>{@link #initialize(Controller)} — resolve numeric id and set the controller port using
+     *       shorthand maps or by parsing {@code stringID}; will throw a {@link RuntimeException}
+     *       if resolution fails.</li>
+     * </ul>
+     *
+     * <p>Usage notes:
+     * <ul>
+     *   <li>Subclasses should call {@link #prepareValue} when converting raw inputs from DriverStation
+     *       to the configured output range (and to apply inversion).</li>
+     *   <li>The {@code minValue} and {@code maxValue} fields may be {@code null} in JSON; callers
+     *       frequently rely on subclass constructors to set sensible defaults (for example axes to
+     *       [-1,1], buttons to [0,1], POVs to [-1,360]).</li>
+     *   <li>{@link #initialize(Controller)} must be invoked prior to reading values so that {@code id}
+     *       and {@code port} are populated.</li>
+     * </ul>
+     *
+     * <p>Threading: instances are typically read from the main robot loop and are not synchronized;
+     * construct and initialize on startup and avoid concurrent mutation at runtime.
+     *
+     * @see Controller#applyInversion(double, boolean, double, double)
+     * @see Controller#adjustRange(double, double, double, double, double)
+     */
     @JsonType(
-            property = "controllerType",
+            property = "elementType",
             subtypes = {
                 @JsonSubtype(clazz = LowLevelButton.class, name = "button"),
                 @JsonSubtype(clazz = LowLevelAxis.class, name = "axis"),
                 @JsonSubtype(clazz = LowLevelPOV.class, name = "pov"),
             })
-
-    /**
-     * Low-level control element
-     *
-     * <p>These represents the raw, low-level control elements directly tied to the controller
-     * hardware such as a button or an axis
-     */
     public abstract static class LowLevelControlElement {
         public String elementType;
 
@@ -417,14 +455,61 @@ public class Controller {
         }
     }
 
+    
     /**
-     * Raw axis interface
+     * Low-level representation of a joystick/controller axis.
      *
-     * <p>This represents an axis on the controller
+     * <p>This class models an individual analog axis on a controller and provides
+     * common preprocessing features used by higher-level input handling:
+     * <ul>
+     *   <li>Configurable deadband to suppress small input noise.</li>
+     *   <li>Optional remapping of values outside the deadband so the remaining
+     *       input range fills the full output range.</li>
+     *   <li>Integration with the parent {@code LowLevelControlElement} for value
+     *       preparation (scaling/clamping) and metadata such as {@code port},
+     *       {@code id}, {@code minValue} and {@code maxValue}.</li>
+     * </ul>
      *
-     * <p>Values range from -1.0 to 1.0
+     * <p>Typical usage: read the raw axis from the DriverStation, apply the
+     * configured deadband (and optional remapping), then prepare the final
+     * value (scale and clamp) for downstream logic.
      *
-     * <p>It includes deadband handling
+     * Fields:
+     * <ul>
+     *   <li>{@code public Double deadband} — Fractional dead zone size. Expected
+     *       in [0.0, 1.0). Values less than or equal to 0.0 disable the deadband.
+     *       Values approaching or equal to 1.0 are invalid for remapping (would
+     *       cause division by zero).</li>
+     *   <li>{@code public Boolean remapDeadbanded} — When {@code false} inputs
+     *       inside the deadband are clipped to {@code 0.0} and values outside are
+     *       passed through unchanged. When {@code true} inputs outside the
+     *       deadband are linearly rescaled so the range {@code [deadband, 1.0]}
+     *       maps to {@code [0.0, 1.0]} (sign preserved).</li>
+     * </ul>
+     *
+     * Behavior notes:
+     * <ul>
+     *   <li>The constructor sets {@code elementType = "axis"} and ensures default
+     *       {@code minValue = -1.0} and {@code maxValue = 1.0} when they are
+     *       otherwise unset.</li>
+     *   <li>{@link #applyDeadband(double)} implements the deadband/remapping
+     *       semantics. If remapping is enabled and {@code deadband >= 1.0} a
+     *       division-by-zero will occur; callers should ensure deadband remains
+     *       in a safe range.</li>
+     *   <li>{@link #getValue()} reads the raw axis (via
+     *       {@code DriverStation.getStickAxis(port, id)}), applies the deadband,
+     *       then forwards the result to {@code prepareValue(...)} so the final
+     *       output lies within {@code [minValue, maxValue]}.</li>
+     * </ul>
+     *
+     * @implNote Inputs are normally expected in the range [-1.0, 1.0]. The
+     *           deadband/remap logic preserves the sign of the input. When
+     *           {@code remapDeadbanded} is enabled the non-zero outputs are
+     *           expanded to occupy the full dynamic range outside the deadband
+     *           using: sign(value) * ((|value| - deadband) / (1.0 - deadband)).
+     *
+     * @see LowLevelControlElement
+     * @see DriverStation#getStickAxis(int, int)
      */
     public static class LowLevelAxis extends LowLevelControlElement {
         public Double deadband = 0.0;
@@ -497,11 +582,39 @@ public class Controller {
     }
 
     /**
-     * Raw POV interface
+     * Low-level control element representing a joystick POV (Point-Of-View or "hat") switch,
+     * commonly exposed to users as the controller "D‑pad" (directional pad).
      *
-     * <p>This represents a POV (D-pad) on the controller
+     * <p>This concrete LowLevelControlElement provides access to a joystick's POV direction as
+     * reported by the DriverStation. It configures the element type to "pov" and establishes
+     * sensible default value bounds for POV angles:
+     * <ul>
+     *   <li>minValue: -1.0 — used to represent "no direction pressed"</li>
+     *   <li>maxValue: 360.0 — maximum angle in degrees</li>
+     * </ul>
      *
-     * <p>Values range from 0 to 360 degrees. The value is -1 when not pressed
+     * <p>Behavior:
+     * <ul>
+     *   <li>When queried, the element obtains the raw POV reading via
+     *       DriverStation.getStickPOV(port, id).</li>
+     *   <li>The raw value is expressed in degrees (0–360) or -1 when the POV (D‑pad) is not pressed.</li>
+     *   <li>The raw reading is passed to prepareValue(...) so the returned value is normalized/clamped
+     *       according to the configured min/max for this element.</li>
+     *   <li>This implementation supports diagonal directions; the DriverStation may return intermediate
+     *       compass angles such as 45, 135, 225, 315 to indicate diagonal presses in addition to the
+     *       primary 0/90/180/270 directions.</li>
+     * </ul>
+     *
+     * <p>Notes for consumers:
+     * <ul>
+     *   <li>"port" refers to the joystick port/index and "id" refers to the POV index on that joystick
+     *       (inherited from LowLevelControlElement).</li>
+     *   <li>Callers should expect -1 to indicate no active POV direction; otherwise the returned value
+     *       is the angle in degrees (0 = up, 45 = up-right, 90 = right, 135 = down-right, 180 = down,
+     *       225 = down-left, 270 = left, 315 = up-left).</li>
+     * </ul>
+     *
+     * @see DriverStation#getStickPOV(int, int)
      */
     public static class LowLevelPOV extends LowLevelControlElement {
 
@@ -511,11 +624,90 @@ public class Controller {
             if (maxValue == null) maxValue = 360.0;
         }
 
+        /**
+         * Retrieves and returns the prepared POV (point-of-view / hat) value for this controller.
+         *
+         * <p>This method reads the raw POV value from the DriverStation for the joystick
+         * identified by this controller's port and id (DriverStation.getStickPOV(port, id))
+         * and passes that raw value into prepareValue with -1 and 360 as sentinel bounds.
+         * In the underlying API the raw POV is typically -1 when the hat is in a neutral
+         * position (not pressed) or an angle in degrees (0–360) when a direction is pressed.
+         * The returned value is the result of prepareValue applied to that raw input,
+         * and therefore reflects whichever normalization, clamping, or mapping logic
+         * prepareValue implements for the sentinel and angle range.
+         *
+         * @return the POV value as a double after processing by prepareValue; raw inputs
+         *         are -1 for neutral/not-pressed or an angle in degrees (0–360) which
+         *         are converted according to prepareValue's semantics
+         * @see edu.wpi.first.wpilibj.DriverStation#getStickPOV(int, int)
+         */
         public double getValue() {
             return prepareValue(DriverStation.getStickPOV(port, id), -1, 360);
         }
     }
 
+    /**
+     * Abstract base class representing a configurable control element that maps a low-level
+     * controller input to a processed numeric value or command.
+     *
+     * <p>This class is intended to be extended by concrete control element types (for example,
+     * Button, Axis, and POV). Instances are configured via JSON and support polymorphic
+     * deserialization using the "commandType" discriminator (subtypes: "button", "axis", "pov").
+     *
+     * <p>Responsibilities:
+     * <ul>
+     *   <li>Hold configuration for mapping and transforming a low-level input (LowLevelControlElement)
+     *       into a higher-level numeric value.</li>
+     *   <li>Provide lifecycle support to initialize the underlying low-level element with a
+     *       Controller instance.</li>
+     *   <li>Expose the processed value through abstract getValue(), and convenience Supplier accessors.</li>
+     * </ul>
+     *
+     * <p>Key fields (configuration):
+     * <ul>
+     *   <li>{@code lowLevelControlElement} (JSON name "controllerInterface") — the underlying input source
+     *       that supplies raw values and range metadata.</li>
+     *   <li>{@code command} — a logical name or identifier for the command associated with this element.</li>
+     *   <li>{@code commandType} — JSON discriminator for the concrete control element type.</li>
+     *   <li>{@code inverted} — when true, the resulting value is inverted (default: false).</li>
+     *   <li>{@code minValue}, {@code maxValue} — configured target range for the element. If null,
+     *       the low-level element's range is used.</li>
+     *   <li>{@code clampValue} — when true, the value is clamped to [minValue, maxValue] rather than
+     *       being scaled/adjusted (default: false).</li>
+     * </ul>
+     *
+     * <p>Notable protected helpers:
+     * <ul>
+     *   <li>{@code fixRange(double)} — either clamps the given value into the configured range or
+     *       adjusts (scales) it from the low-level element's range into the configured target range,
+     *       depending on {@code clampValue}.</li>
+     *   <li>{@code getPreparedValue()} — obtains the raw value from the low-level element, applies
+     *       range adjustment/clamping and inversion, and returns the processed result.</li>
+     * </ul>
+     *
+     * <p>Primary methods to implement and use:
+     * <ul>
+     *   <li>{@code public abstract double getValue()} — subclasses must return the final value that
+     *       represents this control element. Implementations will typically call {@code getPreparedValue()}
+     *       and/or include additional processing logic.</li>
+     *   <li>{@code public void initialize(Controller controller)} — initializes the underlying low-level
+     *       element with the given Controller. Subclasses should call super.initialize(controller) if
+     *       they override this method.</li>
+     *   <li>{@code public Supplier<Double> getSupplier()} and {@code public DoubleSupplier getPrimitiveSupplier()}
+     *       — convenience accessors that return suppliers bound to {@code getValue()} for use with APIs
+     *       that accept suppliers or primitive double suppliers.</li>
+     * </ul>
+     *
+     * <p>Usage notes:
+     * <ul>
+     *   <li>When configuring via JSON, supply the "commandType" discriminator and the nested
+     *       "controllerInterface" configuration to properly construct and wire the underlying input.</li>
+     *   <li>Null {@code minValue}/{@code maxValue} are interpreted to mean "use the low-level element's range".</li>
+     * </ul>
+     *
+     * @see LowLevelControlElement
+     * @see MathUtil
+     */
     @JsonType(
             property = "commandType",
             subtypes = {
@@ -523,14 +715,6 @@ public class Controller {
                 @JsonSubtype(clazz = Axis.class, name = "axis"),
                 @JsonSubtype(clazz = POV.class, name = "pov"),
             })
-    /**
-     * Control element base class
-     *
-     * <p>These represents the ControlElements that the code will interact with. They wrap around
-     * the low-level, raw interfaces to provide additional functionality Such as thresholds,
-     * hysteresis, and toggling for buttons. Also includes range adjustment and inversion for all
-     * interfaces
-     */
     public abstract static class ControlElement {
         @JSONName("controllerInterface")
         LowLevelControlElement lowLevelControlElement;
