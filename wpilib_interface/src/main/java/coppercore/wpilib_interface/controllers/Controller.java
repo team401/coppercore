@@ -423,14 +423,79 @@ public class Controller {
          */
         public String elementType;
 
+        /**
+         * Unique string identifier for this controller.
+         *
+         * <p>This field is mapped to the JSON property "id" (via @JSONName("id")) and is used
+         * during serialization and deserialization to identify the controller instance. It is
+         * expected to be a non-empty string when present; a null value indicates that no identifier
+         * has been assigned.
+         */
         @JSONName("id")
         public String stringID;
 
+        /**
+         * Whether the controller's output/direction is inverted.
+         *
+         * <p>When {@code true}, the controller input (for example an axis or motor direction) is
+         * inverted. When {@code false} (the default), the input is used normally.
+         */
         public Boolean inverted = false;
+
+        /**
+         * The inclusive lower bound for this controller's value.
+         *
+         * <p>When set, values produced or accepted by the controller should not be less than this
+         * value. If this field is null, no minimum bound is enforced.
+         *
+         * <p>Nullable: may be null to indicate "no minimum".
+         */
         public Double minValue;
+
+        /**
+         * The upper bound for values produced or accepted by this controller.
+         *
+         * <p>This is a nullable Double; a null value indicates that no explicit maximum is
+         * enforced. Typically this represents a normalized, unitless limit (for example 1.0 for
+         * joystick outputs), but the exact interpretation depends on the controller's
+         * configuration.
+         *
+         * <p>Implementations may clamp or scale output values to this maximum. Because this field
+         * is an object type, callers should handle the null case and avoid unboxing without a null
+         * check.
+         */
         public Double maxValue;
+
+        /**
+         * When true, enables clamping of values produced by this controller to its valid range.
+         * Clamped values will be constrained to the controller's configured minimum and maximum
+         * bounds (for example, a typical joystick-style output range). Defaults to false.
+         *
+         * <p>Note: this is a Boolean wrapper; callers should handle potential null values if the
+         * field may be unset.
+         */
         public Boolean clampValue = false;
+
+        /**
+         * Internal unique identifier for this controller instance.
+         *
+         * <p>This field is used internally to distinguish controller objects (for example when
+         * tracking registrations or mapping to hardware). It is not part of the public serialized
+         * state and is intentionally excluded from JSON serialization/deserialization via
+         * {@code @JSONExclude}.
+         *
+         * <p>Do not rely on this value for persistent identity across application restarts; it is
+         * intended for in-memory use only.
+         */
         @JSONExclude protected int id;
+
+        /**
+         * The port index identifying which physical or virtual port this controller instance is
+         * attached to. Intended to be a non-negative integer used when mapping controller
+         * inputs/outputs to hardware. This field is protected (accessible to subclasses) and is
+         * annotated with @JSONExclude so that runtime-specific port assignments are not included in
+         * JSON serialization.
+         */
         @JSONExclude protected int port;
 
         /**
@@ -1115,9 +1180,9 @@ public class Controller {
      *       bounds based on the previous raw pressed state (lastState). This reduces chatter near
      *       the boundary: when lastState==true the window is expanded, and when lastState==false
      *       the window is contracted.
-     *   <li>isToggle: When true, a rising edge (pressed && !lastState) flips the internal latched
-     *       state isToggled. When false, the reported pressed state simply reflects the threshold
-     *       test result.
+     *   <li>isToggle: When true, a rising edge {@code (pressed && !lastState)} flips the internal
+     *       latched state isToggled. When false, the reported pressed state simply reflects the
+     *       threshold test result.
      * </ul>
      *
      * <p>Behavioral notes
