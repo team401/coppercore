@@ -69,6 +69,81 @@ The coppercore.vision package is well-designed for its purpose. PhotonPoseEstima
 
 ---
 
+## Q&A: Would it make sense to use PhotonPoseEstimator inside coppercore.vision?
+
+It could, but with caveats.
+
+### Where it could fit
+
+`VisionIOPhotonReal` could use `PhotonPoseEstimator` internally instead of doing its own pose math. You'd call the individual estimation methods (not the deprecated `update()` methods):
+
+```java
+// Instead of manually transforming multitagResult:
+Optional<EstimatedRobotPose> pose = poseEstimator.estimateCoprocMultiTagPose(result);
+
+// Instead of PhotonUtils.estimateFieldToRobotAprilTag():
+Optional<EstimatedRobotPose> pose = poseEstimator.estimateLowestAmbiguityPose(result);
+```
+
+### Problems with this approach
+
+1. **Batch processing mismatch** - `VisionIOPhotonReal.updateInputs()` loops through `camera.getAllUnreadResults()` and creates multiple `PoseObservation` objects. PhotonPoseEstimator's `update()` has timestamp caching that assumes one-result-at-a-time processing.
+
+2. **Data conversion overhead** - You'd need to convert `EstimatedRobotPose` back to `PoseObservation`, which is mostly boilerplate.
+
+3. **Heading data plumbing** - The interesting new strategies (PNP_DISTANCE_TRIG_SOLVE, CONSTRAINED_SOLVEPNP) require gyro heading via `addHeadingData()`. You'd need to pass a heading supplier through the `VisionIO` interface, which changes the abstraction.
+
+### Current code is simple and correct
+
+```java
+// Multi-tag (lines 72-76 of VisionIOPhotonReal.java)
+Transform3d fieldToCamera = multitagResult.estimatedPose.best;
+Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse());
+
+// Single-tag (lines 99-103)
+PhotonUtils.estimateFieldToRobotAprilTag(...)
+```
+
+This is essentially what PhotonPoseEstimator does internally for `MULTI_TAG_PNP_ON_COPROCESSOR` and `LOWEST_AMBIGUITY`.
+
+### Bottom line
+
+Using PhotonPoseEstimator would add a dependency without much benefit unless you want the gyro-based strategies. The current implementation duplicates maybe 10 lines of straightforward transform math that's unlikely to change.
+
+---
+
+## Q&A: What would the consequences be of abandoning coppercore.vision and relying on PhotonPoseEstimator only?
+
+### You would lose
+
+1. **IO abstraction for simulation** - `VisionIO`/`VisionIOPhotonSim` provides clean real vs sim switching. With PhotonPoseEstimator alone, you'd need to manually integrate `VisionSystemSim` and handle the simulation path yourself.
+
+2. **Multi-camera management** - `VisionLocalizer` handles N cameras, logs each one, and aggregates results. PhotonPoseEstimator is per-camera, so you'd write your own loop and aggregation logic.
+
+3. **AdvantageKit logging** - The `@AutoLog` annotations on `VisionIOInputs` and all the `Logger.recordOutput()` calls would be gone. You'd reimplement this from scratch.
+
+4. **Pose rejection** - `shouldRejectPose()` filters out bad estimates (field bounds, Z-height, ambiguity, distance). PhotonPoseEstimator just estimates poses—it doesn't reject them. You'd move this logic elsewhere.
+
+5. **Standard deviation calculation** - `getLatestVariance()` computes confidence based on distance and tag count. PhotonPoseEstimator doesn't provide this. You'd need to calculate it yourself before passing to your pose estimator.
+
+6. **VisionConsumer pattern** - The functional interface that sends poses to the drivetrain subsystem would need replacement.
+
+7. **Helper methods** - `getDistanceErrorToTag()`, `hasMultitagResult()`, `coprocessorConnected()`, `cameraConnected()` would all need reimplementation.
+
+8. **Disconnected camera alerts** - The `Alert` system for camera disconnection would be gone.
+
+### You would gain
+
+1. Access to all 9 pose strategies without implementing them
+2. Automatic updates when PhotonVision improves their estimator
+3. Less vision-specific code to maintain (but more glue code)
+
+### Net assessment
+
+Abandoning coppercore.vision would mean rewriting most of its functionality elsewhere in your robot code. The package isn't just a wrapper around PhotonPoseEstimator—it's infrastructure for multi-camera logging, filtering, and integration with WPILib/AdvantageKit patterns. You'd trade ~300 lines of well-structured library code for scattered reimplementation across your robot project.
+
+---
+
 ## Files Analyzed
 
 ### coppercore.vision package
