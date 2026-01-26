@@ -83,4 +83,14 @@ public class EnvironmentPathProvider implements PathProvider {
 
         return path;
     }
+
+    /**
+     * Returns the environment name from the environment.
+     *
+     * @return the environment path/name
+     */
+    @Override
+    public String getEnvironmentName() {
+        return environment.getPath();
+    }
 }
