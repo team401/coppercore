@@ -16,7 +16,7 @@ public class UnitTestingPathProvider implements PathProvider {
     private String path;
 
     public UnitTestingPathProvider() {
-        path = "";
+        this("");
     }
 
     private UnitTestingPathProvider(String path) {
