@@ -8,7 +8,7 @@
                     "command": "shoot",
                     "commandType": "button",
                     "threshold": 0.5,
-                    "humanControlElement": {
+                    "hapticControlElement": {
                         "elementType": "axis",
                         "id": "0"
                     }

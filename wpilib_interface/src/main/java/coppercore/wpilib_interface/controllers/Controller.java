@@ -918,7 +918,7 @@ public class Controller {
      * <p>Key fields (configuration):
      *
      * <ul>
-     *   <li>{@code lowLevelControlElement} (JSON name "humanControlElement") — the underlying input
+     *   <li>{@code lowLevelControlElement} (JSON name "hapticControlElement") — the underlying input
      *       source that supplies raw values and range metadata.
      *   <li>{@code command} — a logical name or identifier for the command associated with this
      *       element.
@@ -958,7 +958,7 @@ public class Controller {
      *
      * <ul>
      *   <li>When configuring via JSON, supply the "commandType" discriminator and the nested
-     *       "humanControlElement" configuration to properly construct and wire the underlying
+     *       "hapticControlElement" configuration to properly construct and wire the underlying
      *       input.
      *   <li>Null {@code minValue}/{@code maxValue} are interpreted to mean "use the low-level
      *       element's range".
@@ -975,7 +975,7 @@ public class Controller {
                 @JsonSubtype(clazz = POV.class, name = "pov"),
             })
     public abstract static class ControlElement {
-        @JSONName("humanControlElement")
+        @JSONName("hapticControlElement")
         LowLevelControlElement lowLevelControlElement;
 
         /**

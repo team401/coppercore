@@ -7,7 +7,7 @@
                 {
                     "command": "shoot",
                     "commandType": "button",
-                    "humanControlElement": {
+                    "hapticControlElement": {
                         "elementType": "button",
                         "id": "1"
                     }
@@ -21,7 +21,7 @@
                 {
                     "command": "drive",
                     "commandType": "axis",
-                    "humanControlElement": {
+                    "hapticControlElement": {
                         "elementType": "axis",
                         "id": "0"
                     }
