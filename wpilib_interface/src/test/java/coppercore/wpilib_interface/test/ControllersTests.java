@@ -34,10 +34,8 @@ public class ControllersTests {
 
     public JSONHandler jsonHandler =
             new JSONHandler(
-                    new JSONSyncConfigBuilder()
-                            .setUpPolymorphAdapter(Controller.ControlElement.class)
-                            .setUpPolymorphAdapter(Controller.LowLevelControlElement.class)
-                            .build(),
+                    Controllers.getControllerJsonSyncConfigBuilder()
+                        .build(),
                     new UnitTestingPathProvider());
 
     public void resetDriverStationSim() {

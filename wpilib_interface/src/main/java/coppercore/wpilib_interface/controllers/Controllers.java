@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
+
 /**
  * Container and lookup facade for a collection of Controller instances used by the WPILib
  * interface.
@@ -211,5 +213,15 @@ public class Controllers {
                         (controller, cmd) -> controller.hasPOV(cmd),
                         (controller, cmd) -> controller.getPOV(cmd),
                         command);
+    }
+
+    public static JSONSyncConfigBuilder applyControllerConfigToBuilder(JSONSyncConfigBuilder builder) {
+        return builder
+            .setUpPolymorphAdapter(Controller.ControlElement.class)
+            .setUpPolymorphAdapter(Controller.LowLevelControlElement.class);
+    }
+
+    public static JSONSyncConfigBuilder getControllerJsonSyncConfigBuilder() {
+        return applyControllerConfigToBuilder(new JSONSyncConfigBuilder());
     }
 }
