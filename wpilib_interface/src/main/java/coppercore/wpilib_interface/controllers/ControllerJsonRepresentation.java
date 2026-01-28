@@ -1,6 +1,7 @@
 package coppercore.wpilib_interface.controllers;
 
 import coppercore.parameter_tools.json.helpers.JSONObject;
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
      *
      * @param controller
      */
-    private ControllerJsonRepresentation(Controller controller) {
+    public ControllerJsonRepresentation(Controller controller) {
         super(controller);
         throw new RuntimeException("This method should not be called directly");
     }
@@ -44,9 +45,15 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
         controller.povShorthands =
                 new HashMap<String, Integer>(controller.controllerType.POVShorthands);
 
-        controller.buttonShorthands.putAll(this.buttonShorthands);
-        controller.axisShorthands.putAll(this.axisShorthands);
-        controller.povShorthands.putAll(this.povShorthands);
+        if (this.buttonShorthands != null) {
+            controller.buttonShorthands.putAll(this.buttonShorthands);
+        }
+        if (this.axisShorthands != null) {
+            controller.axisShorthands.putAll(this.axisShorthands);
+        }
+        if (this.povShorthands != null) {
+            controller.povShorthands.putAll(this.povShorthands);
+        }
 
         for (Controller.ControlElement controlElement : this.controlElements) {
             switch (controlElement.commandType) {
@@ -70,5 +77,10 @@ public class ControllerJsonRepresentation extends JSONObject<Controller> {
         controller.initializeControlElements();
 
         return controller;
+    }
+
+    public static Constructor<? extends JSONObject<?>> getConstructor()
+            throws NoSuchMethodException {
+        return ControllerJsonRepresentation.class.getConstructor(Controller.class);
     }
 }

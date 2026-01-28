@@ -1,0 +1,26 @@
+{
+    "controllers": [
+        {
+            "port": 2,
+            "type": "xbox",
+            "controlElements": [
+                {
+                    "command": "shoot",
+                    "commandType": "button",
+                    "humanControlElement": {
+                        "elementType": "button",
+                        "id": "1"
+                    }
+                },
+                {
+                    "command": "drive",
+                    "commandType": "axis",
+                    "humanControlElement": {
+                        "elementType": "axis",
+                        "id": "0"
+                    }
+                }
+            ]
+        }
+    ]
+}
