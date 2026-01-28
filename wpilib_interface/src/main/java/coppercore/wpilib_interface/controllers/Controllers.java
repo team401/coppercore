@@ -215,12 +215,36 @@ public class Controllers {
                         command);
     }
 
+    /**
+     * Configures the provided JSONSyncConfigBuilder with the polymorphic adapters
+     * required for controller-related types.
+     *
+     * This method registers adapters for Controller.ControlElement and
+     * Controller.LowLevelControlElement so that instances of those types can be
+     * correctly serialized and deserialized by the configured JSON sync system.
+     *
+     * The supplied builder is modified in-place and returned to allow fluent use.
+     *
+     * @param builder the JSONSyncConfigBuilder to configure; must not be {@code null}
+     * @return the same {@code JSONSyncConfigBuilder} instance after configuration
+     * @throws NullPointerException if {@code builder} is {@code null}
+     */
     public static JSONSyncConfigBuilder applyControllerConfigToBuilder(JSONSyncConfigBuilder builder) {
         return builder
             .setUpPolymorphAdapter(Controller.ControlElement.class)
             .setUpPolymorphAdapter(Controller.LowLevelControlElement.class);
     }
 
+    /**
+     * Creates and returns a JSONSyncConfigBuilder pre-configured with controller settings.
+     *
+     * <p>This method instantiates a new {@code JSONSyncConfigBuilder} and applies the
+     * controller-specific configuration to it via {@code applyControllerConfigToBuilder(...)}.
+     * The returned builder is ready for further customization by the caller prior to building
+     * the final configuration.</p>
+     *
+     * @return a new {@code JSONSyncConfigBuilder} with controller configuration applied; never {@code null}
+     */
     public static JSONSyncConfigBuilder getControllerJsonSyncConfigBuilder() {
         return applyControllerConfigToBuilder(new JSONSyncConfigBuilder());
     }
