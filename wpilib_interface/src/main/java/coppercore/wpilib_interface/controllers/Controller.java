@@ -1383,7 +1383,6 @@ public class Controller {
          */
         public boolean isPressed() {
             double value = getPreparedValue();
-            System.out.println("Prepared Value: " + value);
             boolean pressed = testThreshold(MathUtil.clamp(value, minValue, maxValue));
             return applyToggle(pressed);
         }
