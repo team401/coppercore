@@ -1,5 +1,7 @@
 package coppercore.wpilib_interface.controllers;
 
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.helpers.JSONConverter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -211,5 +213,49 @@ public class Controllers {
                         (controller, cmd) -> controller.hasPOV(cmd),
                         (controller, cmd) -> controller.getPOV(cmd),
                         command);
+    }
+
+    /**
+     * Configures the provided JSONSyncConfigBuilder with the polymorphic adapters required for
+     * controller-related types.
+     *
+     * <p>This method registers adapters for Controller.ControlElement and
+     * Controller.LowLevelControlElement so that instances of those types can be correctly
+     * serialized and deserialized by the configured JSON sync system.
+     *
+     * <p>The supplied builder is modified in-place and returned to allow fluent use.
+     *
+     * @param builder the JSONSyncConfigBuilder to configure; must not be {@code null}
+     * @return the same {@code JSONSyncConfigBuilder} instance after configuration
+     * @throws NullPointerException if {@code builder} is {@code null}
+     */
+    public static JSONSyncConfigBuilder applyControllerConfigToBuilder(
+            JSONSyncConfigBuilder builder) {
+        return builder.setUpPolymorphAdapter(Controller.ControlElement.class)
+                .setUpPolymorphAdapter(Controller.LowLevelControlElement.class);
+    }
+
+    /**
+     * Creates and returns a JSONSyncConfigBuilder pre-configured with controller settings.
+     *
+     * <p>This method instantiates a new {@code JSONSyncConfigBuilder} and applies the
+     * controller-specific configuration to it via {@code applyControllerConfigToBuilder(...)}. The
+     * returned builder is ready for further customization by the caller prior to building the final
+     * configuration.
+     *
+     * @return a new {@code JSONSyncConfigBuilder} with controller configuration applied; never
+     *     {@code null}
+     */
+    public static JSONSyncConfigBuilder getControllerJsonSyncConfigBuilder() {
+        return applyControllerConfigToBuilder(new JSONSyncConfigBuilder());
+    }
+
+    /**
+     * Static initializer to register JSON conversion for Controller class. This code is also in
+     * Controller.java but needs to be here to ensure registration when only Controllers is
+     * referenced.
+     */
+    static {
+        JSONConverter.addConversion(Controller.class, ControllerJsonRepresentation.class);
     }
 }

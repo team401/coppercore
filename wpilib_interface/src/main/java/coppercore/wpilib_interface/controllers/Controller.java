@@ -918,8 +918,8 @@ public class Controller {
      * <p>Key fields (configuration):
      *
      * <ul>
-     *   <li>{@code lowLevelControlElement} (JSON name "controllerInterface") — the underlying input
-     *       source that supplies raw values and range metadata.
+     *   <li>{@code lowLevelControlElement} (JSON name "hapticControlElement") — the underlying
+     *       input source that supplies raw values and range metadata.
      *   <li>{@code command} — a logical name or identifier for the command associated with this
      *       element.
      *   <li>{@code commandType} — JSON discriminator for the concrete control element type.
@@ -958,7 +958,7 @@ public class Controller {
      *
      * <ul>
      *   <li>When configuring via JSON, supply the "commandType" discriminator and the nested
-     *       "controllerInterface" configuration to properly construct and wire the underlying
+     *       "hapticControlElement" configuration to properly construct and wire the underlying
      *       input.
      *   <li>Null {@code minValue}/{@code maxValue} are interpreted to mean "use the low-level
      *       element's range".
@@ -975,7 +975,7 @@ public class Controller {
                 @JsonSubtype(clazz = POV.class, name = "pov"),
             })
     public abstract static class ControlElement {
-        @JSONName("controllerInterface")
+        @JSONName("hapticControlElement")
         LowLevelControlElement lowLevelControlElement;
 
         /**
@@ -1237,12 +1237,12 @@ public class Controller {
          * Deadband threshold for controller inputs.
          *
          * <p>Inputs with absolute value less than this threshold are treated as zero and should be
-         * ignored by input processing. Default value is 0.0.
+         * ignored by input processing. Default value is 0.5.
          *
          * <p>Expected to be used with controller input values on the same scale (commonly -1.0 to
          * 1.0). Adjust as needed to filter out small/intentional noise.
          */
-        public Double threshold = 0.0;
+        public Double threshold = 0.5;
 
         /**
          * Optional tolerance or hysteresis width applied around the controller's primary threshold.
@@ -1370,22 +1370,6 @@ public class Controller {
         }
 
         /**
-         * Constructs a new Button and ensures its value bounds are initialized.
-         *
-         * <p>If the instance fields {@code minValue} or {@code maxValue} are {@code null}, they are
-         * assigned default bounds: {@code minValue} becomes {@code 0.0} and {@code maxValue}
-         * becomes {@code 1.0}. This guarantees a valid numeric range for consumers of the Button
-         * and prevents {@code NullPointerException}s when the bounds are accessed or used in
-         * computations.
-         *
-         * <p>Note: existing non-null values are left unchanged.
-         */
-        public Button() {
-            if (minValue == null) minValue = 0.0;
-            if (maxValue == null) maxValue = 1.0;
-        }
-
-        /**
          * Determines whether this controller input is considered "pressed".
          *
          * <p>This method: 1. Retrieves the prepared input value via {@code getPreparedValue()}. 2.
@@ -1465,6 +1449,10 @@ public class Controller {
         @Override
         public void initialize(Controller controller) {
             super.initialize(controller);
+            if (minValue == null)
+                minValue = (lowLevelControlElement != null) ? lowLevelControlElement.minValue : 0.0;
+            if (maxValue == null)
+                maxValue = (lowLevelControlElement != null) ? lowLevelControlElement.maxValue : 1.0;
             trigger =
                     new Trigger(
                             CommandScheduler.getInstance().getDefaultButtonLoop(), this::isPressed);
@@ -1485,17 +1473,6 @@ public class Controller {
      * <p>See {@link ControlElement} for shared behavior and lifecycle details.
      */
     public static class Axis extends ControlElement {
-        /**
-         * Constructs an Axis instance and ensures default axis bounds.
-         *
-         * <p>If the instance fields {@code minValue} or {@code maxValue} are {@code null}, they are
-         * initialized to -1.0 and 1.0 respectively. Existing non-null values are left unchanged.
-         * After this constructor completes, {@code minValue} and {@code maxValue} will be non-null.
-         */
-        public Axis() {
-            if (minValue == null) minValue = -1.0;
-            if (maxValue == null) maxValue = 1.0;
-        }
 
         /**
          * Returns the controller's current prepared value.
@@ -1511,6 +1488,15 @@ public class Controller {
         @Override
         public double getValue() {
             return getPreparedValue();
+        }
+
+        public void initialize(Controller controller) {
+            super.initialize(controller);
+            if (minValue == null)
+                minValue =
+                        (lowLevelControlElement != null) ? lowLevelControlElement.minValue : -1.0;
+            if (maxValue == null)
+                maxValue = (lowLevelControlElement != null) ? lowLevelControlElement.maxValue : 1.0;
         }
     }
 
@@ -1531,18 +1517,6 @@ public class Controller {
      * -1.0 when the POV is not engaged.
      */
     public static class POV extends ControlElement {
-        /**
-         * Constructs a POV object and ensures default bounds are set.
-         *
-         * <p>If the instance fields for range limits are not already assigned, this constructor
-         * initializes them to sensible defaults: minValue is set to -1.0 and maxValue is set to
-         * 360.0. These defaults provide a sentinel lower bound and a full-circle upper bound in
-         * degrees.
-         */
-        public POV() {
-            if (minValue == null) minValue = -1.0;
-            if (maxValue == null) maxValue = 360.0;
-        }
 
         /**
          * Returns the current prepared value for this controller.
@@ -1558,6 +1532,16 @@ public class Controller {
         @Override
         public double getValue() {
             return getPreparedValue();
+        }
+
+        public void initialize(Controller controller) {
+            super.initialize(controller);
+            if (minValue == null)
+                minValue =
+                        (lowLevelControlElement != null) ? lowLevelControlElement.minValue : -1.0;
+            if (maxValue == null)
+                maxValue =
+                        (lowLevelControlElement != null) ? lowLevelControlElement.maxValue : 360.0;
         }
     }
 
