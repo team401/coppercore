@@ -5,10 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import coppercore.parameter_tools.json.JSONHandler;
-import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
-import coppercore.parameter_tools.json.helpers.JSONConverter;
 import coppercore.wpilib_interface.controllers.Controller;
-import coppercore.wpilib_interface.controllers.ControllerJsonRepresentation;
 import coppercore.wpilib_interface.controllers.Controllers;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
@@ -28,14 +25,9 @@ public class ControllersTests {
 
     public static final double DELTA = 0.01;
 
-    static {
-        JSONConverter.addConversion(Controller.class, ControllerJsonRepresentation.class);
-    }
-
     public JSONHandler jsonHandler =
             new JSONHandler(
-                    Controllers.getControllerJsonSyncConfigBuilder()
-                        .build(),
+                    Controllers.getControllerJsonSyncConfigBuilder().build(),
                     new UnitTestingPathProvider());
 
     public void resetDriverStationSim() {

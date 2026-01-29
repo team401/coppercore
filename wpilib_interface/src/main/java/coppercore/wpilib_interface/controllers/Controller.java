@@ -918,8 +918,8 @@ public class Controller {
      * <p>Key fields (configuration):
      *
      * <ul>
-     *   <li>{@code lowLevelControlElement} (JSON name "hapticControlElement") — the underlying input
-     *       source that supplies raw values and range metadata.
+     *   <li>{@code lowLevelControlElement} (JSON name "hapticControlElement") — the underlying
+     *       input source that supplies raw values and range metadata.
      *   <li>{@code command} — a logical name or identifier for the command associated with this
      *       element.
      *   <li>{@code commandType} — JSON discriminator for the concrete control element type.
