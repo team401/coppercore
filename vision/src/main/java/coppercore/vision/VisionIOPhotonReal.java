@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
@@ -14,7 +15,7 @@ import org.photonvision.PhotonUtils;
 /** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {
     protected final PhotonCamera camera;
-    protected final Transform3d robotToCamera;
+    protected final Optional<Transform3d> robotToCamera;
     public final String name;
     public AprilTagFieldLayout aprilTagLayout;
 
@@ -27,8 +28,16 @@ public class VisionIOPhotonReal implements VisionIO {
     public VisionIOPhotonReal(String name, Transform3d robotToCamera) {
         camera = new PhotonCamera(name);
         this.name = name;
-        this.robotToCamera = robotToCamera;
+        if (robotToCamera != null) {
+            this.robotToCamera = Optional.of(robotToCamera);
+        } else {
+            this.robotToCamera = Optional.empty();
+        }
         this.aprilTagLayout = null;
+    }
+
+    public VisionIOPhotonReal(String name) {
+        this(name, null);
     }
 
     /**
@@ -41,7 +50,7 @@ public class VisionIOPhotonReal implements VisionIO {
     }
 
     @Override
-    public void updateInputs(VisionIOInputs inputs) {
+    public void updateInputs(VisionIOInputs inputs, Transform3d robotToCamera) {
         inputs.connected = camera.isConnected();
 
         Set<Short> tagsSeen = new HashSet<>();
@@ -148,5 +157,17 @@ public class VisionIOPhotonReal implements VisionIO {
         for (int j = 0; j < singleTagObservations.size(); j++) {
             inputs.singleTagObservations[j] = singleTagObservations.get(j);
         }
+    }
+
+    @Override
+    public void updateInputs(VisionIOInputs inputs) {
+        robotToCamera.ifPresentOrElse(
+                (robotToCameraInstance) -> {
+                    updateInputs(inputs, robotToCameraInstance);
+                },
+                () -> {
+                    System.err.println(
+                            "updateInputs was called without a robot to camera transform");
+                });
     }
 }

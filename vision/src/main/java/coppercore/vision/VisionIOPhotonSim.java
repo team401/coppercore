@@ -8,9 +8,7 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 
-/**
- * implements vision io throuigh photon vision simulation
- */
+/** implements vision io throuigh photon vision simulation */
 public class VisionIOPhotonSim extends VisionIOPhotonReal {
     private static VisionSystemSim visionSim;
 
@@ -47,5 +45,11 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
     public void updateInputs(VisionIOInputs inputs) {
         visionSim.update(poseSupplier.get());
         super.updateInputs(inputs);
+    }
+
+    @Override
+    public void updateInputs(VisionIOInputs inputs, Transform3d robotToCamera) {
+        visionSim.update(poseSupplier.get());
+        super.updateInputs(inputs, robotToCamera);
     }
 }

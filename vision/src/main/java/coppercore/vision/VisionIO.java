@@ -85,5 +85,7 @@ public interface VisionIO {
 
     public default void updateInputs(VisionIOInputs inputs) {}
 
+    public default void updateInputs(VisionIOInputs inputs, Transform3d robotToCamera) {}
+
     public default void setAprilTagLayout(AprilTagFieldLayout tagLayout) {}
 }
