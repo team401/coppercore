@@ -37,7 +37,7 @@ public class VisionLocalizer extends SubsystemBase {
     /**
      * A camera config for a single camera
      *
-     * @param cameraStdDevFactors factors to multiply standard deviation
+     * @param stdDevFactor factors to multiply standard deviation
      * @param io of each camera, using photon vision or sim
      * @param isFixed boolean representing whether or not the camera is stationary
      */
