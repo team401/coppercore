@@ -21,6 +21,7 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      *
      * @param name The name of the camera.
      * @param poseSupplier Supplier for the robot pose to use in simulation.
+     * @see VisionIOPhotonReal#VisionIOPhotonReal(String, Transform3d)
      */
     public VisionIOPhotonSim(
             String name,

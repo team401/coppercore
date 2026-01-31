@@ -24,7 +24,10 @@ public class VisionIOPhotonReal implements VisionIO {
      * Creates a new VisionIOPhotonVision.
      *
      * @param name The configured name of the camera.
-     * @param robotToCamera Transform to help find robot position
+     * @param robotToCamera Transform to help find robot position. If this transform is not null, it
+     *     is used by default, and if it is null, a camera transform must be provided every time
+     *     updateInputs is called.
+     * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs, DoubleFunction)
      */
     public VisionIOPhotonReal(String name, Transform3d robotToCamera) {
         camera = new PhotonCamera(name);
