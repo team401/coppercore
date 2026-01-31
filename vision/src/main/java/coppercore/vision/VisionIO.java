@@ -4,6 +4,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import java.util.Optional;
 import java.util.function.DoubleFunction;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -100,7 +101,7 @@ public interface VisionIO {
      *     that must return the robotToCamera transform at the given timestamp.
      */
     public default void updateInputs(
-            VisionIOInputs inputs, DoubleFunction<Transform3d> robotToCamera) {}
+            VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> robotToCamera) {}
 
     public default void setAprilTagLayout(AprilTagFieldLayout tagLayout) {}
 }

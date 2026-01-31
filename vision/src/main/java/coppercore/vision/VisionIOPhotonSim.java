@@ -3,13 +3,14 @@ package coppercore.vision;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import java.util.Optional;
 import java.util.function.DoubleFunction;
 import java.util.function.Supplier;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 
-/** implements vision io throuigh photon vision simulation */
+/** implements vision io through photon vision simulation */
 public class VisionIOPhotonSim extends VisionIOPhotonReal {
     private static VisionSystemSim visionSim;
 
@@ -56,7 +57,8 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs, DoubleFunction)
      */
     @Override
-    public void updateInputs(VisionIOInputs inputs, DoubleFunction<Transform3d> robotToCamera) {
+    public void updateInputs(
+            VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> robotToCamera) {
         visionSim.update(poseSupplier.get());
         super.updateInputs(inputs, robotToCamera);
     }
