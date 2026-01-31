@@ -84,8 +84,21 @@ public interface VisionIO {
             Rotation2d ty) {}
     ;
 
+    /**
+     * Updates the inputs of the camera without a new robotToCamera transform; used for stationary
+     * cameras.
+     *
+     * @param inputs the information received from the camera either in sim or the real camera
+     */
     public default void updateInputs(VisionIOInputs inputs) {}
 
+    /**
+     * Updates the inputs of the camera with a new robotToCamera transform; used for moving cameras.
+     *
+     * @param inputs the information received from the camera either in sim or the real camera
+     * @param robotToCamera the transform from the robot to the camera. This is a DoubleFunction
+     *     that must return the robotToCamera transform at the given timestamp.
+     */
     public default void updateInputs(
             VisionIOInputs inputs, DoubleFunction<Transform3d> robotToCamera) {}
 

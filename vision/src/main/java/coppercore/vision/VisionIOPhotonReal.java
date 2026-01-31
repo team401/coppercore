@@ -50,6 +50,9 @@ public class VisionIOPhotonReal implements VisionIO {
         aprilTagLayout = tagLayout;
     }
 
+    /**
+     * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs, DoubleFunction)
+     */
     @Override
     public void updateInputs(VisionIOInputs inputs, DoubleFunction<Transform3d> robotToCamera) {
         inputs.connected = camera.isConnected();
@@ -162,6 +165,9 @@ public class VisionIOPhotonReal implements VisionIO {
         }
     }
 
+    /**
+     * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs)
+     */
     @Override
     public void updateInputs(VisionIOInputs inputs) {
         robotToCamera.ifPresentOrElse(

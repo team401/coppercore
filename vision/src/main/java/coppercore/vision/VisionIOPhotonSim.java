@@ -42,12 +42,18 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
         visionSim.addCamera(cameraSim, robotToCamera);
     }
 
+    /**
+     * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs)
+     */
     @Override
     public void updateInputs(VisionIOInputs inputs) {
         visionSim.update(poseSupplier.get());
         super.updateInputs(inputs);
     }
 
+    /**
+     * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs, DoubleFunction)
+     */
     @Override
     public void updateInputs(VisionIOInputs inputs, DoubleFunction<Transform3d> robotToCamera) {
         visionSim.update(poseSupplier.get());
