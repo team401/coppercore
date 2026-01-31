@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.DoubleFunction;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
 
@@ -50,7 +51,7 @@ public class VisionIOPhotonReal implements VisionIO {
     }
 
     @Override
-    public void updateInputs(VisionIOInputs inputs, Transform3d robotToCamera) {
+    public void updateInputs(VisionIOInputs inputs, DoubleFunction<Transform3d> robotToCamera) {
         inputs.connected = camera.isConnected();
 
         Set<Short> tagsSeen = new HashSet<>();
@@ -79,7 +80,9 @@ public class VisionIOPhotonReal implements VisionIO {
 
                 // convert pose from field to camera -> field to robot
                 Transform3d fieldToCamera = multitagResult.estimatedPose.best;
-                Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse());
+                Transform3d fieldToRobot =
+                        fieldToCamera.plus(
+                                robotToCamera.apply(result.getTimestampSeconds()).inverse());
                 Pose3d robotPose =
                         new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
 
@@ -109,7 +112,7 @@ public class VisionIOPhotonReal implements VisionIO {
                             PhotonUtils.estimateFieldToRobotAprilTag(
                                     target.getBestCameraToTarget(),
                                     aprilTagLayout.getTagPose(target.fiducialId).get(),
-                                    robotToCamera.inverse());
+                                    robotToCamera.apply(result.getTimestampSeconds()).inverse());
 
                     // Add tag ID
                     tagsSeen.add((short) target.fiducialId);
@@ -163,7 +166,7 @@ public class VisionIOPhotonReal implements VisionIO {
     public void updateInputs(VisionIOInputs inputs) {
         robotToCamera.ifPresentOrElse(
                 (robotToCameraInstance) -> {
-                    updateInputs(inputs, robotToCameraInstance);
+                    updateInputs(inputs, (_ignored) -> robotToCameraInstance);
                 },
                 () -> {
                     System.err.println(
