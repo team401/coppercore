@@ -162,7 +162,7 @@ public class StateMachine<World> {
         pw.println();
         for (var state : states.entrySet()) {
             var stateName = state.getKey();
-            pw.printf("  %s;%n", stateName);
+            pw.printf("  %s %s;%n", stateName, currentState == state ? "[shape=doublecircle]" : "");
         }
         pw.println();
         pw.println("  // Transitions");
@@ -192,7 +192,6 @@ public class StateMachine<World> {
         writeGraphvizFileWithCustomGraphFormat(
                 pw,
                 """
-      rankdir=LR;
       node [
         shape=box,
         style=rounded
