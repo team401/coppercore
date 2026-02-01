@@ -189,19 +189,4 @@ public class VisionIOPhotonReal implements VisionIO {
             inputs.singleTagObservations[j] = singleTagObservations.get(j);
         }
     }
-
-    /**
-     * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs)
-     */
-    @Override
-    public void updateInputs(VisionIOInputs inputs) {
-        robotToCamera.ifPresentOrElse(
-                (robotToCameraInstance) -> {
-                    updateInputs(inputs, (_ignored) -> Optional.of(robotToCameraInstance));
-                },
-                () -> {
-                    System.err.println(
-                            "updateInputs was called without a robot to camera transform");
-                });
-    }
 }

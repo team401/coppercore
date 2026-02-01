@@ -45,15 +45,6 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
     }
 
     /**
-     * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs)
-     */
-    @Override
-    public void updateInputs(VisionIOInputs inputs) {
-        visionSim.update(poseSupplier.get());
-        super.updateInputs(inputs);
-    }
-
-    /**
      * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs, DoubleFunction)
      */
     @Override

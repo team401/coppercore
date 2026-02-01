@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
@@ -17,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.DoubleFunction;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -25,7 +25,6 @@ import org.littletonrobotics.junction.Logger;
  */
 public class VisionLocalizer extends SubsystemBase {
     private final CameraConfig[] cameras;
-    private final TimeInterpolatableBuffer<Pose3d>[] cameraPoses;
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
     // avoid NullPointerExceptions by setting a default no-op
@@ -39,9 +38,25 @@ public class VisionLocalizer extends SubsystemBase {
      *
      * @param stdDevFactor factors to multiply standard deviation
      * @param io of each camera, using photon vision or sim
-     * @param isFixed boolean representing whether or not the camera is stationary
+     * @param robotToCameraAt double function providing the camera transform from the given
+     *     timestamp, used for mobile cameras
      */
-    public record CameraConfig(VisionIO io, double stdDevFactor, boolean isFixed) {}
+    public record CameraConfig(
+            VisionIO io,
+            double stdDevFactor,
+            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
+
+        /**
+         * A camera config for a stationary camera
+         *
+         * @param io of each camera, using photon vision or sim
+         * @param stdDevFactor factors to multiply standard deviation
+         * @param robotToCamera static transform of robot to camera, used for stationary cameras
+         */
+        public CameraConfig(VisionIO io, double stdDevFactor, Transform3d robotToCamera) {
+            this(io, stdDevFactor, (double _ignored) -> Optional.of(robotToCamera));
+        }
+    }
 
     /**
      * Constructs a new VisionLocalizer instance
@@ -52,7 +67,6 @@ public class VisionLocalizer extends SubsystemBase {
      *     and pose rejection parameters for this VisionLocalizer.
      * @param cameras an array of the camera configs
      */
-    @SuppressWarnings("unchecked")
     public VisionLocalizer(
             VisionConsumer consumer,
             AprilTagFieldLayout aprilTagLayout,
@@ -62,13 +76,9 @@ public class VisionLocalizer extends SubsystemBase {
         this.cameras = cameras;
         this.aprilTagLayout = aprilTagLayout;
         this.gainConstants = gainConstants;
-        this.cameraPoses = new TimeInterpolatableBuffer[cameras.length];
 
         for (int i = 0; i < cameras.length; i++) {
             cameras[i].io.setAprilTagLayout(aprilTagLayout);
-            if (!cameras[i].isFixed) {
-                cameraPoses[i] = TimeInterpolatableBuffer.createBuffer(5.0);
-            }
         }
 
         // Initialize inputs
@@ -180,21 +190,9 @@ public class VisionLocalizer extends SubsystemBase {
     @Override
     public void periodic() {
         for (int i = 0; i < cameras.length; i++) {
-            if (cameras[i].isFixed()) {
-                cameras[i].io.updateInputs(inputs[i]);
-            } else {
-                final int _i = i;
-                cameras[i].io.updateInputs(
-                        inputs[i],
-                        (double time) -> {
-                            var samplePose = cameraPoses[_i].getSample(time);
-                            if (samplePose.isPresent()) {
-                                return Optional.of(samplePose.get().minus(Pose3d.kZero));
-                            } else {
-                                return Optional.empty();
-                            }
-                        });
-            }
+            final int _i = i;
+            cameras[i].io.updateInputs(
+                    inputs[i], (time) -> cameras[_i].robotToCameraAt.apply(time));
             Logger.processInputs("Vision/Camera" + i, inputs[i]);
         }
 
@@ -348,12 +346,4 @@ public class VisionLocalizer extends SubsystemBase {
     public static record DistanceToTag(
             double crossTrackDistance, double alongTrackDistance, boolean isValid) {}
     ;
-
-    public void addCameraTransformSample(int index, double time, Transform3d robotToCamera) {
-        if (cameras[index].isFixed) {
-            System.err.println("camera transform sample was added to a stationary camera");
-        } else {
-            cameraPoses[index].addSample(time, Pose3d.kZero.plus(robotToCamera));
-        }
-    }
 }
