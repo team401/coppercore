@@ -90,7 +90,7 @@ public interface VisionIO {
      *
      * @param inputs the information received from the camera either in sim or the real camera
      * @param robotToCamera the transform from the robot to the camera. This is a DoubleFunction
-     *     that must return the robotToCamera transform at the given timestamp.
+     *     that must return the robotToCamera transform at the given timestamp in seconds.
      */
     public default void updateInputs(
             VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> robotToCamera) {}
