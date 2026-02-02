@@ -56,6 +56,17 @@ public class VisionLocalizer extends SubsystemBase {
         public CameraConfig(VisionIO io, double stdDevFactor, Transform3d robotToCamera) {
             this(io, stdDevFactor, (double _ignored) -> Optional.of(robotToCamera));
         }
+
+        /**
+         * A camera config for a stationary camera with no additional stddev factor. Achieves this
+         * by setting stddev factor to 1.0.
+         *
+         * @param io of each camera, using photon vision or sim
+         * @param robotToCamera static transform of robot to camera, used for stationary cameras
+         */
+        public CameraConfig(VisionIO io, Transform3d robotToCamera) {
+            this(io, 1.0, robotToCamera);
+        }
     }
 
     /**
