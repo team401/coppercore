@@ -1,5 +1,6 @@
 package coppercore.wpilib_interface.subsystems.motors.talonfx;
 
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -36,6 +37,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -45,6 +47,75 @@ import edu.wpi.first.wpilibj.DriverStation;
  * MotionMagicExpo, MotionMagicVelocity, and TorqueCurrentFOC wherever possible.
  */
 public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO {
+    /**
+     * The refresh rate, in hertz, for low priority status signals such as applied voltage or closed
+     * loop output.
+     *
+     * <p>This value can be configured with {@link #setLowPriorityRefreshRate(double)}
+     */
+    protected static double lowPriorityRefreshRateHz = 20.0;
+
+    /**
+     * The refresh rate, in hertz, for high priority status signals (velocity, position, stator and
+     * supply current).
+     *
+     * <p>This value can be configured with {@link #setHighPriorityRefreshRate(double)}
+     */
+    protected static double highPriorityRefreshRateHz = 200.0;
+
+    /**
+     * Configure the refresh rate, in hertz, of low priority status signals such as applied voltage
+     * or closed loop output. This method only applies to MotorIOTalonFX instances that are
+     * instantiated after it has been called, and the value configured will apply to all instances
+     * created until it is called with a different value.
+     *
+     * <p><b>Default value: 20 hz</b>
+     *
+     * <p>See {@link #setHighPriorityRefreshRate(double)} for a list of high priority signals.
+     *
+     * <p>If logs contain data that is too stale, a "low priority"" signal is needed at a high
+     * refresh rate, or low priority signals are consuming too much bus bandwidth which is needed by
+     * high priority signals, this method should be called to adjust the refresh rate.
+     *
+     * @param lowPriorityRefreshRateHz A double containing the desired refresh rate for low priority
+     *     status signals.
+     */
+    public static void setLowPriorityRefreshRate(double lowPriorityRefreshRateHz) {
+        MotorIOTalonFX.lowPriorityRefreshRateHz = lowPriorityRefreshRateHz;
+    }
+
+    /**
+     * Configure the refresh rate, in hertz, of high priority status signals such as applied voltage
+     * or closed loop output. This method only applies to MotorIOTalonFX instances that are
+     * instantiated after it has been called, and the value configured will apply to all instances
+     * created until it is called with a different value.
+     *
+     * <p><b>Default value: 200 hz</b>
+     *
+     * <p>The "high priority status signals" that this method affects are:
+     *
+     * <ul>
+     *   <li>Position
+     *   <li>Velocity
+     *   <li>Supply Current
+     *   <li>Stator Current
+     * </ul>
+     *
+     * <p>To adjust low priority signals, see {@link
+     * MotorIOTalonFX#setLowPriorityRefreshRate(double) }
+     *
+     * <p>If logs contain data that is too stale, the "high priority" signals are not needed at such
+     * a high refresh rate, or this subsystem's high priority signals are consuming too much bus
+     * bandwidth which is needed by high priority signals, this method should be called to adjust
+     * the refresh rate.
+     *
+     * @param highPriorityRefreshRateHz A double containing the desired refresh rate for high
+     *     priority status signals.
+     */
+    public static void setHighPriorityRefreshRate(double highPriorityRefreshRateHz) {
+        MotorIOTalonFX.highPriorityRefreshRateHz = highPriorityRefreshRateHz;
+    }
+
     /**
      * TalonFXConfiguration used by the motor. This may be shared between multiple IOs and therefore
      * should be mutated only with extreme caution.
@@ -83,6 +154,9 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     /** Closed Loop Reference Slope StatusSignal cached for easy repeated access */
     protected final StatusSignal<Double> closedLoopReferenceSlopeSignal;
+
+    /** Temperature StatusSignal cached for easy repeated access */
+    protected final StatusSignal<Temperature> temperatureSignal;
 
     /** Array of status signals to be easily passed to refreshAll */
     protected final BaseStatusSignal[] signals;
@@ -172,6 +246,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         this.closedLoopOutputSignal = talon.getClosedLoopOutput();
         this.closedLoopReferenceSignal = talon.getClosedLoopReference();
         this.closedLoopReferenceSlopeSignal = talon.getClosedLoopReferenceSlope();
+        this.temperatureSignal = talon.getAncillaryDeviceTemp();
 
         this.signals =
                 new BaseStatusSignal[] {
@@ -184,10 +259,23 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                     closedLoopOutputSignal,
                     closedLoopReferenceSignal,
                     closedLoopReferenceSlopeSignal,
+                    temperatureSignal
                 };
+        final BaseStatusSignal[] highPrioritySignals = {
+            velocitySignal, positionSignal, statorCurrentSignal, supplyCurrentSignal
+        };
 
+        // Signals that won't be used for
         CTREUtil.tryUntilOk(
-                () -> BaseStatusSignal.setUpdateFrequencyForAll(50.0, signals), id, (code) -> {});
+                () -> BaseStatusSignal.setUpdateFrequencyForAll(lowPriorityRefreshRateHz, signals),
+                id,
+                (code) -> {});
+        CTREUtil.tryUntilOk(
+                () ->
+                        BaseStatusSignal.setUpdateFrequencyForAll(
+                                highPriorityRefreshRateHz, highPrioritySignals),
+                id,
+                (code) -> {});
         CTREUtil.tryUntilOk(() -> talon.optimizeBusUtilization(), id, (code) -> {});
 
         this.dynamicProfiledPositionRequest =
@@ -295,6 +383,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 Units.rotationsToRadians(closedLoopReferenceSignal.getValueAsDouble());
         inputs.closedLoopReferenceSlope =
                 Units.rotationsToRadians(closedLoopReferenceSlopeSignal.getValueAsDouble());
+        inputs.tempCelsius = temperatureSignal.getValue().in(Celsius);
     }
 
     @Override
