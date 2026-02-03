@@ -16,7 +16,6 @@ import org.photonvision.PhotonUtils;
 /** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {
     protected final PhotonCamera camera;
-    protected final Optional<Transform3d> robotToCamera;
     public final String name;
     public AprilTagFieldLayout aprilTagLayout;
 
@@ -24,24 +23,11 @@ public class VisionIOPhotonReal implements VisionIO {
      * Creates a new VisionIOPhotonVision.
      *
      * @param name The configured name of the camera.
-     * @param robotToCamera Transform to help find robot position. If this transform is not null, it
-     *     is used by default, and if it is null, a camera transform must be provided every time
-     *     updateInputs is called.
-     * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs, DoubleFunction)
      */
-    public VisionIOPhotonReal(String name, Transform3d robotToCamera) {
+    public VisionIOPhotonReal(String name) {
         camera = new PhotonCamera(name);
         this.name = name;
-        if (robotToCamera != null) {
-            this.robotToCamera = Optional.of(robotToCamera);
-        } else {
-            this.robotToCamera = Optional.empty();
-        }
         this.aprilTagLayout = null;
-    }
-
-    public VisionIOPhotonReal(String name) {
-        this(name, null);
     }
 
     /**

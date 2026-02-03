@@ -3,6 +3,7 @@ package coppercore.vision;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
 import java.util.function.DoubleFunction;
 import java.util.function.Supplier;
@@ -15,21 +16,18 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
     private static VisionSystemSim visionSim;
 
     private final Supplier<Pose2d> poseSupplier;
-    private final PhotonCameraSim cameraSim;
+    private PhotonCameraSim cameraSim;
 
     /**
      * Creates a new VisionIOPhotonVisionSim.
      *
      * @param name The name of the camera.
      * @param poseSupplier Supplier for the robot pose to use in simulation.
-     * @see VisionIOPhotonReal#VisionIOPhotonReal(String, Transform3d)
+     * @see VisionIOPhotonReal#VisionIOPhotonReal(String)
      */
     public VisionIOPhotonSim(
-            String name,
-            Transform3d robotToCamera,
-            Supplier<Pose2d> poseSupplier,
-            AprilTagFieldLayout aprilTagLayout) {
-        super(name, robotToCamera);
+            String name, Supplier<Pose2d> poseSupplier, AprilTagFieldLayout aprilTagLayout) {
+        super(name);
         this.poseSupplier = poseSupplier;
 
         // Initialize vision sim
@@ -37,11 +35,6 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
             visionSim = new VisionSystemSim("main");
             visionSim.addAprilTags(aprilTagLayout);
         }
-
-        // Add sim camera
-        var cameraProperties = new SimCameraProperties();
-        cameraSim = new PhotonCameraSim(camera, cameraProperties);
-        visionSim.addCamera(cameraSim, robotToCamera);
     }
 
     /**
@@ -49,8 +42,37 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      */
     @Override
     public void updateInputs(
-            VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> robotToCamera) {
+            VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
+        // If the camera doesn't already exist, it should be created at the given transform. If it
+        // already existed, it should be adjusted to the new transform, which may be the same as
+        // before if the camera is stationary.
+        if (cameraSim == null) {
+            // Add sim camera
+            var cameraProperties = new SimCameraProperties();
+            cameraSim = new PhotonCameraSim(camera, cameraProperties);
+            robotToCameraAt
+                    .apply(Timer.getFPGATimestamp())
+                    .ifPresentOrElse(
+                            (robotToCamera) -> {
+                                visionSim.addCamera(cameraSim, robotToCamera);
+                            },
+                            () -> {
+                                System.err.println(
+                                        "could not simulate camera as a transform was not given");
+                            });
+        } else {
+            robotToCameraAt
+                    .apply(Timer.getFPGATimestamp())
+                    .ifPresentOrElse(
+                            (robotToCamera) -> {
+                                visionSim.adjustCamera(cameraSim, robotToCamera);
+                            },
+                            () -> {
+                                System.err.println(
+                                        "could not adjust camera transform as one was not given");
+                            });
+        }
         visionSim.update(poseSupplier.get());
-        super.updateInputs(inputs, robotToCamera);
+        super.updateInputs(inputs, robotToCameraAt);
     }
 }
