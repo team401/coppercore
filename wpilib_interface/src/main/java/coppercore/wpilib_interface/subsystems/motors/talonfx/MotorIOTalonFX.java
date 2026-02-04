@@ -1,6 +1,7 @@
 package coppercore.wpilib_interface.subsystems.motors.talonfx;
 
 import static edu.wpi.first.units.Units.Celsius;
+import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -37,6 +38,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -48,72 +50,39 @@ import edu.wpi.first.wpilibj.DriverStation;
  */
 public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO {
     /**
-     * The refresh rate, in hertz, for low priority status signals such as applied voltage or closed
+     * The default refresh rate for medium priority status signals such as applied voltage or closed
      * loop output.
-     *
-     * <p>This value can be configured with {@link #setLowPriorityRefreshRate(double)}
      */
-    protected static double lowPriorityRefreshRateHz = 20.0;
+    public static final Frequency defaultMediumPriorityUpdateFrequency = Hertz.of(20.0);
 
     /**
-     * The refresh rate, in hertz, for high priority status signals (velocity, position, stator and
+     * The default refresh rate for high priority status signals (velocity, position, stator and
      * supply current).
-     *
-     * <p>This value can be configured with {@link #setHighPriorityRefreshRate(double)}
      */
-    protected static double highPriorityRefreshRateHz = 200.0;
+    public static final Frequency defaultHighPriorityUpdateFrequency = Hertz.of(200.0);
 
     /**
-     * Configure the refresh rate, in hertz, of low priority status signals such as applied voltage
-     * or closed loop output. This method only applies to MotorIOTalonFX instances that are
-     * instantiated after it has been called, and the value configured will apply to all instances
-     * created until it is called with a different value.
+     * The SignalRefreshRates record stores the desired signal refresh rates for a MotorIOTalonFX.
      *
-     * <p><b>Default value: 20 hz</b>
-     *
-     * <p>See {@link #setHighPriorityRefreshRate(double)} for a list of high priority signals.
-     *
-     * <p>If logs contain data that is too stale, a "low priority"" signal is needed at a high
-     * refresh rate, or low priority signals are consuming too much bus bandwidth which is needed by
-     * high priority signals, this method should be called to adjust the refresh rate.
-     *
-     * @param lowPriorityRefreshRateHz A double containing the desired refresh rate for low priority
-     *     status signals.
+     * @param highPriorityUpdateFrequency A Frequency specifying the update frequency for the
+     *     position, velocity, stator current, and supply current signals.
+     * @param mediumPriorityUpdateFrequency A Frequency specifying the update frequency for the
+     *     applied voltage, raw rotor position, closed loop output, closed loop reference, closed
+     *     loop reference slope, and temperature signals.
      */
-    public static void setLowPriorityRefreshRate(double lowPriorityRefreshRateHz) {
-        MotorIOTalonFX.lowPriorityRefreshRateHz = lowPriorityRefreshRateHz;
-    }
-
-    /**
-     * Configure the refresh rate, in hertz, of high priority status signals such as applied voltage
-     * or closed loop output. This method only applies to MotorIOTalonFX instances that are
-     * instantiated after it has been called, and the value configured will apply to all instances
-     * created until it is called with a different value.
-     *
-     * <p><b>Default value: 200 hz</b>
-     *
-     * <p>The "high priority status signals" that this method affects are:
-     *
-     * <ul>
-     *   <li>Position
-     *   <li>Velocity
-     *   <li>Supply Current
-     *   <li>Stator Current
-     * </ul>
-     *
-     * <p>To adjust low priority signals, see {@link
-     * MotorIOTalonFX#setLowPriorityRefreshRate(double) }
-     *
-     * <p>If logs contain data that is too stale, the "high priority" signals are not needed at such
-     * a high refresh rate, or this subsystem's high priority signals are consuming too much bus
-     * bandwidth which is needed by high priority signals, this method should be called to adjust
-     * the refresh rate.
-     *
-     * @param highPriorityRefreshRateHz A double containing the desired refresh rate for high
-     *     priority status signals.
-     */
-    public static void setHighPriorityRefreshRate(double highPriorityRefreshRateHz) {
-        MotorIOTalonFX.highPriorityRefreshRateHz = highPriorityRefreshRateHz;
+    public record SignalRefreshRates(
+            Frequency highPriorityUpdateFrequency, Frequency mediumPriorityUpdateFrequency) {
+        /**
+         * Creates a new SignalRefreshRates object with the default values of 200hz for high
+         * priority and 20hz for medium priority signals.
+         *
+         * @return A new SignalRefreshRates object with the default values of 200hz for high
+         *     priority and 20hz for medium priority signals.
+         */
+        public static SignalRefreshRates defaults() {
+            return new SignalRefreshRates(
+                    defaultHighPriorityUpdateFrequency, defaultMediumPriorityUpdateFrequency);
+        }
     }
 
     /**
@@ -221,9 +190,14 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      * @param id The CANDeviceID of the motor in question.
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high- and medium-priority signals.
      */
     protected MotorIOTalonFX(
-            MechanismConfig config, CANDeviceID id, TalonFXConfiguration talonFXConfig) {
+            MechanismConfig config,
+            CANDeviceID id,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates) {
         super(config, id, "_TalonFX_");
 
         this.talonFXConfig = talonFXConfig;
@@ -265,15 +239,21 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
             velocitySignal, positionSignal, statorCurrentSignal, supplyCurrentSignal
         };
 
-        // Signals that won't be used for
-        CTREUtil.tryUntilOk(
-                () -> BaseStatusSignal.setUpdateFrequencyForAll(lowPriorityRefreshRateHz, signals),
-                id,
-                (code) -> {});
+        // Signals that won't be used for low-latency code functions, such as scoring/shooting,
+        // state machine transitions, fast-paced decisionmaking.
         CTREUtil.tryUntilOk(
                 () ->
                         BaseStatusSignal.setUpdateFrequencyForAll(
-                                highPriorityRefreshRateHz, highPrioritySignals),
+                                signalRefreshRates.mediumPriorityUpdateFrequency, signals),
+                id,
+                (code) -> {});
+
+        // Signals that need to be have a latency as low as possible
+        CTREUtil.tryUntilOk(
+                () ->
+                        BaseStatusSignal.setUpdateFrequencyForAll(
+                                signalRefreshRates.highPriorityUpdateFrequency,
+                                highPrioritySignals),
                 id,
                 (code) -> {});
         CTREUtil.tryUntilOk(() -> talon.optimizeBusUtilization(), id, (code) -> {});
@@ -290,15 +270,20 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      * Create a new TalonFX IO, initializing a TalonFX and all required StatusSignals
      *
      * <p>This constructor is for the "lead motor". Use {@link
-     * MotorIOTalonFX#MotorIOTalonFX(MechanismConfig, int, TalonFXConfiguration)} to create a
-     * follower.
+     * MotorIOTalonFX#MotorIOTalonFX(MechanismConfig, int, TalonFXConfiguration,
+     * SignalRefreshRates)} to create a follower.
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high- and medium-priority signals.
      */
-    public MotorIOTalonFX(MechanismConfig config, TalonFXConfiguration talonFXConfig) {
-        this(config, config.leadMotorId, talonFXConfig);
+    public MotorIOTalonFX(
+            MechanismConfig config,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates) {
+        this(config, config.leadMotorId, talonFXConfig, signalRefreshRates);
     }
 
     /**
@@ -308,19 +293,39 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      * @param config A MechanismConfig config to use for CAN IDs
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high- and medium-priority signals.
+     * @return A new MotorIOTalonFX created with the specified parameters, configured as a lead
+     *     motor.
+     */
+    public static MotorIOTalonFX newLeader(
+            MechanismConfig config,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates) {
+        return new MotorIOTalonFX(config, talonFXConfig, signalRefreshRates);
+    }
+
+    /**
+     * Create a new TalonFX IO for a lead motor, initializing a TalonFX and all required
+     * StatusSignals, using the {@link SignalRefreshRates#defaults() default} SignalRefreshRates.
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
      * @return A new MotorIOTalonFX created with the specified parameters, configured as a lead
      *     motor.
      */
     public static MotorIOTalonFX newLeader(
             MechanismConfig config, TalonFXConfiguration talonFXConfig) {
-        return new MotorIOTalonFX(config, talonFXConfig);
+        return new MotorIOTalonFX(config, talonFXConfig, SignalRefreshRates.defaults());
     }
 
     /**
      * Create a new TalonFX IO, initializing a TalonFX and all required StatusSignals
      *
      * <p>This constructor is for a "follower motor". Use {@link
-     * MotorIOTalonFX#MotorIOTalonFX(MechanismConfig, TalonFXConfiguration)} to create the leader.
+     * MotorIOTalonFX#MotorIOTalonFX(MechanismConfig, TalonFXConfiguration, SignalRefreshRates)} to
+     * create the leader.
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param followerIndex An int containing the index of the follower motor (what position in
@@ -328,10 +333,19 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      *     the end of its constructor.
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high- and medium-priority signals.
      */
     public MotorIOTalonFX(
-            MechanismConfig config, int followerIndex, TalonFXConfiguration talonFXConfig) {
-        this(config, config.followerMotorConfigs[followerIndex].id(), talonFXConfig);
+            MechanismConfig config,
+            int followerIndex,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates) {
+        this(
+                config,
+                config.followerMotorConfigs[followerIndex].id(),
+                talonFXConfig,
+                signalRefreshRates);
 
         follow(config.leadMotorId.id(), config.followerMotorConfigs[followerIndex].invert());
     }
@@ -346,12 +360,37 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      *     the end of its constructor.
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high- and medium-priority signals.
+     * @return A new MotorIOTalonFX created with the specified parameters, configured as a follower
+     *     motor.
+     */
+    public static MotorIOTalonFX newFollower(
+            MechanismConfig config,
+            int followerIndex,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates) {
+        return new MotorIOTalonFX(config, followerIndex, talonFXConfig, signalRefreshRates);
+    }
+
+    /**
+     * Create a new TalonFX IO for a follower motor, initializing a TalonFX and all required
+     * StatusSignals, using the {@link SignalRefreshRates#defaults() default} SignalRefreshRates and
+     * automatically following the lead motor specified in the config.
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param followerIndex An int containing the index of the follower motor (what position in
+     *     config.followerIds this motor is). This IO will automatically follow the lead motor at
+     *     the end of its constructor.
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
      * @return A new MotorIOTalonFX created with the specified parameters, configured as a follower
      *     motor.
      */
     public static MotorIOTalonFX newFollower(
             MechanismConfig config, int followerIndex, TalonFXConfiguration talonFXConfig) {
-        return new MotorIOTalonFX(config, followerIndex, talonFXConfig);
+        return new MotorIOTalonFX(
+                config, followerIndex, talonFXConfig, SignalRefreshRates.defaults());
     }
 
     @Override

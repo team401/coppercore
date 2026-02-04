@@ -53,19 +53,22 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
      *
      * <p>This constructor is for a lead motor. Use {@link
      * MotorIOTalonFXSim#MotorIOTalonFXSim(MechanismConfig, int, TalonFXConfiguration,
-     * CoppercoreSimAdapter)} to create a follower.
+     * SignalRefreshRates, CoppercoreSimAdapter)} to create a follower.
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high- and medium-priority signals.
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
      *     simulation.
      */
     public MotorIOTalonFXSim(
             MechanismConfig config,
             TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates,
             CoppercoreSimAdapter physicsSimAdapter) {
-        super(config, talonFXConfig);
+        super(config, talonFXConfig, signalRefreshRates);
 
         this.isFollower = false;
 
@@ -86,6 +89,29 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
      * @param config A MechanismConfig config to use for CAN IDs
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high- and medium-priority signals.
+     * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
+     *     simulation.
+     * @return A new MotorIOTalonFXSim created with the specified parameters, configured as a lead
+     *     motor.
+     */
+    public static MotorIOTalonFXSim newLeader(
+            MechanismConfig config,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates,
+            CoppercoreSimAdapter physicsSimAdapter) {
+        return new MotorIOTalonFXSim(config, talonFXConfig, signalRefreshRates, physicsSimAdapter);
+    }
+
+    /**
+     * Create a new simulated TalonFX IO for a lead motor, initializing a real TalonFX IO and all
+     * required StatusSignals, using {@link MotorIOTalonFX.SignalRefreshRates#defaults() default}
+     * SignalRefreshRates, and then extracting its sim state.
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
      *     simulation.
      * @return A new MotorIOTalonFXSim created with the specified parameters, configured as a lead
@@ -95,7 +121,8 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
             MechanismConfig config,
             TalonFXConfiguration talonFXConfig,
             CoppercoreSimAdapter physicsSimAdapter) {
-        return new MotorIOTalonFXSim(config, talonFXConfig, physicsSimAdapter);
+        return new MotorIOTalonFXSim(
+                config, talonFXConfig, SignalRefreshRates.defaults(), physicsSimAdapter);
     }
 
     /**
@@ -103,7 +130,7 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
      *
      * <p>This constructor is for a follower. Use {@link
      * MotorIOTalonFXSim#MotorIOTalonFXSim(MechanismConfig, TalonFXConfiguration,
-     * CoppercoreSimAdapter)} to create a lead motor.
+     * SignalRefreshRates, CoppercoreSimAdapter)} to create a lead motor.
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param followerIndex An int containing the index of the follower motor (what position in
@@ -111,6 +138,8 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
      *     motor at the end of its constructor.
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high- and medium-priority signals.
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
      *     simulation.
      */
@@ -118,8 +147,9 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
             MechanismConfig config,
             int followerIndex,
             TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates,
             CoppercoreSimAdapter physicsSimAdapter) {
-        super(config, followerIndex, talonFXConfig);
+        super(config, followerIndex, talonFXConfig, signalRefreshRates);
 
         this.isFollower = true;
         this.invertSimRotation = config.followerMotorConfigs[followerIndex].invert();
@@ -142,6 +172,34 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
      *     motor at the end of its constructor.
      * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
      *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high- and medium-priority signals.
+     * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
+     *     simulation.
+     * @return A new MotorIOTalonFXSim created with the specified parameters, configured as a lead
+     *     motor.
+     */
+    public static MotorIOTalonFXSim newFollower(
+            MechanismConfig config,
+            int followerIndex,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates,
+            CoppercoreSimAdapter physicsSimAdapter) {
+        return new MotorIOTalonFXSim(
+                config, followerIndex, talonFXConfig, signalRefreshRates, physicsSimAdapter);
+    }
+
+    /**
+     * Create a new simulated TalonFX IO for a follower motor, initializing a real TalonFX IO and
+     * all required StatusSignals, using {@link MotorIOTalonFX.SignalRefreshRates#defaults()
+     * default} SignalRefreshRates and then extracting its sim state.
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param followerIndex An int containing the index of the follower motor (what position in
+     *     config.followerMotorConfigs this motor is). This IO will automatically follow the lead
+     *     motor at the end of its constructor.
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for mechanism physics
      *     simulation.
      * @return A new MotorIOTalonFXSim created with the specified parameters, configured as a lead
@@ -152,7 +210,12 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
             int followerIndex,
             TalonFXConfiguration talonFXConfig,
             CoppercoreSimAdapter physicsSimAdapter) {
-        return new MotorIOTalonFXSim(config, followerIndex, talonFXConfig, physicsSimAdapter);
+        return new MotorIOTalonFXSim(
+                config,
+                followerIndex,
+                talonFXConfig,
+                SignalRefreshRates.defaults(),
+                physicsSimAdapter);
     }
 
     /**
