@@ -38,9 +38,6 @@ public class VisionIOPhotonReal implements VisionIO {
         aprilTagLayout = tagLayout;
     }
 
-    /**
-     * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs, DoubleFunction)
-     */
     @Override
     public void updateInputs(
             VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> optionalRobotToCamera) {

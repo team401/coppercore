@@ -242,9 +242,7 @@ public class VisionLocalizer extends SubsystemBase {
     @Override
     public void periodic() {
         for (int i = 0; i < cameras.length; i++) {
-            final int _i = i;
-            cameras[i].io.updateInputs(
-                    inputs[i], (time) -> cameras[_i].robotToCameraAt.apply(time));
+            cameras[i].io.updateInputs(inputs[i], cameras[i].robotToCameraAt);
             Logger.processInputs("Vision/Camera" + i, inputs[i]);
         }
 
