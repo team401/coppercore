@@ -17,7 +17,7 @@ import org.photonvision.PhotonUtils;
 public class VisionIOPhotonReal implements VisionIO {
     protected final PhotonCamera camera;
     public final String name;
-    public AprilTagFieldLayout aprilTagLayout;
+    private AprilTagFieldLayout aprilTagLayout;
 
     /**
      * Creates a new VisionIOPhotonVision.
@@ -27,7 +27,6 @@ public class VisionIOPhotonReal implements VisionIO {
     public VisionIOPhotonReal(String name) {
         camera = new PhotonCamera(name);
         this.name = name;
-        this.aprilTagLayout = null;
     }
 
     /**

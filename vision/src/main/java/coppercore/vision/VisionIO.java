@@ -96,4 +96,11 @@ public interface VisionIO {
             VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> robotToCamera) {}
 
     public default void setAprilTagLayout(AprilTagFieldLayout tagLayout) {}
+
+    /**
+     * Used for both fixed and mobile cameras in SIM to initialize the robotToCamera transform.
+     *
+     * @param robotToCamera the transform of the robot to the camera
+     */
+    public default void initializeRobotToCameraTransform(Transform3d robotToCamera) {}
 }

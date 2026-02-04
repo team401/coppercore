@@ -12,6 +12,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,34 +40,70 @@ public class VisionLocalizer extends SubsystemBase {
      * @param stdDevFactor factors to multiply standard deviation
      * @param io of each camera, using photon vision or sim
      * @param robotToCameraAt double function providing the camera transform from the given
-     *     timestamp, used for mobile cameras
+     *     timestamp, used for both stationary and mobile cameras
      */
     public record CameraConfig(
+            CameraType type,
             VisionIO io,
             double stdDevFactor,
             DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
 
         /**
-         * A camera config for a stationary camera
+         * A function that returns a stationary camera config
          *
          * @param io of each camera, using photon vision or sim
          * @param stdDevFactor factors to multiply standard deviation
-         * @param robotToCamera static transform of robot to camera, used for stationary cameras
+         * @param robotToCamera static transform of robot to camera
+         * @return camera config that is stationary
          */
-        public CameraConfig(VisionIO io, double stdDevFactor, Transform3d robotToCamera) {
-            this(io, stdDevFactor, (double _ignored) -> Optional.of(robotToCamera));
+        public static CameraConfig fixed(
+                VisionIO io, double stdDevFactor, Transform3d robotToCamera) {
+            return new CameraConfig(
+                    CameraType.FIXED,
+                    io,
+                    stdDevFactor,
+                    (double _ignored) -> Optional.of(robotToCamera));
         }
 
         /**
-         * A camera config for a stationary camera with no additional stddev factor. Achieves this
-         * by setting stddev factor to 1.0.
+         * A function that returns a mobile camera config
          *
          * @param io of each camera, using photon vision or sim
-         * @param robotToCamera static transform of robot to camera, used for stationary cameras
+         * @param stdDevFactor factors to multiply standard deviation
+         * @param robotToCamera double function that accepts a timestamp
+         * @return camera config that is mobile
          */
-        public CameraConfig(VisionIO io, Transform3d robotToCamera) {
-            this(io, 1.0, robotToCamera);
+        public static CameraConfig mobile(
+                VisionIO io,
+                double stdDevFactor,
+                DoubleFunction<Optional<Transform3d>> robotToCamera) {
+            return new CameraConfig(CameraType.MOBILE, io, stdDevFactor, robotToCamera);
         }
+
+        /**
+         * A function that returns a stationary camera config with stddevfactor set to 1.0
+         *
+         * @see VisionLocalizer.CameraConfig#fixed(VisionIO, double, Transform3d)
+         */
+        public static CameraConfig fixed(VisionIO io, Transform3d robotToCamera) {
+            return new CameraConfig(
+                    CameraType.FIXED, io, 1.0, (double _ignored) -> Optional.of(robotToCamera));
+        }
+
+        /**
+         * A function that returns a mobile camera config with stddevfactor set to 1.0
+         *
+         * @see VisionLocalizer.CameraConfig#mobile(VisionIO, double, Transform3d)
+         */
+        public static CameraConfig mobile(
+                VisionIO io, DoubleFunction<Optional<Transform3d>> robotToCamera) {
+            return new CameraConfig(CameraType.MOBILE, io, 1.0, robotToCamera);
+        }
+    }
+
+    enum CameraType {
+        FIXED,
+        MOBILE;
     }
 
     /**
@@ -90,6 +127,8 @@ public class VisionLocalizer extends SubsystemBase {
 
         for (int i = 0; i < cameras.length; i++) {
             cameras[i].io.setAprilTagLayout(aprilTagLayout);
+            cameras[i].io.initializeRobotToCameraTransform(
+                    cameras[i].robotToCameraAt.apply(Timer.getFPGATimestamp()).get());
         }
 
         // Initialize inputs

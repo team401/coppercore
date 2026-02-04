@@ -17,6 +17,7 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
 
     private final Supplier<Pose2d> poseSupplier;
     private PhotonCameraSim cameraSim;
+    private VisionLocalizer.CameraType cameraType;
 
     /**
      * Creates a new VisionIOPhotonVisionSim.
@@ -26,14 +27,14 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      * @see VisionIOPhotonReal#VisionIOPhotonReal(String)
      */
     public VisionIOPhotonSim(
-            String name, Supplier<Pose2d> poseSupplier, AprilTagFieldLayout aprilTagLayout) {
+            String name, Supplier<Pose2d> poseSupplier, VisionLocalizer.CameraType type) {
         super(name);
         this.poseSupplier = poseSupplier;
+        this.cameraType = type;
 
         // Initialize vision sim
         if (visionSim == null) {
             visionSim = new VisionSystemSim("main");
-            visionSim.addAprilTags(aprilTagLayout);
         }
     }
 
@@ -43,24 +44,8 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
     @Override
     public void updateInputs(
             VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
-        // If the camera doesn't already exist, it should be created at the given transform. If it
-        // already existed, it should be adjusted to the new transform, which may be the same as
-        // before if the camera is stationary.
-        if (cameraSim == null) {
-            // Add sim camera
-            var cameraProperties = new SimCameraProperties();
-            cameraSim = new PhotonCameraSim(camera, cameraProperties);
-            robotToCameraAt
-                    .apply(Timer.getFPGATimestamp())
-                    .ifPresentOrElse(
-                            (robotToCamera) -> {
-                                visionSim.addCamera(cameraSim, robotToCamera);
-                            },
-                            () -> {
-                                System.err.println(
-                                        "could not simulate camera as a transform was not given");
-                            });
-        } else {
+
+        if (cameraType == VisionLocalizer.CameraType.MOBILE) {
             robotToCameraAt
                     .apply(Timer.getFPGATimestamp())
                     .ifPresentOrElse(
@@ -74,5 +59,25 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
         }
         visionSim.update(poseSupplier.get());
         super.updateInputs(inputs, robotToCameraAt);
+    }
+
+    /**
+     * Creates a camera with the given initial transform. This should be called only once when the
+     * VisionIOPhotonSim is created. This is called for both mobile and stationary cameras.
+     *
+     * @param robotToCamera the initialize transform of the robot to the camera
+     */
+    @Override
+    public void initializeRobotToCameraTransform(Transform3d robotToCamera) {
+        // Add sim camera
+        var cameraProperties = new SimCameraProperties();
+        cameraSim = new PhotonCameraSim(camera, cameraProperties);
+        visionSim.addCamera(cameraSim, robotToCamera);
+    }
+
+    @Override
+    public void setAprilTagLayout(AprilTagFieldLayout aprilTagLayout) {
+        super.setAprilTagLayout(aprilTagLayout);
+        visionSim.addAprilTags(aprilTagLayout);
     }
 }
