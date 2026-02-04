@@ -88,15 +88,6 @@ plugins.withId("maven-publish") {
 	}
 }
 
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			from components.java
-			artifactId = project.name   // "metadata"
-		}
-	}
-}
-
 mavenPublishing {
 	pom {
 		description = 'FRC 401 metadata library'

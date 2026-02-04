@@ -103,7 +103,7 @@ public class VisionLocalizer extends SubsystemBase {
         }
     }
 
-    enum CameraType {
+    public enum CameraType {
         FIXED,
         MOBILE;
     }
