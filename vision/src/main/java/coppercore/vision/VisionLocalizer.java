@@ -93,7 +93,8 @@ public class VisionLocalizer extends SubsystemBase {
         /**
          * A function that returns a mobile camera config with stddevfactor set to 1.0
          *
-         * @see VisionLocalizer.CameraConfig#mobile(VisionIO, double, Transform3d)
+         * @see VisionLocalizer.CameraConfig#mobile(VisionIO, double,
+         *     DoubleFunction<Optional<Transform3d>>)
          */
         public static CameraConfig mobile(
                 VisionIO io, DoubleFunction<Optional<Transform3d>> robotToCamera) {
