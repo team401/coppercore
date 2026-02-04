@@ -12,7 +12,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.List;
@@ -129,8 +128,7 @@ public class VisionLocalizer extends SubsystemBase {
 
         for (int i = 0; i < cameras.length; i++) {
             cameras[i].io.setAprilTagLayout(aprilTagLayout);
-            cameras[i].io.initializeRobotToCameraTransform(
-                    cameras[i].robotToCameraAt.apply(Timer.getFPGATimestamp()).get());
+            cameras[i].io.initializeRobotToCameraTransform(cameras[i].robotToCameraAt);
         }
 
         // Initialize inputs

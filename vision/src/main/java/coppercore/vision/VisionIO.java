@@ -99,8 +99,12 @@ public interface VisionIO {
 
     /**
      * Used for both fixed and mobile cameras in SIM to initialize the robotToCamera transform.
+     * VisionIOPhotonReal does not implement this, as its updateInputs method will use the current
+     * camera transform.
      *
-     * @param robotToCamera the transform of the robot to the camera
+     * @param robotToCameraAt the transform of the robot to the camera as a double function of time
+     *     in seconds
      */
-    public default void initializeRobotToCameraTransform(Transform3d robotToCamera) {}
+    public default void initializeRobotToCameraTransform(
+            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {}
 }

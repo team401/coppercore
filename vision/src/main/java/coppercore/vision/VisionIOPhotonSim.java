@@ -65,14 +65,24 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      * Creates a camera with the given initial transform. This should be called only once when the
      * VisionIOPhotonSim is created. This is called for both mobile and stationary cameras.
      *
-     * @param robotToCamera the initial transform of the robot to the camera
+     * @param robotToCameraAt the initial transform of the robot to the camera as a double function
      */
     @Override
-    public void initializeRobotToCameraTransform(Transform3d robotToCamera) {
+    public void initializeRobotToCameraTransform(
+            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
         // Add sim camera
         var cameraProperties = new SimCameraProperties();
         cameraSim = new PhotonCameraSim(camera, cameraProperties);
-        visionSim.addCamera(cameraSim, robotToCamera);
+        robotToCameraAt
+                .apply(Timer.getFPGATimestamp())
+                .ifPresentOrElse(
+                        (robotToCamera) -> {
+                            visionSim.addCamera(cameraSim, robotToCamera);
+                        },
+                        () -> {
+                            System.err.println(
+                                    "could not add camera as robotToCamera does not exist");
+                        });
     }
 
     @Override
