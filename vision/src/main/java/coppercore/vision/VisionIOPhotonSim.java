@@ -65,7 +65,7 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      * Creates a camera with the given initial transform. This should be called only once when the
      * VisionIOPhotonSim is created. This is called for both mobile and stationary cameras.
      *
-     * @param robotToCamera the initialize transform of the robot to the camera
+     * @param robotToCamera the initial transform of the robot to the camera
      */
     @Override
     public void initializeRobotToCameraTransform(Transform3d robotToCamera) {

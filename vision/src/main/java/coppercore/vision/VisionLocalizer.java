@@ -37,6 +37,7 @@ public class VisionLocalizer extends SubsystemBase {
     /**
      * A camera config for a single camera
      *
+     * @param type the type of the camera, either MOBILE or FIXED
      * @param stdDevFactor factors to multiply standard deviation
      * @param io of each camera, using photon vision or sim
      * @param robotToCameraAt double function providing the camera transform from the given
@@ -331,10 +332,8 @@ public class VisionLocalizer extends SubsystemBase {
                 gainConstants.angularStdDevFactor * Math.pow(avgDistanceFromTarget, 2) / numTags;
 
         // adjustment based on position of camera
-        if (cameraIndex < this.cameras.length) {
-            linearStdDev *= this.cameras[cameraIndex].stdDevFactor;
-            angularStdDev *= this.cameras[cameraIndex].stdDevFactor;
-        }
+        linearStdDev *= this.cameras[cameraIndex].stdDevFactor;
+        angularStdDev *= this.cameras[cameraIndex].stdDevFactor;
 
         return VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev);
     }
