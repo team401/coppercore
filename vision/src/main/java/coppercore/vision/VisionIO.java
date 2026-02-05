@@ -4,6 +4,8 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import java.util.Optional;
+import java.util.function.DoubleFunction;
 import org.littletonrobotics.junction.AutoLog;
 
 /**
@@ -83,7 +85,26 @@ public interface VisionIO {
             Rotation2d ty) {}
     ;
 
-    public default void updateInputs(VisionIOInputs inputs) {}
+    /**
+     * Updates the inputs of the camera with a new robotToCamera transform; used for moving cameras.
+     *
+     * @param inputs the information received from the camera either in sim or the real camera
+     * @param robotToCamera the transform from the robot to the camera. This is a DoubleFunction
+     *     that must return the robotToCamera transform at the given timestamp in seconds.
+     */
+    public default void updateInputs(
+            VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> robotToCamera) {}
 
     public default void setAprilTagLayout(AprilTagFieldLayout tagLayout) {}
+
+    /**
+     * Used for both fixed and mobile cameras in SIM to initialize the robotToCamera transform.
+     * VisionIOPhotonReal does not implement this, as its updateInputs method will use the current
+     * camera transform.
+     *
+     * @param robotToCameraAt the transform of the robot to the camera as a double function of time
+     *     in seconds
+     */
+    public default void initializeRobotToCameraTransform(
+            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {}
 }
