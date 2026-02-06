@@ -5,6 +5,7 @@ import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import coppercore.parameter_tools.json.strategies.JSONExcludeExclusionStrategy;
 import coppercore.parameter_tools.json.strategies.JSONNamingStrategy;
@@ -14,12 +15,17 @@ import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.RobotController;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /** Handler to create JSONSync objects with given config and path provider */
 public final class JSONHandler {
@@ -28,6 +34,21 @@ public final class JSONHandler {
     private static HttpServer server;
     private static final Object serverLock = new Object();
     private static final Set<String> registeredPaths = new HashSet<>();
+    private static final Map<String, RouteInfo<?>> routeInfoMap = new HashMap<>();
+
+    /** Holds information about a registered route including the instance and optional callback. */
+    private static class RouteInfo<T> {
+        final T instance;
+        final Class<T> type;
+        Function<T, Boolean> postCallback;
+
+        @SuppressWarnings("unchecked")
+        RouteInfo(T instance) {
+            this.instance = instance;
+            this.type = (Class<T>) instance.getClass();
+            this.postCallback = null;
+        }
+    }
 
     private final JSONSyncConfig config;
     private final PathProvider path_provider;
@@ -152,6 +173,14 @@ public final class JSONHandler {
      * Adds an HTTP route that serves the given object as JSON. The route will be available at
      * /{environment}/{path} where environment is determined by the path provider.
      *
+     * <p>Supported HTTP methods:
+     *
+     * <ul>
+     *   <li>GET - Returns the current state of the object as JSON
+     *   <li>PUT - Updates the object's fields from the JSON in the request body
+     *   <li>POST - Calls the registered callback (if any) with the object
+     * </ul>
+     *
      * @param <T> Type of the object
      * @param path the route path (should start with /)
      * @param instance of the object to serialize and serve
@@ -161,24 +190,17 @@ public final class JSONHandler {
         String environment = getEnvironmentName();
         String fullPath = "/" + environment + path;
 
+        RouteInfo<T> routeInfo = new RouteInfo<>(instance);
+
         synchronized (serverLock) {
             if (registeredPaths.contains(fullPath)) {
                 server.removeContext(fullPath);
             }
             registeredPaths.add(fullPath);
+            routeInfoMap.put(fullPath, routeInfo);
         }
 
-        server.createContext(
-                fullPath,
-                exchange -> {
-                    String json = buildGson().toJson(instance);
-                    byte[] response = json.getBytes(StandardCharsets.UTF_8);
-                    exchange.getResponseHeaders().set("Content-Type", "application/json");
-                    exchange.sendResponseHeaders(200, response.length);
-                    try (OutputStream os = exchange.getResponseBody()) {
-                        os.write(response);
-                    }
-                });
+        server.createContext(fullPath, exchange -> handleRequest(exchange, fullPath, routeInfo));
 
         String host = getHostAddress();
         String url = "http://" + host + ":" + PORT + fullPath;
@@ -189,6 +211,177 @@ public final class JSONHandler {
                         + "; use\ncurl "
                         + url
                         + "\nto retrieve the data");
+    }
+
+    /**
+     * Registers a callback to be invoked when a POST request is made to the specified route. The
+     * callback receives the object associated with the route and returns a boolean indicating
+     * success or failure, which is sent back to the client.
+     *
+     * @param <T> Type of the object
+     * @param path the route path (should start with /)
+     * @param callback the callback to invoke on POST requests, returns true for success
+     * @throws IllegalArgumentException if no route exists for the given path
+     */
+    @SuppressWarnings("unchecked")
+    public <T> void registerPostCallback(String path, Function<T, Boolean> callback) {
+        String environment = getEnvironmentName();
+        String fullPath = "/" + environment + path;
+
+        synchronized (serverLock) {
+            RouteInfo<?> routeInfo = routeInfoMap.get(fullPath);
+            if (routeInfo == null) {
+                throw new IllegalArgumentException("No route registered for path: " + fullPath);
+            }
+            ((RouteInfo<T>) routeInfo).postCallback = callback;
+        }
+    }
+
+    /**
+     * Handles an HTTP request for a route.
+     *
+     * @param <T> Type of the object
+     * @param exchange the HTTP exchange
+     * @param fullPath the full path of the route
+     * @param routeInfo the route information
+     */
+    private <T> void handleRequest(HttpExchange exchange, String fullPath, RouteInfo<T> routeInfo)
+            throws IOException {
+        String method = exchange.getRequestMethod();
+
+        try {
+            switch (method) {
+                case "GET":
+                    handleGet(exchange, routeInfo);
+                    break;
+                case "PUT":
+                    handlePut(exchange, routeInfo);
+                    break;
+                case "POST":
+                    handlePost(exchange, routeInfo);
+                    break;
+                default:
+                    sendError(exchange, 405, "Method Not Allowed");
+                    break;
+            }
+        } catch (Exception e) {
+            sendError(exchange, 500, "Internal Server Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Handles a GET request by returning the object as JSON.
+     *
+     * @param <T> Type of the object
+     * @param exchange the HTTP exchange
+     * @param routeInfo the route information
+     */
+    private <T> void handleGet(HttpExchange exchange, RouteInfo<T> routeInfo) throws IOException {
+        String json = buildGson().toJson(routeInfo.instance);
+        byte[] response = json.getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, response.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(response);
+        }
+    }
+
+    /**
+     * Handles a PUT request by updating the object's fields from the JSON in the request body.
+     *
+     * @param <T> Type of the object
+     * @param exchange the HTTP exchange
+     * @param routeInfo the route information
+     */
+    private <T> void handlePut(HttpExchange exchange, RouteInfo<T> routeInfo) throws IOException {
+        String requestBody;
+        try (InputStream is = exchange.getRequestBody()) {
+            requestBody = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        }
+
+        Gson gson = buildGson();
+        T updatedObject = gson.fromJson(requestBody, routeInfo.type);
+
+        // Copy fields from updated object to the instance
+        copyFields(updatedObject, routeInfo.instance);
+
+        // Return the updated object
+        String json = gson.toJson(routeInfo.instance);
+        byte[] response = json.getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, response.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(response);
+        }
+    }
+
+    /**
+     * Handles a POST request by invoking the registered callback with the object. The callback's
+     * boolean return value is included in the response.
+     *
+     * @param <T> Type of the object
+     * @param exchange the HTTP exchange
+     * @param routeInfo the route information
+     */
+    private <T> void handlePost(HttpExchange exchange, RouteInfo<T> routeInfo) throws IOException {
+        if (routeInfo.postCallback == null) {
+            sendError(exchange, 400, "No callback registered for this route");
+            return;
+        }
+
+        Boolean result = routeInfo.postCallback.apply(routeInfo.instance);
+
+        // Return the result along with the current state of the object
+        Gson gson = buildGson();
+        String objectJson = gson.toJson(routeInfo.instance);
+        String json = "{\"success\":" + result + ",\"data\":" + objectJson + "}";
+        byte[] response = json.getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, response.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(response);
+        }
+    }
+
+    /**
+     * Copies all fields from the source object to the target object.
+     *
+     * @param <T> Type of the objects
+     * @param source the source object
+     * @param target the target object
+     */
+    private <T> void copyFields(T source, T target) {
+        Class<?> clazz = source.getClass();
+        while (clazz != null) {
+            for (Field field : clazz.getDeclaredFields()) {
+                try {
+                    field.setAccessible(true);
+                    Object value = field.get(source);
+                    if (value != null) {
+                        field.set(target, value);
+                    }
+                } catch (IllegalAccessException e) {
+                    // Skip fields that can't be accessed
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+    }
+
+    /**
+     * Sends an error response.
+     *
+     * @param exchange the HTTP exchange
+     * @param code the HTTP status code
+     * @param message the error message
+     */
+    private void sendError(HttpExchange exchange, int code, String message) throws IOException {
+        byte[] response = message.getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().set("Content-Type", "text/plain");
+        exchange.sendResponseHeaders(code, response.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(response);
+        }
     }
 
     /**
