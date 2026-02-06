@@ -52,12 +52,16 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     /**
      * The default refresh rate for medium priority status signals such as applied voltage or closed
      * loop output.
+     * 
+     * <p>These "medium priority" signals are StatusSignals that are important to monitor at a frequency higher than 4hz, but do not need minimum latency and so are kept at a medium refresh rate, such as 20hz.
      */
     public static final Frequency defaultMediumPriorityUpdateFrequency = Hertz.of(20.0);
 
     /**
      * The default refresh rate for high priority status signals (velocity, position, stator and
      * supply current).
+     * 
+     * <p>These "high priority" signals are StatusSignals that are vital to monitor at a high frequency to lower latency. They're kept at a very high refresh rate, such as 200-250hz, so that the newest possible data is available during each periodic cycle.
      */
     public static final Frequency defaultHighPriorityUpdateFrequency = Hertz.of(200.0);
 
