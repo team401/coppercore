@@ -14,6 +14,8 @@ import coppercore.wpilib_interface.subsystems.sim.CoppercoreSimAdapter;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 
+// TODO: Add all signal group customizations to overloads in MotorIOTalonFXSim
+
 /**
  * A MotorIOTalonFXSim uses Phoenix-6 simulation features (TalonFX sim state) to read and update a
  * DCMotorSim, ElevatorSim, or SingleJointedArmSim periodically and propagate its values into the
@@ -68,7 +70,12 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
             TalonFXConfiguration talonFXConfig,
             SignalRefreshRates signalRefreshRates,
             CoppercoreSimAdapter physicsSimAdapter) {
-        super(config, talonFXConfig, signalRefreshRates);
+        super(
+                config,
+                talonFXConfig,
+                signalRefreshRates,
+                DEFAULT_MEDIUM_PRIORITY_SIGNALS,
+                DEFAULT_HIGH_PRIORITY_SIGNALS);
 
         this.isFollower = false;
 
@@ -149,7 +156,13 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
             TalonFXConfiguration talonFXConfig,
             SignalRefreshRates signalRefreshRates,
             CoppercoreSimAdapter physicsSimAdapter) {
-        super(config, followerIndex, talonFXConfig, signalRefreshRates);
+        super(
+                config,
+                followerIndex,
+                talonFXConfig,
+                signalRefreshRates,
+                DEFAULT_MEDIUM_PRIORITY_SIGNALS,
+                DEFAULT_HIGH_PRIORITY_SIGNALS);
 
         this.isFollower = true;
         this.invertSimRotation = config.followerMotorConfigs[followerIndex].invert();
