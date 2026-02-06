@@ -61,6 +61,52 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      */
     public static final Frequency defaultHighPriorityUpdateFrequency = Hertz.of(200.0);
 
+    /** Bitmask constant for the position signal. */
+    public static final int SIGNAL_POSITION = 1 << 0;
+
+    /** Bitmask constant for the velocity signal. */
+    public static final int SIGNAL_VELOCITY = 1 << 1;
+
+    /** Bitmask constant for the applied voltage signal. */
+    public static final int SIGNAL_APPLIED_VOLTAGE = 1 << 2;
+
+    /** Bitmask constant for the stator current signal. */
+    public static final int SIGNAL_STATOR_CURRENT = 1 << 3;
+
+    /** Bitmask constant for the supply current signal. */
+    public static final int SIGNAL_SUPPLY_CURRENT = 1 << 4;
+
+    /** Bitmask constant for the raw rotor position signal. */
+    public static final int SIGNAL_RAW_ROTOR_POSITION = 1 << 5;
+
+    /** Bitmask constant for the closed loop output signal. */
+    public static final int SIGNAL_CLOSED_LOOP_OUTPUT = 1 << 6;
+
+    /** Bitmask constant for the closed loop reference signal. */
+    public static final int SIGNAL_CLOSED_LOOP_REFERENCE = 1 << 7;
+
+    /** Bitmask constant for the closed loop reference slope signal. */
+    public static final int SIGNAL_CLOSED_LOOP_REFERENCE_SLOPE = 1 << 8;
+
+    /** Bitmask constant for the temperature signal. */
+    public static final int SIGNAL_TEMPERATURE = 1 << 9;
+
+    /** Bitmask combining all signal constants. */
+    public static final int SIGNAL_ALL = (1 << 10) - 1;
+
+    /**
+     * Default medium priority signal mask. Includes all signals (signals also in the high priority
+     * mask will be overridden to use the high priority update frequency).
+     */
+    public static final int DEFAULT_MEDIUM_PRIORITY_SIGNALS = SIGNAL_ALL;
+
+    /**
+     * Default high priority signal mask. Includes velocity, position, stator current, and supply
+     * current.
+     */
+    public static final int DEFAULT_HIGH_PRIORITY_SIGNALS =
+            SIGNAL_VELOCITY | SIGNAL_POSITION | SIGNAL_STATOR_CURRENT | SIGNAL_SUPPLY_CURRENT;
+
     /**
      * The SignalRefreshRates record stores the desired signal refresh rates for a MotorIOTalonFX.
      *
@@ -179,12 +225,18 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     protected final TorqueCurrentFOC currentRequest = new TorqueCurrentFOC(0.0);
 
     /**
-     * Create a new MotorIOTalonFX given a mechanism config, a CANDeviceID, and a
-     * TalonFXConfiguration.
+     * Create a new MotorIOTalonFX given a mechanism config, a CANDeviceID, a TalonFXConfiguration,
+     * signal refresh rates, and bitmasks specifying which signals should receive medium vs. high
+     * priority update frequencies.
      *
      * <p>This constructor initializes all required fields but doesn't handle leader vs. follower
      * behavior, so it is protected and is intended only to be called from a constructor that will
      * extract the lead motor or follower motor ID from the config.
+     *
+     * <p>Signals included in both {@code mediumPrioritySignals} and {@code highPrioritySignals}
+     * will use the high priority update frequency (applied second). Signals not included in either
+     * mask will retain their default update frequency and may be disabled by {@code
+     * optimizeBusUtilization}.
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param id The CANDeviceID of the motor in question.
@@ -192,12 +244,18 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      *     modified by this IO, so there's no need to copy it.
      * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
      *     for high- and medium-priority signals.
+     * @param mediumPrioritySignals A bitmask of SIGNAL_* constants specifying which signals should
+     *     receive the medium priority update frequency.
+     * @param highPrioritySignals A bitmask of SIGNAL_* constants specifying which signals should
+     *     receive the high priority update frequency (overrides medium priority).
      */
     protected MotorIOTalonFX(
             MechanismConfig config,
             CANDeviceID id,
             TalonFXConfiguration talonFXConfig,
-            SignalRefreshRates signalRefreshRates) {
+            SignalRefreshRates signalRefreshRates,
+            int mediumPrioritySignals,
+            int highPrioritySignals) {
         super(config, id, "_TalonFX_");
 
         this.talonFXConfig = talonFXConfig;
@@ -235,27 +293,31 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                     closedLoopReferenceSlopeSignal,
                     temperatureSignal
                 };
-        final BaseStatusSignal[] highPrioritySignals = {
-            velocitySignal, positionSignal, statorCurrentSignal, supplyCurrentSignal
-        };
+
+        BaseStatusSignal[] mediumSignals = signalsForMask(mediumPrioritySignals);
+        BaseStatusSignal[] highSignals = signalsForMask(highPrioritySignals);
 
         // Signals that won't be used for low-latency code functions, such as scoring/shooting,
         // state machine transitions, fast-paced decisionmaking.
-        CTREUtil.tryUntilOk(
-                () ->
-                        BaseStatusSignal.setUpdateFrequencyForAll(
-                                signalRefreshRates.mediumPriorityUpdateFrequency, signals),
-                id,
-                (code) -> {});
+        if (mediumSignals.length > 0) {
+            CTREUtil.tryUntilOk(
+                    () ->
+                            BaseStatusSignal.setUpdateFrequencyForAll(
+                                    signalRefreshRates.mediumPriorityUpdateFrequency,
+                                    mediumSignals),
+                    id,
+                    (code) -> {});
+        }
 
-        // Signals that need to be have a latency as low as possible
-        CTREUtil.tryUntilOk(
-                () ->
-                        BaseStatusSignal.setUpdateFrequencyForAll(
-                                signalRefreshRates.highPriorityUpdateFrequency,
-                                highPrioritySignals),
-                id,
-                (code) -> {});
+        // Signals that need to have a latency as low as possible
+        if (highSignals.length > 0) {
+            CTREUtil.tryUntilOk(
+                    () ->
+                            BaseStatusSignal.setUpdateFrequencyForAll(
+                                    signalRefreshRates.highPriorityUpdateFrequency, highSignals),
+                    id,
+                    (code) -> {});
+        }
         CTREUtil.tryUntilOk(() -> talon.optimizeBusUtilization(), id, (code) -> {});
 
         this.dynamicProfiledPositionRequest =
@@ -264,6 +326,34 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                                 talonFXConfig.MotionMagic.MotionMagicCruiseVelocity,
                                 talonFXConfig.MotionMagic.MotionMagicAcceleration)
                         .withJerk(talonFXConfig.MotionMagic.MotionMagicJerk);
+    }
+
+    /**
+     * Create a new MotorIOTalonFX given a mechanism config, a CANDeviceID, and a
+     * TalonFXConfiguration, using the default signal priority masks.
+     *
+     * <p>This constructor uses {@link #DEFAULT_MEDIUM_PRIORITY_SIGNALS} and {@link
+     * #DEFAULT_HIGH_PRIORITY_SIGNALS} for the signal priority bitmasks.
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param id The CANDeviceID of the motor in question.
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high- and medium-priority signals.
+     */
+    protected MotorIOTalonFX(
+            MechanismConfig config,
+            CANDeviceID id,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates) {
+        this(
+                config,
+                id,
+                talonFXConfig,
+                signalRefreshRates,
+                DEFAULT_MEDIUM_PRIORITY_SIGNALS,
+                DEFAULT_HIGH_PRIORITY_SIGNALS);
     }
 
     /**
@@ -391,6 +481,29 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
             MechanismConfig config, int followerIndex, TalonFXConfiguration talonFXConfig) {
         return new MotorIOTalonFX(
                 config, followerIndex, talonFXConfig, SignalRefreshRates.defaults());
+    }
+
+    /**
+     * Returns an array of BaseStatusSignal objects corresponding to the bits set in the given mask.
+     *
+     * @param mask A bitmask of SIGNAL_* constants.
+     * @return An array of the matching BaseStatusSignal objects.
+     */
+    private BaseStatusSignal[] signalsForMask(int mask) {
+        BaseStatusSignal[] result = new BaseStatusSignal[Integer.bitCount(mask & SIGNAL_ALL)];
+        int i = 0;
+        if ((mask & SIGNAL_POSITION) != 0) result[i++] = positionSignal;
+        if ((mask & SIGNAL_VELOCITY) != 0) result[i++] = velocitySignal;
+        if ((mask & SIGNAL_APPLIED_VOLTAGE) != 0) result[i++] = appliedVoltageSignal;
+        if ((mask & SIGNAL_STATOR_CURRENT) != 0) result[i++] = statorCurrentSignal;
+        if ((mask & SIGNAL_SUPPLY_CURRENT) != 0) result[i++] = supplyCurrentSignal;
+        if ((mask & SIGNAL_RAW_ROTOR_POSITION) != 0) result[i++] = rawRotorPositionSignal;
+        if ((mask & SIGNAL_CLOSED_LOOP_OUTPUT) != 0) result[i++] = closedLoopOutputSignal;
+        if ((mask & SIGNAL_CLOSED_LOOP_REFERENCE) != 0) result[i++] = closedLoopReferenceSignal;
+        if ((mask & SIGNAL_CLOSED_LOOP_REFERENCE_SLOPE) != 0)
+            result[i++] = closedLoopReferenceSlopeSignal;
+        if ((mask & SIGNAL_TEMPERATURE) != 0) result[i++] = temperatureSignal;
+        return result;
     }
 
     @Override
