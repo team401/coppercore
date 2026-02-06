@@ -92,4 +92,7 @@ public class MotorInputs {
      * control, it will be in radians per second squared.
      */
     public double closedLoopReferenceSlope = 0.0;
+
+    /** The current temperature reported by the motor controller, measured in celsius. */
+    public double tempCelsius = 0.0;
 }
