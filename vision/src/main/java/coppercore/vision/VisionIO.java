@@ -105,8 +105,13 @@ public interface VisionIO {
      * called once when the camera is created.
      *
      * @param tagLayout the april tag field layout
+     * @param tagLayoutRunOnce a RunOnce which should be common to all IOs when calling
+     *     initializeCamera that prevents sim IOs from initializing the sim field tag layout more
+     *     than one time
      * @param robotToCameraAt the function to get the robot to camera transform at a given time
      */
     public default void initializeCamera(
-            AprilTagFieldLayout tagLayout, DoubleFunction<Optional<Transform3d>> robotToCameraAt) {}
+            AprilTagFieldLayout tagLayout,
+            RunOnce tagLayoutRunOnce,
+            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {}
 }

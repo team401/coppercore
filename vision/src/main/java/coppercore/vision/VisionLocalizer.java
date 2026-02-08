@@ -127,8 +127,10 @@ public class VisionLocalizer extends SubsystemBase {
         this.aprilTagLayout = aprilTagLayout;
         this.gainConstants = gainConstants;
 
+        RunOnce tagLayoutRunOnce = new RunOnce();
         for (int i = 0; i < cameras.length; i++) {
-            cameras[i].io.initializeCamera(aprilTagLayout, cameras[i].robotToCameraAt);
+            cameras[i].io.initializeCamera(
+                    aprilTagLayout, tagLayoutRunOnce, cameras[i].robotToCameraAt);
         }
 
         // Initialize inputs

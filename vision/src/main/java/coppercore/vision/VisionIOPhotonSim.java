@@ -93,14 +93,22 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      * Creates a camera with the given initial transform. This should be called only once when the
      * VisionIOPhotonSim is created. This is called for both mobile and stationary cameras.
      *
+     * @param tagLayout the AprilTagFieldLayout currently in use
+     * @param tagLayoutRunOnce a RunOnce which should be passed to all instances during
+     *     initialization to ensure that tags are only added once.
      * @param robotToCameraAt the initial transform of the robot to the camera as a double function
      */
     @Override
     public void initializeCamera(
-            AprilTagFieldLayout tagLayout, DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
-        super.initializeCamera(tagLayout, robotToCameraAt);
-        visionSim.clearAprilTags();
-        visionSim.addAprilTags(tagLayout);
+            AprilTagFieldLayout tagLayout,
+            RunOnce tagLayoutRunOnce,
+            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
+        super.initializeCamera(tagLayout, tagLayoutRunOnce, robotToCameraAt);
+        tagLayoutRunOnce.run(
+                () -> {
+                    visionSim.clearAprilTags();
+                    visionSim.addAprilTags(tagLayout);
+                });
 
         // Add sim camera
         cameraSim = new PhotonCameraSim(camera, cameraProperties, tagLayout);

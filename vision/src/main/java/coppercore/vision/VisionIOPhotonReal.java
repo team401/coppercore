@@ -32,7 +32,9 @@ public class VisionIOPhotonReal implements VisionIO {
 
     @Override
     public void initializeCamera(
-            AprilTagFieldLayout tagLayout, DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
+            AprilTagFieldLayout tagLayout,
+            RunOnce tagLayoutRunOnce,
+            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
         aprilTagLayout = tagLayout;
     }
 
