@@ -20,15 +20,24 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
     private PhotonCameraSim cameraSim;
     private VisionLocalizer.CameraType cameraType;
 
+    private final SimCameraProperties cameraProperties;
+
     /**
      * Creates a new VisionIOPhotonVisionSim.
      *
      * @param name The name of the camera.
      * @param poseSupplier Supplier for the robot pose to use in simulation.
+     * @param simCameraProperties A SimCameraProperties used to specify camera-specific properties
+     *     such as calibrations, framerate, latency, etc. If these values aren't known or needed,
+     *     use {@link SimCameraProperties#SimCameraProperties()} to create a sane default
+     *     configuration.
      * @see VisionIOPhotonReal#VisionIOPhotonReal(String)
      */
     public VisionIOPhotonSim(
-            String name, Supplier<Pose2d> poseSupplier, VisionLocalizer.CameraType type) {
+            String name,
+            Supplier<Pose2d> poseSupplier,
+            VisionLocalizer.CameraType type,
+            SimCameraProperties simCameraProperties) {
         super(name);
         this.poseSupplier = poseSupplier;
         this.cameraType = type;
@@ -37,6 +46,8 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
         if (visionSim == null) {
             visionSim = new VisionSystemSim("main");
         }
+
+        this.cameraProperties = simCameraProperties;
     }
 
     @Override
@@ -75,7 +86,6 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
         visionSim.addAprilTags(tagLayout);
 
         // Add sim camera
-        var cameraProperties = new SimCameraProperties();
         cameraSim = new PhotonCameraSim(camera, cameraProperties, tagLayout);
         robotToCameraAt
                 .apply(Timer.getFPGATimestamp())
