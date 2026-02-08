@@ -212,6 +212,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      *
      * <ul>
      *   <li><b>Default value:</b> Empty (uses default update frequency for each request type)
+     * </ul>
      */
     protected Optional<Frequency> requestUpdateFrequencyHz = Optional.empty();
 
