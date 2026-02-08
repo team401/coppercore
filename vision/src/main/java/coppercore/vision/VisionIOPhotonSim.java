@@ -29,8 +29,8 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      * @param poseSupplier Supplier for the robot pose to use in simulation.
      * @param simCameraProperties A SimCameraProperties used to specify camera-specific properties
      *     such as calibrations, framerate, latency, etc. If these values aren't known or needed,
-     *     use {@link SimCameraProperties#SimCameraProperties()} to create a sane default
-     *     configuration.
+     *     use {@link VisionIOPhotonSim#VisionIOPhotonSim(String, Supplier,
+     *     coppercore.vision.VisionLocalizer.CameraType)} to use defaults instead.
      * @see VisionIOPhotonReal#VisionIOPhotonReal(String)
      */
     public VisionIOPhotonSim(
@@ -48,6 +48,23 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
         }
 
         this.cameraProperties = simCameraProperties;
+    }
+
+    /**
+     * Creates a new VisionIOPhotonVisionSim.
+     *
+     * <p>This constructor uses the {@link SimCameraProperties#SimCameraProperties() default}
+     * SimCameraProperties. To configure the SimCameraProperties, use {@link
+     * VisionIOPhotonSim#VisionIOPhotonSim(String, Supplier,
+     * coppercore.vision.VisionLocalizer.CameraType, SimCameraProperties)}.
+     *
+     * @param name The name of the camera.
+     * @param poseSupplier Supplier for the robot pose to use in simulation.
+     * @see VisionIOPhotonReal#VisionIOPhotonReal(String)
+     */
+    public VisionIOPhotonSim(
+            String name, Supplier<Pose2d> poseSupplier, VisionLocalizer.CameraType type) {
+        this(name, poseSupplier, type, new SimCameraProperties());
     }
 
     @Override
