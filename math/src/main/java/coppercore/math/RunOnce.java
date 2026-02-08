@@ -6,7 +6,7 @@ package coppercore.math;
  *
  * <p>This class is not thread-safe.
  */
-public class RunFirst {
+public class RunOnce {
     private boolean hasRun = false;
 
     /**

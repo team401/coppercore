@@ -1,5 +1,6 @@
 package coppercore.vision;
 
+import coppercore.math.RunOnce;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -93,7 +94,9 @@ public interface VisionIO {
      *     that must return the robotToCamera transform at the given timestamp in seconds.
      */
     public default void updateInputs(
-            VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> robotToCamera) {}
+            VisionIOInputs inputs,
+            DoubleFunction<Optional<Transform3d>> robotToCamera,
+            RunOnce doOnce) {}
 
     /**
      * Initializes the camera with the april tag layout and robot to camera transform. This is

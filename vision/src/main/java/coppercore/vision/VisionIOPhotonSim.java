@@ -1,5 +1,6 @@
 package coppercore.vision;
 
+import coppercore.math.RunOnce;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -43,7 +44,9 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      */
     @Override
     public void updateInputs(
-            VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
+            VisionIOInputs inputs,
+            DoubleFunction<Optional<Transform3d>> robotToCameraAt,
+            RunOnce doOnce) {
 
         if (cameraType == VisionLocalizer.CameraType.MOBILE) {
             robotToCameraAt
@@ -57,8 +60,8 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
                                         "could not adjust camera transform as one was not given");
                             });
         }
-        visionSim.update(poseSupplier.get());
-        super.updateInputs(inputs, robotToCameraAt);
+        doOnce.run(() -> visionSim.update(poseSupplier.get()));
+        super.updateInputs(inputs, robotToCameraAt, doOnce);
     }
 
     /**

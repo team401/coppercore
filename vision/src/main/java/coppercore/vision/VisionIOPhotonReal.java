@@ -1,5 +1,6 @@
 package coppercore.vision;
 
+import coppercore.math.RunOnce;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -37,7 +38,9 @@ public class VisionIOPhotonReal implements VisionIO {
 
     @Override
     public void updateInputs(
-            VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> optionalRobotToCamera) {
+            VisionIOInputs inputs,
+            DoubleFunction<Optional<Transform3d>> optionalRobotToCamera,
+            RunOnce _doOnce) {
         inputs.connected = camera.isConnected();
 
         Set<Short> tagsSeen = new HashSet<>();
