@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.DoubleFunction;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
 
 /** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {
@@ -107,19 +108,11 @@ public class VisionIOPhotonReal implements VisionIO {
 
                                     var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
                                     if (tagPose.isPresent()) {
-                                        Transform3d fieldToTarget =
-                                                new Transform3d(
-                                                        tagPose.get().getTranslation(),
-                                                        tagPose.get().getRotation());
-                                        Transform3d cameraToTarget = target.bestCameraToTarget;
-                                        Transform3d fieldToCamera =
-                                                fieldToTarget.plus(cameraToTarget.inverse());
-                                        Transform3d fieldToRobot =
-                                                fieldToCamera.plus(robotToCamera.inverse());
                                         Pose3d robotPose =
-                                                new Pose3d(
-                                                        fieldToRobot.getTranslation(),
-                                                        fieldToRobot.getRotation());
+                                                PhotonUtils.estimateFieldToRobotAprilTag(
+                                                        target.getBestCameraToTarget(),
+                                                        tagPose.get(),
+                                                        robotToCamera.inverse());
 
                                         // Add tag ID
                                         tagsSeen.add((short) target.fiducialId);
