@@ -68,11 +68,15 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      * @param robotToCameraAt the initial transform of the robot to the camera as a double function
      */
     @Override
-    public void initializeRobotToCameraTransform(
-            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
+    public void initializeCamera(
+            AprilTagFieldLayout tagLayout, DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
+        super.initializeCamera(tagLayout, robotToCameraAt);
+        visionSim.clearAprilTags();
+        visionSim.addAprilTags(tagLayout);
+
         // Add sim camera
         var cameraProperties = new SimCameraProperties();
-        cameraSim = new PhotonCameraSim(camera, cameraProperties);
+        cameraSim = new PhotonCameraSim(camera, cameraProperties, tagLayout);
         robotToCameraAt
                 .apply(Timer.getFPGATimestamp())
                 .ifPresentOrElse(
@@ -83,11 +87,5 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
                             System.err.println(
                                     "could not add camera as robotToCamera does not exist");
                         });
-    }
-
-    @Override
-    public void setAprilTagLayout(AprilTagFieldLayout aprilTagLayout) {
-        super.setAprilTagLayout(aprilTagLayout);
-        visionSim.addAprilTags(aprilTagLayout);
     }
 }

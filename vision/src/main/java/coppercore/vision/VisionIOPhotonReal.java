@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.DoubleFunction;
 import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonUtils;
 
 /** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {
@@ -29,12 +28,9 @@ public class VisionIOPhotonReal implements VisionIO {
         this.name = name;
     }
 
-    /**
-     * Sets the april tag field layout for single tag pose estimation
-     *
-     * @param tagLayout the Field layout to use for single tag pose estimation (gathers tag pose)
-     */
-    public void setAprilTagLayout(AprilTagFieldLayout tagLayout) {
+    @Override
+    public void initializeCamera(
+            AprilTagFieldLayout tagLayout, DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
         aprilTagLayout = tagLayout;
     }
 
@@ -71,11 +67,12 @@ public class VisionIOPhotonReal implements VisionIO {
                                                                 .getTranslation()
                                                                 .getNorm(),
                                                         target.getBestCameraToTarget(),
-                                                        new Rotation2d(target.getYaw()),
-                                                        new Rotation2d(target.getPitch())));
+                                                        Rotation2d.fromDegrees(target.getYaw()),
+                                                        Rotation2d.fromDegrees(target.getPitch())));
                                     }
 
                                     // convert pose from field to camera -> field to robot
+                                    // Calculate robot pose
                                     Transform3d fieldToCamera = multitagResult.estimatedPose.best;
                                     Transform3d fieldToRobot =
                                             fieldToCamera.plus(robotToCamera.inverse());
@@ -110,13 +107,19 @@ public class VisionIOPhotonReal implements VisionIO {
 
                                     var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
                                     if (tagPose.isPresent()) {
+                                        Transform3d fieldToTarget =
+                                                new Transform3d(
+                                                        tagPose.get().getTranslation(),
+                                                        tagPose.get().getRotation());
+                                        Transform3d cameraToTarget = target.bestCameraToTarget;
+                                        Transform3d fieldToCamera =
+                                                fieldToTarget.plus(cameraToTarget.inverse());
+                                        Transform3d fieldToRobot =
+                                                fieldToCamera.plus(robotToCamera.inverse());
                                         Pose3d robotPose =
-                                                PhotonUtils.estimateFieldToRobotAprilTag(
-                                                        target.getBestCameraToTarget(),
-                                                        aprilTagLayout
-                                                                .getTagPose(target.fiducialId)
-                                                                .get(),
-                                                        robotToCamera.inverse());
+                                                new Pose3d(
+                                                        fieldToRobot.getTranslation(),
+                                                        fieldToRobot.getRotation());
 
                                         // Add tag ID
                                         tagsSeen.add((short) target.fiducialId);
@@ -142,11 +145,8 @@ public class VisionIOPhotonReal implements VisionIO {
                                                                 .getTranslation()
                                                                 .getNorm(),
                                                         target.getBestCameraToTarget(),
-                                                        new Rotation2d(
-                                                                Math.toRadians(target.getYaw())),
-                                                        new Rotation2d(
-                                                                Math.toRadians(
-                                                                        target.getPitch()))));
+                                                        Rotation2d.fromDegrees(target.getYaw()),
+                                                        Rotation2d.fromDegrees(target.getPitch())));
                                     }
                                 }
                             });

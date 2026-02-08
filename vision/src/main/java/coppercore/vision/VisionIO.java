@@ -95,16 +95,13 @@ public interface VisionIO {
     public default void updateInputs(
             VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> robotToCamera) {}
 
-    public default void setAprilTagLayout(AprilTagFieldLayout tagLayout) {}
-
     /**
-     * Used for both fixed and mobile cameras in SIM to initialize the robotToCamera transform.
-     * VisionIOPhotonReal does not implement this, as its updateInputs method will use the current
-     * camera transform.
+     * Initializes the camera with the april tag layout and robot to camera transform. This is
+     * called once when the camera is created.
      *
-     * @param robotToCameraAt the transform of the robot to the camera as a double function of time
-     *     in seconds
+     * @param tagLayout the april tag field layout
+     * @param robotToCameraAt the function to get the robot to camera transform at a given time
      */
-    public default void initializeRobotToCameraTransform(
-            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {}
+    public default void initializeCamera(
+            AprilTagFieldLayout tagLayout, DoubleFunction<Optional<Transform3d>> robotToCameraAt) {}
 }
