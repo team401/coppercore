@@ -1,5 +1,6 @@
 package coppercore.vision;
 
+import coppercore.math.RunOnce;
 import coppercore.vision.VisionIO.SingleTagObservation;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
@@ -126,9 +127,10 @@ public class VisionLocalizer extends SubsystemBase {
         this.aprilTagLayout = aprilTagLayout;
         this.gainConstants = gainConstants;
 
+        RunOnce tagLayoutRunOnce = new RunOnce();
         for (int i = 0; i < cameras.length; i++) {
-            cameras[i].io.setAprilTagLayout(aprilTagLayout);
-            cameras[i].io.initializeRobotToCameraTransform(cameras[i].robotToCameraAt);
+            cameras[i].io.initializeCamera(
+                    aprilTagLayout, tagLayoutRunOnce, cameras[i].robotToCameraAt);
         }
 
         // Initialize inputs
@@ -239,8 +241,9 @@ public class VisionLocalizer extends SubsystemBase {
     /** Periodically updates the camera data and processes new measurements. */
     @Override
     public void periodic() {
+        var doOnce = new RunOnce();
         for (int i = 0; i < cameras.length; i++) {
-            cameras[i].io.updateInputs(inputs[i], cameras[i].robotToCameraAt);
+            cameras[i].io.updateInputs(inputs[i], cameras[i].robotToCameraAt, doOnce);
             Logger.processInputs("Vision/Camera" + i, inputs[i]);
         }
 

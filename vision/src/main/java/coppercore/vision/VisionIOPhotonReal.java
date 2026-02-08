@@ -1,5 +1,6 @@
 package coppercore.vision;
 
+import coppercore.math.RunOnce;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,18 +30,19 @@ public class VisionIOPhotonReal implements VisionIO {
         this.name = name;
     }
 
-    /**
-     * Sets the april tag field layout for single tag pose estimation
-     *
-     * @param tagLayout the Field layout to use for single tag pose estimation (gathers tag pose)
-     */
-    public void setAprilTagLayout(AprilTagFieldLayout tagLayout) {
+    @Override
+    public void initializeCamera(
+            AprilTagFieldLayout tagLayout,
+            RunOnce tagLayoutRunOnce,
+            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
         aprilTagLayout = tagLayout;
     }
 
     @Override
     public void updateInputs(
-            VisionIOInputs inputs, DoubleFunction<Optional<Transform3d>> optionalRobotToCamera) {
+            VisionIOInputs inputs,
+            DoubleFunction<Optional<Transform3d>> optionalRobotToCamera,
+            RunOnce _doOnce) {
         inputs.connected = camera.isConnected();
 
         Set<Short> tagsSeen = new HashSet<>();
@@ -71,11 +73,12 @@ public class VisionIOPhotonReal implements VisionIO {
                                                                 .getTranslation()
                                                                 .getNorm(),
                                                         target.getBestCameraToTarget(),
-                                                        new Rotation2d(target.getYaw()),
-                                                        new Rotation2d(target.getPitch())));
+                                                        Rotation2d.fromDegrees(target.getYaw()),
+                                                        Rotation2d.fromDegrees(target.getPitch())));
                                     }
 
                                     // convert pose from field to camera -> field to robot
+                                    // Calculate robot pose
                                     Transform3d fieldToCamera = multitagResult.estimatedPose.best;
                                     Transform3d fieldToRobot =
                                             fieldToCamera.plus(robotToCamera.inverse());
@@ -113,9 +116,7 @@ public class VisionIOPhotonReal implements VisionIO {
                                         Pose3d robotPose =
                                                 PhotonUtils.estimateFieldToRobotAprilTag(
                                                         target.getBestCameraToTarget(),
-                                                        aprilTagLayout
-                                                                .getTagPose(target.fiducialId)
-                                                                .get(),
+                                                        tagPose.get(),
                                                         robotToCamera.inverse());
 
                                         // Add tag ID
@@ -142,11 +143,8 @@ public class VisionIOPhotonReal implements VisionIO {
                                                                 .getTranslation()
                                                                 .getNorm(),
                                                         target.getBestCameraToTarget(),
-                                                        new Rotation2d(
-                                                                Math.toRadians(target.getYaw())),
-                                                        new Rotation2d(
-                                                                Math.toRadians(
-                                                                        target.getPitch()))));
+                                                        Rotation2d.fromDegrees(target.getYaw()),
+                                                        Rotation2d.fromDegrees(target.getPitch())));
                                     }
                                 }
                             });
