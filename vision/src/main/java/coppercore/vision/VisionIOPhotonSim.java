@@ -106,7 +106,6 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
         super.initializeCamera(tagLayout, tagLayoutRunOnce, robotToCameraAt);
         tagLayoutRunOnce.run(
                 () -> {
-                    visionSim.clearAprilTags();
                     visionSim.addAprilTags(tagLayout);
                 });
 
