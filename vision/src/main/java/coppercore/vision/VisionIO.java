@@ -92,6 +92,8 @@ public interface VisionIO {
      * @param inputs the information received from the camera either in sim or the real camera
      * @param robotToCamera the transform from the robot to the camera. This is a DoubleFunction
      *     that must return the robotToCamera transform at the given timestamp in seconds.
+     * @param doOnce A {@link coppercore.math.RunOnce RunOnce} instance created for each periodic
+     *     cycle which Sim IOs will use to update the sim once per cycle.
      */
     public default void updateInputs(
             VisionIOInputs inputs,

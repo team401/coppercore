@@ -39,9 +39,6 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
         }
     }
 
-    /**
-     * @see VisionIO#updateInputs(coppercore.vision.VisionIO.VisionIOInputs, DoubleFunction)
-     */
     @Override
     public void updateInputs(
             VisionIOInputs inputs,
