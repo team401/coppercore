@@ -43,6 +43,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
+import java.util.Optional;
 
 /**
  * A base motor IO that implements closed-loop control for a TalonFX-supporting motor using
@@ -204,6 +205,15 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     /** Array of status signals to be easily passed to refreshAll */
     protected final BaseStatusSignal[] signals;
+
+    /**
+     * The Update Frequency to request from each motor output request. Can be configured using
+     * setRequestUpdateFrequency.
+     *
+     * <ul>
+     *   <li><b>Default value:</b> Empty (uses default update frequency for each request type)
+     */
+    protected Optional<Frequency> requestUpdateFrequencyHz = Optional.empty();
 
     /** A neutral request to use for basic config-based neutral mode commands */
     protected final NeutralOut neutralRequest = new NeutralOut();
@@ -683,26 +693,38 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void controlNeutral() {
+        requestUpdateFrequencyHz.ifPresent(frequency -> neutralRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(neutralRequest);
     }
 
     @Override
     public void controlCoast() {
+        requestUpdateFrequencyHz.ifPresent(frequency -> coastRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(coastRequest);
     }
 
     @Override
     public void controlBrake() {
+        requestUpdateFrequencyHz.ifPresent(frequency -> brakeRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(brakeRequest);
     }
 
     @Override
     public void controlToPositionUnprofiled(Angle positionSetpoint) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> unprofiledPositionRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(unprofiledPositionRequest.withPosition(positionSetpoint));
     }
 
     @Override
     public void controlToPositionProfiled(Angle positionSetpoint) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> profiledPositionRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(profiledPositionRequest.withPosition(positionSetpoint));
     }
 
@@ -714,6 +736,9 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
             Velocity<AngularAccelerationUnit> maxJerk,
             double expoKv,
             double expoKa) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> dynamicProfiledPositionRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(
                 dynamicProfiledPositionRequest
                         .withPosition(positionSetpoint)
@@ -725,6 +750,9 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     @Override
     public void controlToPositionProfiled(
             Angle positionSetpoint, MotionProfileConfig profileConfig) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> dynamicProfiledPositionRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(
                 dynamicProfiledPositionRequest
                         .withPosition(positionSetpoint)
@@ -735,26 +763,39 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void controlToPositionExpoProfiled(Angle positionSetpoint) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> expoProfiledPositionRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(expoProfiledPositionRequest.withPosition(positionSetpoint));
     }
 
     @Override
     public void controlToVelocityUnprofiled(AngularVelocity velocity) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> unprofiledVelocityRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(unprofiledVelocityRequest.withVelocity(velocity));
     }
 
     @Override
     public void controlToVelocityProfiled(AngularVelocity velocity) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> profiledVelocityRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(profiledVelocityRequest.withVelocity(velocity));
     }
 
     @Override
     public void controlOpenLoopVoltage(Voltage voltage) {
+        requestUpdateFrequencyHz.ifPresent(frequency -> voltageRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(voltageRequest.withOutput(voltage));
     }
 
     @Override
     public void controlOpenLoopCurrent(Current current) {
+        requestUpdateFrequencyHz.ifPresent(frequency -> currentRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(currentRequest.withOutput(current));
     }
 
@@ -800,5 +841,10 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 (code) -> {
                     configFailedToApplyAlert.set(true);
                 });
+    }
+
+    @Override
+    public void setRequestUpdateFrequency(Frequency updateFrequency) {
+        this.requestUpdateFrequencyHz = Optional.of(updateFrequency);
     }
 }
