@@ -9,6 +9,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 
@@ -226,4 +227,25 @@ public interface MotorIO {
     public default void setCurrentPositionAsZero() {
         setCurrentPosition(Rotations.zero());
     }
+
+    /**
+     * Set the requested update frequency for control requests to the motor.
+     *
+     * <p>By default, the default update frequency for each request is used. However, once this
+     * method is called, all requests will attempt to use this frequency instead.
+     *
+     * <p>This method is not supported by spark IOs.
+     *
+     * <p>Some update frequencies are not supported and will be promoted up to the next highest
+     * supported frequency.
+     *
+     * <p>If this value is set to 0 Hz, the control request will be sent immediately as a one-shot
+     * frame. This may be useful for advanced applications that require outputs to be synchronized
+     * with data acquisition. In this case, we recommend not exceeding 50 ms between control calls.
+     *
+     * @param updateFrequency A Frequency measure specifying the desired update frequency of
+     *     requests. For MotionMagicExpoTorqueCurrentFOC requests, the default is 100hz, while for
+     *     requests like Follower, the default is 20hz.
+     */
+    public void setRequestUpdateFrequency(Frequency updateFrequency);
 }
