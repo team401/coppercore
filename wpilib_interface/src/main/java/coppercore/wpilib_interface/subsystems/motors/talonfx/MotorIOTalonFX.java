@@ -43,6 +43,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
+import java.util.Optional;
 
 /**
  * A base motor IO that implements closed-loop control for a TalonFX-supporting motor using
@@ -69,14 +70,23 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      */
     public static final Frequency defaultHighPriorityUpdateFrequency = Hertz.of(200.0);
 
+    /**
+     * The default refresh rate for motor output status signals (MotorVoltage and TorqueCurrent).
+     * These signals must be kept at a decent refresh rate since Follower requests read these
+     * signals to decide what output to apply to their motors.
+     *
+     * <p>DutyCycle isn't used here since we should never use it.
+     */
+    public static final Frequency defaultOutputUpdateFrequency = Hertz.of(75.0);
+
     /** Bitmask constant for the position signal. */
     public static final int SIGNAL_POSITION = 1 << 0;
 
     /** Bitmask constant for the velocity signal. */
     public static final int SIGNAL_VELOCITY = 1 << 1;
 
-    /** Bitmask constant for the applied voltage signal. */
-    public static final int SIGNAL_APPLIED_VOLTAGE = 1 << 2;
+    /** Bitmask constant for the motor voltage voltage (also called applied voltage) signal. */
+    public static final int SIGNAL_MOTOR_VOLTAGE = 1 << 2;
 
     /** Bitmask constant for the stator current signal. */
     public static final int SIGNAL_STATOR_CURRENT = 1 << 3;
@@ -123,9 +133,16 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      * @param mediumPriorityUpdateFrequency A Frequency specifying the update frequency for the
      *     applied voltage, raw rotor position, closed loop output, closed loop reference, closed
      *     loop reference slope, and temperature signals.
+     * @param outputUpdateFrequency A Frequency specifying the update frequency for the MotorVoltage
+     *     and TorqueCurrent signals, which are used by follower requests. It isn't recommended to
+     *     lower these below 20hz. Note that if either of these signals is present in the high
+     *     priority status signal bitmask, its refresh rate will be set to the high priority refresh
+     *     rate instead.
      */
     public record SignalRefreshRates(
-            Frequency highPriorityUpdateFrequency, Frequency mediumPriorityUpdateFrequency) {
+            Frequency highPriorityUpdateFrequency,
+            Frequency mediumPriorityUpdateFrequency,
+            Frequency outputUpdateFrequency) {
         /**
          * Creates a new SignalRefreshRates object with the default values of 200hz for high
          * priority and 20hz for medium priority signals.
@@ -135,7 +152,9 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
          */
         public static SignalRefreshRates defaults() {
             return new SignalRefreshRates(
-                    defaultHighPriorityUpdateFrequency, defaultMediumPriorityUpdateFrequency);
+                    defaultHighPriorityUpdateFrequency,
+                    defaultMediumPriorityUpdateFrequency,
+                    defaultOutputUpdateFrequency);
         }
     }
 
@@ -157,8 +176,11 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     /** Velocity StatusSignal cached for easy repeated access */
     protected final StatusSignal<AngularVelocity> velocitySignal;
 
-    /** Applied Voltage StatusSignal cached for easy repeated access */
-    protected final StatusSignal<Voltage> appliedVoltageSignal;
+    /** Motor Voltage StatusSignal cached for easy repeated access */
+    protected final StatusSignal<Voltage> motorVoltageSignal;
+
+    /** Torque Current StatusSignal cached for easy repeated access */
+    protected final StatusSignal<Current> torqueCurrentSignal;
 
     /** Stator Current StatusSignal cached for easy repeated access */
     protected final StatusSignal<Current> statorCurrentSignal;
@@ -183,6 +205,16 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     /** Array of status signals to be easily passed to refreshAll */
     protected final BaseStatusSignal[] signals;
+
+    /**
+     * The Update Frequency to request from each motor output request. Can be configured using
+     * setRequestUpdateFrequency.
+     *
+     * <ul>
+     *   <li><b>Default value:</b> Empty (uses default update frequency for each request type)
+     * </ul>
+     */
+    protected Optional<Frequency> requestUpdateFrequencyHz = Optional.empty();
 
     /** A neutral request to use for basic config-based neutral mode commands */
     protected final NeutralOut neutralRequest = new NeutralOut();
@@ -279,7 +311,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
         this.positionSignal = talon.getPosition();
         this.velocitySignal = talon.getVelocity();
-        this.appliedVoltageSignal = talon.getMotorVoltage();
+        this.motorVoltageSignal = talon.getMotorVoltage();
+        this.torqueCurrentSignal = talon.getTorqueCurrent();
         this.statorCurrentSignal = talon.getStatorCurrent();
         this.supplyCurrentSignal = talon.getSupplyCurrent();
         this.rawRotorPositionSignal = talon.getRotorPosition();
@@ -292,7 +325,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 new BaseStatusSignal[] {
                     velocitySignal,
                     positionSignal,
-                    appliedVoltageSignal,
+                    motorVoltageSignal,
                     statorCurrentSignal,
                     supplyCurrentSignal,
                     rawRotorPositionSignal,
@@ -304,6 +337,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
         BaseStatusSignal[] mediumSignals = signalsForMask(mediumPrioritySignals);
         BaseStatusSignal[] highSignals = signalsForMask(highPrioritySignals);
+        BaseStatusSignal[] outputSignals =
+                new BaseStatusSignal[] {motorVoltageSignal, torqueCurrentSignal};
 
         // Signals that won't be used for low-latency code functions, such as scoring/shooting,
         // state machine transitions, fast-paced decisionmaking.
@@ -317,6 +352,14 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                     (code) -> {});
         }
 
+        // Signals that are used for follower requests
+        CTREUtil.tryUntilOk(
+                () ->
+                        BaseStatusSignal.setUpdateFrequencyForAll(
+                                signalRefreshRates.outputUpdateFrequency, outputSignals),
+                id,
+                (code) -> {});
+
         // Signals that need to have a latency as low as possible
         if (highSignals.length > 0) {
             CTREUtil.tryUntilOk(
@@ -326,6 +369,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                     id,
                     (code) -> {});
         }
+
         CTREUtil.tryUntilOk(() -> talon.optimizeBusUtilization(), id, (code) -> {});
 
         this.dynamicProfiledPositionRequest =
@@ -604,7 +648,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         int i = 0;
         if ((mask & SIGNAL_POSITION) != 0) result[i++] = positionSignal;
         if ((mask & SIGNAL_VELOCITY) != 0) result[i++] = velocitySignal;
-        if ((mask & SIGNAL_APPLIED_VOLTAGE) != 0) result[i++] = appliedVoltageSignal;
+        if ((mask & SIGNAL_MOTOR_VOLTAGE) != 0) result[i++] = motorVoltageSignal;
         if ((mask & SIGNAL_STATOR_CURRENT) != 0) result[i++] = statorCurrentSignal;
         if ((mask & SIGNAL_SUPPLY_CURRENT) != 0) result[i++] = supplyCurrentSignal;
         if ((mask & SIGNAL_RAW_ROTOR_POSITION) != 0) result[i++] = rawRotorPositionSignal;
@@ -634,7 +678,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
         inputs.positionRadians = positionSignal.getValue().in(Radians);
         inputs.velocityRadiansPerSecond = velocitySignal.getValue().in(RadiansPerSecond);
-        inputs.appliedVolts = appliedVoltageSignal.getValueAsDouble();
+        inputs.appliedVolts = motorVoltageSignal.getValueAsDouble();
         inputs.statorCurrentAmps = statorCurrentSignal.getValueAsDouble();
         inputs.supplyCurrentAmps = supplyCurrentSignal.getValueAsDouble();
         inputs.rawRotorPositionRadians = rawRotorPositionSignal.getValue().in(Radians);
@@ -650,26 +694,38 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void controlNeutral() {
+        requestUpdateFrequencyHz.ifPresent(frequency -> neutralRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(neutralRequest);
     }
 
     @Override
     public void controlCoast() {
+        requestUpdateFrequencyHz.ifPresent(frequency -> coastRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(coastRequest);
     }
 
     @Override
     public void controlBrake() {
+        requestUpdateFrequencyHz.ifPresent(frequency -> brakeRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(brakeRequest);
     }
 
     @Override
     public void controlToPositionUnprofiled(Angle positionSetpoint) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> unprofiledPositionRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(unprofiledPositionRequest.withPosition(positionSetpoint));
     }
 
     @Override
     public void controlToPositionProfiled(Angle positionSetpoint) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> profiledPositionRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(profiledPositionRequest.withPosition(positionSetpoint));
     }
 
@@ -681,6 +737,9 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
             Velocity<AngularAccelerationUnit> maxJerk,
             double expoKv,
             double expoKa) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> dynamicProfiledPositionRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(
                 dynamicProfiledPositionRequest
                         .withPosition(positionSetpoint)
@@ -692,6 +751,9 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     @Override
     public void controlToPositionProfiled(
             Angle positionSetpoint, MotionProfileConfig profileConfig) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> dynamicProfiledPositionRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(
                 dynamicProfiledPositionRequest
                         .withPosition(positionSetpoint)
@@ -702,26 +764,39 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void controlToPositionExpoProfiled(Angle positionSetpoint) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> expoProfiledPositionRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(expoProfiledPositionRequest.withPosition(positionSetpoint));
     }
 
     @Override
     public void controlToVelocityUnprofiled(AngularVelocity velocity) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> unprofiledVelocityRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(unprofiledVelocityRequest.withVelocity(velocity));
     }
 
     @Override
     public void controlToVelocityProfiled(AngularVelocity velocity) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> profiledVelocityRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(profiledVelocityRequest.withVelocity(velocity));
     }
 
     @Override
     public void controlOpenLoopVoltage(Voltage voltage) {
+        requestUpdateFrequencyHz.ifPresent(frequency -> voltageRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(voltageRequest.withOutput(voltage));
     }
 
     @Override
     public void controlOpenLoopCurrent(Current current) {
+        requestUpdateFrequencyHz.ifPresent(frequency -> currentRequest.withUpdateFreqHz(frequency));
+
         talon.setControl(currentRequest.withOutput(current));
     }
 
@@ -767,5 +842,10 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 (code) -> {
                     configFailedToApplyAlert.set(true);
                 });
+    }
+
+    @Override
+    public void setRequestUpdateFrequency(Frequency updateFrequency) {
+        this.requestUpdateFrequencyHz = Optional.of(updateFrequency);
     }
 }

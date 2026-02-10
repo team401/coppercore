@@ -24,6 +24,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -371,5 +372,11 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
     @Override
     public void setCurrentPosition(Angle position) {
         sparkMax.getEncoder().setPosition(position.in(Rotations));
+    }
+
+    @Override
+    public void setRequestUpdateFrequency(Frequency updateFrequency) {
+        throw new UnsupportedOperationException(
+                "Setting request update frequency is not supported by Spark IOs.");
     }
 }
