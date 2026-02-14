@@ -40,8 +40,11 @@ public class JSONPrimitiveCheckStrategy {
         Class<?> type = field.getType();
         int fieldModifiers = field.getModifiers();
 
-        // Check if type is primitive
-        if (!type.isPrimitive()) {
+        boolean isFinalPrimitive = type.isPrimitive();
+        boolean isFinalString = type == String.class;
+
+        // Check if type is primitive or String (both are inlined by javac when final)
+        if (!isFinalPrimitive && !isFinalString) {
             return;
         }
 
@@ -60,7 +63,10 @@ public class JSONPrimitiveCheckStrategy {
         // Build warning/error message
         StringBuilder messageBuilder = new StringBuilder();
 
-        messageBuilder.append("Primitive Used: ");
+        messageBuilder.append(
+                isFinalString
+                        ? "Final String Used (value is inlined by the compiler): "
+                        : "Primitive Used: ");
         messageBuilder.append('\n');
 
         messageBuilder.append("In Class: ");

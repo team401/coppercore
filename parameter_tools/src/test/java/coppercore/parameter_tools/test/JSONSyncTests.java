@@ -244,6 +244,49 @@ public class JSONSyncTests {
         Assertions.assertThrows(RuntimeException.class, synced::saveData);
     }
 
+    /** Class to test the final String check crash feature. */
+    private static class FinalStringCheckCrash {
+        public final String stringField = "hello";
+    }
+
+    /**
+     * Tests the {@link JSONSync#saveData} method to ensure it crashes when a final String is used,
+     * since the Java compiler inlines final String values into the constant pool.
+     */
+    @Test
+    public void JsonSyncFinalStringCheckCrash() {
+        JSONSync<FinalStringCheckCrash> synced =
+                new JSONSync<>(
+                        new FinalStringCheckCrash(),
+                        "FinalStringCheckCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
+                        new JSONSyncConfigBuilder()
+                                .setPrettyPrinting(true)
+                                .setPrimitiveCheckCrash(true)
+                                .build());
+        Assertions.assertThrows(RuntimeException.class, synced::saveData);
+    }
+
+    /** Class to test that non-final String fields are allowed. */
+    private static class NonFinalStringNoCrash {
+        public String stringField = "hello";
+    }
+
+    /** Tests that non-final String fields do not cause a crash. */
+    @Test
+    public void JsonSyncNonFinalStringNoCrash() {
+        JSONSync<NonFinalStringNoCrash> synced =
+                new JSONSync<>(
+                        new NonFinalStringNoCrash(),
+                        "NonFinalStringNoCrash.json",
+                        new UnitTestingPathProvider().getDirectory("JSONSyncTests"),
+                        new JSONSyncConfigBuilder()
+                                .setPrettyPrinting(true)
+                                .setPrimitiveCheckCrash(true)
+                                .build());
+        Assertions.assertDoesNotThrow(synced::saveData);
+    }
+
     /** Class to test the primitive check crash feature with a private field. */
     public static class AfterJsonLoadsClass {
         public Boolean methodRun = false;
