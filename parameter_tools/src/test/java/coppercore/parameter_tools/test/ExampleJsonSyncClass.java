@@ -43,7 +43,7 @@ public class ExampleJsonSyncClass {
             new JSONSync<>(
                     new ExampleJsonSyncClass(), "filePath", new JSONSyncConfigBuilder().build());
 
-    public final String testText = "";
+    public String testText = "";
 
     public final Double testDouble = 0.0;
 
