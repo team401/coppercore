@@ -6,6 +6,10 @@ import edu.wpi.first.wpilibj.Filesystem;
 import java.io.IOException;
 import java.util.Collections;
 
+/* This is not currently used in the 2026 robot code, it uses
+ * frc.robot.constants.AprilTagConstants.getTagLayout() instead.
+ * TODO: refactor
+ */
 /** Utility class for loading an AprilTag field layout from a JSON file. */
 public class LayoutUtil {
     /**

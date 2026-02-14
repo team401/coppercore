@@ -1,5 +1,6 @@
 package coppercore.vision;
 
+import coppercore.math.RunOnce;
 import coppercore.vision.VisionIO.SingleTagObservation;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
@@ -7,6 +8,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
@@ -14,6 +16,8 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.DoubleFunction;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -21,15 +25,88 @@ import org.littletonrobotics.junction.Logger;
  * custom handling of new measurements.
  */
 public class VisionLocalizer extends SubsystemBase {
-    private final VisionIO[] io;
+    private final CameraConfig[] cameras;
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
     // avoid NullPointerExceptions by setting a default no-op
     private VisionConsumer consumer;
     public AprilTagFieldLayout aprilTagLayout;
-    private double[] cameraStdDevFactors;
 
     private final VisionGainConstants gainConstants;
+
+    /**
+     * A camera config for a single camera
+     *
+     * @param type the type of the camera, either MOBILE or FIXED
+     * @param stdDevFactor factors to multiply standard deviation
+     * @param io of each camera, using photon vision or sim
+     * @param robotToCameraAt double function providing the camera transform from the given
+     *     timestamp, used for both stationary and mobile cameras
+     */
+    public record CameraConfig(
+            CameraType type,
+            VisionIO io,
+            double stdDevFactor,
+            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
+
+        /**
+         * A function that returns a stationary camera config
+         *
+         * @param io of each camera, using photon vision or sim
+         * @param stdDevFactor factors to multiply standard deviation
+         * @param robotToCamera static transform of robot to camera
+         * @return camera config that is stationary
+         */
+        public static CameraConfig fixed(
+                VisionIO io, double stdDevFactor, Transform3d robotToCamera) {
+            return new CameraConfig(
+                    CameraType.FIXED,
+                    io,
+                    stdDevFactor,
+                    (double _ignored) -> Optional.of(robotToCamera));
+        }
+
+        /**
+         * A function that returns a mobile camera config
+         *
+         * @param io of each camera, using photon vision or sim
+         * @param stdDevFactor factors to multiply standard deviation
+         * @param robotToCamera double function that accepts a timestamp
+         * @return camera config that is mobile
+         */
+        public static CameraConfig mobile(
+                VisionIO io,
+                double stdDevFactor,
+                DoubleFunction<Optional<Transform3d>> robotToCamera) {
+            return new CameraConfig(CameraType.MOBILE, io, stdDevFactor, robotToCamera);
+        }
+
+        /**
+         * A function that returns a stationary camera config with stddevfactor set to 1.0
+         *
+         * @see VisionLocalizer.CameraConfig#fixed(VisionIO, double, Transform3d)
+         */
+        public static CameraConfig fixed(VisionIO io, Transform3d robotToCamera) {
+            return new CameraConfig(
+                    CameraType.FIXED, io, 1.0, (double _ignored) -> Optional.of(robotToCamera));
+        }
+
+        /**
+         * A function that returns a mobile camera config with stddevfactor set to 1.0
+         *
+         * @see VisionLocalizer.CameraConfig#mobile(VisionIO, double,
+         *     DoubleFunction<Optional<Transform3d>>)
+         */
+        public static CameraConfig mobile(
+                VisionIO io, DoubleFunction<Optional<Transform3d>> robotToCamera) {
+            return new CameraConfig(CameraType.MOBILE, io, 1.0, robotToCamera);
+        }
+    }
+
+    public enum CameraType {
+        FIXED,
+        MOBILE;
+    }
 
     /**
      * Constructs a new VisionLocalizer instance
@@ -38,34 +115,32 @@ public class VisionLocalizer extends SubsystemBase {
      * @param aprilTagLayout the field layout for current year
      * @param gainConstants a VisionGainConstants object containing the standard deviation factors
      *     and pose rejection parameters for this VisionLocalizer.
-     * @param cameraStdDevFactors factors to multiply standard deviation. matches camera index
-     *     (camera 0 -> index 0 in factors)
-     * @param io of each camera, using photon vision or sim
+     * @param cameras an array of the camera configs
      */
     public VisionLocalizer(
             VisionConsumer consumer,
             AprilTagFieldLayout aprilTagLayout,
             VisionGainConstants gainConstants,
-            double[] cameraStdDevFactors,
-            VisionIO... io) {
+            CameraConfig... cameras) {
         this.consumer = consumer;
-        this.io = io;
+        this.cameras = cameras;
         this.aprilTagLayout = aprilTagLayout;
         this.gainConstants = gainConstants;
-        this.cameraStdDevFactors = cameraStdDevFactors;
 
-        for (int i = 0; i < io.length; i++) {
-            io[i].setAprilTagLayout(aprilTagLayout);
+        RunOnce tagLayoutRunOnce = new RunOnce();
+        for (int i = 0; i < cameras.length; i++) {
+            cameras[i].io.initializeCamera(
+                    aprilTagLayout, tagLayoutRunOnce, cameras[i].robotToCameraAt);
         }
 
         // Initialize inputs
-        this.inputs = new VisionIOInputsAutoLogged[io.length];
+        this.inputs = new VisionIOInputsAutoLogged[cameras.length];
         for (int i = 0; i < inputs.length; i++) {
             inputs[i] = new VisionIOInputsAutoLogged();
         }
 
         // Initialize disconnected alerts
-        this.disconnectedAlerts = new Alert[io.length];
+        this.disconnectedAlerts = new Alert[cameras.length];
         for (int i = 0; i < inputs.length; i++) {
             disconnectedAlerts[i] =
                     new Alert("Vision camera " + i + " is disconnected.", AlertType.kWarning);
@@ -85,8 +160,9 @@ public class VisionLocalizer extends SubsystemBase {
     }
 
     /**
-     * boolean that checks whether or not a coprocessor is connected like the BeeLink
-     * by checking for all cameras
+     * boolean that checks whether or not a coprocessor is connected like the BeeLink by checking
+     * for all cameras
+     *
      * @return camera inputs are connected
      */
     public boolean coprocessorConnected() {
@@ -107,7 +183,7 @@ public class VisionLocalizer extends SubsystemBase {
             System.err.println("Camera index out of bounds" + cameraIndex);
             return false;
         }
-        
+
         return inputs[cameraIndex].connected;
     }
 
@@ -165,8 +241,9 @@ public class VisionLocalizer extends SubsystemBase {
     /** Periodically updates the camera data and processes new measurements. */
     @Override
     public void periodic() {
-        for (int i = 0; i < io.length; i++) {
-            io[i].updateInputs(inputs[i]);
+        var doOnce = new RunOnce();
+        for (int i = 0; i < cameras.length; i++) {
+            cameras[i].io.updateInputs(inputs[i], cameras[i].robotToCameraAt, doOnce);
             Logger.processInputs("Vision/Camera" + i, inputs[i]);
         }
 
@@ -176,7 +253,7 @@ public class VisionLocalizer extends SubsystemBase {
         List<Pose3d> allRobotPosesRejected = new ArrayList<>();
 
         // Loop over cameras
-        for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
+        for (int cameraIndex = 0; cameraIndex < cameras.length; cameraIndex++) {
             // Update disconnected alert
             disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
@@ -254,10 +331,8 @@ public class VisionLocalizer extends SubsystemBase {
                 gainConstants.angularStdDevFactor * Math.pow(avgDistanceFromTarget, 2) / numTags;
 
         // adjustment based on position of camera
-        if (cameraIndex < this.cameraStdDevFactors.length) {
-            linearStdDev *= this.cameraStdDevFactors[cameraIndex];
-            angularStdDev *= this.cameraStdDevFactors[cameraIndex];
-        }
+        linearStdDev *= this.cameras[cameraIndex].stdDevFactor;
+        angularStdDev *= this.cameras[cameraIndex].stdDevFactor;
 
         return VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev);
     }

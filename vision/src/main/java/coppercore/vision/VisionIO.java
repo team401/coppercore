@@ -1,9 +1,12 @@
 package coppercore.vision;
 
+import coppercore.math.RunOnce;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import java.util.Optional;
+import java.util.function.DoubleFunction;
 import org.littletonrobotics.junction.AutoLog;
 
 /**
@@ -83,7 +86,32 @@ public interface VisionIO {
             Rotation2d ty) {}
     ;
 
-    public default void updateInputs(VisionIOInputs inputs) {}
+    /**
+     * Updates the inputs of the camera with a new robotToCamera transform; used for moving cameras.
+     *
+     * @param inputs the information received from the camera either in sim or the real camera
+     * @param robotToCamera the transform from the robot to the camera. This is a DoubleFunction
+     *     that must return the robotToCamera transform at the given timestamp in seconds.
+     * @param doOnce A {@link coppercore.math.RunOnce RunOnce} instance created for each periodic
+     *     cycle which Sim IOs will use to update the sim once per cycle.
+     */
+    public default void updateInputs(
+            VisionIOInputs inputs,
+            DoubleFunction<Optional<Transform3d>> robotToCamera,
+            RunOnce doOnce) {}
 
-    public default void setAprilTagLayout(AprilTagFieldLayout tagLayout) {}
+    /**
+     * Initializes the camera with the april tag layout and robot to camera transform. This is
+     * called once when the camera is created.
+     *
+     * @param tagLayout the april tag field layout
+     * @param tagLayoutRunOnce a RunOnce which should be common to all IOs when calling
+     *     initializeCamera that prevents sim IOs from initializing the sim field tag layout more
+     *     than one time
+     * @param robotToCameraAt the function to get the robot to camera transform at a given time
+     */
+    public default void initializeCamera(
+            AprilTagFieldLayout tagLayout,
+            RunOnce tagLayoutRunOnce,
+            DoubleFunction<Optional<Transform3d>> robotToCameraAt) {}
 }

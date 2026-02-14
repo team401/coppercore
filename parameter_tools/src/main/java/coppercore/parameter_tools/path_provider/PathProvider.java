@@ -33,4 +33,13 @@ public interface PathProvider {
      * @return the resolved path for the file
      */
     String resolvePath(String file);
+
+    /**
+     * Returns the environment name for this path provider.
+     *
+     * @return the environment name, defaults to "default"
+     */
+    default String getEnvironmentName() {
+        return "default";
+    }
 }
