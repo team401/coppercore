@@ -104,7 +104,14 @@ public class VisionLocalizer extends SubsystemBase {
     }
 
     public enum CameraType {
+        /**
+         * This is a fixed camera type for cameras that have a constant robot to camera transform
+         */
         FIXED,
+        /**
+         * This is a mobile camera type for cameras that must provide a double function of // time
+         * that gives the current robot to camera transform.
+         */
         MOBILE;
     }
 
@@ -205,6 +212,13 @@ public class VisionLocalizer extends SubsystemBase {
             double alongTrackOffsetMeters) {
         // camera not in vision
         if (desiredCameraIndex >= inputs.length) {
+            return new DistanceToTag(0, 0, false);
+        }
+
+        if (!cameras[desiredCameraIndex].io.isLoggingSingleTags()) {
+            System.err.println(
+                    "getDistanceErrorToTag was called without logging single tag observations -"
+                            + " this needs to be set in the camera io constructor");
             return new DistanceToTag(0, 0, false);
         }
 

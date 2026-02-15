@@ -17,6 +17,7 @@ import org.photonvision.PhotonUtils;
 /** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {
     protected final PhotonCamera camera;
+    protected final boolean logSingleTagObservations;
     public final String name;
     private AprilTagFieldLayout aprilTagLayout;
 
@@ -24,10 +25,22 @@ public class VisionIOPhotonReal implements VisionIO {
      * Creates a new VisionIOPhotonVision.
      *
      * @param name The configured name of the camera.
+     * @param logSingleTagObservations Whether or not the camera should log its individual tag
+     *     observations.
      */
-    public VisionIOPhotonReal(String name) {
+    public VisionIOPhotonReal(String name, boolean logSingleTagObservations) {
         camera = new PhotonCamera(name);
         this.name = name;
+        this.logSingleTagObservations = logSingleTagObservations;
+    }
+
+    /**
+     * Creates a new VisionIOPhotonVision that does not log single tag observations.
+     *
+     * @param name The configured name of the camera.
+     */
+    public VisionIOPhotonReal(String name) {
+        this(name, false);
     }
 
     @Override
@@ -36,6 +49,11 @@ public class VisionIOPhotonReal implements VisionIO {
             RunOnce tagLayoutRunOnce,
             DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
         aprilTagLayout = tagLayout;
+    }
+
+    @Override
+    public boolean isLoggingSingleTags() {
+        return logSingleTagObservations;
     }
 
     @Override
@@ -63,20 +81,22 @@ public class VisionIOPhotonReal implements VisionIO {
                                     inputs.hasMultitagResult = true;
                                     var multitagResult = result.multitagResult.get();
 
-                                    // add observation for each tag
-                                    for (var target : result.getTargets()) {
-                                        singleTagObservations.add(
-                                                new SingleTagObservation(
-                                                        target.getFiducialId(),
-                                                        result.getTimestampSeconds(),
-                                                        target.getBestCameraToTarget()
-                                                                .getTranslation()
-                                                                .getNorm(),
-                                                        target.getBestCameraToTarget(),
-                                                        Rotation2d.fromDegrees(target.getYaw()),
-                                                        Rotation2d.fromDegrees(target.getPitch())));
+                                    if (logSingleTagObservations) {
+                                        // add observation for each tag
+                                        for (var target : result.getTargets()) {
+                                            singleTagObservations.add(
+                                                    new SingleTagObservation(
+                                                            target.getFiducialId(),
+                                                            result.getTimestampSeconds(),
+                                                            target.getBestCameraToTarget()
+                                                                    .getTranslation()
+                                                                    .getNorm(),
+                                                            target.getBestCameraToTarget(),
+                                                            Rotation2d.fromDegrees(target.getYaw()),
+                                                            Rotation2d.fromDegrees(
+                                                                    target.getPitch())));
+                                        }
                                     }
-
                                     // convert pose from field to camera -> field to robot
                                     // Calculate robot pose
                                     Transform3d fieldToCamera = multitagResult.estimatedPose.best;
@@ -134,17 +154,20 @@ public class VisionIOPhotonReal implements VisionIO {
                                                                 .getNorm() // Average tag distance
                                                         ));
 
-                                        // set latest single tag observation
-                                        singleTagObservations.add(
-                                                new SingleTagObservation(
-                                                        target.fiducialId,
-                                                        result.getTimestampSeconds(),
-                                                        target.getBestCameraToTarget()
-                                                                .getTranslation()
-                                                                .getNorm(),
-                                                        target.getBestCameraToTarget(),
-                                                        Rotation2d.fromDegrees(target.getYaw()),
-                                                        Rotation2d.fromDegrees(target.getPitch())));
+                                        if (logSingleTagObservations) {
+                                            // set latest single tag observation
+                                            singleTagObservations.add(
+                                                    new SingleTagObservation(
+                                                            target.fiducialId,
+                                                            result.getTimestampSeconds(),
+                                                            target.getBestCameraToTarget()
+                                                                    .getTranslation()
+                                                                    .getNorm(),
+                                                            target.getBestCameraToTarget(),
+                                                            Rotation2d.fromDegrees(target.getYaw()),
+                                                            Rotation2d.fromDegrees(
+                                                                    target.getPitch())));
+                                        }
                                     }
                                 }
                             });
