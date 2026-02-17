@@ -31,14 +31,17 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      *     such as calibrations, framerate, latency, etc. If these values aren't known or needed,
      *     use {@link VisionIOPhotonSim#VisionIOPhotonSim(String, Supplier,
      *     coppercore.vision.VisionLocalizer.CameraType)} to use defaults instead.
+     * @param logSingleTagObservations Whether or not the individual tag observations should be
+     *     logged
      * @see VisionIOPhotonReal#VisionIOPhotonReal(String)
      */
     public VisionIOPhotonSim(
             String name,
             Supplier<Pose2d> poseSupplier,
             VisionLocalizer.CameraType type,
-            SimCameraProperties simCameraProperties) {
-        super(name);
+            SimCameraProperties simCameraProperties,
+            boolean logSingleTagObservations) {
+        super(name, logSingleTagObservations);
         this.poseSupplier = poseSupplier;
         this.cameraType = type;
 
@@ -48,6 +51,25 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
         }
 
         this.cameraProperties = simCameraProperties;
+    }
+
+    /**
+     * Creates a new VisionIOPhotonVisionSim that does not log single tag observations.
+     *
+     * @param name The name of the camera.
+     * @param poseSupplier Supplier for the robot pose to use in simulation.
+     * @param simCameraProperties A SimCameraProperties used to specify camera-specific properties
+     *     such as calibrations, framerate, latency, etc. If these values aren't known or needed,
+     *     use {@link VisionIOPhotonSim#VisionIOPhotonSim(String, Supplier,
+     *     coppercore.vision.VisionLocalizer.CameraType)} to use defaults instead.
+     * @see VisionIOPhotonReal#VisionIOPhotonReal(String)
+     */
+    public VisionIOPhotonSim(
+            String name,
+            Supplier<Pose2d> poseSupplier,
+            VisionLocalizer.CameraType type,
+            SimCameraProperties simCameraProperties) {
+        this(name, poseSupplier, type, simCameraProperties, false);
     }
 
     /**
