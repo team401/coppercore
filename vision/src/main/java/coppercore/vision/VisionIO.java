@@ -120,5 +120,7 @@ public interface VisionIO {
      *
      * @return true if the camera io is logging single tag observations
      */
-    public boolean isLoggingSingleTags();
+    public default boolean isLoggingSingleTags() {
+        return false;
+    }
 }
