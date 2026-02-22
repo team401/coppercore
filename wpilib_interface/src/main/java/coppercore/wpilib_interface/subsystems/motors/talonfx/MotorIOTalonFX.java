@@ -606,7 +606,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      *
      * <p>This constructor is for a "follower motor". Use {@link
      * MotorIOTalonFX#MotorIOTalonFX(MechanismConfig, CANDeviceID, TalonFXConfiguration,
-     * SignalRefreshRates, int, int)} to create the leader.
+     * SignalRefreshRates, int, int, int)} to create the leader.
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param followerIndex An int containing the index of the follower motor (what position in
