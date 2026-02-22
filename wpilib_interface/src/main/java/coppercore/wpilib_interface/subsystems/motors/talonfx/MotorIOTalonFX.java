@@ -819,6 +819,11 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                                 .withKG(kG)
                                 .withKV(kV)
                                 .withKA(kA)
+                                .withGainSchedBehavior(talonFXConfig.Slot0.GainSchedBehavior)
+                                .withGravityArmPositionOffset(
+                                        talonFXConfig.Slot0.GravityArmPositionOffset)
+                                .withStaticFeedforwardSign(
+                                        talonFXConfig.Slot0.StaticFeedforwardSign)
                                 .withGravityType(
                                         config.gravityFeedforwardType
                                                 .toPhoenix6GravityTypeValue()));
