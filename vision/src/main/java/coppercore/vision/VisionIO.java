@@ -114,4 +114,13 @@ public interface VisionIO {
             AprilTagFieldLayout tagLayout,
             RunOnce tagLayoutRunOnce,
             DoubleFunction<Optional<Transform3d>> robotToCameraAt) {}
+
+    /**
+     * Returns whether or not the camera is logging its single tag observations.
+     *
+     * @return true if the camera io is logging single tag observations
+     */
+    public default boolean isLoggingSingleTags() {
+        return false;
+    }
 }
