@@ -109,8 +109,11 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     /** Bitmask constant for the temperature signal. */
     public static final int SIGNAL_TEMPERATURE = 1 << 9;
 
+    /** Bitmask constant for the torque current signal. */
+    public static final int SIGNAL_TORQUE_CURRENT = 1 << 10;
+
     /** Bitmask combining all signal constants. */
-    public static final int SIGNAL_ALL = (1 << 10) - 1;
+    public static final int SIGNAL_ALL = (1 << 11) - 1;
 
     /**
      * Default medium priority signal mask. Includes all signals (signals also in the high priority
@@ -126,6 +129,13 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
             SIGNAL_VELOCITY | SIGNAL_POSITION | SIGNAL_STATOR_CURRENT | SIGNAL_SUPPLY_CURRENT;
 
     /**
+     * Default output signal mask. Includes only torque current, since followers using
+     * TorqueCurrentFOC read this signal to decide what output to apply to their motors. Add {@link
+     * #SIGNAL_MOTOR_VOLTAGE} if voltage-mode followers are used.
+     */
+    public static final int DEFAULT_OUTPUT_SIGNALS = SIGNAL_TORQUE_CURRENT;
+
+    /**
      * The SignalRefreshRates record stores the desired signal refresh rates for a MotorIOTalonFX.
      *
      * @param highPriorityUpdateFrequency A Frequency specifying the update frequency for the
@@ -133,11 +143,11 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      * @param mediumPriorityUpdateFrequency A Frequency specifying the update frequency for the
      *     applied voltage, raw rotor position, closed loop output, closed loop reference, closed
      *     loop reference slope, and temperature signals.
-     * @param outputUpdateFrequency A Frequency specifying the update frequency for the MotorVoltage
-     *     and TorqueCurrent signals, which are used by follower requests. It isn't recommended to
-     *     lower these below 20hz. Note that if either of these signals is present in the high
-     *     priority status signal bitmask, its refresh rate will be set to the high priority refresh
-     *     rate instead.
+     * @param outputUpdateFrequency A Frequency specifying the update frequency for signals in the
+     *     output signal bitmask (by default, only TorqueCurrent), which are used by follower
+     *     requests. It isn't recommended to lower these below 20hz. Note that if any of these
+     *     signals is present in the high priority status signal bitmask, its refresh rate will be
+     *     set to the high priority refresh rate instead.
      */
     public record SignalRefreshRates(
             Frequency highPriorityUpdateFrequency,
@@ -288,6 +298,9 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      *     receive the medium priority update frequency.
      * @param highPrioritySignals A bitmask of SIGNAL_* constants specifying which signals should
      *     receive the high priority update frequency (overrides medium priority).
+     * @param outputSignals A bitmask of SIGNAL_* constants specifying which signals should receive
+     *     the output update frequency. These signals are read by follower requests to decide what
+     *     output to apply to their motors. Defaults to {@link #DEFAULT_OUTPUT_SIGNALS}.
      */
     protected MotorIOTalonFX(
             MechanismConfig config,
@@ -295,7 +308,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
             TalonFXConfiguration talonFXConfig,
             SignalRefreshRates signalRefreshRates,
             int mediumPrioritySignals,
-            int highPrioritySignals) {
+            int highPrioritySignals,
+            int outputSignals) {
         super(config, id, "_TalonFX_");
 
         this.talonFXConfig = talonFXConfig;
@@ -337,8 +351,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
         BaseStatusSignal[] mediumSignals = signalsForMask(mediumPrioritySignals);
         BaseStatusSignal[] highSignals = signalsForMask(highPrioritySignals);
-        BaseStatusSignal[] outputSignals =
-                new BaseStatusSignal[] {motorVoltageSignal, torqueCurrentSignal};
+        BaseStatusSignal[] outputSigs = signalsForMask(outputSignals);
 
         // Signals that won't be used for low-latency code functions, such as scoring/shooting,
         // state machine transitions, fast-paced decisionmaking.
@@ -353,12 +366,14 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         }
 
         // Signals that are used for follower requests
-        CTREUtil.tryUntilOk(
-                () ->
-                        BaseStatusSignal.setUpdateFrequencyForAll(
-                                signalRefreshRates.outputUpdateFrequency, outputSignals),
-                id,
-                (code) -> {});
+        if (outputSigs.length > 0) {
+            CTREUtil.tryUntilOk(
+                    () ->
+                            BaseStatusSignal.setUpdateFrequencyForAll(
+                                    signalRefreshRates.outputUpdateFrequency, outputSigs),
+                    id,
+                    (code) -> {});
+        }
 
         // Signals that need to have a latency as low as possible
         if (highSignals.length > 0) {
@@ -405,7 +420,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 talonFXConfig,
                 signalRefreshRates,
                 DEFAULT_MEDIUM_PRIORITY_SIGNALS,
-                DEFAULT_HIGH_PRIORITY_SIGNALS);
+                DEFAULT_HIGH_PRIORITY_SIGNALS,
+                DEFAULT_OUTPUT_SIGNALS);
     }
 
     /**
@@ -431,7 +447,50 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
             SignalRefreshRates signalRefreshRates,
             int mediumPrioritySignals,
             int highPrioritySignals) {
-        this(config, config.leadMotorId, talonFXConfig, signalRefreshRates);
+        this(
+                config,
+                config.leadMotorId,
+                talonFXConfig,
+                signalRefreshRates,
+                mediumPrioritySignals,
+                highPrioritySignals,
+                DEFAULT_OUTPUT_SIGNALS);
+    }
+
+    /**
+     * Create a new TalonFX IO, initializing a TalonFX and all required StatusSignals
+     *
+     * <p>This constructor is for the "lead motor". Use {@link
+     * MotorIOTalonFX#MotorIOTalonFX(MechanismConfig, int, TalonFXConfiguration, SignalRefreshRates,
+     * int, int, int)} to create a follower.
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high-, medium-, and output-priority signals.
+     * @param mediumPrioritySignals A bitmask of SIGNAL_* constants specifying which signals should
+     *     receive the medium priority update frequency.
+     * @param highPrioritySignals A bitmask of SIGNAL_* constants specifying which signals should
+     *     receive the high priority update frequency (overrides medium priority).
+     * @param outputSignals A bitmask of SIGNAL_* constants specifying which signals should receive
+     *     the output update frequency (used by follower requests).
+     */
+    public MotorIOTalonFX(
+            MechanismConfig config,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates,
+            int mediumPrioritySignals,
+            int highPrioritySignals,
+            int outputSignals) {
+        this(
+                config,
+                config.leadMotorId,
+                talonFXConfig,
+                signalRefreshRates,
+                mediumPrioritySignals,
+                highPrioritySignals,
+                outputSignals);
     }
 
     /**
@@ -462,6 +521,40 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 signalRefreshRates,
                 mediumPrioritySignals,
                 highPrioritySignals);
+    }
+
+    /**
+     * Create a new TalonFX IO for a lead motor, initializing a TalonFX and all required
+     * StatusSignals
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high-, medium-, and output-priority signals.
+     * @param mediumPrioritySignals A bitmask of SIGNAL_* constants specifying which signals should
+     *     receive the medium priority update frequency.
+     * @param highPrioritySignals A bitmask of SIGNAL_* constants specifying which signals should
+     *     receive the high priority update frequency (overrides medium priority).
+     * @param outputSignals A bitmask of SIGNAL_* constants specifying which signals should receive
+     *     the output update frequency (used by follower requests).
+     * @return A new MotorIOTalonFX created with the specified parameters, configured as a lead
+     *     motor.
+     */
+    public static MotorIOTalonFX newLeader(
+            MechanismConfig config,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates,
+            int mediumPrioritySignals,
+            int highPrioritySignals,
+            int outputSignals) {
+        return new MotorIOTalonFX(
+                config,
+                talonFXConfig,
+                signalRefreshRates,
+                mediumPrioritySignals,
+                highPrioritySignals,
+                outputSignals);
     }
 
     /**
@@ -513,7 +606,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      *
      * <p>This constructor is for a "follower motor". Use {@link
      * MotorIOTalonFX#MotorIOTalonFX(MechanismConfig, CANDeviceID, TalonFXConfiguration,
-     * SignalRefreshRates, int, int)} to create the leader.
+     * SignalRefreshRates, int, int, int)} to create the leader.
      *
      * @param config A MechanismConfig config to use for CAN IDs
      * @param followerIndex An int containing the index of the follower motor (what position in
@@ -539,7 +632,52 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 config,
                 config.followerMotorConfigs[followerIndex].id(),
                 talonFXConfig,
-                signalRefreshRates);
+                signalRefreshRates,
+                mediumPrioritySignals,
+                highPrioritySignals,
+                DEFAULT_OUTPUT_SIGNALS);
+
+        follow(config.leadMotorId.id(), config.followerMotorConfigs[followerIndex].invert());
+    }
+
+    /**
+     * Create a new TalonFX IO, initializing a TalonFX and all required StatusSignals
+     *
+     * <p>This constructor is for a "follower motor". Use {@link
+     * MotorIOTalonFX#MotorIOTalonFX(MechanismConfig, CANDeviceID, TalonFXConfiguration,
+     * SignalRefreshRates, int, int, int)} to create the leader.
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param followerIndex An int containing the index of the follower motor (what position in
+     *     config.followerIds this motor is). This IO will automatically follow the lead motor at
+     *     the end of its constructor.
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high-, medium-, and output-priority signals.
+     * @param mediumPrioritySignals A bitmask of SIGNAL_* constants specifying which signals should
+     *     receive the medium priority update frequency.
+     * @param highPrioritySignals A bitmask of SIGNAL_* constants specifying which signals should
+     *     receive the high priority update frequency (overrides medium priority).
+     * @param outputSignals A bitmask of SIGNAL_* constants specifying which signals should receive
+     *     the output update frequency (used by follower requests).
+     */
+    public MotorIOTalonFX(
+            MechanismConfig config,
+            int followerIndex,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates,
+            int mediumPrioritySignals,
+            int highPrioritySignals,
+            int outputSignals) {
+        this(
+                config,
+                config.followerMotorConfigs[followerIndex].id(),
+                talonFXConfig,
+                signalRefreshRates,
+                mediumPrioritySignals,
+                highPrioritySignals,
+                outputSignals);
 
         follow(config.leadMotorId.id(), config.followerMotorConfigs[followerIndex].invert());
     }
@@ -638,6 +776,45 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     }
 
     /**
+     * Create a new TalonFX IO for a follower motor, initializing a TalonFX and all required
+     * StatusSignals, and automatically following the lead motor specified in the config.
+     *
+     * @param config A MechanismConfig config to use for CAN IDs
+     * @param followerIndex An int containing the index of the follower motor (what position in
+     *     config.followerIds this motor is). This IO will automatically follow the lead motor at
+     *     the end of its constructor.
+     * @param talonFXConfig A TalonFXConfiguration to apply to the motor. This config will not be
+     *     modified by this IO, so there's no need to copy it.
+     * @param signalRefreshRates A SignalRefreshRates object containing the desired refresh rates
+     *     for high-, medium-, and output-priority signals.
+     * @param mediumPrioritySignals A bitmask of SIGNAL_* constants specifying which signals should
+     *     receive the medium priority update frequency.
+     * @param highPrioritySignals A bitmask of SIGNAL_* constants specifying which signals should
+     *     receive the high priority update frequency (overrides medium priority).
+     * @param outputSignals A bitmask of SIGNAL_* constants specifying which signals should receive
+     *     the output update frequency (used by follower requests).
+     * @return A new MotorIOTalonFX created with the specified parameters, configured as a follower
+     *     motor.
+     */
+    public static MotorIOTalonFX newFollower(
+            MechanismConfig config,
+            int followerIndex,
+            TalonFXConfiguration talonFXConfig,
+            SignalRefreshRates signalRefreshRates,
+            int mediumPrioritySignals,
+            int highPrioritySignals,
+            int outputSignals) {
+        return new MotorIOTalonFX(
+                config,
+                followerIndex,
+                talonFXConfig,
+                signalRefreshRates,
+                mediumPrioritySignals,
+                highPrioritySignals,
+                outputSignals);
+    }
+
+    /**
      * Returns an array of BaseStatusSignal objects corresponding to the bits set in the given mask.
      *
      * @param mask A bitmask of SIGNAL_* constants.
@@ -657,6 +834,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         if ((mask & SIGNAL_CLOSED_LOOP_REFERENCE_SLOPE) != 0)
             result[i++] = closedLoopReferenceSlopeSignal;
         if ((mask & SIGNAL_TEMPERATURE) != 0) result[i++] = temperatureSignal;
+        if ((mask & SIGNAL_TORQUE_CURRENT) != 0) result[i++] = torqueCurrentSignal;
         return result;
     }
 
