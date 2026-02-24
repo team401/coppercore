@@ -53,11 +53,11 @@ public interface MotorIO {
      */
     public enum GainSlot {
         /** Gain slot 0 (the default). */
-        kSlot0,
+        Slot0,
         /** Gain slot 1. */
-        kSlot1,
+        Slot1,
         /** Gain slot 2. */
-        kSlot2
+        Slot2
     }
 
     /**
@@ -229,10 +229,10 @@ public interface MotorIO {
             double kA);
 
     /**
-     * Set the closed-loop control gains used by the motor in {@link GainSlot#kSlot0}.
+     * Set the closed-loop control gains used by the motor in {@link GainSlot#Slot0}.
      *
      * <p>This is equivalent to calling {@link #setGains(GainSlot, double, double, double, double,
-     * double, double, double)} with {@code slot = GainSlot.kSlot0}.
+     * double, double, double)} with {@code slot = GainSlot.Slot0}.
      *
      * @param kP Proportional gain. Unit is output units / rotation of error.
      * @param kI Integral gain. Unit is output units / (rotation of error * seconds).
@@ -244,7 +244,7 @@ public interface MotorIO {
      */
     public default void setGains(
             double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
-        setGains(GainSlot.kSlot0, kP, kI, kD, kS, kG, kV, kA);
+        setGains(GainSlot.Slot0, kP, kI, kD, kS, kG, kV, kA);
     }
 
     /**

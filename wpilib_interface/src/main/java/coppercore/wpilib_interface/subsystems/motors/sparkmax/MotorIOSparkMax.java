@@ -393,11 +393,11 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     private static ClosedLoopSlot toClosedLoopSlot(GainSlot slot) {
         switch (slot) {
-            case kSlot0:
+            case Slot0:
                 return ClosedLoopSlot.kSlot0;
-            case kSlot1:
+            case Slot1:
                 return ClosedLoopSlot.kSlot1;
-            case kSlot2:
+            case Slot2:
                 return ClosedLoopSlot.kSlot2;
             default:
                 throw new IllegalArgumentException("Unhandled GainSlot: " + slot);

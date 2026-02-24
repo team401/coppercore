@@ -1014,7 +1014,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
             double kV,
             double kA) {
         switch (slot) {
-            case kSlot0:
+            case Slot0:
                 talon.getConfigurator()
                         .apply(
                                 new Slot0Configs()
@@ -1035,7 +1035,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                                                 config.gravityFeedforwardType
                                                         .toPhoenix6GravityTypeValue()));
                 break;
-            case kSlot1:
+            case Slot1:
                 talon.getConfigurator()
                         .apply(
                                 new Slot1Configs()
@@ -1056,7 +1056,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                                                 config.gravityFeedforwardType
                                                         .toPhoenix6GravityTypeValue()));
                 break;
-            case kSlot2:
+            case Slot2:
                 talon.getConfigurator()
                         .apply(
                                 new Slot2Configs()
