@@ -233,10 +233,10 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      * {@link #selectGainSlot(GainSlot)}.
      *
      * <ul>
-     *   <li><b>Default value:</b> 0
+     *   <li><b>Default value:</b> {@link GainSlot#Slot0}
      * </ul>
      */
-    protected int activeGainSlot = 0;
+    protected GainSlot activeGainSlot = GainSlot.Slot0;
 
     /** A neutral request to use for basic config-based neutral mode commands */
     protected final NeutralOut neutralRequest = new NeutralOut();
@@ -909,7 +909,9 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 frequency -> unprofiledPositionRequest.withUpdateFreqHz(frequency));
 
         talon.setControl(
-                unprofiledPositionRequest.withPosition(positionSetpoint).withSlot(activeGainSlot));
+                unprofiledPositionRequest
+                        .withPosition(positionSetpoint)
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -918,7 +920,9 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 frequency -> profiledPositionRequest.withUpdateFreqHz(frequency));
 
         talon.setControl(
-                profiledPositionRequest.withPosition(positionSetpoint).withSlot(activeGainSlot));
+                profiledPositionRequest
+                        .withPosition(positionSetpoint)
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -938,7 +942,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                         .withVelocity(maxVelocity)
                         .withAcceleration(maxAcceleration)
                         .withJerk(maxJerk)
-                        .withSlot(activeGainSlot));
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -953,7 +957,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                         .withVelocity(profileConfig.getMaxVelocity())
                         .withAcceleration(profileConfig.getMaxAcceleration())
                         .withJerk(profileConfig.getMaxJerk())
-                        .withSlot(activeGainSlot));
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -964,7 +968,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         talon.setControl(
                 expoProfiledPositionRequest
                         .withPosition(positionSetpoint)
-                        .withSlot(activeGainSlot));
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -972,7 +976,10 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         requestUpdateFrequencyHz.ifPresent(
                 frequency -> unprofiledVelocityRequest.withUpdateFreqHz(frequency));
 
-        talon.setControl(unprofiledVelocityRequest.withVelocity(velocity).withSlot(activeGainSlot));
+        talon.setControl(
+                unprofiledVelocityRequest
+                        .withVelocity(velocity)
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -980,7 +987,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         requestUpdateFrequencyHz.ifPresent(
                 frequency -> profiledVelocityRequest.withUpdateFreqHz(frequency));
 
-        talon.setControl(profiledVelocityRequest.withVelocity(velocity).withSlot(activeGainSlot));
+        talon.setControl(
+                profiledVelocityRequest.withVelocity(velocity).withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -1082,7 +1090,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void selectGainSlot(GainSlot slot) {
-        activeGainSlot = slot.ordinal();
+        activeGainSlot = slot;
     }
 
     @Override
