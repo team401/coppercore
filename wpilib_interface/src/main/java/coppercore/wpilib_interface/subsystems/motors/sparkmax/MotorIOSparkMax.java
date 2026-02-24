@@ -75,7 +75,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
      * {@link #selectGainSlot(GainSlot)}.
      *
      * <ul>
-     *   <li><b>Default value:</b> {@link ClosedLoopSlot#kSlot0}
+     *   <li><b>Default value:</b> {@link MotorIO.GainSlot#Slot0}
      * </ul>
      */
     protected ClosedLoopSlot activeGainSlot = ClosedLoopSlot.kSlot0;
