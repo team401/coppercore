@@ -29,6 +29,8 @@ import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The MotorIOSparkMax implements the MotorIO interface for the <a
@@ -45,6 +47,10 @@ import edu.wpi.first.wpilibj.DriverStation;
  * <p>This IO implementation also does not support dynamic motion profiles, exponential motion
  * profiles, or current/FOC-based open-loop control. Calling any of the aforementioned control
  * methods will result in an UnsupportedOperationException.
+ *
+ * <p>Note that using {@link #selectGainSlot(GainSlot)} is a blocking operation on these IOs; sparks
+ * don't support different feedforward gains across different slots so changing slots requires a
+ * config flash.
  */
 public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorIO {
     /**
@@ -80,6 +86,8 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
      */
     protected ClosedLoopSlot activeGainSlot = ClosedLoopSlot.kSlot0;
 
+    protected final Map<ClosedLoopSlot, FeedForwardConfig> feedforwardMap = new HashMap<>(3);
+
     /**
      * Create a new MotorIOSparkMax given a mechanism config, a CANDeviceID, a SparkMaxConfig, and a
      * MotorType
@@ -106,6 +114,10 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         this.sparkMax = new SparkMax(id.id(), motorType);
 
         this.controller = sparkMax.getClosedLoopController();
+
+        this.feedforwardMap.put(ClosedLoopSlot.kSlot0, sparkMaxConfig.closedLoop.feedForward);
+        this.feedforwardMap.put(ClosedLoopSlot.kSlot1, sparkMaxConfig.closedLoop.feedForward);
+        this.feedforwardMap.put(ClosedLoopSlot.kSlot2, sparkMaxConfig.closedLoop.feedForward);
 
         applyConfig();
     }
@@ -382,13 +394,23 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         // TODO: Decide on whether adding manual calculation of feedforward is worth it.
         // Note: FeedForwardConfig applies feedforward gains globally across all slots.
         sparkMaxConfig.closedLoop.pid(kP, kI, kD, closedLoopSlot);
-        sparkMaxConfig.closedLoop.apply(new FeedForwardConfig().kV(kV).kA(kA).kS(kS).kG(kG));
+        feedforwardMap.put(closedLoopSlot, new FeedForwardConfig().kS(kS).kG(kG).kV(kV).kA(kA));
+
+        if (activeGainSlot == closedLoopSlot) {
+            // If the selected slot is being updated, call selectGainSlot to update the configs
+            selectGainSlot(slot);
+        }
+
         applyConfig();
     }
 
     @Override
     public void selectGainSlot(GainSlot slot) {
         activeGainSlot = toClosedLoopSlot(slot);
+
+        sparkMaxConfig.closedLoop.apply(feedforwardMap.get(activeGainSlot));
+
+        applyConfig();
     }
 
     private static ClosedLoopSlot toClosedLoopSlot(GainSlot slot) {
