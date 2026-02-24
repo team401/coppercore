@@ -72,7 +72,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     /**
      * The currently active gain slot used for closed-loop control requests. Can be changed using
-     * {@link #selectGainSlot(int)}.
+     * {@link #selectGainSlot(GainSlot)}.
      *
      * <ul>
      *   <li><b>Default value:</b> {@link ClosedLoopSlot#kSlot0}
@@ -370,21 +370,15 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void setGains(
-            int slot, double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
-        ClosedLoopSlot closedLoopSlot;
-        switch (slot) {
-            case 0:
-                closedLoopSlot = ClosedLoopSlot.kSlot0;
-                break;
-            case 1:
-                closedLoopSlot = ClosedLoopSlot.kSlot1;
-                break;
-            case 2:
-                closedLoopSlot = ClosedLoopSlot.kSlot2;
-                break;
-            default:
-                throw new IllegalArgumentException("Gain slot must be 0, 1, or 2. Got: " + slot);
-        }
+            GainSlot slot,
+            double kP,
+            double kI,
+            double kD,
+            double kS,
+            double kG,
+            double kV,
+            double kA) {
+        ClosedLoopSlot closedLoopSlot = toClosedLoopSlot(slot);
         // TODO: Decide on whether adding manual calculation of feedforward is worth it.
         // Note: FeedForwardConfig applies feedforward gains globally across all slots.
         sparkMaxConfig.closedLoop.pid(kP, kI, kD, closedLoopSlot);
@@ -393,19 +387,20 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
     }
 
     @Override
-    public void selectGainSlot(int slot) {
+    public void selectGainSlot(GainSlot slot) {
+        activeGainSlot = toClosedLoopSlot(slot);
+    }
+
+    private static ClosedLoopSlot toClosedLoopSlot(GainSlot slot) {
         switch (slot) {
-            case 0:
-                activeGainSlot = ClosedLoopSlot.kSlot0;
-                break;
-            case 1:
-                activeGainSlot = ClosedLoopSlot.kSlot1;
-                break;
-            case 2:
-                activeGainSlot = ClosedLoopSlot.kSlot2;
-                break;
+            case kSlot0:
+                return ClosedLoopSlot.kSlot0;
+            case kSlot1:
+                return ClosedLoopSlot.kSlot1;
+            case kSlot2:
+                return ClosedLoopSlot.kSlot2;
             default:
-                throw new IllegalArgumentException("Gain slot must be 0, 1, or 2. Got: " + slot);
+                throw new IllegalArgumentException("Unhandled GainSlot: " + slot);
         }
     }
 

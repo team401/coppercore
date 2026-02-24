@@ -230,7 +230,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     /**
      * The currently active gain slot used for closed-loop control requests. Can be changed using
-     * {@link #selectGainSlot(int)}.
+     * {@link #selectGainSlot(GainSlot)}.
      *
      * <ul>
      *   <li><b>Default value:</b> 0
@@ -1005,9 +1005,16 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void setGains(
-            int slot, double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
+            GainSlot slot,
+            double kP,
+            double kI,
+            double kD,
+            double kS,
+            double kG,
+            double kV,
+            double kA) {
         switch (slot) {
-            case 0:
+            case kSlot0:
                 talon.getConfigurator()
                         .apply(
                                 new Slot0Configs()
@@ -1028,7 +1035,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                                                 config.gravityFeedforwardType
                                                         .toPhoenix6GravityTypeValue()));
                 break;
-            case 1:
+            case kSlot1:
                 talon.getConfigurator()
                         .apply(
                                 new Slot1Configs()
@@ -1049,7 +1056,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                                                 config.gravityFeedforwardType
                                                         .toPhoenix6GravityTypeValue()));
                 break;
-            case 2:
+            case kSlot2:
                 talon.getConfigurator()
                         .apply(
                                 new Slot2Configs()
@@ -1070,17 +1077,12 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                                                 config.gravityFeedforwardType
                                                         .toPhoenix6GravityTypeValue()));
                 break;
-            default:
-                throw new IllegalArgumentException("Gain slot must be 0, 1, or 2. Got: " + slot);
         }
     }
 
     @Override
-    public void selectGainSlot(int slot) {
-        if (slot < 0 || slot > 2) {
-            throw new IllegalArgumentException("Gain slot must be 0, 1, or 2. Got: " + slot);
-        }
-        activeGainSlot = slot;
+    public void selectGainSlot(GainSlot slot) {
+        activeGainSlot = slot.ordinal();
     }
 
     @Override

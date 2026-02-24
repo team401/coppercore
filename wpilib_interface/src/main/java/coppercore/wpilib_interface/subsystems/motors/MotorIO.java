@@ -44,6 +44,23 @@ public interface MotorIO {
     }
 
     /**
+     * A type-safe selector for the closed-loop gain slot to configure or activate.
+     *
+     * <p>Motor controllers such as TalonFX and SparkMax support multiple independent sets of PID
+     * and feedforward gains, each stored in a numbered slot. Use {@link MotorIO#setGains(GainSlot,
+     * double, double, double, double, double, double, double)} to write gains to a slot and {@link
+     * MotorIO#selectGainSlot(GainSlot)} to make that slot active.
+     */
+    public enum GainSlot {
+        /** Gain slot 0 (the default). */
+        kSlot0,
+        /** Gain slot 1. */
+        kSlot1,
+        /** Gain slot 2. */
+        kSlot2
+    }
+
+    /**
      * Take a set of inputs and update them with the latest data from the motor controller
      *
      * @param inputs The inputs object, which will be mutated.
@@ -190,10 +207,9 @@ public interface MotorIO {
      *
      * <p>Currently, Spark IOs don't support the usage of kS, kG, or kA.
      *
-     * <p>Supported slots are 0, 1, and 2. Use {@link #selectGainSlot(int)} to activate a previously
-     * configured slot.
+     * <p>Use {@link #selectGainSlot(GainSlot)} to activate a previously configured slot.
      *
-     * @param slot The gain slot to configure (0, 1, or 2).
+     * @param slot The gain slot to configure.
      * @param kP Proportional gain. Unit is output units / rotation of error.
      * @param kI Integral gain. Unit is output units / (rotation of error * seconds).
      * @param kD Derivative gain. Unit is output units / (rotation per second)
@@ -203,13 +219,20 @@ public interface MotorIO {
      * @param kA Accelerated feed-forward. Unit is output units / requested input acceleration.
      */
     public void setGains(
-            int slot, double kP, double kI, double kD, double kS, double kG, double kV, double kA);
+            GainSlot slot,
+            double kP,
+            double kI,
+            double kD,
+            double kS,
+            double kG,
+            double kV,
+            double kA);
 
     /**
-     * Set the closed-loop control gains used by the motor in gain slot 0.
+     * Set the closed-loop control gains used by the motor in {@link GainSlot#kSlot0}.
      *
-     * <p>This is equivalent to calling {@link #setGains(int, double, double, double, double,
-     * double, double, double)} with {@code slot = 0}.
+     * <p>This is equivalent to calling {@link #setGains(GainSlot, double, double, double, double,
+     * double, double, double)} with {@code slot = GainSlot.kSlot0}.
      *
      * @param kP Proportional gain. Unit is output units / rotation of error.
      * @param kI Integral gain. Unit is output units / (rotation of error * seconds).
@@ -221,7 +244,7 @@ public interface MotorIO {
      */
     public default void setGains(
             double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
-        setGains(0, kP, kI, kD, kS, kG, kV, kA);
+        setGains(GainSlot.kSlot0, kP, kI, kD, kS, kG, kV, kA);
     }
 
     /**
@@ -229,13 +252,11 @@ public interface MotorIO {
      *
      * <p>After calling this method, all subsequent closed-loop control requests will use the gains
      * stored in the specified slot. Gains must have been written to the slot previously using
-     * {@link #setGains(int, double, double, double, double, double, double, double)}.
+     * {@link #setGains(GainSlot, double, double, double, double, double, double, double)}.
      *
-     * <p>Supported slots are 0, 1, and 2.
-     *
-     * @param slot The gain slot to activate (0, 1, or 2).
+     * @param slot The gain slot to activate.
      */
-    public void selectGainSlot(int slot);
+    public void selectGainSlot(GainSlot slot);
 
     /**
      * Set whether the motor should brake or coast when a neutral (0) output is commanded.
