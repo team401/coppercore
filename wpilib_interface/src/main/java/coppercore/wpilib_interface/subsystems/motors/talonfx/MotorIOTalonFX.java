@@ -1085,6 +1085,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                                                 config.gravityFeedforwardType
                                                         .toPhoenix6GravityTypeValue()));
                 break;
+            default:
+                throw new IllegalArgumentException("Unknown GainSlot: " + slot);
         }
     }
 
