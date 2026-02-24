@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Rotations;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -68,6 +69,16 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
      * velocity) will only be read when this value is true.
      */
     protected boolean encoderEnabled = true;
+
+    /**
+     * The currently active gain slot used for closed-loop control requests. Can be changed using
+     * {@link #selectGainSlot(int)}.
+     *
+     * <ul>
+     *   <li><b>Default value:</b> {@link ClosedLoopSlot#kSlot0}
+     * </ul>
+     */
+    protected ClosedLoopSlot activeGainSlot = ClosedLoopSlot.kSlot0;
 
     /**
      * Create a new MotorIOSparkMax given a mechanism config, a CANDeviceID, a SparkMaxConfig, and a
@@ -280,13 +291,16 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void controlToPositionUnprofiled(Angle positionSetpoint) {
-        controller.setSetpoint(positionSetpoint.in(Rotations), ControlType.kPosition);
+        controller.setSetpoint(
+                positionSetpoint.in(Rotations), ControlType.kPosition, activeGainSlot);
     }
 
     @Override
     public void controlToPositionProfiled(Angle positionSetpoint) {
         controller.setSetpoint(
-                positionSetpoint.in(Rotations), ControlType.kMAXMotionPositionControl);
+                positionSetpoint.in(Rotations),
+                ControlType.kMAXMotionPositionControl,
+                activeGainSlot);
     }
 
     @Override
@@ -320,12 +334,13 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void controlToVelocityUnprofiled(AngularVelocity velocitySetpoint) {
-        controller.setSetpoint(velocitySetpoint.in(RPM), ControlType.kVelocity);
+        controller.setSetpoint(velocitySetpoint.in(RPM), ControlType.kVelocity, activeGainSlot);
     }
 
     @Override
     public void controlToVelocityProfiled(AngularVelocity velocitySetpoint) {
-        controller.setSetpoint(velocitySetpoint.in(RPM), ControlType.kMAXMotionVelocityControl);
+        controller.setSetpoint(
+                velocitySetpoint.in(RPM), ControlType.kMAXMotionVelocityControl, activeGainSlot);
     }
 
     @Override
@@ -355,11 +370,43 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void setGains(
-            double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
-        // TODO: Decide on whether adding manual calculation of feedforward is worth it
-        sparkMaxConfig.closedLoop.pid(kP, kI, kD);
+            int slot, double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
+        ClosedLoopSlot closedLoopSlot;
+        switch (slot) {
+            case 0:
+                closedLoopSlot = ClosedLoopSlot.kSlot0;
+                break;
+            case 1:
+                closedLoopSlot = ClosedLoopSlot.kSlot1;
+                break;
+            case 2:
+                closedLoopSlot = ClosedLoopSlot.kSlot2;
+                break;
+            default:
+                throw new IllegalArgumentException("Gain slot must be 0, 1, or 2. Got: " + slot);
+        }
+        // TODO: Decide on whether adding manual calculation of feedforward is worth it.
+        // Note: FeedForwardConfig applies feedforward gains globally across all slots.
+        sparkMaxConfig.closedLoop.pid(kP, kI, kD, closedLoopSlot);
         sparkMaxConfig.closedLoop.apply(new FeedForwardConfig().kV(kV).kA(kA).kS(kS).kG(kG));
         applyConfig();
+    }
+
+    @Override
+    public void selectGainSlot(int slot) {
+        switch (slot) {
+            case 0:
+                activeGainSlot = ClosedLoopSlot.kSlot0;
+                break;
+            case 1:
+                activeGainSlot = ClosedLoopSlot.kSlot1;
+                break;
+            case 2:
+                activeGainSlot = ClosedLoopSlot.kSlot2;
+                break;
+            default:
+                throw new IllegalArgumentException("Gain slot must be 0, 1, or 2. Got: " + slot);
+        }
     }
 
     @Override
