@@ -205,7 +205,9 @@ public interface MotorIO {
      * <p>Units listed are for position control. When using velocity control, error will be in
      * rotations/second instead.
      *
-     * <p>Currently, Spark IOs don't support the usage of kS, kG, or kA.
+     * <p>For Spark IOs, the usage of kS, kG, or kA in separate slots is implemented by
+     *    keeping feed forward gains in memory and reapplying the configuration for the
+     *    respective active slot. (Which is blocking.)
      *
      * <p>Use {@link #selectGainSlot(GainSlot)} to activate a previously configured slot.
      *
