@@ -11,6 +11,8 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
+import com.ctre.phoenix6.configs.Slot2Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DynamicMotionMagicTorqueCurrentFOC;
@@ -225,6 +227,16 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      * </ul>
      */
     protected Optional<Frequency> requestUpdateFrequencyHz = Optional.empty();
+
+    /**
+     * The currently active gain slot used for closed-loop control requests. Can be changed using
+     * {@link #selectGainSlot(GainSlot)}.
+     *
+     * <ul>
+     *   <li><b>Default value:</b> {@link GainSlot#Slot0}
+     * </ul>
+     */
+    protected GainSlot activeGainSlot = GainSlot.Slot0;
 
     /** A neutral request to use for basic config-based neutral mode commands */
     protected final NeutralOut neutralRequest = new NeutralOut();
@@ -896,7 +908,10 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         requestUpdateFrequencyHz.ifPresent(
                 frequency -> unprofiledPositionRequest.withUpdateFreqHz(frequency));
 
-        talon.setControl(unprofiledPositionRequest.withPosition(positionSetpoint));
+        talon.setControl(
+                unprofiledPositionRequest
+                        .withPosition(positionSetpoint)
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -904,7 +919,10 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         requestUpdateFrequencyHz.ifPresent(
                 frequency -> profiledPositionRequest.withUpdateFreqHz(frequency));
 
-        talon.setControl(profiledPositionRequest.withPosition(positionSetpoint));
+        talon.setControl(
+                profiledPositionRequest
+                        .withPosition(positionSetpoint)
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -923,7 +941,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                         .withPosition(positionSetpoint)
                         .withVelocity(maxVelocity)
                         .withAcceleration(maxAcceleration)
-                        .withJerk(maxJerk));
+                        .withJerk(maxJerk)
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -937,7 +956,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                         .withPosition(positionSetpoint)
                         .withVelocity(profileConfig.getMaxVelocity())
                         .withAcceleration(profileConfig.getMaxAcceleration())
-                        .withJerk(profileConfig.getMaxJerk()));
+                        .withJerk(profileConfig.getMaxJerk())
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -945,7 +965,10 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         requestUpdateFrequencyHz.ifPresent(
                 frequency -> expoProfiledPositionRequest.withUpdateFreqHz(frequency));
 
-        talon.setControl(expoProfiledPositionRequest.withPosition(positionSetpoint));
+        talon.setControl(
+                expoProfiledPositionRequest
+                        .withPosition(positionSetpoint)
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -953,7 +976,10 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         requestUpdateFrequencyHz.ifPresent(
                 frequency -> unprofiledVelocityRequest.withUpdateFreqHz(frequency));
 
-        talon.setControl(unprofiledVelocityRequest.withVelocity(velocity));
+        talon.setControl(
+                unprofiledVelocityRequest
+                        .withVelocity(velocity)
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -961,7 +987,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         requestUpdateFrequencyHz.ifPresent(
                 frequency -> profiledVelocityRequest.withUpdateFreqHz(frequency));
 
-        talon.setControl(profiledVelocityRequest.withVelocity(velocity));
+        talon.setControl(
+                profiledVelocityRequest.withVelocity(velocity).withSlot(activeGainSlot.ordinal()));
     }
 
     @Override
@@ -986,25 +1013,86 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void setGains(
-            double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
-        talon.getConfigurator()
-                .apply(
-                        new Slot0Configs()
-                                .withKP(kP)
-                                .withKI(kI)
-                                .withKD(kD)
-                                .withKS(kS)
-                                .withKG(kG)
-                                .withKV(kV)
-                                .withKA(kA)
-                                .withGainSchedBehavior(talonFXConfig.Slot0.GainSchedBehavior)
-                                .withGravityArmPositionOffset(
-                                        talonFXConfig.Slot0.GravityArmPositionOffset)
-                                .withStaticFeedforwardSign(
-                                        talonFXConfig.Slot0.StaticFeedforwardSign)
-                                .withGravityType(
-                                        config.gravityFeedforwardType
-                                                .toPhoenix6GravityTypeValue()));
+            GainSlot slot,
+            double kP,
+            double kI,
+            double kD,
+            double kS,
+            double kG,
+            double kV,
+            double kA) {
+        switch (slot) {
+            case Slot0:
+                talon.getConfigurator()
+                        .apply(
+                                new Slot0Configs()
+                                        .withKP(kP)
+                                        .withKI(kI)
+                                        .withKD(kD)
+                                        .withKS(kS)
+                                        .withKG(kG)
+                                        .withKV(kV)
+                                        .withKA(kA)
+                                        .withGainSchedBehavior(
+                                                talonFXConfig.Slot0.GainSchedBehavior)
+                                        .withGravityArmPositionOffset(
+                                                talonFXConfig.Slot0.GravityArmPositionOffset)
+                                        .withStaticFeedforwardSign(
+                                                talonFXConfig.Slot0.StaticFeedforwardSign)
+                                        .withGravityType(
+                                                config.gravityFeedforwardType
+                                                        .toPhoenix6GravityTypeValue()));
+                break;
+            case Slot1:
+                talon.getConfigurator()
+                        .apply(
+                                new Slot1Configs()
+                                        .withKP(kP)
+                                        .withKI(kI)
+                                        .withKD(kD)
+                                        .withKS(kS)
+                                        .withKG(kG)
+                                        .withKV(kV)
+                                        .withKA(kA)
+                                        .withGainSchedBehavior(
+                                                talonFXConfig.Slot1.GainSchedBehavior)
+                                        .withGravityArmPositionOffset(
+                                                talonFXConfig.Slot1.GravityArmPositionOffset)
+                                        .withStaticFeedforwardSign(
+                                                talonFXConfig.Slot1.StaticFeedforwardSign)
+                                        .withGravityType(
+                                                config.gravityFeedforwardType
+                                                        .toPhoenix6GravityTypeValue()));
+                break;
+            case Slot2:
+                talon.getConfigurator()
+                        .apply(
+                                new Slot2Configs()
+                                        .withKP(kP)
+                                        .withKI(kI)
+                                        .withKD(kD)
+                                        .withKS(kS)
+                                        .withKG(kG)
+                                        .withKV(kV)
+                                        .withKA(kA)
+                                        .withGainSchedBehavior(
+                                                talonFXConfig.Slot2.GainSchedBehavior)
+                                        .withGravityArmPositionOffset(
+                                                talonFXConfig.Slot2.GravityArmPositionOffset)
+                                        .withStaticFeedforwardSign(
+                                                talonFXConfig.Slot2.StaticFeedforwardSign)
+                                        .withGravityType(
+                                                config.gravityFeedforwardType
+                                                        .toPhoenix6GravityTypeValue()));
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown GainSlot: " + slot);
+        }
+    }
+
+    @Override
+    public void selectGainSlot(GainSlot slot) {
+        activeGainSlot = slot;
     }
 
     @Override

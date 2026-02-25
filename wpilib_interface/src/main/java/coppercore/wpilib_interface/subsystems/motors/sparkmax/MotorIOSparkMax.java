@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Rotations;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -28,6 +29,8 @@ import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The MotorIOSparkMax implements the MotorIO interface for the <a
@@ -44,6 +47,10 @@ import edu.wpi.first.wpilibj.DriverStation;
  * <p>This IO implementation also does not support dynamic motion profiles, exponential motion
  * profiles, or current/FOC-based open-loop control. Calling any of the aforementioned control
  * methods will result in an UnsupportedOperationException.
+ *
+ * <p>Note that using {@link #selectGainSlot(GainSlot)} is a blocking operation on these IOs; sparks
+ * don't support different feedforward gains across different slots so changing slots requires a
+ * config flash.
  */
 public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorIO {
     /**
@@ -68,6 +75,18 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
      * velocity) will only be read when this value is true.
      */
     protected boolean encoderEnabled = true;
+
+    /**
+     * The currently active gain slot used for closed-loop control requests. Can be changed using
+     * {@link #selectGainSlot(GainSlot)}.
+     *
+     * <ul>
+     *   <li><b>Default value:</b> {@link MotorIO.GainSlot#Slot0}
+     * </ul>
+     */
+    protected ClosedLoopSlot activeGainSlot = ClosedLoopSlot.kSlot0;
+
+    protected final Map<ClosedLoopSlot, FeedForwardConfig> feedforwardMap = new HashMap<>(3);
 
     /**
      * Create a new MotorIOSparkMax given a mechanism config, a CANDeviceID, a SparkMaxConfig, and a
@@ -95,6 +114,10 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         this.sparkMax = new SparkMax(id.id(), motorType);
 
         this.controller = sparkMax.getClosedLoopController();
+
+        this.feedforwardMap.put(ClosedLoopSlot.kSlot0, sparkMaxConfig.closedLoop.feedForward);
+        this.feedforwardMap.put(ClosedLoopSlot.kSlot1, sparkMaxConfig.closedLoop.feedForward);
+        this.feedforwardMap.put(ClosedLoopSlot.kSlot2, sparkMaxConfig.closedLoop.feedForward);
 
         applyConfig();
     }
@@ -280,13 +303,16 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void controlToPositionUnprofiled(Angle positionSetpoint) {
-        controller.setSetpoint(positionSetpoint.in(Rotations), ControlType.kPosition);
+        controller.setSetpoint(
+                positionSetpoint.in(Rotations), ControlType.kPosition, activeGainSlot);
     }
 
     @Override
     public void controlToPositionProfiled(Angle positionSetpoint) {
         controller.setSetpoint(
-                positionSetpoint.in(Rotations), ControlType.kMAXMotionPositionControl);
+                positionSetpoint.in(Rotations),
+                ControlType.kMAXMotionPositionControl,
+                activeGainSlot);
     }
 
     @Override
@@ -320,12 +346,13 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void controlToVelocityUnprofiled(AngularVelocity velocitySetpoint) {
-        controller.setSetpoint(velocitySetpoint.in(RPM), ControlType.kVelocity);
+        controller.setSetpoint(velocitySetpoint.in(RPM), ControlType.kVelocity, activeGainSlot);
     }
 
     @Override
     public void controlToVelocityProfiled(AngularVelocity velocitySetpoint) {
-        controller.setSetpoint(velocitySetpoint.in(RPM), ControlType.kMAXMotionVelocityControl);
+        controller.setSetpoint(
+                velocitySetpoint.in(RPM), ControlType.kMAXMotionVelocityControl, activeGainSlot);
     }
 
     @Override
@@ -355,11 +382,48 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void setGains(
-            double kP, double kI, double kD, double kS, double kG, double kV, double kA) {
-        // TODO: Decide on whether adding manual calculation of feedforward is worth it
-        sparkMaxConfig.closedLoop.pid(kP, kI, kD);
-        sparkMaxConfig.closedLoop.apply(new FeedForwardConfig().kV(kV).kA(kA).kS(kS).kG(kG));
+            GainSlot slot,
+            double kP,
+            double kI,
+            double kD,
+            double kS,
+            double kG,
+            double kV,
+            double kA) {
+        ClosedLoopSlot closedLoopSlot = toClosedLoopSlot(slot);
+        // TODO: Decide on whether adding manual calculation of feedforward is worth it.
+        // Note: FeedForwardConfig applies feedforward gains globally across all slots.
+        sparkMaxConfig.closedLoop.pid(kP, kI, kD, closedLoopSlot);
+        feedforwardMap.put(closedLoopSlot, new FeedForwardConfig().kS(kS).kG(kG).kV(kV).kA(kA));
+
+        if (activeGainSlot == closedLoopSlot) {
+            // If the selected slot is being updated, call selectGainSlot to update the configs
+            selectGainSlot(slot);
+        }
+
         applyConfig();
+    }
+
+    @Override
+    public void selectGainSlot(GainSlot slot) {
+        activeGainSlot = toClosedLoopSlot(slot);
+
+        sparkMaxConfig.closedLoop.apply(feedforwardMap.get(activeGainSlot));
+
+        applyConfig();
+    }
+
+    private static ClosedLoopSlot toClosedLoopSlot(GainSlot slot) {
+        switch (slot) {
+            case Slot0:
+                return ClosedLoopSlot.kSlot0;
+            case Slot1:
+                return ClosedLoopSlot.kSlot1;
+            case Slot2:
+                return ClosedLoopSlot.kSlot2;
+            default:
+                throw new IllegalArgumentException("Unhandled GainSlot: " + slot);
+        }
     }
 
     @Override

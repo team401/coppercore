@@ -75,7 +75,17 @@ public class MotorIOReplay implements MotorIO {
 
     @Override
     public void setGains(
-            double kP, double kI, double kD, double kS, double kG, double kV, double kA) {}
+            GainSlot slot,
+            double kP,
+            double kI,
+            double kD,
+            double kS,
+            double kG,
+            double kV,
+            double kA) {}
+
+    @Override
+    public void selectGainSlot(GainSlot slot) {}
 
     @Override
     public void setNeutralMode(NeutralMode neutralMode) {}
