@@ -413,6 +413,12 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         applyConfig();
     }
 
+    @Override
+    public void setArbitraryFeedForward(Current feedForward) {
+        throw new UnsupportedOperationException(
+                "Setting arbitrary feedforward is not supported by Spark IOs.");
+    }
+
     private static ClosedLoopSlot toClosedLoopSlot(GainSlot slot) {
         switch (slot) {
             case Slot0:
