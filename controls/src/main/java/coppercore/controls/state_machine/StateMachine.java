@@ -162,7 +162,9 @@ public class StateMachine<World> {
         pw.println();
         for (var state : states.entrySet()) {
             var stateName = state.getKey();
-            pw.printf("  %s %s;%n", stateName, currentState == state ? "[shape=doublecircle]" : "");
+            pw.printf(
+                    "  %s %s;%n",
+                    stateName, currentState == state.getValue() ? "[shape=doublecircle]" : "");
         }
         pw.println();
         pw.println("  // Transitions");
