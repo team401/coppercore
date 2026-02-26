@@ -262,11 +262,11 @@ public interface MotorIO {
     public void selectGainSlot(GainSlot slot);
 
     /**
-     * Sets the supplemental feedforward used by this motor IO in all closed loop requests that
-     * support a supplemental feedforward. After calling this method with a value, all closed-loop
-     * requests will be applied with this extra feedforward added to the result of the onboard
-     * feedforward gains until it is called with a different value, or until {@link
-     * #clearSupplementalFeedforward()} is called.
+     * Sets the arbitrary (supplemental) feedforward used by this motor IO in all closed loop
+     * requests that support a arbitrary (supplemental) feedforward. After calling this method with
+     * a value, all closed-loop requests will be applied with this extra feedforward added to the
+     * result of the onboard feedforward gains until it is called with a different value, or until
+     * {@link #clearArbitraryFeedForward()} is called.
      *
      * <p>This value is a Current because it is only supported by MotorIOTalonFX and its subclasses,
      * which use TorqueCurrentFOC for closed-loop control.
@@ -276,16 +276,16 @@ public interface MotorIO {
      * @param feedForward A Current representing the arbitrary feedforward to add to the output of
      *     the closed-loop controller before the desired output is applied to the motor.
      */
-    public void setSupplementalFeedforward(Current feedForward);
+    public void setArbitraryFeedForward(Current feedForward);
 
     /**
      * Clears the arbitrary feedforward used by this motor IO. This is equivalent to calling {@link
-     * #setSupplementalFeedforward(Current)} with a value of zero amps.
+     * #setArbitraryFeedForward(Current)} with a value of zero amps.
      *
      * <p>Not supported by spark IOs.
      */
-    public default void clearSupplementalFeedforward() {
-        setSupplementalFeedforward(Amps.zero());
+    public default void clearArbitraryFeedForward() {
+        setArbitraryFeedForward(Amps.zero());
     }
 
     /**

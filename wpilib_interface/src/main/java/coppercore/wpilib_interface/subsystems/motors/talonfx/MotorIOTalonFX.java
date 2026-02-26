@@ -241,15 +241,15 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     protected GainSlot activeGainSlot = GainSlot.Slot0;
 
     /**
-     * The current supplemental feedforward value used for closed-loop control requests. Can be
-     * changed using {@link #setSupplementalFeedforward(Current)} or reset to zero with {@link
-     * #clearSupplementalFeedforward()}.
+     * The current arbitrary (supplemental) feedforward value used for closed-loop control requests.
+     * Can be changed using {@link #setArbitraryFeedForward(Current)} or reset to zero with {@link
+     * #clearArbitraryFeedForward()}.
      *
      * <ul>
      *   <li><b>Default value:</b> 0.0 amps
      * </ul>
      */
-    protected MutCurrent supplementalFeedForward = Amps.mutable(0.0);
+    protected MutCurrent arbitraryFF = Amps.mutable(0.0);
 
     /** A neutral request to use for basic config-based neutral mode commands */
     protected final NeutralOut neutralRequest = new NeutralOut();
@@ -925,7 +925,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 unprofiledPositionRequest
                         .withPosition(positionSetpoint)
                         .withSlot(activeGainSlot.ordinal())
-                        .withFeedForward(supplementalFeedForward));
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -937,7 +937,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 profiledPositionRequest
                         .withPosition(positionSetpoint)
                         .withSlot(activeGainSlot.ordinal())
-                        .withFeedForward(supplementalFeedForward));
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -958,7 +958,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                         .withAcceleration(maxAcceleration)
                         .withJerk(maxJerk)
                         .withSlot(activeGainSlot.ordinal())
-                        .withFeedForward(supplementalFeedForward));
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -974,7 +974,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                         .withAcceleration(profileConfig.getMaxAcceleration())
                         .withJerk(profileConfig.getMaxJerk())
                         .withSlot(activeGainSlot.ordinal())
-                        .withFeedForward(supplementalFeedForward));
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -986,7 +986,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 expoProfiledPositionRequest
                         .withPosition(positionSetpoint)
                         .withSlot(activeGainSlot.ordinal())
-                        .withFeedForward(supplementalFeedForward));
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -998,7 +998,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 unprofiledVelocityRequest
                         .withVelocity(velocity)
                         .withSlot(activeGainSlot.ordinal())
-                        .withFeedForward(supplementalFeedForward));
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -1010,7 +1010,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 profiledVelocityRequest
                         .withVelocity(velocity)
                         .withSlot(activeGainSlot.ordinal())
-                        .withFeedForward(supplementalFeedForward));
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -1118,8 +1118,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     }
 
     @Override
-    public void setSupplementalFeedforward(Current feedForward) {
-        supplementalFeedForward.mut_replace(feedForward);
+    public void setArbitraryFeedForward(Current feedForward) {
+        arbitraryFF.mut_replace(feedForward);
     }
 
     @Override
