@@ -242,8 +242,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     /**
      * The current arbitrary (supplemental) feedforward value used for closed-loop control requests.
-     * Can be changed using {@link #setArbitraryFeedForward(Current)} or reset to zero with {@link
-     * #clearArbitraryFeedForward()}.
+     * Can be changed using {@link #setArbitraryFeedForwardCurrent(Current)} or reset to zero with
+     * {@link #clearArbitraryFeedForward()}.
      *
      * <ul>
      *   <li><b>Default value:</b> 0.0 amps
@@ -1118,8 +1118,20 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     }
 
     @Override
-    public void setArbitraryFeedForward(Current feedForward) {
+    public void setArbitraryFeedForwardCurrent(Current feedForward) {
         arbitraryFF.mut_replace(feedForward);
+    }
+
+    @Override
+    public void setArbitraryFeedForwardVoltage(Voltage feedForward) {
+        throw new UnsupportedOperationException(
+                "TalonFX IOs don't support feedforward voltage because they use current-based"
+                        + " control requests.");
+    }
+
+    @Override
+    public void clearArbitraryFeedForward() {
+        setArbitraryFeedForwardCurrent(Amps.zero());
     }
 
     @Override
