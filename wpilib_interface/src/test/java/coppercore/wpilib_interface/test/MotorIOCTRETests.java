@@ -23,6 +23,7 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.unmanaged.Unmanaged;
+import coppercore.wpilib_interface.subsystems.StatusSignalRefresher;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.ElevatorMechanismConfig;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig.GravityFeedforwardType;
@@ -195,6 +196,7 @@ public class MotorIOCTRETests {
 
         Runnable loop =
                 () -> {
+                    StatusSignalRefresher.refreshAll();
                     leadMotor.updateInputs(leadMotorInputs);
                     followerMotor.updateInputs(followerMotorInputs);
                     cancoder.updateInputs(cancoderInputs);

@@ -29,6 +29,7 @@ import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import coppercore.wpilib_interface.CTREUtil;
+import coppercore.wpilib_interface.subsystems.StatusSignalRefresher;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.CanBusMotorControllerBase;
@@ -52,6 +53,11 @@ import java.util.Optional;
 /**
  * A base motor IO that implements closed-loop control for a TalonFX-supporting motor using
  * MotionMagicExpo, MotionMagicVelocity, and TorqueCurrentFOC wherever possible.
+ *
+ * <p>This class leans on the StatusSignalRefresher to refresh signals. You must call {@link
+ * coppercore.wpilib_interface.subsystems.StatusSignalRefresher#refreshAll()} in robotPeriodic
+ * before CommandScheduler.run() (or DependencyOrderedExecutor.execute()) in order to ensure all
+ * signals are refreshed before calling updateInputs on any IOs.
  */
 public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO {
     /**
@@ -409,6 +415,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                     id,
                     (code) -> {});
         }
+
+        StatusSignalRefresher.addSignals(id.canbus(), signals);
 
         CTREUtil.tryUntilOk(() -> talon.optimizeBusUtilization(), id, (code) -> {});
 
@@ -865,18 +873,29 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void updateInputs(MotorInputs inputs) {
-        StatusCode code = BaseStatusSignal.refreshAll(signals);
+        // Don't refresh status codes here; the StatusSignalRefresher will handle this for us.
+        StatusCode potentialErrorCode = StatusCode.OK;
 
-        inputs.connected = code.isOK();
+        for (var signal : signals) {
+            StatusCode code = signal.getStatus();
+            if (!code.isOK()) {
+                potentialErrorCode = code;
+                break;
+            }
+        }
 
-        disconnectedAlert.set(!code.isOK());
+        inputs.connected = potentialErrorCode.isOK();
 
-        if (code.isError()) {
+        disconnectedAlert.set(!potentialErrorCode.isOK());
+
+        if (potentialErrorCode.isError()) {
             DriverStation.reportError(
-                    deviceName + ": Failed to refresh status signals: " + code, false);
-        } else if (code.isWarning()) {
+                    deviceName + ": Failed to refresh status signals: " + potentialErrorCode,
+                    false);
+        } else if (potentialErrorCode.isWarning()) {
             DriverStation.reportWarning(
-                    deviceName + ": Warning while refreshing status signals: " + code, false);
+                    deviceName + ": Warning while refreshing status signals: " + potentialErrorCode,
+                    false);
         }
 
         inputs.positionRadians = positionSignal.getValue().in(Radians);
