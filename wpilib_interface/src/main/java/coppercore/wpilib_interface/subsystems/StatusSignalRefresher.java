@@ -28,6 +28,8 @@ public class StatusSignalRefresher {
 
     /** Maps each CANBus to the signals present on that bus. */
     private static Map<CANBus, List<BaseStatusSignal>> canBusToSignalsMap = new HashMap<>();
+    /** Maps each CANBus to its logging path */
+    private static Map<CANBus, String> canBusLogPathMap = new HashMap<>();
 
     private static CANBus[] buses = {};
 
@@ -43,7 +45,7 @@ public class StatusSignalRefresher {
         for (CANBus bus : buses) {
             // Refresh all signals on this bus and log the resulting status code
             var status = BaseStatusSignal.refreshAll(canBusToSignalsMap.get(bus));
-            Logger.recordOutput("StatusSignalRefresher/StatusCode/" + bus, status);
+            Logger.recordOutput(canBusLogPathMap.get(bus), status);
         }
     }
 
@@ -61,6 +63,8 @@ public class StatusSignalRefresher {
             System.arraycopy(buses, 0, newBuses, 0, buses.length);
             newBuses[buses.length] = bus;
             buses = newBuses;
+
+            canBusLogPathMap.put(bus, "StatusSignalRefresher/StatusCode/" + bus);
         }
     }
 
