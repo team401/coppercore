@@ -3,6 +3,7 @@ package coppercore.wpilib_interface.subsystems;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +29,10 @@ public class StatusSignalRefresher {
 
     /** Maps each CANBus to the signals present on that bus. */
     private static Map<CANBus, List<BaseStatusSignal>> canBusToSignalsMap = new HashMap<>();
-    /** Maps each CANBus to its logging path */
-    private static Map<CANBus, String> canBusLogPathMap = new HashMap<>();
 
-    private static CANBus[] buses = {};
+    private record BusInfo(CANBus bus, String loggingPath) {}
+
+    private static BusInfo[] buses = {};
 
     /**
      * Updates all of the signals in the manager. This must be called BEFORE {@code
@@ -42,29 +43,26 @@ public class StatusSignalRefresher {
             return;
         }
 
-        for (CANBus bus : buses) {
+        for (var busInfo : buses) {
             // Refresh all signals on this bus and log the resulting status code
-            var status = BaseStatusSignal.refreshAll(canBusToSignalsMap.get(bus));
-            Logger.recordOutput(canBusLogPathMap.get(bus), status);
+            var status = BaseStatusSignal.refreshAll(canBusToSignalsMap.get(busInfo.bus()));
+            Logger.recordOutput(busInfo.loggingPath(), status);
         }
     }
 
     private static void addBusIfNotAlreadyAdded(CANBus bus) {
         boolean busAlreadyAdded = false;
-        for (var eachBus : buses) {
-            if (eachBus == bus) {
+        for (var busInfo : buses) {
+            if (busInfo.bus() == bus) {
                 busAlreadyAdded = true;
                 break;
             }
         }
 
         if (!busAlreadyAdded) {
-            CANBus[] newBuses = new CANBus[buses.length + 1];
-            System.arraycopy(buses, 0, newBuses, 0, buses.length);
-            newBuses[buses.length] = bus;
+            BusInfo[] newBuses = Arrays.copyOf(buses, buses.length + 1);
+            newBuses[buses.length] = new BusInfo(bus, "StatusSignalRefresher/StatusCode/" + bus);
             buses = newBuses;
-
-            canBusLogPathMap.put(bus, "StatusSignalRefresher/StatusCode/" + bus);
         }
     }
 
