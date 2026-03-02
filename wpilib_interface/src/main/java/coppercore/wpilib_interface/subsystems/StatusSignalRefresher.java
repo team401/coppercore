@@ -29,6 +29,8 @@ public class StatusSignalRefresher {
     /** Maps each CANBus to the signals present on that bus. */
     private static Map<CANBus, List<BaseStatusSignal>> canBusToSignalsMap = new HashMap<>();
 
+    private static CANBus[] buses = {};
+
     /**
      * Updates all of the signals in the manager. This must be called BEFORE {@code
      * CommandScheduler.getInstance().run()} in the robot periodic to work properly.
@@ -38,10 +40,27 @@ public class StatusSignalRefresher {
             return;
         }
 
-        for (CANBus bus : canBusToSignalsMap.keySet()) {
+        for (CANBus bus : buses) {
             // Refresh all signals on this bus and log the resulting status code
             var status = BaseStatusSignal.refreshAll(canBusToSignalsMap.get(bus));
             Logger.recordOutput("StatusSignalRefresher/StatusCode/" + bus, status);
+        }
+    }
+
+    private static void addBusIfNotAlreadyAdded(CANBus bus) {
+        boolean busAlreadyAdded = false;
+        for (var eachBus : buses) {
+            if (eachBus == bus) {
+                busAlreadyAdded = true;
+                break;
+            }
+        }
+
+        if (!busAlreadyAdded) {
+            CANBus[] newBuses = new CANBus[buses.length + 1];
+            System.arraycopy(buses, 0, newBuses, 0, buses.length);
+            newBuses[buses.length] = bus;
+            buses = newBuses;
         }
     }
 
@@ -52,25 +71,29 @@ public class StatusSignalRefresher {
      * @param signals A List of signals to add
      */
     public static void addSignals(CANBus bus, List<BaseStatusSignal> signals) {
-        if (!canBusToSignalsMap.containsKey(bus)) {
-            canBusToSignalsMap.put(bus, new ArrayList<>());
-        }
-        canBusToSignalsMap.get(bus).addAll(signals);
+        var existingSignals =
+                canBusToSignalsMap.computeIfAbsent(bus, _ignored -> new ArrayList<>());
+
+        existingSignals.addAll(signals);
+
+        addBusIfNotAlreadyAdded(bus);
     }
 
     /**
      * Add a group of status signals to the StatusSignalRefresher
      *
      * @param bus The CANBus these signals will come from
-     * @param signals An of signals to add
+     * @param signals An array of signals to add
      */
     public static void addSignals(CANBus bus, BaseStatusSignal[] signals) {
-        if (!canBusToSignalsMap.containsKey(bus)) {
-            canBusToSignalsMap.put(bus, new ArrayList<>());
-        }
+        var existingSignals =
+                canBusToSignalsMap.computeIfAbsent(bus, _ignored -> new ArrayList<>());
+
         for (var signal : signals) {
-            canBusToSignalsMap.get(bus).add(signal);
+            existingSignals.add(signal);
         }
+
+        addBusIfNotAlreadyAdded(bus);
     }
 
     /**
@@ -80,9 +103,11 @@ public class StatusSignalRefresher {
      * @param signal A BaseStatusSignal to add
      */
     public static void addSignal(CANBus bus, BaseStatusSignal signal) {
-        if (!canBusToSignalsMap.containsKey(bus)) {
-            canBusToSignalsMap.put(bus, new ArrayList<>());
-        }
-        canBusToSignalsMap.get(bus).add(signal);
+        var existingSignals =
+                canBusToSignalsMap.computeIfAbsent(bus, _ignored -> new ArrayList<>());
+
+        existingSignals.add(signal);
+
+        addBusIfNotAlreadyAdded(bus);
     }
 }
