@@ -39,10 +39,6 @@ public class StatusSignalRefresher {
      * CommandScheduler.getInstance().run()} in the robot periodic to work properly.
      */
     public static void refreshAll() {
-        if (canBusToSignalsMap.isEmpty()) {
-            return;
-        }
-
         for (var busInfo : buses) {
             // Refresh all signals on this bus and log the resulting status code
             var status = BaseStatusSignal.refreshAll(canBusToSignalsMap.get(busInfo.bus()));
