@@ -1,5 +1,6 @@
 package coppercore.wpilib_interface.subsystems.motors.talonfx;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Radians;
@@ -42,6 +43,7 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.MutCurrent;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -243,6 +245,17 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      * </ul>
      */
     protected GainSlot activeGainSlot = GainSlot.Slot0;
+
+    /**
+     * The current arbitrary (supplemental) feedforward value used for closed-loop control requests.
+     * Can be changed using {@link #setArbitraryFeedForwardCurrent(Current)} or reset to zero with
+     * {@link #clearArbitraryFeedForward()}.
+     *
+     * <ul>
+     *   <li><b>Default value:</b> 0.0 amps
+     * </ul>
+     */
+    protected MutCurrent arbitraryFF = Amps.mutable(0.0);
 
     /** A neutral request to use for basic config-based neutral mode commands */
     protected final NeutralOut neutralRequest = new NeutralOut();
@@ -930,7 +943,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         talon.setControl(
                 unprofiledPositionRequest
                         .withPosition(positionSetpoint)
-                        .withSlot(activeGainSlot.ordinal()));
+                        .withSlot(activeGainSlot.ordinal())
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -941,7 +955,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         talon.setControl(
                 profiledPositionRequest
                         .withPosition(positionSetpoint)
-                        .withSlot(activeGainSlot.ordinal()));
+                        .withSlot(activeGainSlot.ordinal())
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -961,7 +976,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                         .withVelocity(maxVelocity)
                         .withAcceleration(maxAcceleration)
                         .withJerk(maxJerk)
-                        .withSlot(activeGainSlot.ordinal()));
+                        .withSlot(activeGainSlot.ordinal())
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -976,7 +992,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                         .withVelocity(profileConfig.getMaxVelocity())
                         .withAcceleration(profileConfig.getMaxAcceleration())
                         .withJerk(profileConfig.getMaxJerk())
-                        .withSlot(activeGainSlot.ordinal()));
+                        .withSlot(activeGainSlot.ordinal())
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -987,7 +1004,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         talon.setControl(
                 expoProfiledPositionRequest
                         .withPosition(positionSetpoint)
-                        .withSlot(activeGainSlot.ordinal()));
+                        .withSlot(activeGainSlot.ordinal())
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -998,7 +1016,8 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         talon.setControl(
                 unprofiledVelocityRequest
                         .withVelocity(velocity)
-                        .withSlot(activeGainSlot.ordinal()));
+                        .withSlot(activeGainSlot.ordinal())
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -1007,7 +1026,10 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                 frequency -> profiledVelocityRequest.withUpdateFreqHz(frequency));
 
         talon.setControl(
-                profiledVelocityRequest.withVelocity(velocity).withSlot(activeGainSlot.ordinal()));
+                profiledVelocityRequest
+                        .withVelocity(velocity)
+                        .withSlot(activeGainSlot.ordinal())
+                        .withFeedForward(arbitraryFF));
     }
 
     @Override
@@ -1112,6 +1134,23 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     @Override
     public void selectGainSlot(GainSlot slot) {
         activeGainSlot = slot;
+    }
+
+    @Override
+    public void setArbitraryFeedForwardCurrent(Current feedForward) {
+        arbitraryFF.mut_replace(feedForward);
+    }
+
+    @Override
+    public void setArbitraryFeedForwardVoltage(Voltage feedForward) {
+        throw new UnsupportedOperationException(
+                "TalonFX IOs don't support feedforward voltage because they use current-based"
+                        + " control requests.");
+    }
+
+    @Override
+    public void clearArbitraryFeedForward() {
+        setArbitraryFeedForwardCurrent(Amps.zero());
     }
 
     @Override

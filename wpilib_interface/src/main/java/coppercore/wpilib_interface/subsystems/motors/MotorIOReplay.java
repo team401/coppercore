@@ -88,6 +88,15 @@ public class MotorIOReplay implements MotorIO {
     public void selectGainSlot(GainSlot slot) {}
 
     @Override
+    public void setArbitraryFeedForwardCurrent(Current feedForward) {}
+
+    @Override
+    public void setArbitraryFeedForwardVoltage(Voltage feedForward) {}
+
+    @Override
+    public void clearArbitraryFeedForward() {}
+
+    @Override
     public void setNeutralMode(NeutralMode neutralMode) {}
 
     @Override

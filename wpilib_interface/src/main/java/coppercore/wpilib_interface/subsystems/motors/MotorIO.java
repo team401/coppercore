@@ -205,9 +205,9 @@ public interface MotorIO {
      * <p>Units listed are for position control. When using velocity control, error will be in
      * rotations/second instead.
      *
-     * <p>For Spark IOs, the usage of kS, kG, or kA in separate slots is implemented by
-     *    keeping feed forward gains in memory and reapplying the configuration for the
-     *    respective active slot. (Which is blocking.)
+     * <p>For Spark IOs, the usage of kS, kG, or kA in separate slots is implemented by keeping feed
+     * forward gains in memory and reapplying the configuration for the respective active slot.
+     * (Which is blocking.)
      *
      * <p>Use {@link #selectGainSlot(GainSlot)} to activate a previously configured slot.
      *
@@ -259,6 +259,51 @@ public interface MotorIO {
      * @param slot The gain slot to activate.
      */
     public void selectGainSlot(GainSlot slot);
+
+    /**
+     * Sets the arbitrary (supplemental) feedforward used by this motor IO in all closed loop
+     * requests that support a arbitrary (supplemental) feedforward. After calling this method with
+     * a value, all closed-loop requests will be applied with this extra feedforward added to the
+     * result of the onboard feedforward gains until it is called with a different value, or until
+     * {@link #clearArbitraryFeedForward()} is called.
+     *
+     * <p>This value is a Current because it is only supported by MotorIOTalonFX and its subclasses,
+     * which use TorqueCurrentFOC for closed-loop control.
+     *
+     * <p>Not supported by Spark IOs.
+     *
+     * @param feedForward A Current representing the arbitrary feedforward to add to the output of
+     *     the closed-loop controller before the desired output is applied to the motor.
+     */
+    public void setArbitraryFeedForwardCurrent(Current feedForward);
+
+    /**
+     * Sets the arbitrary (supplemental) feedforward used by this motor IO in all closed loop
+     * requests that support a arbitrary (supplemental) feedforward. After calling this method with
+     * a value, all closed-loop requests will be applied with this extra feedforward added to the
+     * result of the onboard feedforward gains until it is called with a different value, or until
+     * {@link #clearArbitraryFeedForward()} is called.
+     *
+     * <p>This value is a Voltage because it is only supported by MotorIOSparkMax and its
+     * subclasses, which use Voltage for closed-loop control.
+     *
+     * <p>Not supported by TalonFX IOs (unless TalonFX IOs are updated to support voltage requests
+     * in the future).
+     *
+     * @param feedForward A Voltage representing the arbitrary feedforward to add to the output of
+     *     the closed-loop controller before the desired output is applied to the motor.
+     */
+    public void setArbitraryFeedForwardVoltage(Voltage feedForward);
+
+    /**
+     * Clears the arbitrary feedforward used by this motor IO. This is equivalent to calling {@link
+     * #setArbitraryFeedForwardCurrent(Current)} with a value of zero amps for current-based IOs or
+     * {@link #setArbitraryFeedForwardVoltage(Voltage)} with a value of zero volts for voltage-based
+     * IOs.
+     *
+     * <p>Not supported by spark IOs.
+     */
+    public void clearArbitraryFeedForward();
 
     /**
      * Set whether the motor should brake or coast when a neutral (0) output is commanded.

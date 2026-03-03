@@ -2,6 +2,7 @@ package coppercore.wpilib_interface.subsystems.motors.sparkmax;
 
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -26,6 +27,7 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -87,6 +89,17 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
     protected ClosedLoopSlot activeGainSlot = ClosedLoopSlot.kSlot0;
 
     protected final Map<ClosedLoopSlot, FeedForwardConfig> feedforwardMap = new HashMap<>(3);
+
+    /**
+     * The current arbitrary (supplemental) feedforward value used for closed-loop control requests.
+     * Can be changed using {@link #setArbitraryFeedForwardVoltage(Voltage)} or reset to zero with
+     * {@link #clearArbitraryFeedForward()}.
+     *
+     * <ul>
+     *   <li><b>Default value:</b> 0.0 volts
+     * </ul>
+     */
+    protected MutVoltage arbitraryFF = Volts.mutable(0.0);
 
     /**
      * Create a new MotorIOSparkMax given a mechanism config, a CANDeviceID, a SparkMaxConfig, and a
@@ -304,7 +317,10 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
     @Override
     public void controlToPositionUnprofiled(Angle positionSetpoint) {
         controller.setSetpoint(
-                positionSetpoint.in(Rotations), ControlType.kPosition, activeGainSlot);
+                positionSetpoint.in(Rotations),
+                ControlType.kPosition,
+                activeGainSlot,
+                arbitraryFF.in(Volts));
     }
 
     @Override
@@ -312,7 +328,8 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         controller.setSetpoint(
                 positionSetpoint.in(Rotations),
                 ControlType.kMAXMotionPositionControl,
-                activeGainSlot);
+                activeGainSlot,
+                arbitraryFF.in(Volts));
     }
 
     @Override
@@ -346,13 +363,20 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void controlToVelocityUnprofiled(AngularVelocity velocitySetpoint) {
-        controller.setSetpoint(velocitySetpoint.in(RPM), ControlType.kVelocity, activeGainSlot);
+        controller.setSetpoint(
+                velocitySetpoint.in(RPM),
+                ControlType.kVelocity,
+                activeGainSlot,
+                arbitraryFF.in(Volts));
     }
 
     @Override
     public void controlToVelocityProfiled(AngularVelocity velocitySetpoint) {
         controller.setSetpoint(
-                velocitySetpoint.in(RPM), ControlType.kMAXMotionVelocityControl, activeGainSlot);
+                velocitySetpoint.in(RPM),
+                ControlType.kMAXMotionVelocityControl,
+                activeGainSlot,
+                arbitraryFF.in(Volts));
     }
 
     @Override
@@ -411,6 +435,22 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         sparkMaxConfig.closedLoop.apply(feedforwardMap.get(activeGainSlot));
 
         applyConfig();
+    }
+
+    @Override
+    public void setArbitraryFeedForwardCurrent(Current feedForward) {
+        throw new UnsupportedOperationException(
+                "Setting arbitrary/supplemental feedforward is not supported by Spark IOs.");
+    }
+
+    @Override
+    public void setArbitraryFeedForwardVoltage(Voltage feedForward) {
+        arbitraryFF.mut_replace(feedForward);
+    }
+
+    @Override
+    public void clearArbitraryFeedForward() {
+        setArbitraryFeedForwardVoltage(Volts.zero());
     }
 
     private static ClosedLoopSlot toClosedLoopSlot(GainSlot slot) {
