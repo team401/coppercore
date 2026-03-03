@@ -442,7 +442,7 @@ public final class JSONHandler {
      * owner thread drains the queue. A full queue fails fast with 503; otherwise, delays are
      * surfaced to clients as a slow or hanging request unless they time out.
      */
-    private <T> HttpResponse executeQueuedHttpAction(Callable<HttpResponse> action) {
+    private HttpResponse executeQueuedHttpAction(Callable<HttpResponse> action) {
         QueuedHttpAction<HttpResponse> queuedAction = new QueuedHttpAction<>(action);
         if (!queuedHttpActions.offer(queuedAction)) {
             return textResponse(503, "text/plain", "HTTP action queue is full");
