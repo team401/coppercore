@@ -2,7 +2,12 @@ package coppercore.parameter_tools.test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import coppercore.parameter_tools.json.JSONHandler;
+import coppercore.parameter_tools.json.JSONSyncConfig;
+import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.path_provider.PathProvider;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -10,11 +15,16 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
@@ -45,8 +55,114 @@ public class JSONHandlerHttpTests {
         public Distance[] distances = new Distance[] {Units.Meters.of(1.0), Units.Meters.of(2.0)};
     }
 
+    public static class ThreadTrackedValue {
+        public String value = "initial";
+    }
+
+    public static class ThreadTrackedData {
+        public ThreadTrackedValue tracked = new ThreadTrackedValue();
+    }
+
+    private static class ThreadTrackedValueAdapter extends TypeAdapter<ThreadTrackedValue> {
+        private final AtomicReference<Thread> writeThread = new AtomicReference<>();
+        private final AtomicReference<Thread> readThread = new AtomicReference<>();
+
+        @Override
+        public void write(JsonWriter out, ThreadTrackedValue value) throws IOException {
+            writeThread.set(Thread.currentThread());
+            out.beginObject();
+            out.name("value").value(value.value);
+            out.endObject();
+        }
+
+        @Override
+        public ThreadTrackedValue read(JsonReader in) throws IOException {
+            readThread.set(Thread.currentThread());
+            ThreadTrackedValue value = new ThreadTrackedValue();
+            in.beginObject();
+            while (in.hasNext()) {
+                if ("value".equals(in.nextName())) {
+                    value.value = in.nextString();
+                } else {
+                    in.skipValue();
+                }
+            }
+            in.endObject();
+            return value;
+        }
+    }
+
+    private static class HttpResult {
+        final int statusCode;
+        final String contentType;
+        final String body;
+
+        HttpResult(int statusCode, String contentType, String body) {
+            this.statusCode = statusCode;
+            this.contentType = contentType;
+            this.body = body;
+        }
+    }
+
+    private CompletableFuture<HttpResult> startRequest(String method, String path) {
+        return startRequest(method, path, null);
+    }
+
+    private CompletableFuture<HttpResult> startRequest(
+            String method, String path, String jsonBody) {
+        return CompletableFuture.supplyAsync(
+                () -> {
+                    try {
+                        URL url = new URL("http://localhost:8088" + path);
+                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                        conn.setRequestMethod(method);
+                        conn.setConnectTimeout(1000);
+                        conn.setReadTimeout(5000);
+                        if (jsonBody != null) {
+                            conn.setDoOutput(true);
+                            conn.setRequestProperty("Content-Type", "application/json");
+                            try (OutputStream os = conn.getOutputStream()) {
+                                os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
+                            }
+                        }
+                        int statusCode = conn.getResponseCode();
+                        String contentType = conn.getContentType();
+                        byte[] bodyBytes =
+                                conn.getErrorStream() != null
+                                        ? conn.getErrorStream().readAllBytes()
+                                        : conn.getInputStream().readAllBytes();
+                        return new HttpResult(
+                                statusCode,
+                                contentType,
+                                new String(bodyBytes, StandardCharsets.UTF_8));
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
+    }
+
+    private HttpResult awaitRequest(JSONHandler handler, CompletableFuture<HttpResult> future)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        long deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        while (!future.isDone() && System.nanoTime() < deadlineNanos) {
+            int drained = handler.drainQueuedHttpActions();
+            if (drained == 0) {
+                Thread.sleep(10);
+            }
+        }
+        assertTrue(
+                future.isDone(), "Request should complete after the owner drains queued actions");
+        return future.get(1, TimeUnit.SECONDS);
+    }
+
+    private HttpResult awaitDirectRequest(CompletableFuture<HttpResult> future)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        return future.get(5, TimeUnit.SECONDS);
+    }
+
     @Test
-    void addRoute_servesJsonAtDefaultEnvironment() throws IOException {
+    void addRoute_servesJsonAtDefaultEnvironment()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         TestData data = new TestData();
         data.name = "hello";
@@ -54,25 +170,19 @@ public class JSONHandlerHttpTests {
 
         handler.addRoute("/testroute", data);
 
-        URL url = new URL("http://localhost:8088/default/testroute");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
+        HttpResult response = awaitRequest(handler, startRequest("GET", "/default/testroute"));
 
-        assertEquals(200, conn.getResponseCode());
-        assertEquals("application/json", conn.getContentType());
-
-        String response = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(
-                response.contains("\"name\""), "Response should contain name field: " + response);
-        assertTrue(
-                response.contains("\"hello\""), "Response should contain hello value: " + response);
-        assertTrue(
-                response.contains("\"value\""), "Response should contain value field: " + response);
-        assertTrue(response.contains("123"), "Response should contain 123 value: " + response);
+        assertEquals(200, response.statusCode);
+        assertEquals("application/json", response.contentType);
+        assertTrue(response.body.contains("\"name\""));
+        assertTrue(response.body.contains("\"hello\""));
+        assertTrue(response.body.contains("\"value\""));
+        assertTrue(response.body.contains("123"));
     }
 
     @Test
-    void addRoute_withPathProvider_usesEnvironmentName() throws IOException {
+    void addRoute_withPathProvider_usesEnvironmentName()
+            throws InterruptedException, ExecutionException, TimeoutException {
         PathProvider testProvider =
                 new PathProvider() {
                     @Override
@@ -91,15 +201,14 @@ public class JSONHandlerHttpTests {
 
         handler.addRoute("/envroute", data);
 
-        URL url = new URL("http://localhost:8088/testenv/envroute");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
+        HttpResult response = awaitRequest(handler, startRequest("GET", "/testenv/envroute"));
 
-        assertEquals(200, conn.getResponseCode());
+        assertEquals(200, response.statusCode);
     }
 
     @Test
-    void addRoute_multipleRoutes_allAccessible() throws IOException {
+    void addRoute_multipleRoutes_allAccessible()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
 
         TestData data1 = new TestData();
@@ -111,22 +220,16 @@ public class JSONHandlerHttpTests {
         handler.addRoute("/route1", data1);
         handler.addRoute("/route2", data2);
 
-        URL url1 = new URL("http://localhost:8088/default/route1");
-        HttpURLConnection conn1 = (HttpURLConnection) url1.openConnection();
-        String response1 =
-                new String(conn1.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(response1.contains("\"first\""), "Response1 should contain first: " + response1);
+        HttpResult response1 = awaitRequest(handler, startRequest("GET", "/default/route1"));
+        HttpResult response2 = awaitRequest(handler, startRequest("GET", "/default/route2"));
 
-        URL url2 = new URL("http://localhost:8088/default/route2");
-        HttpURLConnection conn2 = (HttpURLConnection) url2.openConnection();
-        String response2 =
-                new String(conn2.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(
-                response2.contains("\"second\""), "Response2 should contain second: " + response2);
+        assertTrue(response1.body.contains("\"first\""));
+        assertTrue(response2.body.contains("\"second\""));
     }
 
     @Test
-    void addRoute_isIdempotent_canBeCalledMultipleTimes() throws IOException {
+    void addRoute_isIdempotent_canBeCalledMultipleTimes()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
 
         TestData data1 = new TestData();
@@ -137,25 +240,19 @@ public class JSONHandlerHttpTests {
         data2.name = "updated";
         data2.value = 200;
 
-        // Add route twice with same path - should not throw
         handler.addRoute("/idempotent", data1);
         handler.addRoute("/idempotent", data2);
 
-        // Verify route is still accessible and serves the latest data
-        URL url = new URL("http://localhost:8088/default/idempotent");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
+        HttpResult response = awaitRequest(handler, startRequest("GET", "/default/idempotent"));
 
-        assertEquals(200, conn.getResponseCode());
-        String response = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(
-                response.contains("\"updated\""),
-                "Response should contain updated value: " + response);
-        assertTrue(response.contains("200"), "Response should contain 200 value: " + response);
+        assertEquals(200, response.statusCode);
+        assertTrue(response.body.contains("\"updated\""));
+        assertTrue(response.body.contains("200"));
     }
 
     @Test
-    void putRequest_updatesObject() throws IOException {
+    void putRequest_updatesObject()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         TestData data = new TestData();
         data.name = "original";
@@ -163,32 +260,22 @@ public class JSONHandlerHttpTests {
 
         handler.addRoute("/puttest", data);
 
-        // Send PUT request to update the object
-        URL url = new URL("http://localhost:8088/default/puttest");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("PUT");
-        conn.setDoOutput(true);
-        conn.setRequestProperty("Content-Type", "application/json");
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT", "/default/puttest", "{\"name\":\"updated\",\"value\":999}"));
 
-        String jsonBody = "{\"name\":\"updated\",\"value\":999}";
-        try (OutputStream os = conn.getOutputStream()) {
-            os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
-        }
-
-        assertEquals(200, conn.getResponseCode());
-        String response = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(
-                response.contains("\"updated\""),
-                "Response should contain updated name: " + response);
-        assertTrue(response.contains("999"), "Response should contain updated value: " + response);
-
-        // Verify the original object was actually updated
+        assertEquals(200, response.statusCode);
+        assertTrue(response.body.contains("\"updated\""));
+        assertTrue(response.body.contains("999"));
         assertEquals("updated", data.name);
         assertEquals(999, data.value);
     }
 
     @Test
-    void putRequest_partialUpdate() throws IOException {
+    void putRequest_partialUpdate()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         TestData data = new TestData();
         data.name = "original";
@@ -196,26 +283,18 @@ public class JSONHandlerHttpTests {
 
         handler.addRoute("/partialput", data);
 
-        // Send PUT request with only one field
-        URL url = new URL("http://localhost:8088/default/partialput");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("PUT");
-        conn.setDoOutput(true);
-        conn.setRequestProperty("Content-Type", "application/json");
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest("PUT", "/default/partialput", "{\"name\":\"newname\"}"));
 
-        String jsonBody = "{\"name\":\"newname\"}";
-        try (OutputStream os = conn.getOutputStream()) {
-            os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
-        }
-
-        assertEquals(200, conn.getResponseCode());
+        assertEquals(200, response.statusCode);
         assertEquals("newname", data.name);
-        // Value should remain unchanged (default for int is 0 from deserialization,
-        // but we only copy non-null values)
     }
 
     @Test
-    void postRequest_invokesCallback() throws IOException {
+    void postRequest_invokesCallback()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         TestData data = new TestData();
         data.name = "test";
@@ -233,41 +312,32 @@ public class JSONHandlerHttpTests {
                     return true;
                 });
 
-        // Send POST request
-        URL url = new URL("http://localhost:8088/default/posttest");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
+        HttpResult response = awaitRequest(handler, startRequest("POST", "/default/posttest"));
 
-        assertEquals(200, conn.getResponseCode());
-        String response = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(
-                response.contains("\"success\":true"),
-                "Response should contain success:true: " + response);
-        assertTrue(
-                response.contains("\"data\""), "Response should contain data field: " + response);
-        assertTrue(callbackInvoked.get(), "Callback should have been invoked");
-        assertEquals("test", capturedName.get(), "Callback should receive the object");
+        assertEquals(200, response.statusCode);
+        assertTrue(response.body.contains("\"success\":true"));
+        assertTrue(response.body.contains("\"data\""));
+        assertTrue(callbackInvoked.get());
+        assertEquals("test", capturedName.get());
     }
 
     @Test
-    void postRequest_withoutCallback_returnsError() throws IOException {
+    void postRequest_withoutCallback_returnsError()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         TestData data = new TestData();
 
         handler.addRoute("/nopostcallback", data);
 
-        // Send POST request without registering callback
-        URL url = new URL("http://localhost:8088/default/nopostcallback");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
+        HttpResult response =
+                awaitRequest(handler, startRequest("POST", "/default/nopostcallback"));
 
-        assertEquals(400, conn.getResponseCode());
+        assertEquals(400, response.statusCode);
     }
 
     @Test
-    void putAndPostWorkTogether() throws IOException {
+    void putAndPostWorkTogether()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         TestData data = new TestData();
         data.name = "initial";
@@ -283,32 +353,23 @@ public class JSONHandlerHttpTests {
                     return true;
                 });
 
-        // First, PUT to update the object
-        URL putUrl = new URL("http://localhost:8088/default/combined");
-        HttpURLConnection putConn = (HttpURLConnection) putUrl.openConnection();
-        putConn.setRequestMethod("PUT");
-        putConn.setDoOutput(true);
-        putConn.setRequestProperty("Content-Type", "application/json");
+        HttpResult putResponse =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/combined",
+                                "{\"name\":\"modified\",\"value\":555}"));
+        assertEquals(200, putResponse.statusCode);
 
-        String jsonBody = "{\"name\":\"modified\",\"value\":555}";
-        try (OutputStream os = putConn.getOutputStream()) {
-            os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
-        }
-        assertEquals(200, putConn.getResponseCode());
-        putConn.getInputStream().close();
-
-        // Then, POST to trigger callback with updated data
-        URL postUrl = new URL("http://localhost:8088/default/combined");
-        HttpURLConnection postConn = (HttpURLConnection) postUrl.openConnection();
-        postConn.setRequestMethod("POST");
-        postConn.setDoOutput(true);
-
-        assertEquals(200, postConn.getResponseCode());
-        assertEquals(555, capturedValue.get(), "Callback should receive updated value");
+        HttpResult postResponse = awaitRequest(handler, startRequest("POST", "/default/combined"));
+        assertEquals(200, postResponse.statusCode);
+        assertEquals(555, capturedValue.get());
     }
 
     @Test
-    void dataWithUnits_getRequest() throws IOException {
+    void dataWithUnits_getRequest()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         DataWithUnits data = new DataWithUnits();
         data.distance = Units.Meters.of(3.14);
@@ -317,27 +378,18 @@ public class JSONHandlerHttpTests {
 
         handler.addRoute("/units", data);
 
-        URL url = new URL("http://localhost:8088/default/units");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
+        HttpResult response = awaitRequest(handler, startRequest("GET", "/default/units"));
 
-        assertEquals(200, conn.getResponseCode());
-        String response = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(
-                response.contains("\"label\""), "Response should contain label field: " + response);
-        assertTrue(
-                response.contains("\"measurement\""),
-                "Response should contain measurement value: " + response);
-        assertTrue(
-                response.contains("distance"),
-                "Response should contain distance field: " + response);
-        assertTrue(
-                response.contains("velocity"),
-                "Response should contain velocity field: " + response);
+        assertEquals(200, response.statusCode);
+        assertTrue(response.body.contains("\"label\""));
+        assertTrue(response.body.contains("\"measurement\""));
+        assertTrue(response.body.contains("distance"));
+        assertTrue(response.body.contains("velocity"));
     }
 
     @Test
-    void dataWithUnits_putRequest() throws IOException {
+    void dataWithUnits_putRequest()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         DataWithUnits data = new DataWithUnits();
         data.distance = Units.Meters.of(1.0);
@@ -346,25 +398,22 @@ public class JSONHandlerHttpTests {
 
         handler.addRoute("/unitsput", data);
 
-        // Update just the label via PUT
-        URL url = new URL("http://localhost:8088/default/unitsput");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("PUT");
-        conn.setDoOutput(true);
-        conn.setRequestProperty("Content-Type", "application/json");
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/unitsput",
+                                "{\"label\":\"updated\",\"distance\":{\"value\":5.5,\"unit\":\"Meters\"},"
+                                    + "\"velocity\":{\"value\":10.0,\"unit\":\"MetersPerSecond\"}}"));
 
-        String jsonBody =
-                "{\"label\":\"updated\",\"distance\":{\"value\":5.5,\"unit\":\"Meters\"},\"velocity\":{\"value\":10.0,\"unit\":\"MetersPerSecond\"}}";
-        try (OutputStream os = conn.getOutputStream()) {
-            os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
-        }
-
-        assertEquals(200, conn.getResponseCode());
+        assertEquals(200, response.statusCode);
         assertEquals("updated", data.label);
     }
 
     @Test
-    void dataWithUnits_postCallback() throws IOException {
+    void dataWithUnits_postCallback()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         DataWithUnits data = new DataWithUnits();
         data.distance = Units.Meters.of(2.5);
@@ -381,17 +430,15 @@ public class JSONHandlerHttpTests {
                     return true;
                 });
 
-        URL url = new URL("http://localhost:8088/default/unitspost");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
+        HttpResult response = awaitRequest(handler, startRequest("POST", "/default/unitspost"));
 
-        assertEquals(200, conn.getResponseCode());
-        assertEquals(2.5, capturedDistance.get(), 0.001, "Callback should receive distance value");
+        assertEquals(200, response.statusCode);
+        assertEquals(2.5, capturedDistance.get(), 0.001);
     }
 
     @Test
-    void dataWithArray_getRequest() throws IOException {
+    void dataWithArray_getRequest()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         DataWithArray data = new DataWithArray();
         data.name = "arraytest";
@@ -400,24 +447,22 @@ public class JSONHandlerHttpTests {
 
         handler.addRoute("/array", data);
 
-        URL url = new URL("http://localhost:8088/default/array");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
+        HttpResult response = awaitRequest(handler, startRequest("GET", "/default/array"));
 
-        assertEquals(200, conn.getResponseCode());
-        String response = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(response.contains("\"arraytest\""), "Response should contain name: " + response);
-        assertTrue(response.contains("10"), "Response should contain array value 10: " + response);
-        assertTrue(response.contains("20"), "Response should contain array value 20: " + response);
-        assertTrue(response.contains("30"), "Response should contain array value 30: " + response);
-        assertTrue(response.contains("40"), "Response should contain array value 40: " + response);
-        assertTrue(response.contains("\"x\""), "Response should contain tag x: " + response);
-        assertTrue(response.contains("\"y\""), "Response should contain tag y: " + response);
-        assertTrue(response.contains("\"z\""), "Response should contain tag z: " + response);
+        assertEquals(200, response.statusCode);
+        assertTrue(response.body.contains("\"arraytest\""));
+        assertTrue(response.body.contains("10"));
+        assertTrue(response.body.contains("20"));
+        assertTrue(response.body.contains("30"));
+        assertTrue(response.body.contains("40"));
+        assertTrue(response.body.contains("\"x\""));
+        assertTrue(response.body.contains("\"y\""));
+        assertTrue(response.body.contains("\"z\""));
     }
 
     @Test
-    void dataWithArray_putRequest() throws IOException {
+    void dataWithArray_putRequest()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         DataWithArray data = new DataWithArray();
         data.name = "original";
@@ -426,19 +471,16 @@ public class JSONHandlerHttpTests {
 
         handler.addRoute("/arrayput", data);
 
-        URL url = new URL("http://localhost:8088/default/arrayput");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("PUT");
-        conn.setDoOutput(true);
-        conn.setRequestProperty("Content-Type", "application/json");
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/arrayput",
+                                "{\"name\":\"modified\",\"values\":[100,200,300,400,500],"
+                                        + "\"tags\":[\"tag1\",\"tag2\",\"tag3\"]}"));
 
-        String jsonBody =
-                "{\"name\":\"modified\",\"values\":[100,200,300,400,500],\"tags\":[\"tag1\",\"tag2\",\"tag3\"]}";
-        try (OutputStream os = conn.getOutputStream()) {
-            os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
-        }
-
-        assertEquals(200, conn.getResponseCode());
+        assertEquals(200, response.statusCode);
         assertEquals("modified", data.name);
         assertEquals(5, data.values.size());
         assertEquals(100, data.values.get(0));
@@ -448,7 +490,8 @@ public class JSONHandlerHttpTests {
     }
 
     @Test
-    void dataWithArray_postCallback() throws IOException {
+    void dataWithArray_postCallback()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         DataWithArray data = new DataWithArray();
         data.name = "arraytest";
@@ -467,28 +510,24 @@ public class JSONHandlerHttpTests {
                     return true;
                 });
 
-        URL url = new URL("http://localhost:8088/default/arraypost");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
+        HttpResult response = awaitRequest(handler, startRequest("POST", "/default/arraypost"));
 
-        assertEquals(200, conn.getResponseCode());
-        assertEquals(30, capturedSum.get(), "Callback should receive sum of values");
-        assertEquals(2, capturedTagCount.get(), "Callback should receive tag count");
+        assertEquals(200, response.statusCode);
+        assertEquals(30, capturedSum.get());
+        assertEquals(2, capturedTagCount.get());
     }
 
     @Test
-    void unsupportedMethod_returns405() throws IOException {
+    void unsupportedMethod_returns405()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         TestData data = new TestData();
 
         handler.addRoute("/methodtest", data);
 
-        URL url = new URL("http://localhost:8088/default/methodtest");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("DELETE");
+        HttpResult response = awaitDirectRequest(startRequest("DELETE", "/default/methodtest"));
 
-        assertEquals(405, conn.getResponseCode());
+        assertEquals(405, response.statusCode);
     }
 
     @Test
@@ -497,41 +536,30 @@ public class JSONHandlerHttpTests {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> {
-                    handler.registerPostCallback("/nonexistent", (TestData obj) -> true);
-                });
+                () -> handler.registerPostCallback("/nonexistent", (TestData obj) -> true));
     }
 
     @Test
-    void postRequest_returnsFalse_whenCallbackReturnsFalse() throws IOException {
+    void postRequest_returnsFalse_whenCallbackReturnsFalse()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         TestData data = new TestData();
         data.name = "test";
         data.value = 42;
 
         handler.addRoute("/postfalse", data);
-        handler.registerPostCallback(
-                "/postfalse",
-                (TestData obj) -> {
-                    return false;
-                });
+        handler.registerPostCallback("/postfalse", (TestData obj) -> false);
 
-        URL url = new URL("http://localhost:8088/default/postfalse");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
+        HttpResult response = awaitRequest(handler, startRequest("POST", "/default/postfalse"));
 
-        assertEquals(200, conn.getResponseCode());
-        String response = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(
-                response.contains("\"success\":false"),
-                "Response should contain success:false: " + response);
-        assertTrue(
-                response.contains("\"data\""), "Response should contain data field: " + response);
+        assertEquals(200, response.statusCode);
+        assertTrue(response.body.contains("\"success\":false"));
+        assertTrue(response.body.contains("\"data\""));
     }
 
     @Test
-    void dataWithUnitArray_getRequest() throws IOException {
+    void dataWithUnitArray_getRequest()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         DataWithUnitArray data = new DataWithUnitArray();
         data.name = "test_angles";
@@ -547,31 +575,19 @@ public class JSONHandlerHttpTests {
 
         handler.addRoute("/unitarray", data);
 
-        URL url = new URL("http://localhost:8088/default/unitarray");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
+        HttpResult response = awaitRequest(handler, startRequest("GET", "/default/unitarray"));
 
-        assertEquals(200, conn.getResponseCode());
-        String response = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(
-                response.contains("\"test_angles\""), "Response should contain name: " + response);
-        assertTrue(
-                response.contains("\"angles\""),
-                "Response should contain angles array: " + response);
-        assertTrue(
-                response.contains("\"distances\""),
-                "Response should contain distances array: " + response);
-        // Verify array contains unit data (value and unit fields)
-        assertTrue(
-                response.contains("\"value\""),
-                "Response should contain value fields for units: " + response);
-        assertTrue(
-                response.contains("\"unit\""),
-                "Response should contain unit fields for units: " + response);
+        assertEquals(200, response.statusCode);
+        assertTrue(response.body.contains("\"test_angles\""));
+        assertTrue(response.body.contains("\"angles\""));
+        assertTrue(response.body.contains("\"distances\""));
+        assertTrue(response.body.contains("\"value\""));
+        assertTrue(response.body.contains("\"unit\""));
     }
 
     @Test
-    void dataWithUnitArray_putRequest() throws IOException {
+    void dataWithUnitArray_putRequest()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         DataWithUnitArray data = new DataWithUnitArray();
         data.name = "original";
@@ -580,28 +596,22 @@ public class JSONHandlerHttpTests {
 
         handler.addRoute("/unitarrayput", data);
 
-        URL url = new URL("http://localhost:8088/default/unitarrayput");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("PUT");
-        conn.setDoOutput(true);
-        conn.setRequestProperty("Content-Type", "application/json");
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/unitarrayput",
+                                "{\"name\":\"updated\","
+                                        + "\"angles\":["
+                                        + "{\"value\":30.0,\"unit\":\"Degrees\"},"
+                                        + "{\"value\":60.0,\"unit\":\"Degrees\"},"
+                                        + "{\"value\":90.0,\"unit\":\"Degrees\"}],"
+                                        + "\"distances\":["
+                                        + "{\"value\":5.0,\"unit\":\"Meters\"},"
+                                        + "{\"value\":10.0,\"unit\":\"Meters\"}]}"));
 
-        String jsonBody =
-                "{\"name\":\"updated\","
-                        + "\"angles\":["
-                        + "{\"value\":30.0,\"unit\":\"Degrees\"},"
-                        + "{\"value\":60.0,\"unit\":\"Degrees\"},"
-                        + "{\"value\":90.0,\"unit\":\"Degrees\"}"
-                        + "],"
-                        + "\"distances\":["
-                        + "{\"value\":5.0,\"unit\":\"Meters\"},"
-                        + "{\"value\":10.0,\"unit\":\"Meters\"}"
-                        + "]}";
-        try (OutputStream os = conn.getOutputStream()) {
-            os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
-        }
-
-        assertEquals(200, conn.getResponseCode());
+        assertEquals(200, response.statusCode);
         assertEquals("updated", data.name);
         assertEquals(3, data.angles.length);
         assertEquals(30.0, data.angles[0].in(Units.Degrees), 0.001);
@@ -613,7 +623,8 @@ public class JSONHandlerHttpTests {
     }
 
     @Test
-    void dataWithUnitArray_postCallback() throws IOException {
+    void dataWithUnitArray_postCallback()
+            throws InterruptedException, ExecutionException, TimeoutException {
         JSONHandler handler = new JSONHandler();
         DataWithUnitArray data = new DataWithUnitArray();
         data.name = "callback_test";
@@ -644,19 +655,96 @@ public class JSONHandlerHttpTests {
                     return true;
                 });
 
-        URL url = new URL("http://localhost:8088/default/unitarraypost");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
+        HttpResult response = awaitRequest(handler, startRequest("POST", "/default/unitarraypost"));
 
-        assertEquals(200, conn.getResponseCode());
-        String response = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        assertTrue(
-                response.contains("\"success\":true"),
-                "Response should contain success:true: " + response);
-        assertEquals(60.0, capturedAngleSum.get(), 0.001, "Callback should receive sum of angles");
-        assertEquals(
-                6.0, capturedDistanceSum.get(), 0.001, "Callback should receive sum of distances");
-        assertEquals(3, capturedAngleCount.get(), "Callback should receive angle array length");
+        assertEquals(200, response.statusCode);
+        assertTrue(response.body.contains("\"success\":true"));
+        assertEquals(60.0, capturedAngleSum.get(), 0.001);
+        assertEquals(6.0, capturedDistanceSum.get(), 0.001);
+        assertEquals(3, capturedAngleCount.get());
+    }
+
+    @Test
+    void getRequest_runsSerializationOnOwnerThread()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        ThreadTrackedValueAdapter adapter = new ThreadTrackedValueAdapter();
+        JSONSyncConfig config =
+                new JSONSyncConfigBuilder()
+                        .addJsonTypeAdapter(ThreadTrackedValue.class, adapter)
+                        .build();
+        JSONHandler handler = new JSONHandler(config);
+        ThreadTrackedData data = new ThreadTrackedData();
+        data.tracked.value = "queued";
+
+        handler.addRoute("/threadedget", data);
+
+        CompletableFuture<HttpResult> future = startRequest("GET", "/default/threadedget");
+        Thread.sleep(100);
+
+        assertFalse(future.isDone());
+        assertNull(adapter.writeThread.get());
+
+        HttpResult response = awaitRequest(handler, future);
+
+        assertEquals(200, response.statusCode);
+        assertEquals(Thread.currentThread(), adapter.writeThread.get());
+        assertTrue(response.body.contains("\"queued\""));
+    }
+
+    @Test
+    void putRequest_runsDeserializationAndMutationOnOwnerThread()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        ThreadTrackedValueAdapter adapter = new ThreadTrackedValueAdapter();
+        JSONSyncConfig config =
+                new JSONSyncConfigBuilder()
+                        .addJsonTypeAdapter(ThreadTrackedValue.class, adapter)
+                        .build();
+        JSONHandler handler = new JSONHandler(config);
+        ThreadTrackedData data = new ThreadTrackedData();
+        data.tracked.value = "before";
+
+        handler.addRoute("/threadedput", data);
+
+        CompletableFuture<HttpResult> future =
+                startRequest("PUT", "/default/threadedput", "{\"tracked\":{\"value\":\"after\"}}");
+        Thread.sleep(100);
+
+        assertFalse(future.isDone());
+        assertEquals("before", data.tracked.value);
+        assertNull(adapter.readThread.get());
+
+        HttpResult response = awaitRequest(handler, future);
+
+        assertEquals(200, response.statusCode);
+        assertEquals(Thread.currentThread(), adapter.readThread.get());
+        assertEquals("after", data.tracked.value);
+    }
+
+    @Test
+    void postRequest_runsCallbackOnOwnerThread()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        JSONHandler handler = new JSONHandler();
+        TestData data = new TestData();
+        AtomicReference<Thread> callbackThread = new AtomicReference<>();
+
+        handler.addRoute("/threadedpost", data);
+        handler.registerPostCallback(
+                "/threadedpost",
+                (TestData obj) -> {
+                    callbackThread.set(Thread.currentThread());
+                    return true;
+                });
+
+        CompletableFuture<HttpResult> future = startRequest("POST", "/default/threadedpost");
+        Thread.sleep(100);
+
+        assertFalse(future.isDone());
+        assertNull(callbackThread.get());
+
+        HttpResult response = awaitRequest(handler, future);
+
+        assertEquals(200, response.statusCode);
+        assertEquals(Thread.currentThread(), callbackThread.get());
+        assertTrue(response.body.contains("\"success\":true"));
     }
 }

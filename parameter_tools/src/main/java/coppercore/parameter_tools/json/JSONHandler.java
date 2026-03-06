@@ -25,12 +25,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 /** Handler to create JSONSync objects with given config and path provider */
 public final class JSONHandler {
 
     private static final int PORT = 8088;
+    private static final int DEFAULT_QUEUE_CAPACITY = 256;
     private static HttpServer server;
     private static final Object serverLock = new Object();
     private static final Set<String> registeredPaths = new HashSet<>();
@@ -40,7 +45,7 @@ public final class JSONHandler {
     private static class RouteInfo<T> {
         final T instance;
         final Class<T> type;
-        Function<T, Boolean> postCallback;
+        volatile Function<T, Boolean> postCallback;
 
         @SuppressWarnings("unchecked")
         RouteInfo(T instance) {
@@ -50,12 +55,45 @@ public final class JSONHandler {
         }
     }
 
+    /** Work submitted by the HTTP server thread for the owner thread to execute. */
+    private static class QueuedHttpAction<T> {
+        private final Callable<T> action;
+        private final CompletableFuture<T> future = new CompletableFuture<>();
+
+        QueuedHttpAction(Callable<T> action) {
+            this.action = action;
+        }
+
+        void run() {
+            try {
+                future.complete(action.call());
+            } catch (Throwable t) {
+                future.completeExceptionally(t);
+            }
+        }
+    }
+
+    /** Response payload produced by an owner-thread action and written by the HTTP thread. */
+    private static class HttpResponse {
+        final int statusCode;
+        final String contentType;
+        final byte[] body;
+
+        HttpResponse(int statusCode, String contentType, byte[] body) {
+            this.statusCode = statusCode;
+            this.contentType = contentType;
+            this.body = body;
+        }
+    }
+
     private final JSONSyncConfig config;
     private final PathProvider path_provider;
+    private final ArrayBlockingQueue<QueuedHttpAction<?>> queuedHttpActions;
+    private final QueuedHttpAction<?>[] queuedHttpActionBuffer;
 
     /** Creates a JSONHandler with default config and no path provider */
     public JSONHandler() {
-        this(new JSONSyncConfigBuilder().build(), null);
+        this(new JSONSyncConfigBuilder().build(), null, DEFAULT_QUEUE_CAPACITY);
     }
 
     /**
@@ -64,7 +102,7 @@ public final class JSONHandler {
      * @param path_provider path provider
      */
     public JSONHandler(PathProvider path_provider) {
-        this(new JSONSyncConfigBuilder().build(), path_provider);
+        this(new JSONSyncConfigBuilder().build(), path_provider, DEFAULT_QUEUE_CAPACITY);
     }
 
     /**
@@ -73,7 +111,7 @@ public final class JSONHandler {
      * @param config JSONSync config
      */
     public JSONHandler(JSONSyncConfig config) {
-        this(new JSONSyncConfigBuilder().build(), null);
+        this(config, null, DEFAULT_QUEUE_CAPACITY);
     }
 
     /**
@@ -83,8 +121,22 @@ public final class JSONHandler {
      * @param path_provider path provider
      */
     public JSONHandler(JSONSyncConfig config, PathProvider path_provider) {
+        this(config, path_provider, DEFAULT_QUEUE_CAPACITY);
+    }
+
+    /**
+     * Creates a JSONHandler with the given config, path provider, and queue capacity for threaded
+     * HTTP route actions.
+     *
+     * @param config JSONSync config
+     * @param path_provider path provider
+     * @param queueCapacity capacity for queued HTTP actions
+     */
+    public JSONHandler(JSONSyncConfig config, PathProvider path_provider, int queueCapacity) {
         this.config = config;
         this.path_provider = path_provider;
+        this.queuedHttpActions = new ArrayBlockingQueue<>(queueCapacity);
+        this.queuedHttpActionBuffer = new QueuedHttpAction<?>[queueCapacity];
     }
 
     /**
@@ -270,6 +322,51 @@ public final class JSONHandler {
     }
 
     /**
+     * Runs a single queued HTTP action on the calling thread.
+     *
+     * <p>This is intended to be called by the thread that owns the route objects. Until this method
+     * (or {@link #drainQueuedHttpActions()}) runs the queued work, the corresponding HTTP request
+     * remains blocked waiting for a response.
+     *
+     * @return true if an action was run, false if the queue was empty
+     */
+    public boolean runNextQueuedHttpAction() {
+        QueuedHttpAction<?> action = queuedHttpActions.poll();
+        if (action == null) {
+            return false;
+        }
+        action.run();
+        return true;
+    }
+
+    /**
+     * Drains and runs all queued HTTP actions on the calling thread.
+     *
+     * <p>This is the convenient periodic pump for the thread that owns the routed objects. If the
+     * owner thread is delayed, incoming GET/PUT/POST requests will continue waiting. If the owner
+     * thread never drains the queue, those HTTP requests will hang until the client times out.
+     *
+     * @return the number of actions that were run
+     */
+    public int drainQueuedHttpActions() {
+        int drainedCount = 0;
+        while (drainedCount < queuedHttpActionBuffer.length) {
+            QueuedHttpAction<?> action = queuedHttpActions.poll();
+            if (action == null) {
+                break;
+            }
+            queuedHttpActionBuffer[drainedCount] = action;
+            drainedCount++;
+        }
+
+        for (int i = 0; i < drainedCount; i++) {
+            queuedHttpActionBuffer[i].run();
+            queuedHttpActionBuffer[i] = null;
+        }
+        return drainedCount;
+    }
+
+    /**
      * Handles a GET request by returning the object as JSON.
      *
      * @param <T> Type of the object
@@ -277,13 +374,13 @@ public final class JSONHandler {
      * @param routeInfo the route information
      */
     private <T> void handleGet(HttpExchange exchange, RouteInfo<T> routeInfo) throws IOException {
-        String json = buildGson().toJson(routeInfo.instance);
-        byte[] response = json.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, response.length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(response);
-        }
+        HttpResponse response =
+                executeQueuedHttpAction(
+                        () -> {
+                            String json = buildGson().toJson(routeInfo.instance);
+                            return jsonResponse(json);
+                        });
+        writeResponse(exchange, response);
     }
 
     /**
@@ -299,20 +396,15 @@ public final class JSONHandler {
             requestBody = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         }
 
-        Gson gson = buildGson();
-        T updatedObject = gson.fromJson(requestBody, routeInfo.type);
-
-        // Copy fields from updated object to the instance
-        copyFields(updatedObject, routeInfo.instance);
-
-        // Return the updated object
-        String json = gson.toJson(routeInfo.instance);
-        byte[] response = json.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, response.length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(response);
-        }
+        HttpResponse response =
+                executeQueuedHttpAction(
+                        () -> {
+                            Gson gson = buildGson();
+                            T updatedObject = gson.fromJson(requestBody, routeInfo.type);
+                            copyFields(updatedObject, routeInfo.instance);
+                            return jsonResponse(gson.toJson(routeInfo.instance));
+                        });
+        writeResponse(exchange, response);
     }
 
     /**
@@ -324,22 +416,64 @@ public final class JSONHandler {
      * @param routeInfo the route information
      */
     private <T> void handlePost(HttpExchange exchange, RouteInfo<T> routeInfo) throws IOException {
-        if (routeInfo.postCallback == null) {
-            sendError(exchange, 400, "No callback registered for this route");
-            return;
+        HttpResponse response =
+                executeQueuedHttpAction(
+                        () -> {
+                            if (routeInfo.postCallback == null) {
+                                return textResponse(
+                                        400, "text/plain", "No callback registered for this route");
+                            }
+
+                            Boolean result = routeInfo.postCallback.apply(routeInfo.instance);
+                            Gson gson = buildGson();
+                            String objectJson = gson.toJson(routeInfo.instance);
+                            String json =
+                                    "{\"success\":" + result + ",\"data\":" + objectJson + "}";
+                            return jsonResponse(json);
+                        });
+        writeResponse(exchange, response);
+    }
+
+    /**
+     * Queues work for the owner thread and waits synchronously for it to finish.
+     *
+     * <p>This preserves request/response semantics for HTTP clients while ensuring the object is
+     * only touched on the owner thread. The tradeoff is that the HTTP worker blocks here until the
+     * owner thread drains the queue. A full queue fails fast with 503; otherwise, delays are
+     * surfaced to clients as a slow or hanging request unless they time out.
+     */
+    private HttpResponse executeQueuedHttpAction(Callable<HttpResponse> action) {
+        QueuedHttpAction<HttpResponse> queuedAction = new QueuedHttpAction<>(action);
+        if (!queuedHttpActions.offer(queuedAction)) {
+            return textResponse(503, "text/plain", "HTTP action queue is full");
         }
 
-        Boolean result = routeInfo.postCallback.apply(routeInfo.instance);
+        try {
+            return queuedAction.future.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return textResponse(
+                    500, "text/plain", "Interrupted while waiting for queued HTTP action");
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            String message = cause == null ? "Unknown error" : cause.getMessage();
+            return textResponse(500, "text/plain", "Internal Server Error: " + message);
+        }
+    }
 
-        // Return the result along with the current state of the object
-        Gson gson = buildGson();
-        String objectJson = gson.toJson(routeInfo.instance);
-        String json = "{\"success\":" + result + ",\"data\":" + objectJson + "}";
-        byte[] response = json.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, response.length);
+    private HttpResponse jsonResponse(String json) {
+        return new HttpResponse(200, "application/json", json.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private HttpResponse textResponse(int statusCode, String contentType, String message) {
+        return new HttpResponse(statusCode, contentType, message.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void writeResponse(HttpExchange exchange, HttpResponse response) throws IOException {
+        exchange.getResponseHeaders().set("Content-Type", response.contentType);
+        exchange.sendResponseHeaders(response.statusCode, response.body.length);
         try (OutputStream os = exchange.getResponseBody()) {
-            os.write(response);
+            os.write(response.body);
         }
     }
 
