@@ -35,10 +35,12 @@ public final class JSONHandler {
     /** Holds information about a registered route including the instance and optional callback. */
     private static class RouteInfo<T> {
         final T instance;
+        final JSONSync<T> sync;
         volatile Function<T, Boolean> postCallback;
 
-        RouteInfo(T instance) {
+        RouteInfo(T instance, JSONSync<T> sync) {
             this.instance = instance;
+            this.sync = sync;
             this.postCallback = null;
         }
     }
@@ -230,7 +232,7 @@ public final class JSONHandler {
         String environment = getEnvironmentName();
         String fullPath = "/" + environment + path;
 
-        RouteInfo<T> routeInfo = new RouteInfo<>(instance);
+        RouteInfo<T> routeInfo = new RouteInfo<>(instance, getJsonSync(instance, ""));
 
         synchronized (serverLock) {
             if (registeredPaths.contains(fullPath)) {
@@ -365,7 +367,7 @@ public final class JSONHandler {
         HttpResponse response =
                 executeQueuedHttpAction(
                         () -> {
-                            String json = getRouteJsonSync(routeInfo.instance).serialize();
+                            String json = routeInfo.sync.serialize();
                             return jsonResponse(json);
                         });
         writeResponse(exchange, response);
@@ -387,10 +389,9 @@ public final class JSONHandler {
         HttpResponse response =
                 executeQueuedHttpAction(
                         () -> {
-                            JSONSync<T> sync = getRouteJsonSync(routeInfo.instance);
-                            T updatedObject = sync.deserialize(requestBody);
+                            T updatedObject = routeInfo.sync.deserialize(requestBody);
                             copyFields(updatedObject, routeInfo.instance);
-                            return jsonResponse(sync.serialize());
+                            return jsonResponse(routeInfo.sync.serialize());
                         });
         writeResponse(exchange, response);
     }
@@ -413,7 +414,7 @@ public final class JSONHandler {
                             }
 
                             Boolean result = routeInfo.postCallback.apply(routeInfo.instance);
-                            String objectJson = getRouteJsonSync(routeInfo.instance).serialize();
+                            String objectJson = routeInfo.sync.serialize();
                             String json =
                                     "{\"success\":" + result + ",\"data\":" + objectJson + "}";
                             return jsonResponse(json);
@@ -541,10 +542,6 @@ public final class JSONHandler {
             return "default";
         }
         return path_provider.getEnvironmentName();
-    }
-
-    private <T> JSONSync<T> getRouteJsonSync(T instance) {
-        return getJsonSync(instance, "");
     }
 
     /** Ensures the HTTP server is started. Lazily initializes the server on first call. */

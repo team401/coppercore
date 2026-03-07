@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import coppercore.parameter_tools.json.JSONHandler;
 import coppercore.parameter_tools.json.JSONSyncConfig;
@@ -125,7 +126,7 @@ public class JSONHandlerHttpTests {
                         value.configuredValue.value = in.nextString();
                         break;
                     case "optionalValue":
-                        if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
+                        if (in.peek() == JsonToken.NULL) {
                             in.nextNull();
                             value.optionalValue = null;
                         } else {

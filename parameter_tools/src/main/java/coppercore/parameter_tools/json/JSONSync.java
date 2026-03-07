@@ -43,7 +43,6 @@ public class JSONSync<T> {
      *
      * @throws RuntimeException if the JSON file cannot be read or parsed.
      */
-    @SuppressWarnings("unchecked")
     public void loadData() {
         String path = file;
         if (pathProvider != null) {
@@ -77,7 +76,7 @@ public class JSONSync<T> {
     }
 
     /**
-     * Serializes the current object using this sync's configured Gson path.
+     * Serializes the current object using this sync's configured Gson instance.
      *
      * @return The serialized JSON.
      */
@@ -86,7 +85,7 @@ public class JSONSync<T> {
     }
 
     /**
-     * Deserializes JSON into an object using this sync's configured Gson path.
+     * Deserializes JSON into an object using this sync's configured Gson instance.
      *
      * @param json The JSON payload.
      * @return The deserialized object.
@@ -98,7 +97,7 @@ public class JSONSync<T> {
     }
 
     /**
-     * Deserializes JSON from a reader using this sync's configured Gson path.
+     * Deserializes JSON from a reader using this sync's configured Gson instance.
      *
      * @param reader The JSON source.
      * @return The deserialized object.
