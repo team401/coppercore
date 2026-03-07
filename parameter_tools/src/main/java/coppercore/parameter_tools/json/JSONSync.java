@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 
 /**
  * A utility class for synchronizing Java objects with JSON files. Provides functionality for
@@ -42,13 +43,16 @@ public class JSONSync<T> {
      *
      * @throws RuntimeException if the JSON file cannot be read or parsed.
      */
-    @SuppressWarnings("unchecked")
     public void loadData() {
         String path = file;
         if (pathProvider != null) {
             path = pathProvider.resolveReadPath(file);
         }
-        instance = gson.fromJson(getFileReader(path), (Class<T>) instance.getClass());
+        try (Reader reader = getFileReader(path)) {
+            instance = deserialize(reader);
+        } catch (IOException e) {
+            throw new RuntimeException("IOException", e);
+        }
     }
 
     /**
@@ -61,7 +65,7 @@ public class JSONSync<T> {
         if (pathProvider != null) {
             path = pathProvider.resolveWritePath(file);
         }
-        String json = gson.toJson(instance);
+        String json = serialize();
         FileWriter writer = getFileWriter(path);
         try {
             writer.write(json);
@@ -69,6 +73,39 @@ public class JSONSync<T> {
         } catch (IOException e) {
             throw new RuntimeException("IOException", e);
         }
+    }
+
+    /**
+     * Serializes the current object using this sync's configured Gson instance.
+     *
+     * @return The serialized JSON.
+     */
+    public String serialize() {
+        return gson.toJson(instance);
+    }
+
+    /**
+     * Deserializes JSON into an object using this sync's configured Gson instance.
+     *
+     * @param json The JSON payload.
+     * @return The deserialized object.
+     */
+    public T deserialize(String json) {
+        @SuppressWarnings("unchecked")
+        Class<T> objectClass = (Class<T>) instance.getClass();
+        return gson.fromJson(json, objectClass);
+    }
+
+    /**
+     * Deserializes JSON from a reader using this sync's configured Gson instance.
+     *
+     * @param reader The JSON source.
+     * @return The deserialized object.
+     */
+    public T deserialize(Reader reader) {
+        @SuppressWarnings("unchecked")
+        Class<T> objectClass = (Class<T>) instance.getClass();
+        return gson.fromJson(reader, objectClass);
     }
 
     /**

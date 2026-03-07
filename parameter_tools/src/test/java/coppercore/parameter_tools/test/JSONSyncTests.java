@@ -1,9 +1,15 @@
 package coppercore.parameter_tools.test;
 
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 import coppercore.parameter_tools.json.JSONHandler;
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.json.annotations.AfterJsonLoad;
+import java.io.IOException;
+import java.io.StringReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +23,52 @@ import org.junit.jupiter.api.Test;
  * when data changes.
  */
 public class JSONSyncTests {
+
+    private static class ConfiguredSyncData {
+        public String displayValue = "initial";
+        public String optionalValue = null;
+    }
+
+    private static class ConfiguredSyncDataAdapter extends TypeAdapter<ConfiguredSyncData> {
+        @Override
+        public void write(JsonWriter out, ConfiguredSyncData value) throws IOException {
+            out.beginObject();
+            out.name("customValue").value(value.displayValue);
+            out.name("optionalValue");
+            if (value.optionalValue == null) {
+                out.nullValue();
+            } else {
+                out.value(value.optionalValue);
+            }
+            out.endObject();
+        }
+
+        @Override
+        public ConfiguredSyncData read(JsonReader in) throws IOException {
+            ConfiguredSyncData value = new ConfiguredSyncData();
+            in.beginObject();
+            while (in.hasNext()) {
+                switch (in.nextName()) {
+                    case "customValue":
+                        value.displayValue = in.nextString();
+                        break;
+                    case "optionalValue":
+                        if (in.peek() == JsonToken.NULL) {
+                            in.nextNull();
+                            value.optionalValue = null;
+                        } else {
+                            value.optionalValue = in.nextString();
+                        }
+                        break;
+                    default:
+                        in.skipValue();
+                        break;
+                }
+            }
+            in.endObject();
+            return value;
+        }
+    }
 
     /**
      * Prepares a new {@link JSONSync} instance with a predefined configuration and file path before
@@ -95,6 +147,34 @@ public class JSONSyncTests {
         instance = ExampleJsonSyncClass.synced.getObject();
         Assertions.assertEquals(
                 saved_int, instance.testingIntField, "testInt should be " + saved_int);
+    }
+
+    @Test
+    public void JsonSyncSerializeDeserializeUsesConfiguredAdapters() {
+        JSONSync<ConfiguredSyncData> sync =
+                new JSONSync<>(
+                        new ConfiguredSyncData(),
+                        "ConfiguredSyncData.json",
+                        new JSONSyncConfigBuilder()
+                                .addJsonTypeAdapter(
+                                        ConfiguredSyncData.class, new ConfiguredSyncDataAdapter())
+                                .build());
+
+        String json = sync.serialize();
+
+        Assertions.assertTrue(json.contains("\"customValue\""), json);
+        Assertions.assertTrue(json.contains("\"initial\""), json);
+
+        ConfiguredSyncData fromString =
+                sync.deserialize("{\"customValue\":\"updated\",\"optionalValue\":\"set\"}");
+        Assertions.assertEquals("updated", fromString.displayValue);
+        Assertions.assertEquals("set", fromString.optionalValue);
+
+        ConfiguredSyncData fromReader =
+                sync.deserialize(
+                        new StringReader("{\"customValue\":\"reader\",\"optionalValue\":null}"));
+        Assertions.assertEquals("reader", fromReader.displayValue);
+        Assertions.assertNull(fromReader.optionalValue);
     }
 
     private static class PrimitiveClass {
