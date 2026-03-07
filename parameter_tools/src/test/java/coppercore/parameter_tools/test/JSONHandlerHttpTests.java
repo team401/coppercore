@@ -36,6 +36,15 @@ public class JSONHandlerHttpTests {
         public int value = 42;
     }
 
+    public static class ConfiguredRouteData {
+        public ConfiguredValue configuredValue = new ConfiguredValue();
+        public String optionalValue = null;
+    }
+
+    public static class ConfiguredValue {
+        public String value = "test";
+    }
+
     public static class DataWithUnits {
         public Distance distance = Units.Meters.of(1.5);
         public LinearVelocity velocity = Units.MetersPerSecond.of(2.5);
@@ -85,6 +94,47 @@ public class JSONHandlerHttpTests {
                     value.value = in.nextString();
                 } else {
                     in.skipValue();
+                }
+            }
+            in.endObject();
+            return value;
+        }
+    }
+
+    private static class ConfiguredRouteDataAdapter extends TypeAdapter<ConfiguredRouteData> {
+        @Override
+        public void write(JsonWriter out, ConfiguredRouteData value) throws IOException {
+            out.beginObject();
+            out.name("customValue").value(value.configuredValue.value);
+            out.name("optionalValue");
+            if (value.optionalValue == null) {
+                out.nullValue();
+            } else {
+                out.value(value.optionalValue);
+            }
+            out.endObject();
+        }
+
+        @Override
+        public ConfiguredRouteData read(JsonReader in) throws IOException {
+            ConfiguredRouteData value = new ConfiguredRouteData();
+            in.beginObject();
+            while (in.hasNext()) {
+                switch (in.nextName()) {
+                    case "customValue":
+                        value.configuredValue.value = in.nextString();
+                        break;
+                    case "optionalValue":
+                        if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
+                            in.nextNull();
+                            value.optionalValue = null;
+                        } else {
+                            value.optionalValue = in.nextString();
+                        }
+                        break;
+                    default:
+                        in.skipValue();
+                        break;
                 }
             }
             in.endObject();
@@ -555,6 +605,53 @@ public class JSONHandlerHttpTests {
         assertEquals(200, response.statusCode);
         assertTrue(response.body.contains("\"success\":false"));
         assertTrue(response.body.contains("\"data\""));
+    }
+
+    @Test
+    void routeRequests_useConfiguredJsonSyncForGetPutAndPost()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        JSONSyncConfig config =
+                new JSONSyncConfigBuilder()
+                        .addJsonTypeAdapter(
+                                ConfiguredRouteData.class, new ConfiguredRouteDataAdapter())
+                        .build();
+        JSONHandler handler = new JSONHandler(config);
+        ConfiguredRouteData data = new ConfiguredRouteData();
+        data.configuredValue.value = "initial";
+
+        handler.addRoute("/configured", data);
+        handler.registerPostCallback("/configured", (ConfiguredRouteData obj) -> true);
+
+        HttpResult getResponse = awaitRequest(handler, startRequest("GET", "/default/configured"));
+        assertEquals(200, getResponse.statusCode);
+        assertTrue(getResponse.body.contains("\"customValue\""), getResponse.body);
+        assertTrue(getResponse.body.contains("\"initial\""), getResponse.body);
+
+        HttpResult putResponse =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/configured",
+                                "{\"customValue\":\"updated\",\"optionalValue\":\"set\"}"));
+
+        assertEquals(200, putResponse.statusCode);
+        assertEquals("updated", data.configuredValue.value);
+        assertEquals("set", data.optionalValue);
+        assertTrue(putResponse.body.contains("\"customValue\""), putResponse.body);
+        assertTrue(putResponse.body.contains("\"updated\""), putResponse.body);
+        assertTrue(putResponse.body.contains("\"optionalValue\""), putResponse.body);
+        assertTrue(putResponse.body.contains("\"set\""), putResponse.body);
+
+        HttpResult postResponse =
+                awaitRequest(handler, startRequest("POST", "/default/configured"));
+
+        assertEquals(200, postResponse.statusCode);
+        assertTrue(postResponse.body.contains("\"success\":true"), postResponse.body);
+        assertTrue(postResponse.body.contains("\"customValue\""), postResponse.body);
+        assertTrue(postResponse.body.contains("\"updated\""), postResponse.body);
+        assertTrue(postResponse.body.contains("\"optionalValue\""), postResponse.body);
+        assertTrue(postResponse.body.contains("\"set\""), postResponse.body);
     }
 
     @Test

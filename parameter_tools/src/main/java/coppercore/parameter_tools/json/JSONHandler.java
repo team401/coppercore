@@ -1,18 +1,9 @@
 package coppercore.parameter_tools.json;
 
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldNamingStrategy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.TypeAdapterFactory;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import coppercore.parameter_tools.json.strategies.JSONExcludeExclusionStrategy;
-import coppercore.parameter_tools.json.strategies.JSONNamingStrategy;
-import coppercore.parameter_tools.json.strategies.JSONPrimitiveCheckStrategy;
 import coppercore.parameter_tools.path_provider.PathProvider;
 import edu.wpi.first.hal.HAL;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.RobotController;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,13 +35,10 @@ public final class JSONHandler {
     /** Holds information about a registered route including the instance and optional callback. */
     private static class RouteInfo<T> {
         final T instance;
-        final Class<T> type;
         volatile Function<T, Boolean> postCallback;
 
-        @SuppressWarnings("unchecked")
         RouteInfo(T instance) {
             this.instance = instance;
-            this.type = (Class<T>) instance.getClass();
             this.postCallback = null;
         }
     }
@@ -377,7 +365,7 @@ public final class JSONHandler {
         HttpResponse response =
                 executeQueuedHttpAction(
                         () -> {
-                            String json = buildGson().toJson(routeInfo.instance);
+                            String json = getRouteJsonSync(routeInfo.instance).serialize();
                             return jsonResponse(json);
                         });
         writeResponse(exchange, response);
@@ -399,10 +387,10 @@ public final class JSONHandler {
         HttpResponse response =
                 executeQueuedHttpAction(
                         () -> {
-                            Gson gson = buildGson();
-                            T updatedObject = gson.fromJson(requestBody, routeInfo.type);
+                            JSONSync<T> sync = getRouteJsonSync(routeInfo.instance);
+                            T updatedObject = sync.deserialize(requestBody);
                             copyFields(updatedObject, routeInfo.instance);
-                            return jsonResponse(gson.toJson(routeInfo.instance));
+                            return jsonResponse(sync.serialize());
                         });
         writeResponse(exchange, response);
     }
@@ -425,8 +413,7 @@ public final class JSONHandler {
                             }
 
                             Boolean result = routeInfo.postCallback.apply(routeInfo.instance);
-                            Gson gson = buildGson();
-                            String objectJson = gson.toJson(routeInfo.instance);
+                            String objectJson = getRouteJsonSync(routeInfo.instance).serialize();
                             String json =
                                     "{\"success\":" + result + ",\"data\":" + objectJson + "}";
                             return jsonResponse(json);
@@ -556,6 +543,10 @@ public final class JSONHandler {
         return path_provider.getEnvironmentName();
     }
 
+    private <T> JSONSync<T> getRouteJsonSync(T instance) {
+        return getJsonSync(instance, "");
+    }
+
     /** Ensures the HTTP server is started. Lazily initializes the server on first call. */
     private void ensureServerStarted() {
         synchronized (serverLock) {
@@ -569,40 +560,5 @@ public final class JSONHandler {
                 }
             }
         }
-    }
-
-    /**
-     * Builds a Gson instance with the current configuration.
-     *
-     * @return a configured Gson instance
-     */
-    private Gson buildGson() {
-        ExclusionStrategy jsonExcludeStrategy = new JSONExcludeExclusionStrategy();
-        FieldNamingStrategy jsonNameStrategy =
-                new JSONNamingStrategy(this.config.namingPolicy(), this.config);
-        jsonNameStrategy =
-                JSONPrimitiveCheckStrategy.checkForPrimitives(jsonNameStrategy, this.config);
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(new JSONTypeAdapterFactory(this.config));
-        if (this.config.serializeNulls()) {
-            builder.serializeNulls();
-        }
-        if (this.config.prettyPrinting()) {
-            builder.setPrettyPrinting();
-        }
-        if (this.config.excludeFieldsWithoutExposeAnnotation()) {
-            builder.excludeFieldsWithoutExposeAnnotation();
-        }
-        builder.setFieldNamingStrategy(jsonNameStrategy)
-                .setLongSerializationPolicy(this.config.longSerializationPolicy())
-                .addDeserializationExclusionStrategy(jsonExcludeStrategy)
-                .addSerializationExclusionStrategy(jsonExcludeStrategy);
-        for (TypeAdapterFactory factory : this.config.typeAdapterFactories()) {
-            builder.registerTypeAdapterFactory(factory);
-        }
-        for (Pair<Class, Object> pair : this.config.typeAdapters()) {
-            builder.registerTypeAdapter(pair.getFirst(), pair.getSecond());
-        }
-        return builder.create();
     }
 }
