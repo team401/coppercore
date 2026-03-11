@@ -147,6 +147,10 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
                     @SuppressWarnings("unchecked")
                     @Override
                     public void write(JsonWriter out, T value) throws IOException {
+                        if (value == null) {
+                            out.nullValue();
+                            return;
+                        }
                         try {
                             gson.toJson(constructor.newInstance(value), jsonObject, out);
                         } catch (IllegalAccessException
