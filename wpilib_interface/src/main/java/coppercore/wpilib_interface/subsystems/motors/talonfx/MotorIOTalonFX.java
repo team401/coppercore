@@ -21,6 +21,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MusicTone;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.StaticBrake;
@@ -304,6 +305,9 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     /** A torque-current FOC request to use for all open-loop current control */
     protected final TorqueCurrentFOC currentRequest = new TorqueCurrentFOC(0.0);
+
+    /** A music tone request to use for chirping */
+    protected final MusicTone musicToneRequest = new MusicTone(0.0);
 
     /**
      * Create a new MotorIOTalonFX given a mechanism config, a CANDeviceID, a TalonFXConfiguration,
@@ -1050,6 +1054,11 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     public void follow(int leaderId, boolean opposeLeaderDirection) {
         talon.setControl(
                 new Follower(leaderId, CTREUtil.translateFollowerInvert(opposeLeaderDirection)));
+    }
+
+    @Override
+    public void controlChirp(Frequency audioFrequency) {
+        talon.setControl(musicToneRequest.withAudioFrequency(audioFrequency));
     }
 
     @Override

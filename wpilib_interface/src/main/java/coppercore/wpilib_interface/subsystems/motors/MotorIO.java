@@ -180,6 +180,15 @@ public interface MotorIO {
     public void follow(int leaderId, boolean opposeLeaderDirection);
 
     /**
+     * Control the motor to output a music tone with its chirp speaker
+     *
+     * <p>Only supported by TalonFX IOs. This method is not supported by Spark IOs.
+     *
+     * @param audioFrequency The Frequency of the tone to play.
+     */
+    public void controlChirp(Frequency audioFrequency);
+
+    /**
      * Set the default motion profile constraints that will be used for closed-loop control.
      *
      * <p>This method should be assumed to be blocking, and may take significant time to finish. If

@@ -398,6 +398,12 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
     }
 
     @Override
+    public void controlChirp(Frequency audioFrequency) {
+        throw new UnsupportedOperationException(
+                "Chirp control is not supported by Spark IOs since they do not have a speaker.");
+    }
+
+    @Override
     public void setProfileConstraints(MotionProfileConfig profileConfig) {
         sparkMaxConfig.closedLoop.apply(profileConfig.asMaxMotionConfig());
 
