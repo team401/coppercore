@@ -62,6 +62,12 @@ public class MotorIOReplay implements MotorIO {
     public void controlToVelocityProfiled(AngularVelocity velocitySetpoint) {}
 
     @Override
+    public void controlToVelocityUnprofiledVoltage(AngularVelocity velocitySetpoint) {}
+
+    @Override
+    public void controlToVelocityProfiledVoltage(AngularVelocity velocitySetpoint) {}
+
+    @Override
     public void controlOpenLoopVoltage(Voltage voltage) {}
 
     @Override

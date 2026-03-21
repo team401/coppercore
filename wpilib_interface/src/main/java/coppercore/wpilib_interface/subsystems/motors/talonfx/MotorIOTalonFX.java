@@ -21,12 +21,14 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MusicTone;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import coppercore.wpilib_interface.CTREUtil;
@@ -299,6 +301,14 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
     /** A Motion-Magic profiled velocity FOC request for profiled velocity closed-loop control */
     protected final MotionMagicVelocityTorqueCurrentFOC profiledVelocityRequest =
             new MotionMagicVelocityTorqueCurrentFOC(RotationsPerSecond.zero());
+
+    /** An unprofiled velocity voltage request for unprofiled velocity closed-loop control */
+    protected final VelocityVoltage unprofiledVelocityVoltageRequest =
+            new VelocityVoltage(RotationsPerSecond.zero());
+
+    /** A profiled velocity voltage request for profiled velocity closed-loop control */
+    protected final MotionMagicVelocityVoltage profiledVelocityVoltageRequest =
+            new MotionMagicVelocityVoltage(RotationsPerSecond.zero());
 
     /** A voltage request to use for all open-loop voltage control */
     protected final VoltageOut voltageRequest = new VoltageOut(0.0);
@@ -1034,6 +1044,28 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
                         .withVelocity(velocity)
                         .withSlot(activeGainSlot.ordinal())
                         .withFeedForward(arbitraryFF));
+    }
+
+    @Override
+    public void controlToVelocityUnprofiledVoltage(AngularVelocity velocity) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> unprofiledVelocityVoltageRequest.withUpdateFreqHz(frequency));
+
+        talon.setControl(
+                unprofiledVelocityVoltageRequest
+                        .withVelocity(velocity)
+                        .withSlot(activeGainSlot.ordinal()));
+    }
+
+    @Override
+    public void controlToVelocityProfiledVoltage(AngularVelocity velocity) {
+        requestUpdateFrequencyHz.ifPresent(
+                frequency -> profiledVelocityVoltageRequest.withUpdateFreqHz(frequency));
+
+        talon.setControl(
+                profiledVelocityVoltageRequest
+                        .withVelocity(velocity)
+                        .withSlot(activeGainSlot.ordinal()));
     }
 
     @Override

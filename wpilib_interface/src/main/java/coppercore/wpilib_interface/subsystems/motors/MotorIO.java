@@ -151,6 +151,26 @@ public interface MotorIO {
     public void controlToVelocityProfiled(AngularVelocity velocitySetpoint);
 
     /**
+     * Control the motor to a certain velocity using voltage-based closed-loop control without a
+     * motion profile.
+     *
+     * <p>On TalonFX IOs, this maps to a VelocityVoltage request.
+     *
+     * @param velocitySetpoint The velocity to control the motor to
+     */
+    public void controlToVelocityUnprofiledVoltage(AngularVelocity velocitySetpoint);
+
+    /**
+     * Control the motor to a certain velocity using voltage-based closed-loop control with a motion
+     * profile.
+     *
+     * <p>On TalonFX IOs, this maps to a MotionMagicVelocityVoltage request.
+     *
+     * @param velocitySetpoint The velocity to control the motor to
+     */
+    public void controlToVelocityProfiledVoltage(AngularVelocity velocitySetpoint);
+
+    /**
      * Control the motor by applying a certain Voltage
      *
      * @param voltage The voltage to apply to the motor
