@@ -380,6 +380,16 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
     }
 
     @Override
+    public void controlToVelocityUnprofiledVoltage(AngularVelocity velocitySetpoint) {
+        controlToVelocityUnprofiled(velocitySetpoint);
+    }
+
+    @Override
+    public void controlToVelocityProfiledVoltage(AngularVelocity velocitySetpoint) {
+        controlToVelocityProfiled(velocitySetpoint);
+    }
+
+    @Override
     public void controlOpenLoopVoltage(Voltage voltage) {
         sparkMax.setVoltage(voltage);
     }
