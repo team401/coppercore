@@ -71,6 +71,9 @@ public class MotorIOReplay implements MotorIO {
     public void follow(int leaderId, boolean opposeLeaderDirection) {}
 
     @Override
+    public void controlChirp(Frequency audioFrequency) {}
+
+    @Override
     public void setProfileConstraints(MotionProfileConfig profileConfig) {}
 
     @Override
