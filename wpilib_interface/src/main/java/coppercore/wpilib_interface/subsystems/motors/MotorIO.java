@@ -182,9 +182,12 @@ public interface MotorIO {
     /**
      * Control the motor to output a music tone with its chirp speaker
      *
+     * <p>Applying a different control request or requesting a frequency of 0hz will stop the chirp.
+     *
      * <p>Only supported by TalonFX IOs. This method is not supported by Spark IOs.
      *
-     * @param audioFrequency The Frequency of the tone to play.
+     * @param audioFrequency The Frequency of the tone to play. A value of zero will silence the
+     *     device.
      */
     public void controlChirp(Frequency audioFrequency);
 
