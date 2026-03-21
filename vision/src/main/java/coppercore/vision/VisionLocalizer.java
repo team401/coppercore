@@ -195,6 +195,20 @@ public class VisionLocalizer extends SubsystemBase {
     }
 
     /**
+     * boolean that determines whether or not there is at least one camera connected
+     *
+     * @return false only if all cameras are disconnected
+     */
+    public boolean isAnyCameraConnected() {
+        for (int i = 0; i < inputs.length; i++) {
+            if (cameraConnected(i)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * calculates the strafing and forward / reverse required for drive to be in line with a
      * specific tag + offset
      *
