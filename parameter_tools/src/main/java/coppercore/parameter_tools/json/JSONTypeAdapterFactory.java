@@ -58,13 +58,7 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
                         throw new RuntimeException(
                                 "Multiple AfterJsonLoad annotations on methods in one class");
                     }
-                    try {
-                        annotatedMethods.get(0).invoke(obj);
-                    } catch (IllegalAccessException
-                            | IllegalArgumentException
-                            | InvocationTargetException e) {
-                        e.printStackTrace();
-                    }
+                    invokeAfterJsonLoad(obj, annotatedMethods.get(0));
                 }
                 return obj;
             }
@@ -74,6 +68,28 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
                 adapter.write(out, value);
             }
         };
+    }
+
+    private void invokeAfterJsonLoad(Object obj, Method method) {
+        try {
+            method.invoke(obj);
+        } catch (IllegalAccessException | IllegalArgumentException e) {
+            throwAfterJsonLoadFailure(obj, method, e);
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause() == null ? e : e.getCause();
+            throwAfterJsonLoadFailure(obj, method, cause);
+        }
+    }
+
+    private void throwAfterJsonLoadFailure(Object obj, Method method, Throwable cause) {
+        String message =
+                "AfterJsonLoad method "
+                        + method.getName()
+                        + " failed for "
+                        + obj.getClass().getName();
+        System.err.println(message);
+        cause.printStackTrace(System.err);
+        throw new RuntimeException(message, cause);
     }
 
     public <T> TypeAdapter<T> getAfterLoadTypeAdapter(
