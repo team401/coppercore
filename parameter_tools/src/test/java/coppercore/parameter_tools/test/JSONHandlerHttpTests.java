@@ -9,6 +9,7 @@ import com.google.gson.stream.JsonWriter;
 import coppercore.parameter_tools.json.JSONHandler;
 import coppercore.parameter_tools.json.JSONSyncConfig;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.annotations.AfterJsonLoad;
 import coppercore.parameter_tools.path_provider.PathProvider;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -21,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -63,6 +65,39 @@ public class JSONHandlerHttpTests {
         public Angle[] angles =
                 new Angle[] {Units.Degrees.of(0), Units.Degrees.of(90), Units.Degrees.of(180)};
         public Distance[] distances = new Distance[] {Units.Meters.of(1.0), Units.Meters.of(2.0)};
+    }
+
+    public static class AfterLoadRootData {
+        public int a = 0;
+        public int b = 0;
+        public int sum = 0;
+        public static final List<AfterLoadRootData> hookedInstances =
+                Collections.synchronizedList(new ArrayList<>());
+
+        @AfterJsonLoad
+        public void afterLoad() {
+            sum = a + b;
+            hookedInstances.add(this);
+        }
+    }
+
+    public static class AfterLoadNestedChild {
+        public int x = 0;
+        public int y = 0;
+        public int product = 0;
+        public static final List<AfterLoadNestedChild> hookedInstances =
+                Collections.synchronizedList(new ArrayList<>());
+
+        @AfterJsonLoad
+        public void afterLoad() {
+            product = x * y;
+            hookedInstances.add(this);
+        }
+    }
+
+    public static class AfterLoadParent {
+        public String label = "parent";
+        public AfterLoadNestedChild child = new AfterLoadNestedChild();
     }
 
     public static class ThreadTrackedValue {
@@ -844,5 +879,61 @@ public class JSONHandlerHttpTests {
         assertEquals(200, response.statusCode);
         assertEquals(Thread.currentThread(), callbackThread.get());
         assertTrue(response.body.contains("\"success\":true"));
+    }
+
+    @Test
+    void putRequest_invokesAfterJsonLoadOnLiveRootInstance()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        JSONHandler handler = new JSONHandler();
+        AfterLoadRootData data = new AfterLoadRootData();
+        data.a = 1;
+        data.b = 2;
+
+        handler.addRoute("/afterloadroot", data);
+        AfterLoadRootData.hookedInstances.clear();
+
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest("PUT", "/default/afterloadroot", "{\"a\":10,\"b\":20}"));
+
+        assertEquals(200, response.statusCode);
+        assertEquals(10, data.a);
+        assertEquals(20, data.b);
+        assertEquals(30, data.sum);
+        assertTrue(
+                AfterLoadRootData.hookedInstances.contains(data),
+                "AfterJsonLoad should have run on the live route instance, not just a"
+                        + " throwaway");
+    }
+
+    @Test
+    void putRequest_invokesAfterJsonLoadOnNestedObject()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        JSONHandler handler = new JSONHandler();
+        AfterLoadParent data = new AfterLoadParent();
+        data.label = "original";
+        data.child.x = 1;
+        data.child.y = 2;
+
+        handler.addRoute("/afterloadnested", data);
+        AfterLoadNestedChild.hookedInstances.clear();
+
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/afterloadnested",
+                                "{\"label\":\"updated\",\"child\":{\"x\":3,\"y\":4}}"));
+
+        assertEquals(200, response.statusCode);
+        assertEquals("updated", data.label);
+        assertEquals(3, data.child.x);
+        assertEquals(4, data.child.y);
+        assertEquals(12, data.child.product);
+        assertTrue(
+                AfterLoadNestedChild.hookedInstances.contains(data.child),
+                "AfterJsonLoad should have run on the nested object now living in the route");
     }
 }
