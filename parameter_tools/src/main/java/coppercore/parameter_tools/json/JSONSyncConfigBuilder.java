@@ -139,6 +139,17 @@ public class JSONSyncConfigBuilder {
     }
 
     /**
+     * Adds a custom TypeAdapterFactory.
+     *
+     * @param factory The TypeAdapterFactory to add.
+     * @return The builder instance.
+     */
+    public JSONSyncConfigBuilder addJsonTypeAdapterFactory(TypeAdapterFactory factory) {
+        typeAdapterFactories.add(factory);
+        return this;
+    }
+
+    /**
      * Use the {@see coppercore.parameter_tools.json.annotations.JsonType} annotation to define a
      * way to determine which class to deserialize to.
      *
