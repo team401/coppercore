@@ -2,13 +2,22 @@ package coppercore.parameter_tools.test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.google.gson.TypeAdapter;
+import com.google.gson.TypeAdapterFactory;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import coppercore.parameter_tools.json.JSONHandler;
 import coppercore.parameter_tools.json.JSONSyncConfig;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
+import coppercore.parameter_tools.json.annotations.AfterJsonLoad;
+import coppercore.parameter_tools.json.annotations.JsonSubtype;
+import coppercore.parameter_tools.json.annotations.JsonType;
 import coppercore.parameter_tools.path_provider.PathProvider;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -17,10 +26,14 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -63,6 +76,102 @@ public class JSONHandlerHttpTests {
         public Angle[] angles =
                 new Angle[] {Units.Degrees.of(0), Units.Degrees.of(90), Units.Degrees.of(180)};
         public Distance[] distances = new Distance[] {Units.Meters.of(1.0), Units.Meters.of(2.0)};
+    }
+
+    public static class AfterLoadRootData {
+        public int a = 0;
+        public int b = 0;
+        public int sum = 0;
+        public static final List<AfterLoadRootData> hookedInstances =
+                Collections.synchronizedList(new ArrayList<>());
+
+        @AfterJsonLoad
+        public void afterLoad() {
+            sum = a + b;
+            hookedInstances.add(this);
+        }
+    }
+
+    public static class AfterLoadNestedChild {
+        public int x = 0;
+        public int y = 0;
+        public int product = 0;
+        public static final List<AfterLoadNestedChild> hookedInstances =
+                Collections.synchronizedList(new ArrayList<>());
+
+        @AfterJsonLoad
+        public void afterLoad() {
+            product = x * y;
+            hookedInstances.add(this);
+        }
+    }
+
+    public static class AfterLoadParent {
+        public String label = "parent";
+        public AfterLoadNestedChild child = new AfterLoadNestedChild();
+    }
+
+    @JsonType(
+            property = "type",
+            subtypes = {@JsonSubtype(clazz = PolymorphAfterLoadSub.class, name = "Sub")})
+    public abstract static class PolymorphAfterLoadBase {
+        public String type;
+    }
+
+    public static class PolymorphAfterLoadSub extends PolymorphAfterLoadBase {
+        public String name = "";
+        public int counter = 0;
+        public static final List<PolymorphAfterLoadSub> hookedInstances =
+                Collections.synchronizedList(new ArrayList<>());
+
+        @AfterJsonLoad
+        public void afterLoad() {
+            counter++;
+            hookedInstances.add(this);
+        }
+    }
+
+    public static class PolymorphAfterLoadParent {
+        public HashMap<String, PolymorphAfterLoadBase> entries = new HashMap<>();
+    }
+
+    /**
+     * Mirror of frc.robot.util.json.FixedPolymorphTypeAdapterFactory from 181-follower-autos: a
+     * polymorphic dispatcher registered as a TypeAdapterFactory rather than a JsonDeserializer,
+     * which is the form NetworkConfigurableWait flows through in production.
+     */
+    public static class FixedPolymorphFactoryStub implements TypeAdapterFactory {
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
+            Class<?> clazz = typeToken.getRawType();
+            if (clazz.getAnnotation(JsonType.class) == null) {
+                return null;
+            }
+            return new TypeAdapter<T>() {
+                @Override
+                public T read(JsonReader reader) throws IOException {
+                    JsonElement el = JsonParser.parseReader(reader);
+                    JsonType jsonType = clazz.getDeclaredAnnotation(JsonType.class);
+                    String discriminator =
+                            el.getAsJsonObject().get(jsonType.property()).getAsString();
+                    Type sub =
+                            Arrays.stream(jsonType.subtypes())
+                                    .filter(s -> s.name().equals(discriminator))
+                                    .findFirst()
+                                    .orElseThrow(
+                                            () ->
+                                                    new JsonParseException(
+                                                            "Unknown subtype: " + discriminator))
+                                    .clazz();
+                    return gson.fromJson(el, sub);
+                }
+
+                @Override
+                public void write(JsonWriter out, T value) throws IOException {
+                    gson.toJson(value, value.getClass(), out);
+                }
+            };
+        }
     }
 
     public static class ThreadTrackedValue {
@@ -844,5 +953,257 @@ public class JSONHandlerHttpTests {
         assertEquals(200, response.statusCode);
         assertEquals(Thread.currentThread(), callbackThread.get());
         assertTrue(response.body.contains("\"success\":true"));
+    }
+
+    @Test
+    void putRequest_invokesAfterJsonLoadOnLiveRootInstance()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        JSONHandler handler = new JSONHandler();
+        AfterLoadRootData data = new AfterLoadRootData();
+        data.a = 1;
+        data.b = 2;
+
+        handler.addRoute("/afterloadroot", data);
+        AfterLoadRootData.hookedInstances.clear();
+
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest("PUT", "/default/afterloadroot", "{\"a\":10,\"b\":20}"));
+
+        assertEquals(200, response.statusCode);
+        assertEquals(10, data.a);
+        assertEquals(20, data.b);
+        assertEquals(30, data.sum);
+        assertTrue(
+                AfterLoadRootData.hookedInstances.contains(data),
+                "AfterJsonLoad should have run on the live route instance, not just a"
+                        + " throwaway");
+    }
+
+    @Test
+    void putRequest_invokesAfterJsonLoadOnNestedObject()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        JSONHandler handler = new JSONHandler();
+        AfterLoadParent data = new AfterLoadParent();
+        data.label = "original";
+        data.child.x = 1;
+        data.child.y = 2;
+
+        handler.addRoute("/afterloadnested", data);
+        AfterLoadNestedChild.hookedInstances.clear();
+
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/afterloadnested",
+                                "{\"label\":\"updated\",\"child\":{\"x\":3,\"y\":4}}"));
+
+        assertEquals(200, response.statusCode);
+        assertEquals("updated", data.label);
+        assertEquals(3, data.child.x);
+        assertEquals(4, data.child.y);
+        assertEquals(12, data.child.product);
+        assertTrue(
+                AfterLoadNestedChild.hookedInstances.contains(data.child),
+                "AfterJsonLoad should have run on the nested object now living in the route");
+    }
+
+    @Test
+    void putRequest_invokesAfterJsonLoadOnPolymorphicNestedObject()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        JSONSyncConfig config =
+                new JSONSyncConfigBuilder()
+                        .setUpPolymorphAdapter(PolymorphAfterLoadBase.class)
+                        .build();
+        JSONHandler handler = new JSONHandler(config);
+        PolymorphAfterLoadParent data = new PolymorphAfterLoadParent();
+
+        handler.addRoute("/afterloadpoly", data);
+        PolymorphAfterLoadSub.hookedInstances.clear();
+
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/afterloadpoly",
+                                "{\"entries\":{\"a\":{\"type\":\"Sub\",\"name\":\"first\"}}}"));
+
+        assertEquals(200, response.statusCode);
+        assertEquals(1, data.entries.size());
+        PolymorphAfterLoadSub sub = (PolymorphAfterLoadSub) data.entries.get("a");
+        assertEquals("first", sub.name);
+        assertEquals(1, sub.counter, "AfterJsonLoad should have run exactly once");
+        assertTrue(
+                PolymorphAfterLoadSub.hookedInstances.contains(sub),
+                "AfterJsonLoad should have run on the polymorphic nested object now living in"
+                        + " the route");
+    }
+
+    @Test
+    void putRequest_deserializesPolymorphicNestedObjectWithDefaultConfig()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        JSONHandler handler = new JSONHandler(new JSONSyncConfigBuilder().build());
+        PolymorphAfterLoadParent data = new PolymorphAfterLoadParent();
+
+        handler.addRoute("/afterloadpolydefault", data);
+        PolymorphAfterLoadSub.hookedInstances.clear();
+
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/afterloadpolydefault",
+                                "{\"entries\":{\"a\":{\"type\":\"Sub\",\"name\":\"first\"}}}"));
+
+        assertEquals(200, response.statusCode, response.body);
+        assertEquals(1, data.entries.size());
+        PolymorphAfterLoadSub sub = (PolymorphAfterLoadSub) data.entries.get("a");
+        assertEquals("first", sub.name);
+        assertEquals(1, sub.counter, "AfterJsonLoad should have run exactly once");
+        assertTrue(
+                PolymorphAfterLoadSub.hookedInstances.contains(sub),
+                "Default JSONSyncConfigBuilder should deserialize polymorphic route data during"
+                        + " handlePut and preserve AfterJsonLoad behavior");
+    }
+
+    @Test
+    void putRequest_invokesAfterJsonLoadOnPolymorphicNestedObject_viaTypeAdapterFactory()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        // Mirrors the production setup in 181-follower-autos: polymorphic dispatch is provided by a
+        // TypeAdapterFactory (FixedPolymorphTypeAdapterFactory), not by registerTypeAdapter.
+        JSONSyncConfigBuilder builder = new JSONSyncConfigBuilder();
+        JSONSyncConfig base = builder.build();
+        List<TypeAdapterFactory> factories = new ArrayList<>(base.typeAdapterFactories());
+        factories.add(new FixedPolymorphFactoryStub());
+        JSONSyncConfig config =
+                new JSONSyncConfig(
+                        base.serializeNulls(),
+                        base.prettyPrinting(),
+                        base.excludeFieldsWithoutExposeAnnotation(),
+                        base.namingPolicy(),
+                        base.longSerializationPolicy(),
+                        base.primitiveChecking(),
+                        base.primitiveCheckPrintAlert(),
+                        base.primitiveCheckCrash(),
+                        base.typeAdapters(),
+                        factories);
+
+        JSONHandler handler = new JSONHandler(config);
+        PolymorphAfterLoadParent data = new PolymorphAfterLoadParent();
+
+        handler.addRoute("/afterloadpolyfactory", data);
+        PolymorphAfterLoadSub.hookedInstances.clear();
+
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/afterloadpolyfactory",
+                                "{\"entries\":{\"a\":{\"type\":\"Sub\",\"name\":\"first\"}}}"));
+
+        assertEquals(200, response.statusCode);
+        assertEquals(1, data.entries.size());
+        PolymorphAfterLoadSub sub = (PolymorphAfterLoadSub) data.entries.get("a");
+        assertEquals("first", sub.name);
+        assertEquals(1, sub.counter, "AfterJsonLoad should have run exactly once");
+        assertTrue(
+                PolymorphAfterLoadSub.hookedInstances.contains(sub),
+                "AfterJsonLoad should have run on the polymorphic nested object dispatched via a"
+                        + " TypeAdapterFactory");
+    }
+
+    /**
+     * Mirrors NetworkConfigurableWait: @AfterJsonLoad enforces a uniqueness invariant by throwing
+     * when an already-seen name is reloaded.
+     */
+    public static class StrictPolymorphSub extends StrictPolymorphBase {
+        public String name = "";
+        public static final java.util.Set<String> usedNames =
+                Collections.synchronizedSet(new java.util.HashSet<>());
+        public static final List<StrictPolymorphSub> hookedInstances =
+                Collections.synchronizedList(new ArrayList<>());
+
+        @AfterJsonLoad
+        public void initialize() {
+            hookedInstances.add(this);
+            if (usedNames.contains(name)) {
+                throw new IllegalArgumentException("Duplicate name: " + name);
+            }
+            usedNames.add(name);
+        }
+    }
+
+    @JsonType(
+            property = "type",
+            subtypes = {@JsonSubtype(clazz = StrictPolymorphSub.class, name = "Strict")})
+    public abstract static class StrictPolymorphBase {
+        public String type;
+    }
+
+    public static class StrictPolymorphParent {
+        public HashMap<String, StrictPolymorphBase> entries = new HashMap<>();
+    }
+
+    @Test
+    void putRequest_secondPut_afterJsonLoadFailureReturnsServerError()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        // Reproduces the NetworkConfigurableWait scenario: file load registers the name; PUT
+        // later rebuilds a throwaway with the same name, so the @AfterJsonLoad invariant trips.
+        // The hook should be invoked and its failure should be surfaced instead of silently
+        // skipped.
+        JSONSyncConfigBuilder builder = new JSONSyncConfigBuilder();
+        JSONSyncConfig base = builder.build();
+        List<TypeAdapterFactory> factories = new ArrayList<>(base.typeAdapterFactories());
+        factories.add(new FixedPolymorphFactoryStub());
+        JSONSyncConfig config =
+                new JSONSyncConfig(
+                        base.serializeNulls(),
+                        base.prettyPrinting(),
+                        base.excludeFieldsWithoutExposeAnnotation(),
+                        base.namingPolicy(),
+                        base.longSerializationPolicy(),
+                        base.primitiveChecking(),
+                        base.primitiveCheckPrintAlert(),
+                        base.primitiveCheckCrash(),
+                        base.typeAdapters(),
+                        factories);
+
+        // Re-register StrictPolymorphSub as a JsonSubtype on a fresh base for this test;
+        // reuse PolymorphAfterLoadBase by dropping a Strict Sub onto it isn't supported
+        // since @JsonType is a class-level annotation. Instead, stash the existing one.
+        StrictPolymorphSub.usedNames.clear();
+        StrictPolymorphSub.hookedInstances.clear();
+
+        JSONHandler handler = new JSONHandler(config);
+        StrictPolymorphParent data = new StrictPolymorphParent();
+        StrictPolymorphSub initial = new StrictPolymorphSub();
+        initial.name = "alpha";
+        // simulate the file-load path having already registered this name
+        StrictPolymorphSub.usedNames.add("alpha");
+
+        data.entries.put("a", initial);
+
+        handler.addRoute("/strictpoly", data);
+
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/strictpoly",
+                                "{\"entries\":{\"a\":{\"type\":\"Strict\",\"name\":\"alpha\"}}}"));
+
+        assertEquals(500, response.statusCode);
+        assertTrue(response.body.contains("AfterJsonLoad method initialize failed"));
+        assertEquals(
+                1,
+                StrictPolymorphSub.hookedInstances.size(),
+                "AfterJsonLoad should have been entered once on the throwaway");
     }
 }
