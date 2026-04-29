@@ -7,6 +7,7 @@ import com.google.gson.LongSerializationPolicy;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import coppercore.parameter_tools.json.adapters.PolymorphDeserializer;
+import coppercore.parameter_tools.json.adapters.PolymorphTypeAdapterFactory;
 import edu.wpi.first.math.Pair;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,11 @@ public class JSONSyncConfigBuilder {
 
     /** List of custom TypeAdapterFactory instances to be registered. */
     private List<TypeAdapterFactory> typeAdapterFactories = new ArrayList<>();
+
+    /** Creates a builder with the default Coppercore Gson adapter factories. */
+    public JSONSyncConfigBuilder() {
+        addJsonTypeAdapterFactory(new PolymorphTypeAdapterFactory());
+    }
 
     /**
      * Sets whether null fields should be serialized.

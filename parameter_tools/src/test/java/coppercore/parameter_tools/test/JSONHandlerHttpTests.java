@@ -1044,6 +1044,34 @@ public class JSONHandlerHttpTests {
     }
 
     @Test
+    void putRequest_deserializesPolymorphicNestedObjectWithDefaultConfig()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        JSONHandler handler = new JSONHandler(new JSONSyncConfigBuilder().build());
+        PolymorphAfterLoadParent data = new PolymorphAfterLoadParent();
+
+        handler.addRoute("/afterloadpolydefault", data);
+        PolymorphAfterLoadSub.hookedInstances.clear();
+
+        HttpResult response =
+                awaitRequest(
+                        handler,
+                        startRequest(
+                                "PUT",
+                                "/default/afterloadpolydefault",
+                                "{\"entries\":{\"a\":{\"type\":\"Sub\",\"name\":\"first\"}}}"));
+
+        assertEquals(200, response.statusCode, response.body);
+        assertEquals(1, data.entries.size());
+        PolymorphAfterLoadSub sub = (PolymorphAfterLoadSub) data.entries.get("a");
+        assertEquals("first", sub.name);
+        assertEquals(1, sub.counter, "AfterJsonLoad should have run exactly once");
+        assertTrue(
+                PolymorphAfterLoadSub.hookedInstances.contains(sub),
+                "Default JSONSyncConfigBuilder should deserialize polymorphic route data during"
+                        + " handlePut and preserve AfterJsonLoad behavior");
+    }
+
+    @Test
     void putRequest_invokesAfterJsonLoadOnPolymorphicNestedObject_viaTypeAdapterFactory()
             throws InterruptedException, ExecutionException, TimeoutException {
         // Mirrors the production setup in 181-follower-autos: polymorphic dispatch is provided by a
