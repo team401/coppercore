@@ -2,6 +2,7 @@ package coppercore.parameter_tools.json;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import coppercore.parameter_tools.json.annotations.AfterJsonLoad;
 import coppercore.parameter_tools.path_provider.PathProvider;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.RobotController;
@@ -9,11 +10,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -391,6 +396,7 @@ public final class JSONHandler {
                         () -> {
                             T updatedObject = routeInfo.sync.deserialize(requestBody);
                             copyFields(updatedObject, routeInfo.instance);
+                            invokeAfterJsonLoad(routeInfo.instance);
                             return jsonResponse(routeInfo.sync.serialize());
                         });
         writeResponse(exchange, response);
@@ -487,6 +493,33 @@ public final class JSONHandler {
                 }
             }
             clazz = clazz.getSuperclass();
+        }
+    }
+
+    /**
+     * Invokes the {@link AfterJsonLoad}-annotated method on the given object, if one exists.
+     *
+     * <p>{@link #handlePut} deserializes JSON into a throwaway object and then bulk-copies its
+     * fields onto the live route instance. Gson fires {@code @AfterJsonLoad} on the throwaway
+     * during deserialization, so the live instance never sees its hook run; this method covers that
+     * gap.
+     */
+    private static void invokeAfterJsonLoad(Object obj) {
+        List<Method> methods =
+                Arrays.stream(obj.getClass().getMethods())
+                        .filter(m -> m.isAnnotationPresent(AfterJsonLoad.class))
+                        .toList();
+        if (methods.size() > 1) {
+            throw new RuntimeException(
+                    "Multiple AfterJsonLoad annotations on methods in one class");
+        }
+        if (methods.isEmpty()) {
+            return;
+        }
+        try {
+            methods.get(0).invoke(obj);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
         }
     }
 
