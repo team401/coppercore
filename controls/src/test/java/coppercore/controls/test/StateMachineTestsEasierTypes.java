@@ -72,7 +72,7 @@ public class StateMachineTestsEasierTypes {
         sim.schedule(0, robotLoop);
         assertSame(easierState, stateMachine.getCurrentState());
 
-        final BiFunction<State, String, DES.Runnable> assertIn =
+        final BiFunction<State<Robot>, String, DES.Runnable> assertIn =
                 (state, msg) -> _time -> assertSame(state, stateMachine.getCurrentState(), msg);
 
         // Schedule checks
