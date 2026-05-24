@@ -177,6 +177,7 @@ public class JSONSyncTests {
         Assertions.assertNull(fromReader.optionalValue);
     }
 
+    @SuppressWarnings("unused")
     private static class PrimitiveClass {
         final int testInt;
 
@@ -202,6 +203,7 @@ public class JSONSyncTests {
     }
 
     /** Class to test the primitive check crash feature. */
+    @SuppressWarnings("unused")
     private static class PrimitiveCheckCrash {
         public final int primitiveField = 10;
     }
@@ -222,6 +224,7 @@ public class JSONSyncTests {
     }
 
     /** Class to test the primitive check crash feature with a private field. */
+    @SuppressWarnings("unused")
     private static class PrivatePrimitiveCheckCrash {
         private final int primitiveField = 10;
     }
@@ -245,6 +248,7 @@ public class JSONSyncTests {
     }
 
     /** Class to test the primitive check crash feature with a double. */
+    @SuppressWarnings("unused")
     private static class DoublePrimitiveCheckCrash {
         public final double primitiveField = 10.0;
     }
@@ -265,6 +269,7 @@ public class JSONSyncTests {
     }
 
     /** Class to test the primitive check crash feature with a boolean. */
+    @SuppressWarnings("unused")
     private static class BooleanPrimitiveCheckCrash {
         public final boolean primitiveField = true;
     }
@@ -285,6 +290,7 @@ public class JSONSyncTests {
     }
 
     /** Class to test the primitive check crash feature with a byte. */
+    @SuppressWarnings("unused")
     private static class BytePrimitiveCheckCrash {
         public final byte primitiveField = 1;
     }
@@ -305,6 +311,7 @@ public class JSONSyncTests {
     }
 
     /** Class to test the primitive check crash feature with a short. */
+    @SuppressWarnings("unused")
     private static class ShortPrimitiveCheckCrash {
         public final short primitiveField = 2;
     }
@@ -325,6 +332,7 @@ public class JSONSyncTests {
     }
 
     /** Class to test the final String check crash feature. */
+    @SuppressWarnings("unused")
     private static class FinalStringCheckCrash {
         public final String stringField = "hello";
     }
@@ -348,6 +356,7 @@ public class JSONSyncTests {
     }
 
     /** Class to test that non-final String fields are allowed. */
+    @SuppressWarnings("unused")
     private static class NonFinalStringNoCrash {
         public String stringField = "hello";
     }

@@ -37,7 +37,7 @@ public class JSONSyncConfigBuilder {
      * List of custom type adapters (JsonSerializer, JsonDeserializer, TypeAdapter) to be
      * registered.
      */
-    private List<Pair<Class, Object>> typeAdapters = new ArrayList<>();
+    private List<Pair<Class<?>, Object>> typeAdapters = new ArrayList<>();
 
     /** List of custom TypeAdapterFactory instances to be registered. */
     private List<TypeAdapterFactory> typeAdapterFactories = new ArrayList<>();
