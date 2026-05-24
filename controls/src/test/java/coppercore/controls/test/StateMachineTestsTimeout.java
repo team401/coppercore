@@ -73,7 +73,7 @@ public class StateMachineTestsTimeout {
         sim.schedule(0, robotLoop);
 
         assertSame(waitingState, stateMachine.getCurrentState());
-        final BiFunction<State, String, DES.Runnable> assertIn =
+        final BiFunction<State<Robot>, String, DES.Runnable> assertIn =
                 (state, msg) -> _time -> assertSame(state, stateMachine.getCurrentState(), msg);
 
         sim.schedule(5, assertIn.apply(waitingState, "in waiting 1"));
