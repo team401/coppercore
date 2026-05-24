@@ -52,7 +52,7 @@ public class JSONConverter {
                 });
 
         // Filter out Per from the rest of the measures
-        JSONConverter.addConversion(Per.class, JSONPer.class);
+        JSONConverter.addConversion(Per.class, jsonPerClass());
     }
 
     /**
@@ -63,6 +63,11 @@ public class JSONConverter {
      */
     public static void addConversion(Class<?> clazz, Class<? extends JSONObject<?>> jsonClazz) {
         jsonMap.put(clazz, jsonClazz);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Class<? extends JSONObject<?>> jsonPerClass() {
+        return (Class) JSONPer.class;
     }
 
     /**
