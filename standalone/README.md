@@ -57,11 +57,13 @@ e.g. WPILib math/HAL or Phoenix devices in simulation — work from the command 
 
 ## Vendordeps
 
-GradleRIO loads vendordeps from this project's own `vendordeps/` directory. The build
-automatically mirrors vendordep JSON files from the sibling modules into `vendordeps/`
-at configuration time, and a copy is committed so the first build already has them. If
-you add a brand-new vendordep to another module, run any Gradle command once to copy it
-here (or copy the JSON manually).
+GradleRIO loads vendordeps from this project's own `vendordeps/` directory. Rather than
+committing a second copy that could drift, the build **mirrors** the library modules'
+`*/vendordeps/*.json` into this project's `vendordeps/` on every build (just before
+GradleRIO is applied), so it is always in sync with the modules. That directory is
+git-ignored and regenerated — never edit or commit it. To change vendordeps, edit them in
+the owning module (e.g. `wpilib_interface/vendordeps/`); `standalone` picks the change up
+automatically.
 
 ## Notes
 

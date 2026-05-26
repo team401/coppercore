@@ -17,24 +17,30 @@
 
 import org.gradle.api.file.RelativePath
 
+// GradleRIO is resolved here but NOT applied yet: it reads vendordeps from this
+// project's own `vendordeps/` directory at apply time, so that directory has to be
+// populated first (see the copy below). The plugin is applied a few lines down.
 plugins {
-	alias(libs.plugins.gradlerio)
+	alias(libs.plugins.gradlerio).apply(false)
 }
 
-// Use the release JNI/native libraries. Flip to true to debug native code.
-wpi.java.debugJni = false
-
-// GradleRIO loads vendordeps from this project's own `vendordeps/` directory. Mirror
-// every vendordep used anywhere in coppercore so standalone programs can link against
-// them (Java APIs and desktop simulation natives alike). This runs at configuration
-// time so newly added sibling vendordeps are picked up automatically; a copy is also
-// committed so the very first configuration already sees them.
+// Single source of truth for vendordeps: the `*/vendordeps` directories of the library
+// modules. There is intentionally NO committed copy under standalone/vendordeps (that
+// would be a second copy to keep in sync). Instead this mirrors the modules' vendordeps
+// into this project's git-ignored `vendordeps/` on every build, so it can never drift,
+// then applies GradleRIO. A copy (rather than a symlink) is used so it works on every
+// platform and aggregates vendordeps from any number of modules.
 copy {
 	from(rootProject.subprojects.findAll { it != project }.collect { "${it.projectDir}/vendordeps" })
 	into "${projectDir}/vendordeps"
 	include '*.json'
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
+
+apply plugin: 'edu.wpi.first.GradleRIO'
+
+// Use the release JNI/native libraries. Flip to true to debug native code.
+wpi.java.debugJni = false
 
 dependencies {
 	// All coppercore library modules, so a standalone program can use any of them.

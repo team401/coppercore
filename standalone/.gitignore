@@ -1,1 +1,5 @@
 ctre_sim
+
+# vendordeps/ is generated at build time by mirroring the library modules'
+# */vendordeps (see build.gradle); it is never committed to avoid a second copy.
+vendordeps/
