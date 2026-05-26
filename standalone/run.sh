@@ -30,7 +30,12 @@ shift
 cd "${repo_root}"
 
 if [ "$#" -gt 0 ]; then
-	exec ./gradlew -q :standalone:run -PmainClass="${main_class}" --args="$*"
+	gradle_args=""
+	for arg in "$@"; do
+		printf -v gradle_args '%s%q ' "${gradle_args}" "${arg}"
+	done
+	gradle_args="${gradle_args% }"
+	exec ./gradlew -q :standalone:run -PmainClass="${main_class}" --args="${gradle_args}"
 else
 	exec ./gradlew -q :standalone:run -PmainClass="${main_class}"
 fi
