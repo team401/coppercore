@@ -24,20 +24,31 @@ plugins {
 	alias(libs.plugins.gradlerio).apply(false)
 }
 
+def standaloneTasksRequested = gradle.startParameter.taskNames.any { taskName ->
+	taskName == ':standalone' ||
+		taskName.startsWith(':standalone:') ||
+		taskName == 'standalone' ||
+		taskName.startsWith('standalone:')
+}
+
 // Single source of truth for vendordeps: the `*/vendordeps` directories of the library
 // modules. There is intentionally NO committed copy under standalone/vendordeps (that
 // would be a second copy to keep in sync). Instead this mirrors the modules' vendordeps
-// into this project's git-ignored `vendordeps/` on every build, so it can never drift,
-// then applies GradleRIO. A copy (rather than a symlink) is used so it works on every
-// platform and aggregates vendordeps from any number of modules.
-copy {
-	from(rootProject.subprojects.findAll { it != project }.collect { "${it.projectDir}/vendordeps" })
-	into "${projectDir}/vendordeps"
-	include '*.json'
-	duplicatesStrategy = DuplicatesStrategy.INCLUDE
-}
+// into this project's git-ignored `vendordeps/` only when standalone tasks are requested,
+// so unrelated builds avoid configuration-time filesystem writes. It then applies
+// GradleRIO, which reads vendordeps at apply time. A copy (rather than a symlink) is
+// used so it works on every platform and aggregates vendordeps from any number of
+// modules.
+if (standaloneTasksRequested) {
+	copy {
+		from(rootProject.subprojects.findAll { it != project }.collect { "${it.projectDir}/vendordeps" })
+		into "${projectDir}/vendordeps"
+		include '*.json'
+		duplicatesStrategy = DuplicatesStrategy.INCLUDE
+	}
 
-apply plugin: 'edu.wpi.first.GradleRIO'
+	apply plugin: 'edu.wpi.first.GradleRIO'
+}
 
 // Use the release JNI/native libraries. Flip to true to debug native code.
 wpi.java.debugJni = false
