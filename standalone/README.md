@@ -59,17 +59,18 @@ e.g. WPILib math/HAL or Phoenix devices in simulation — work from the command 
 
 GradleRIO loads vendordeps from this project's own `vendordeps/` directory. Rather than
 committing a second copy that could drift, the build **mirrors** the library modules'
-`*/vendordeps/*.json` into this project's `vendordeps/` on every build (just before
-GradleRIO is applied), so it is always in sync with the modules. That directory is
-git-ignored and regenerated — never edit or commit it. To change vendordeps, edit them in
-the owning module (e.g. `wpilib_interface/vendordeps/`); `standalone` picks the change up
-automatically.
+`*/vendordeps/*.json` into this project's `vendordeps/` whenever a `:standalone` task is
+run (just before GradleRIO is applied), so it is always in sync with the modules. That
+directory is git-ignored and regenerated — never edit or commit it. To change vendordeps,
+edit them in the owning module (e.g. `wpilib_interface/vendordeps/`); `standalone` picks
+the change up automatically.
 
 ## Notes
 
-- Because `standalone` is part of the multi-project build, a program that fails to
-  compile will fail `./gradlew build`. Use `./gradlew :standalone:build` to check just
-  this module, or keep work-in-progress programs that don't compile out of the tree.
+- `standalone` is configured only when one of its own tasks is requested, so it is **not**
+  part of the aggregate `./gradlew build` and a program that fails to compile here can never
+  break the library build or publishing. Use `./gradlew :standalone:build` to compile-check
+  this module on its own.
 - Native libraries default to the **release** variant. Set `wpi.java.debugJni = true` in
   `build.gradle` to use debug natives.
 - The simulation GUI and driver station are disabled by default so programs run headless.
