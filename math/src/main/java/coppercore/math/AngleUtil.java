@@ -16,7 +16,7 @@ public class AngleUtil {
      *
      * @param originalHeadingRadians A double representing the heading to normalize, in radians
      * @return A double representing a coterminal angle of originalHeadingRadians (having the same
-     *     heading) but satisfying the condition 0 &le:= angle &le: 2pi
+     *     heading) but satisfying the condition 0 &lt;= angle &lt; 2pi
      */
     public static double normalizeHeading(double originalHeadingRadians) {
         // First, mod by 2pi, placing any angle into the range -2pi to 2pi
@@ -36,7 +36,7 @@ public class AngleUtil {
      *
      * @param originalHeading A Rotation2d containing the original heading
      * @return A Rotation2d containing a coterminal angle of originalHeading (having the same
-     *     heading) but satisfying the condition 0 &le:= angle &le: 2pi
+     *     heading) but satisfying the condition 0 &lt;= angle &lt; 2pi
      */
     public static Rotation2d normalizeHeading(Rotation2d originalHeading) {
         return new Rotation2d(normalizeHeading(originalHeading.getRadians()));
