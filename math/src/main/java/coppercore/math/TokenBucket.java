@@ -1,5 +1,12 @@
 package coppercore.math;
 
+/**
+ * A token bucket that tracks a capped number of tokens for rate-limiting or budgeting repeated
+ * actions.
+ *
+ * <p>The bucket starts full, can be refilled in fixed increments up to its maximum capacity, and
+ * only consumes tokens when the requested amount is available.
+ */
 public class TokenBucket {
     private final int maxCapacity;
     private final int incrementAmount;

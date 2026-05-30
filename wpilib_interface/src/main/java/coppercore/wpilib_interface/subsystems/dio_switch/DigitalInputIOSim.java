@@ -4,8 +4,9 @@ import edu.wpi.first.wpilibj.simulation.DIOSim;
 
 /**
  * DigitalInputIOSim implements DigitalInputIO by extending DigitalInputIOReal and using wpilib's
- * {@link DIOSim} class to update the values that the DigitalInput returns. Use {@link
- * this#setValue(boolean)} to set the value that will be read.
+ * {@link DIOSim} class to update the values that the DigitalInput returns.
+ *
+ * <p>Use {@link #setValue(boolean)} to set the value that will be read.
  */
 public class DigitalInputIOSim extends DigitalInputIOReal {
     protected final DIOSim dioSim;

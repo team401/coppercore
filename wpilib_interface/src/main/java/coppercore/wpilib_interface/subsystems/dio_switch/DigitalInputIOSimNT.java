@@ -7,8 +7,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
  * using a LoggedNetworkBoolean. This makes it possible to use Elastic or AdvantageScope to mock the
  * value of the switch in simulation.
  *
- * @apiNote {@link DigitalInputIOSimNT#setValue(boolean)} should not be called, as value passed into
- *     it will be overridden in updateInputs anyway.
+ * <p>{@link DigitalInputIOSimNT#setValue(boolean)} should not be called, as value passed into it
+ * will be overridden in updateInputs anyway.
  */
 public class DigitalInputIOSimNT extends DigitalInputIOSim {
     protected final LoggedNetworkBoolean simValue;

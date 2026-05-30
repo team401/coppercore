@@ -10,7 +10,8 @@ import java.util.Map;
  * don't want to do unnecessary math which may cause lag. It's recommended to enable this in replay
  * sim.
  *
- * <p>{@link TotalCurrentCalculator#periodic()} must be called periodically to log the latest data.
+ * <p>{@link TotalCurrentCalculator#getTotalCurrent()} must be called periodically to get the latest
+ * data.
  */
 public class TotalCurrentCalculator {
     // Class should be used statically
