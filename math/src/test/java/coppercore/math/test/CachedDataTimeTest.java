@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 public class CachedDataTimeTest {
 
     @BeforeEach
-    @SuppressWarnings("unused")
     void setUpMockTime() {
         WPIUtilJNI.enableMockTime();
         setMockTimeSeconds(0.0);
@@ -108,7 +107,7 @@ public class CachedDataTimeTest {
 
     @Test
     public void readTestNull() {
-        CachedDataTime data = new CachedDataTime(1);
+        var data = new CachedDataTime<Object>(1);
         setMockTimeSeconds(1.0);
         Assertions.assertEquals(data.read(), null);
     }

@@ -1,9 +1,12 @@
 plugins {
 	// Apply the java-library plugin for API and implementation separation.
 	id 'java-library'
+	alias(libs.plugins.gradlerio)
 }
 
 dependencies {
+	implementation wpi.java.deps.wpilib()
+
 	// This dependency is exported to consumers, that is to say found on their compile classpath.
 	api libs.commons.math3
 

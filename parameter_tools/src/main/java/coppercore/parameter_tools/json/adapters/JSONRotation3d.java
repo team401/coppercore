@@ -20,14 +20,14 @@ public class JSONRotation3d extends JSONObject<Object> {
      */
     public JSONRotation3d(Rotation3d rotation) {
         super(rotation);
-        roll = rotation.getX();
-        pitch = rotation.getY();
-        yaw = rotation.getZ();
+        roll = Math.toDegrees(rotation.getX());
+        pitch = Math.toDegrees(rotation.getY());
+        yaw = Math.toDegrees(rotation.getZ());
     }
 
     @Override
     public Rotation3d toJava() {
-        return new Rotation3d(roll, pitch, yaw);
+        return new Rotation3d(Math.toRadians(roll), Math.toRadians(pitch), Math.toRadians(yaw));
     }
 
     /**

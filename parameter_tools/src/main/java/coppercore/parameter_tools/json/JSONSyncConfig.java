@@ -21,5 +21,5 @@ public record JSONSyncConfig(
         boolean primitiveChecking,
         boolean primitiveCheckPrintAlert,
         boolean primitiveCheckCrash,
-        List<Pair<Class, Object>> typeAdapters,
+        List<Pair<Class<?>, Object>> typeAdapters,
         List<TypeAdapterFactory> typeAdapterFactories) {}

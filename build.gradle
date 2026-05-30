@@ -145,6 +145,14 @@ subprojects {
                 developer {
                     id = 'jkleiber'
                     name = 'Justin Kleiber'
+                }                
+				developer {
+                    id = 'godmar'
+                    name = 'Godmar Back'
+                }                
+				developer {
+                    id = 'thetaback'
+                    name = 'Theta Back'
                 }
             }
             scm {

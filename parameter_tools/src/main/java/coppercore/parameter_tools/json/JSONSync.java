@@ -178,7 +178,7 @@ public class JSONSync<T> {
         jsonNameStrategy =
                 JSONPrimitiveCheckStrategy.checkForPrimitives(jsonNameStrategy, this.config);
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapterFactory(new JSONTypeAdapterFactory(this.config));
+        builder.registerTypeAdapterFactory(new JSONTypeAdapterFactory());
         if (this.config.serializeNulls()) builder.serializeNulls();
         if (this.config.prettyPrinting()) builder.setPrettyPrinting();
         if (this.config.excludeFieldsWithoutExposeAnnotation())
@@ -190,7 +190,7 @@ public class JSONSync<T> {
         for (TypeAdapterFactory factory : this.config.typeAdapterFactories()) {
             builder.registerTypeAdapterFactory(factory);
         }
-        for (Pair<Class, Object> pair : this.config.typeAdapters()) {
+        for (Pair<Class<?>, Object> pair : this.config.typeAdapters()) {
             builder.registerTypeAdapter(pair.getFirst(), pair.getSecond());
         }
         return builder.create();

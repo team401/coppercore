@@ -6,6 +6,7 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.LongSerializationPolicy;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
+import coppercore.parameter_tools.json.adapters.OptionalTypeAdapterFactory;
 import coppercore.parameter_tools.json.adapters.PolymorphDeserializer;
 import coppercore.parameter_tools.json.adapters.PolymorphTypeAdapterFactory;
 import edu.wpi.first.math.Pair;
@@ -37,7 +38,7 @@ public class JSONSyncConfigBuilder {
      * List of custom type adapters (JsonSerializer, JsonDeserializer, TypeAdapter) to be
      * registered.
      */
-    private List<Pair<Class, Object>> typeAdapters = new ArrayList<>();
+    private List<Pair<Class<?>, Object>> typeAdapters = new ArrayList<>();
 
     /** List of custom TypeAdapterFactory instances to be registered. */
     private List<TypeAdapterFactory> typeAdapterFactories = new ArrayList<>();
@@ -45,6 +46,7 @@ public class JSONSyncConfigBuilder {
     /** Creates a builder with the default Coppercore Gson adapter factories. */
     public JSONSyncConfigBuilder() {
         addJsonTypeAdapterFactory(new PolymorphTypeAdapterFactory());
+        addJsonTypeAdapterFactory(new OptionalTypeAdapterFactory());
     }
 
     /**

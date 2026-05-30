@@ -22,13 +22,7 @@ import java.util.List;
  */
 public class JSONTypeAdapterFactory implements TypeAdapterFactory {
 
-    private JSONSyncConfig config;
-
     private List<Class<?>> jsonAfterLoadClasses = new ArrayList<>();
-
-    public JSONTypeAdapterFactory(JSONSyncConfig config) {
-        this.config = config;
-    }
 
     private List<Method> findAfterJsonLoadAnnotatedMethods(Class<?> clazz) {
         return Arrays.stream(clazz.getMethods())
@@ -130,7 +124,7 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
             return null;
         }
 
-        Constructor constructor;
+        Constructor<? extends JSONObject<T>> constructor;
         try {
             Method getConstructor = jsonObject.getMethod("getConstructor");
             constructor = (Constructor<? extends JSONObject<T>>) getConstructor.invoke(null);
@@ -148,7 +142,6 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
         TypeAdapter<T> newTypeAdapter =
                 new TypeAdapter<T>() {
 
-                    @SuppressWarnings("unchecked")
                     @Override
                     public T read(JsonReader reader) throws IOException {
                         try {
@@ -160,7 +153,6 @@ public class JSONTypeAdapterFactory implements TypeAdapterFactory {
                         return null;
                     }
 
-                    @SuppressWarnings("unchecked")
                     @Override
                     public void write(JsonWriter out, T value) throws IOException {
                         if (value == null) {
