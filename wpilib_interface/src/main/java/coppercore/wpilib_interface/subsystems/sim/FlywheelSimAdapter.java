@@ -26,11 +26,18 @@ public class FlywheelSimAdapter extends BaseSimAdapter {
     protected final FlywheelSim physicsSim;
     MutAngle integratedPosition = Radians.mutable(0.0);
 
+    /**
+     * Creates an adapter around a WPILib flywheel simulation.
+     *
+     * @param config mechanism gearing and sensor configuration
+     * @param flywheelSim simulation model to wrap
+     */
     public FlywheelSimAdapter(MechanismConfig config, FlywheelSim flywheelSim) {
         super(config);
         this.physicsSim = flywheelSim;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void update(Voltage inputVoltage, double deltaTimeSeconds) {
         physicsSim.setInputVoltage(inputVoltage.in(Volts));
@@ -45,31 +52,37 @@ public class FlywheelSimAdapter extends BaseSimAdapter {
         integratedPosition.mut_plus(Radians.of(dthetaRadians));
     }
 
+    /** {@inheritDoc} */
     @Override
     public Angle getMotorPosition() {
         return getEncoderPosition().times(config.motorToEncoderRatio);
     }
 
+    /** {@inheritDoc} */
     @Override
     public AngularVelocity getMotorAngularVelocity() {
         return getEncoderAngularVelocity().times(config.motorToEncoderRatio);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Angle getEncoderPosition() {
         return integratedPosition.times(config.encoderToMechanismRatio);
     }
 
+    /** {@inheritDoc} */
     @Override
     public AngularVelocity getEncoderAngularVelocity() {
         return physicsSim.getAngularVelocity().times(config.encoderToMechanismRatio);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Current getCurrentDraw() {
         return Amps.of(physicsSim.getCurrentDrawAmps());
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setState(Angle newAngle, AngularVelocity newAngularVelocity) {
         integratedPosition.mut_replace(newAngle);

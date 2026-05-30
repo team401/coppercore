@@ -14,6 +14,12 @@ public class EnhancedLine2d {
     protected final Translation2d d;
     protected final double length;
 
+    /**
+     * Creates a line segment between two field-relative points.
+     *
+     * @param start start point of the segment
+     * @param end end point of the segment
+     */
     public EnhancedLine2d(Translation2d start, Translation2d end) {
         this.start = start;
         this.end = end;
@@ -56,6 +62,12 @@ public class EnhancedLine2d {
         return Optional.of(new IntersectionParameters(l.d.cross(rp) / D, rp.cross(dneg) / D));
     }
 
+    /**
+     * Checks whether this segment intersects another segment.
+     *
+     * @param other segment to check against
+     * @return true if the two finite segments intersect
+     */
     public boolean intersects(EnhancedLine2d other) {
         return intersectionParameters(other)
                 .map(
@@ -67,10 +79,20 @@ public class EnhancedLine2d {
                 .orElse(false);
     }
 
+    /**
+     * Gets the point halfway between the start and end points.
+     *
+     * @return midpoint of the segment
+     */
     public Translation2d midPoint() {
         return start.plus(d.times(0.5));
     }
 
+    /**
+     * Gets this segment as a two-point trajectory.
+     *
+     * @return array containing the start point followed by the end point
+     */
     public Translation2d[] getTrajectory() {
         return new Translation2d[] {start, end};
     }

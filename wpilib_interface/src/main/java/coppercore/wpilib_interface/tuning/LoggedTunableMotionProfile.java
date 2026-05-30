@@ -28,10 +28,23 @@ public class LoggedTunableMotionProfile {
                     Volts.of(0).div(RotationsPerSecond.of(1)),
                     Volts.of(0).div(RotationsPerSecondPerSecond.of(1)));
 
+    /**
+     * Creates tunables for a motion profile.
+     *
+     * @param namePrefix logged tunable path prefix
+     * @param defaultProfile default profile values
+     */
     public LoggedTunableMotionProfile(String namePrefix, MotionProfileConfig defaultProfile) {
         this(namePrefix, defaultProfile, false);
     }
 
+    /**
+     * Creates tunables for a motion profile with optional unit suffixes.
+     *
+     * @param namePrefix logged tunable path prefix
+     * @param defaultProfile default profile values
+     * @param addUnitSuffix whether to append unit names to tunable paths
+     */
     public LoggedTunableMotionProfile(
             String namePrefix, MotionProfileConfig defaultProfile, boolean addUnitSuffix) {
         this.currentMotionProfile = defaultProfile.derive();
@@ -68,10 +81,20 @@ public class LoggedTunableMotionProfile {
                         addUnitSuffix);
     }
 
+    /**
+     * Creates tunables using the default zeroed motion profile.
+     *
+     * @param namePrefix logged tunable path prefix
+     */
     public LoggedTunableMotionProfile(String namePrefix) {
         this(namePrefix, defaultMotionProfileConfig);
     }
 
+    /**
+     * Gets the latest tuned motion profile.
+     *
+     * @return current motion profile config
+     */
     public MotionProfileConfig getCurrentMotionProfile() {
         updateProfile(hashCode());
         return currentMotionProfile;
@@ -102,6 +125,12 @@ public class LoggedTunableMotionProfile {
         return hasChanged;
     }
 
+    /**
+     * Runs a callback when any profile value changes for a caller id.
+     *
+     * @param id caller id used to track changes independently
+     * @param callback callback receiving the updated profile
+     */
     public void ifChanged(int id, MotionProfileConsumer callback) {
         boolean hasChanged = updateProfile(id);
         if (hasChanged) {
@@ -109,10 +138,22 @@ public class LoggedTunableMotionProfile {
         }
     }
 
+    /**
+     * Creates a callback that applies profile constraints to one motor IO.
+     *
+     * @param motorIO motor IO to update
+     * @return motion profile consumer for the motor IO
+     */
     public MotionProfileConsumer getMotorIOApplier(MotorIO motorIO) {
         return motionProfile -> motorIO.setProfileConstraints(motionProfile);
     }
 
+    /**
+     * Creates a callback that applies profile constraints to multiple motor IOs.
+     *
+     * @param motorIOs motor IOs to update
+     * @return motion profile consumer for all motor IOs
+     */
     public MotionProfileConsumer getMotorIOAppliers(MotorIO... motorIOs) {
         return motionProfile -> {
             for (MotorIO motorIO : motorIOs) {
@@ -125,8 +166,19 @@ public class LoggedTunableMotionProfile {
     public interface MotionProfileConsumer {
         MotionProfileConsumer noOp = motionProfile -> {};
 
+        /**
+         * Accepts an updated motion profile.
+         *
+         * @param motionProfile updated profile config
+         */
         void accept(MotionProfileConfig motionProfile);
 
+        /**
+         * Chains another consumer after this one.
+         *
+         * @param after consumer to run after this one
+         * @return combined consumer
+         */
         default MotionProfileConsumer chain(MotionProfileConsumer after) {
             return motionProfile -> {
                 accept(motionProfile);
@@ -134,6 +186,11 @@ public class LoggedTunableMotionProfile {
             };
         }
 
+        /**
+         * Gets a consumer that ignores profile updates.
+         *
+         * @return no-op consumer
+         */
         static MotionProfileConsumer noOp() {
             return noOp;
         }

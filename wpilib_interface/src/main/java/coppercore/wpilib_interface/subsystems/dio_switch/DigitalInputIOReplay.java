@@ -5,6 +5,7 @@ package coppercore.wpilib_interface.subsystems.dio_switch;
  * no-op implementations.
  */
 public class DigitalInputIOReplay implements DigitalInputIO {
+    /** {@inheritDoc} */
     @Override
     public void updateInputs(DigitalInputInputs inputs) {}
 }
