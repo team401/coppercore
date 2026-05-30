@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import org.junit.jupiter.api.Test;
 
+// This was written by Codex 5.5.
 class EnhancedLine2dTest {
     private static final double DELTA = 1e-12;
 

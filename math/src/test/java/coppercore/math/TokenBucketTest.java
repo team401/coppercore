@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-// This file was created with Codex.
+// This was written by Codex 5.5.
 class TokenBucketTest {
     @Test
     void startsFull() {

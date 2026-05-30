@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import edu.wpi.first.math.geometry.Translation2d;
 import org.junit.jupiter.api.Test;
 
+// This was written by Codex 5.5.
 class RectangleTest {
     private static final double DELTA = 1e-12;
 
