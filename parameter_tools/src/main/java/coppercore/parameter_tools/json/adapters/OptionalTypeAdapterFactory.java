@@ -30,6 +30,14 @@ import java.util.Optional;
  */
 public class OptionalTypeAdapterFactory implements TypeAdapterFactory {
 
+    /**
+     * Creates an adapter for Optional values.
+     *
+     * @param gson Gson instance providing inner value adapters
+     * @param type requested type token
+     * @param <T> requested adapter type
+     * @return Optional adapter, or null for non-Optional types
+     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
@@ -70,6 +78,7 @@ public class OptionalTypeAdapterFactory implements TypeAdapterFactory {
             this.innerAdapter = innerAdapter;
         }
 
+        /** {@inheritDoc} */
         @Override
         public void write(JsonWriter out, Optional<E> value) throws IOException {
             if (value == null || value.isEmpty()) {
@@ -79,6 +88,7 @@ public class OptionalTypeAdapterFactory implements TypeAdapterFactory {
             }
         }
 
+        /** {@inheritDoc} */
         @Override
         public Optional<E> read(JsonReader in) throws IOException {
             if (in.peek() == JsonToken.NULL) {

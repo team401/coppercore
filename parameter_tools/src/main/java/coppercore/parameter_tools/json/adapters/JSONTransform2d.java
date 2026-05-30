@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import java.lang.reflect.Constructor;
 
-/** A JSON representation of a Pose2d object. */
+/** A JSON representation of a Transform2d object. */
 public class JSONTransform2d extends JSONObject<Transform2d> {
     Rotation2d rotation;
     Translation2d translation;
@@ -22,6 +22,7 @@ public class JSONTransform2d extends JSONObject<Transform2d> {
         translation = transform.getTranslation();
     }
 
+    /** {@inheritDoc} */
     @Override
     public Transform2d toJava() {
         return new Transform2d(translation, rotation);
@@ -31,6 +32,7 @@ public class JSONTransform2d extends JSONObject<Transform2d> {
      * Gets the constructor of the json wrapper
      *
      * @return the json wrapper constructor
+     * @throws NoSuchMethodException if the wrapper constructor is missing
      */
     public static Constructor<JSONTransform2d> getConstructor() throws NoSuchMethodException {
         return JSONTransform2d.class.getConstructor(Transform2d.class);

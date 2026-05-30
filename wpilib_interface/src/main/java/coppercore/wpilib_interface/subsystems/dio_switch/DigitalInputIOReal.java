@@ -21,6 +21,7 @@ public class DigitalInputIOReal implements DigitalInputIO {
         this.digitalInput = new DigitalInput(channel);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void updateInputs(DigitalInputInputs inputs) {
         inputs.isOpen = digitalInput.get();

@@ -23,14 +23,26 @@ public class TotalCurrentCalculator {
 
     private static double currentSumAmps = 0.0;
 
+    /** Enables current accumulation from future recorded subsystem currents. */
     public static void enable() {
         enabled = true;
     }
 
+    /**
+     * Gets the latest total current sum.
+     *
+     * @return total recorded supply current in amps
+     */
     public static double getTotalCurrent() {
         return currentSumAmps;
     }
 
+    /**
+     * Records the latest current draw for one subsystem.
+     *
+     * @param id stable subsystem identifier
+     * @param supplyCurrentAmps subsystem supply current in amps
+     */
     public static void recordCurrent(int id, double supplyCurrentAmps) {
         if (!enabled) {
             return;

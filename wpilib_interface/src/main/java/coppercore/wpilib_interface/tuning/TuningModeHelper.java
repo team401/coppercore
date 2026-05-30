@@ -25,16 +25,33 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
     private EnumMap<TestModeEnum, TuningMode> tuningModes;
     private TuningMode currentTestMode = null;
 
+    /**
+     * Creates a helper for an enum of robot test modes.
+     *
+     * @param testModeEnumClass test mode enum class
+     */
     public TuningModeHelper(Class<TestModeEnum> testModeEnumClass) {
         tuningModes = new EnumMap<>(testModeEnumClass);
     }
 
+    /**
+     * Registers a tuning mode for a test mode.
+     *
+     * @param testMode enum value selected by the robot test mode chooser
+     * @param tuningMode tuning actions to run for that mode
+     * @return this helper for chaining
+     */
     public TuningModeHelper<TestModeEnum> addTuningMode(
             TestModeEnum testMode, TuningMode tuningMode) {
         tuningModes.put(testMode, tuningMode);
         return this;
     }
 
+    /**
+     * Runs the selected mode, handling enter and exit transitions.
+     *
+     * @param testMode currently selected test mode
+     */
     public void testPeriodic(TestModeEnum testMode) {
 
         var tuningMode = tuningModes.get(testMode);
@@ -56,6 +73,13 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
         }
     }
 
+    /**
+     * Adds tuning modes for one tunable motor.
+     *
+     * @param motor motor to tune
+     * @param motorTuningModes mappings from test modes to motor control modes
+     * @return this helper for chaining
+     */
     @SafeVarargs
     public final TuningModeHelper<TestModeEnum> addMotorTuningModes(
             TunableMotor motor, MotorTuningMode<TestModeEnum>... motorTuningModes) {
@@ -67,6 +91,14 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
     }
 
     public record MotorTuningMode<T extends Enum<T>>(T testMode, ControlMode controlMode) {
+        /**
+         * Creates a mapping from a test mode to a motor control mode.
+         *
+         * @param testMode enum test mode
+         * @param controlMode motor control mode to run
+         * @param <T> test mode enum type
+         * @return motor tuning mode mapping
+         */
         public static <T extends Enum<T>> MotorTuningMode<T> of(
                 T testMode, ControlMode controlMode) {
             return new MotorTuningMode<>(testMode, controlMode);
@@ -75,33 +107,55 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
 
     public record TuningMode(Runnable enterAction, Runnable periodicAction, Runnable exitAction) {
 
+        /** Runs the action for entering this tuning mode. */
         public void enter() {
             if (enterAction != null) {
                 enterAction.run();
             }
         }
 
+        /** Runs this tuning mode's periodic action. */
         public void periodic() {
             if (periodicAction != null) {
                 periodicAction.run();
             }
         }
 
+        /** Runs the action for leaving this tuning mode. */
         public void exit() {
             if (exitAction != null) {
                 exitAction.run();
             }
         }
 
+        /**
+         * Creates a tuning mode from explicit lifecycle actions.
+         *
+         * @param enterAction action to run when selected
+         * @param periodicAction action to run periodically while selected
+         * @param exitAction action to run when deselected
+         * @return tuning mode
+         */
         public static TuningMode of(
                 Runnable enterAction, Runnable periodicAction, Runnable exitAction) {
             return new TuningMode(enterAction, periodicAction, exitAction);
         }
 
+        /**
+         * Creates a tuning mode with only a periodic action.
+         *
+         * @param periodicAction action to run periodically while selected
+         * @return simple tuning mode
+         */
         public static TuningMode simple(Runnable periodicAction) {
             return new TuningMode(() -> {}, periodicAction, () -> {});
         }
 
+        /**
+         * Creates a tuning mode that does nothing.
+         *
+         * @return empty tuning mode
+         */
         public static TuningMode empty() {
             return new TuningMode(() -> {}, () -> {}, () -> {});
         }
@@ -131,6 +185,14 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
         private LoggedAngle closedLoopPositionTarget = null;
         private LoggedAngularVelocity closedLoopVelocityTarget = null;
 
+        /**
+         * Creates a tunable motor wrapper.
+         *
+         * @param configuration tuning configuration
+         * @param prefix logged tunable path prefix
+         * @param leadMotor lead motor IO
+         * @param followerMotorIOs follower motor IOs that receive gains and profile constraints
+         */
         public TunableMotor(
                 TunableMotorConfiguration configuration,
                 String prefix,
@@ -192,18 +254,22 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
             }
         }
 
+        /** Commands the lead motor into brake mode. */
         public void runBrakeMode() {
             leadMotorIO.controlBrake();
         }
 
+        /** Commands the lead motor into coast mode. */
         public void runCoastMode() {
             leadMotorIO.controlCoast();
         }
 
+        /** Commands the lead motor into neutral output. */
         public void runNeutralMode() {
             leadMotorIO.controlNeutral();
         }
 
+        /** Runs open-loop voltage tuning if enabled. */
         public void runOpenLoopVoltageTuning() {
             if (!configuration.voltageTuning) {
                 return;
@@ -215,6 +281,7 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
             }
         }
 
+        /** Runs open-loop current tuning if enabled. */
         public void runOpenLoopCurrentTuning() {
             if (!configuration.currentTuning) {
                 return;
@@ -238,6 +305,7 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
             followerMotorIOs.forEach(motorIO -> motorIO.setProfileConstraints(profileConfig));
         }
 
+        /** Runs closed-loop target, gains, and profile tuning if enabled. */
         public void runClosedLoopTuning() {
 
             if (!configuration.hasClosedLoopTuning) {
@@ -324,6 +392,12 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
             }
         }
 
+        /**
+         * Creates a tuning mode for a motor control mode.
+         *
+         * @param controlMode control mode to run
+         * @return tuning mode that drives the configured motor behavior
+         */
         public TuningMode createTuningMode(ControlMode controlMode) {
 
             if (controlMode == null) {
@@ -407,10 +481,20 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
 
         private TunableMotorConfiguration() {}
 
+        /**
+         * Starts a new tunable motor configuration.
+         *
+         * @return mutable configuration builder
+         */
         public static TunableMotorConfiguration builder() {
             return new TunableMotorConfiguration();
         }
 
+        /**
+         * Creates the default tuning configuration.
+         *
+         * @return configuration with voltage, current, and Phoenix tuning enabled
+         */
         public static TunableMotorConfiguration defaultConfiguration() {
             return builder()
                     .withVoltageTuning(true)
@@ -418,104 +502,211 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
                     .withPhoenixTuning(true);
         }
 
+        /**
+         * Enables or disables open-loop voltage tuning.
+         *
+         * @param voltageTuning true to enable voltage tuning
+         * @return this configuration
+         */
         public TunableMotorConfiguration withVoltageTuning(boolean voltageTuning) {
             this.voltageTuning = voltageTuning;
             return this;
         }
 
+        /**
+         * Enables or disables open-loop current tuning.
+         *
+         * @param currentTuning true to enable current tuning
+         * @return this configuration
+         */
         public TunableMotorConfiguration withCurrentTuning(boolean currentTuning) {
             this.currentTuning = currentTuning;
             return this;
         }
 
+        /**
+         * Disables closed-loop tuning.
+         *
+         * @return this configuration
+         */
         public TunableMotorConfiguration withoutClosedLoopTuning() {
             this.hasClosedLoopTuning = false;
             return this;
         }
 
+        /**
+         * Enables closed-loop position tuning.
+         *
+         * @return this configuration
+         */
         public TunableMotorConfiguration withPositionTuning() {
             this.closedLoopType = ClosedLoopType.POSITION;
             this.hasClosedLoopTuning = true;
             return this;
         }
 
+        /**
+         * Enables closed-loop velocity tuning.
+         *
+         * @return this configuration
+         */
         public TunableMotorConfiguration withVelocityTuning() {
             this.closedLoopType = ClosedLoopType.VELOCITY;
             this.hasClosedLoopTuning = true;
             return this;
         }
 
+        /**
+         * Enables voltage-based closed-loop velocity tuning.
+         *
+         * @return this configuration
+         */
         public TunableMotorConfiguration withVoltageClosedLoopTuning() {
             this.closedLoopType = ClosedLoopType.VELOCITY_VOLTAGE;
             this.hasClosedLoopTuning = true;
             return this;
         }
 
+        /**
+         * Uses unprofiled closed-loop control.
+         *
+         * @return this configuration
+         */
         public TunableMotorConfiguration unprofiled() {
             this.profileType = ProfileType.UNPROFILED;
             return this;
         }
 
+        /**
+         * Uses trapezoidal-profiled closed-loop control.
+         *
+         * @return this configuration
+         */
         public TunableMotorConfiguration profiled() {
             this.profileType = ProfileType.PROFILED;
             return this;
         }
 
+        /**
+         * Uses exponential-profiled closed-loop control.
+         *
+         * @return this configuration
+         */
         public TunableMotorConfiguration expoProfiled() {
             this.profileType = ProfileType.EXPO_PROFILED;
             return this;
         }
 
+        /**
+         * Enables or disables Phoenix tuner integration mode.
+         *
+         * @param phoenixTuning true to enable Phoenix tuning mode
+         * @return this configuration
+         */
         public TunableMotorConfiguration withPhoenixTuning(boolean phoenixTuning) {
             this.phoenixTuning = phoenixTuning;
             return this;
         }
 
+        /**
+         * Sets the initial closed-loop position target.
+         *
+         * @param initialPositionSetpoint initial position target
+         * @return this configuration
+         */
         public TunableMotorConfiguration withInitialPositionSetpoint(
                 Angle initialPositionSetpoint) {
             this.initialPositionSetpoint = initialPositionSetpoint;
             return this;
         }
 
+        /**
+         * Sets the initial closed-loop velocity target.
+         *
+         * @param initialVelocitySetpoint initial velocity target
+         * @return this configuration
+         */
         public TunableMotorConfiguration withInitialVelocitySetpoint(
                 AngularVelocity initialVelocitySetpoint) {
             this.initialVelocitySetpoint = initialVelocitySetpoint;
             return this;
         }
 
+        /**
+         * Sets the default PID/feedforward gains.
+         *
+         * @param defaultPIDGains default gains
+         * @return this configuration
+         */
         public TunableMotorConfiguration withDefaultPIDGains(PIDGains defaultPIDGains) {
             this.defaultPIDGains = defaultPIDGains;
             return this;
         }
 
+        /**
+         * Sets the default motion profile constraints.
+         *
+         * @param defaultMotionProfileConfig default profile config
+         * @return this configuration
+         */
         public TunableMotorConfiguration withDefaultMotionProfileConfig(
                 MotionProfileConfig defaultMotionProfileConfig) {
             this.defaultMotionProfileConfig = defaultMotionProfileConfig;
             return this;
         }
 
+        /**
+         * Sets a callback for gain changes.
+         *
+         * @param onPIDGainsChanged callback receiving updated gains
+         * @return this configuration
+         */
         public TunableMotorConfiguration onPIDGainsChanged(Consumer<PIDGains> onPIDGainsChanged) {
             this.onPIDGainsChanged = onPIDGainsChanged;
             return this;
         }
 
+        /**
+         * Sets a callback for motion profile changes.
+         *
+         * @param onMotionProfileConfigChanged callback receiving updated profile constraints
+         * @return this configuration
+         */
         public TunableMotorConfiguration onMotionProfileConfigChanged(
                 Consumer<MotionProfileConfig> onMotionProfileConfigChanged) {
             this.onMotionProfileConfigChanged = onMotionProfileConfigChanged;
             return this;
         }
 
+        /**
+         * Sets the unit used for logged position targets.
+         *
+         * @param tunableAngleUnit angle unit for logging and tuning
+         * @return this configuration
+         */
         public TunableMotorConfiguration withTunableAngleUnit(AngleUnit tunableAngleUnit) {
             this.tunableAngleUnit = tunableAngleUnit;
             return this;
         }
 
+        /**
+         * Sets the unit used for logged velocity targets.
+         *
+         * @param tunableAngularVelocityUnit angular velocity unit for logging and tuning
+         * @return this configuration
+         */
         public TunableMotorConfiguration withTunableAngularVelocityUnit(
                 AngularVelocityUnit tunableAngularVelocityUnit) {
             this.tunableAngularVelocityUnit = tunableAngularVelocityUnit;
             return this;
         }
 
+        /**
+         * Sets whether logged tunable paths include unit names.
+         *
+         * @param useUnitInLoggedTunablePaths true to append unit names
+         * @return this configuration
+         */
         public TunableMotorConfiguration withUseUnitInLoggedTunablePaths(
                 boolean useUnitInLoggedTunablePaths) {
             this.useUnitInLoggedTunablePaths = useUnitInLoggedTunablePaths;
@@ -532,6 +723,11 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
             }
         }
 
+        /**
+         * Copies this configuration.
+         *
+         * @return independent configuration copy
+         */
         public TunableMotorConfiguration copy() {
             TunableMotorConfiguration copy = new TunableMotorConfiguration();
             copy.voltageTuning = this.voltageTuning;
@@ -552,6 +748,14 @@ public class TuningModeHelper<TestModeEnum extends Enum<TestModeEnum> & TestMode
             return copy;
         }
 
+        /**
+         * Builds a tunable motor from this configuration.
+         *
+         * @param prefix logged tunable path prefix
+         * @param leadMotorIO lead motor IO
+         * @param followerMotorIOs follower motor IOs
+         * @return tunable motor
+         */
         public TunableMotor build(String prefix, MotorIO leadMotorIO, MotorIO... followerMotorIOs) {
             validate();
             return new TunableMotor(this.copy(), prefix, leadMotorIO, followerMotorIOs);

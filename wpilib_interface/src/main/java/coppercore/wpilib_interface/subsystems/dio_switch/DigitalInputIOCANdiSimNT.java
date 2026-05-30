@@ -13,6 +13,15 @@ public class DigitalInputIOCANdiSimNT extends DigitalInputIOCANdi {
 
     protected final DigitalSignalCloseState closeState;
 
+    /**
+     * Creates a simulated CANdi digital input controlled through NetworkTables.
+     *
+     * @param id CAN device identifier for the CANdi
+     * @param candiConfig CANdi configuration used for signal polarity
+     * @param signal CANdi signal to simulate
+     * @param ntPath NetworkTables path for the simulated open state
+     * @param defaultIsOpenValue initial simulated open state
+     */
     public DigitalInputIOCANdiSimNT(
             CANDeviceID id,
             CANdiConfiguration candiConfig,
@@ -36,6 +45,7 @@ public class DigitalInputIOCANdiSimNT extends DigitalInputIOCANdi {
         this.simValue = new LoggedNetworkBoolean(ntPath, defaultIsOpenValue);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void updateInputs(DigitalInputInputs inputs) {
         boolean openState = simValue.get();

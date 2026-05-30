@@ -26,6 +26,7 @@ public class DigitalInputIOSimNT extends DigitalInputIOSim {
         simValue = new LoggedNetworkBoolean(ntPath, initiallyIsOpen);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void updateInputs(DigitalInputInputs inputs) {
         setValue(simValue.get());

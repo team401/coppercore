@@ -39,6 +39,13 @@ public class DigitalInputIOCANdi implements DigitalInputIO {
      */
     protected int readCount = 0;
 
+    /**
+     * Creates a CANdi-backed digital input reader.
+     *
+     * @param id CAN device identifier for the CANdi
+     * @param candiConfig CANdi configuration to apply
+     * @param signal CANdi signal to read
+     */
     public DigitalInputIOCANdi(CANDeviceID id, CANdiConfiguration candiConfig, CANdiSignal signal) {
         this.candi = new CANdi(id.id(), id.canbus());
 
@@ -69,6 +76,7 @@ public class DigitalInputIOCANdi implements DigitalInputIO {
         CTREUtil.tryUntilOk(() -> candi.optimizeBusUtilization(), id, code -> {});
     }
 
+    /** {@inheritDoc} */
     public void updateInputs(DigitalInputInputs inputs) {
         StatusCode code = closedSignal.getStatus();
 

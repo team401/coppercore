@@ -82,6 +82,14 @@ public class LoggedTunableMeasure<
     final LoggedTunableNumber tunableNumber;
     final BaseUnitType displayedUnit;
 
+    /**
+     * Creates a logged tunable value for a WPILib measure.
+     *
+     * @param name logged tunable path
+     * @param defaultValue default measure value
+     * @param displayedUnit unit used for logging and tuning
+     * @param addUnitSuffix whether to append the unit name to the path
+     */
     public LoggedTunableMeasure(
             String name,
             MutMeasureType defaultValue,
@@ -97,10 +105,17 @@ public class LoggedTunableMeasure<
         value.mut_replace(newValue, displayedUnit);
     }
 
+    /** Forces the cached measure to match the current logged tunable number. */
     public void forceUpdate() {
         updateValue(tunableNumber.getAsDouble());
     }
 
+    /**
+     * Runs a callback when this value changes for a caller id.
+     *
+     * @param id caller id used to track changes independently
+     * @param callback callback receiving the updated mutable measure
+     */
     public void ifChanged(
             int id, MeasureConsumer<MutMeasureType, BaseMeasureType, BaseUnitType> callback) {
         LoggedTunableNumber.ifChanged(
@@ -112,6 +127,11 @@ public class LoggedTunableMeasure<
                 tunableNumber);
     }
 
+    /**
+     * Runs a callback when this value changes for this object.
+     *
+     * @param callback callback receiving the updated mutable measure
+     */
     public void ifChanged(MeasureConsumer<MutMeasureType, BaseMeasureType, BaseUnitType> callback) {
         ifChanged(hashCode(), callback);
     }
@@ -121,19 +141,40 @@ public class LoggedTunableMeasure<
                 hashCode(), newValue -> updateValue(newValue[0]), tunableNumber);
     }
 
+    /**
+     * Checks whether this value changed for a caller id.
+     *
+     * @param id caller id used to track changes independently
+     * @return true if the logged value changed since this id last checked
+     */
     public boolean hasChanged(int id) {
         return tunableNumber.hasChanged(id);
     }
 
+    /**
+     * Checks whether this value changed for this object.
+     *
+     * @return true if the logged value changed since this object last checked
+     */
     public boolean hasChanged() {
         return hasChanged(hashCode());
     }
 
+    /**
+     * Gets the latest tuned measure value.
+     *
+     * @return immutable copy of the current value
+     */
     public BaseMeasureType get() {
         checkForUpdate();
         return value.copy();
     }
 
+    /**
+     * Sets the logged tunable value from a measure.
+     *
+     * @param newValue new measure value
+     */
     public void set(BaseMeasureType newValue) {
         value.mut_replace(newValue);
         tunableNumber.setValue((value.in(displayedUnit)));
@@ -142,8 +183,19 @@ public class LoggedTunableMeasure<
     @FunctionalInterface
     public interface MeasureConsumer<
             M extends MutableMeasure<U, B, M>, B extends Measure<U>, U extends Unit> {
+        /**
+         * Accepts an updated measure value.
+         *
+         * @param newValue updated mutable measure
+         */
         void accept(M newValue);
 
+        /**
+         * Chains another measure consumer after this one.
+         *
+         * @param after consumer to run after this one
+         * @return combined consumer
+         */
         default MeasureConsumer<M, B, U> chain(MeasureConsumer<M, B, U> after) {
             return (M newValue) -> {
                 this.accept(newValue);
@@ -160,36 +212,97 @@ public class LoggedTunableMeasure<
 
         LoggedTunableMeasureFactoryFunction<M, B, U, S> factoryFunction;
 
+        /**
+         * Creates a factory for a specific logged measure type.
+         *
+         * @param factoryFunction constructor-like function for the logged measure type
+         */
         public LoggedTunableMeasureFactory(
                 LoggedTunableMeasureFactoryFunction<M, B, U, S> factoryFunction) {
             this.factoryFunction = factoryFunction;
         }
 
+        /**
+         * Creates a logged measure with explicit display-unit path behavior.
+         *
+         * @param name logged tunable path
+         * @param defaultValue default mutable measure
+         * @param displayedUnit unit used for logging and tuning
+         * @param addUnitSuffix whether to append the unit name to the path
+         * @return logged tunable measure
+         */
         public S of(String name, M defaultValue, U displayedUnit, boolean addUnitSuffix) {
             return factoryFunction.apply(name, defaultValue, displayedUnit, addUnitSuffix);
         }
 
+        /**
+         * Creates a logged measure with an explicit display unit.
+         *
+         * @param name logged tunable path
+         * @param defaultValue default mutable measure
+         * @param displayedUnit unit used for logging and tuning
+         * @return logged tunable measure
+         */
         public S of(String name, M defaultValue, U displayedUnit) {
             return of(name, defaultValue, displayedUnit, false);
         }
 
+        /**
+         * Creates a logged measure using the default value's unit.
+         *
+         * @param name logged tunable path
+         * @param defaultValue default mutable measure
+         * @return logged tunable measure
+         */
         public S of(String name, M defaultValue) {
             return of(name, defaultValue, defaultValue.unit());
         }
 
+        /**
+         * Creates a logged measure from an immutable default value.
+         *
+         * @param name logged tunable path
+         * @param defaultValue default measure
+         * @return logged tunable measure
+         */
         public S of(String name, B defaultValue) {
             return of(name, defaultValue, defaultValue.unit());
         }
 
+        /**
+         * Creates a logged measure from an immutable default value and display unit.
+         *
+         * @param name logged tunable path
+         * @param defaultValue default measure
+         * @param displayedUnit unit used for logging and tuning
+         * @return logged tunable measure
+         */
         public S of(String name, B defaultValue, U displayedUnit) {
             return of(name, defaultValue, displayedUnit, false);
         }
 
+        /**
+         * Creates a logged measure from an immutable default value with path suffix control.
+         *
+         * @param name logged tunable path
+         * @param defaultValue default measure
+         * @param displayedUnit unit used for logging and tuning
+         * @param addUnitSuffix whether to append the unit name to the path
+         * @return logged tunable measure
+         */
         @SuppressWarnings("unchecked")
         public S of(String name, B defaultValue, U displayedUnit, boolean addUnitSuffix) {
             return of(name, (M) defaultValue.mutableCopy(), displayedUnit, addUnitSuffix);
         }
 
+        /**
+         * Creates a logged measure from a raw value in the displayed unit.
+         *
+         * @param name logged tunable path
+         * @param defaultValue default raw value
+         * @param displayedUnit unit used for the raw value
+         * @return logged tunable measure
+         */
         @SuppressWarnings("unchecked")
         public S of(String name, double defaultValue, U displayedUnit) {
             return of(name, (M) displayedUnit.mutable(defaultValue), displayedUnit);
@@ -201,6 +314,15 @@ public class LoggedTunableMeasure<
                 B extends Measure<U>,
                 U extends Unit,
                 S extends LoggedTunableMeasure<M, B, U>> {
+            /**
+             * Creates the typed logged measure.
+             *
+             * @param name logged tunable path
+             * @param defaultValue default mutable measure
+             * @param displayedUnit unit used for logging and tuning
+             * @param addUnitSuffix whether to append the unit name to the path
+             * @return logged tunable measure
+             */
             S apply(String name, M defaultValue, U displayedUnit, boolean addUnitSuffix);
         }
     }
