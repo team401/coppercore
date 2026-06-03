@@ -29,6 +29,15 @@ public class TotalCurrentCalculator {
     }
 
     /**
+     * Returns whether the TotalCurrentCalculator is enabled.
+     *
+     * @return true if enabled
+     */
+    public static boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
      * Gets the latest total current sum.
      *
      * @return total recorded supply current in amps
