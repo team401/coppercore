@@ -1,6 +1,5 @@
 package coppercore.controls.test;
 
-import static coppercore.controls.test.StateMachineTests.Robot;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import coppercore.controls.state_machine.State;
@@ -16,7 +15,7 @@ public class StateMachineTestsDES {
 
     public void runDESStateMachineTest(
             DES sim,
-            Function<State, DES.Runnable> assertIn,
+            Function<State<Robot>, DES.Runnable> assertIn,
             Robot stateMachineWorld,
             State<Robot> idleState,
             State<Robot> intakingState,
@@ -222,7 +221,7 @@ public class StateMachineTestsDES {
 
         // Testing
         assertSame(idleState, stateMachine.getCurrentState());
-        final Function<State, DES.Runnable> assertIn =
+        final Function<State<Robot>, DES.Runnable> assertIn =
                 (state) ->
                         _time ->
                                 assertSame(
@@ -259,7 +258,7 @@ public class StateMachineTestsDES {
 
         // Testing
         assertSame(idleState, stateMachine.getCurrentState());
-        final Function<State, DES.Runnable> assertIn =
+        final Function<State<Robot>, DES.Runnable> assertIn =
                 (state) ->
                         _time ->
                                 assertSame(

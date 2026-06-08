@@ -4,6 +4,8 @@ import coppercore.parameter_tools.json.adapters.JSONPose2d;
 import coppercore.parameter_tools.json.adapters.JSONPose3d;
 import coppercore.parameter_tools.json.adapters.JSONRotation2d;
 import coppercore.parameter_tools.json.adapters.JSONRotation3d;
+import coppercore.parameter_tools.json.adapters.JSONTransform2d;
+import coppercore.parameter_tools.json.adapters.JSONTransform3d;
 import coppercore.parameter_tools.json.adapters.JSONTranslation2d;
 import coppercore.parameter_tools.json.adapters.JSONTranslation3d;
 import coppercore.parameter_tools.json.adapters.measure.JSONMeasure;
@@ -12,6 +14,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.Measure;
@@ -35,10 +39,12 @@ public class JSONConverter {
         JSONConverter.addConversion(Translation2d.class, JSONTranslation2d.class);
         JSONConverter.addConversion(Rotation2d.class, JSONRotation2d.class);
         JSONConverter.addConversion(Pose2d.class, JSONPose2d.class);
+        JSONConverter.addConversion(Transform2d.class, JSONTransform2d.class);
 
         JSONConverter.addConversion(Translation3d.class, JSONTranslation3d.class);
         JSONConverter.addConversion(Rotation3d.class, JSONRotation3d.class);
         JSONConverter.addConversion(Pose3d.class, JSONPose3d.class);
+        JSONConverter.addConversion(Transform3d.class, JSONTransform3d.class);
 
         // All measure are wrapped by the JSONMeasure class except Per
         // Per is handled separately below because it needs its own wrapper
@@ -52,7 +58,7 @@ public class JSONConverter {
                 });
 
         // Filter out Per from the rest of the measures
-        JSONConverter.addConversion(Per.class, JSONPer.class);
+        JSONConverter.addConversion(Per.class, jsonPerClass());
     }
 
     /**
@@ -63,6 +69,11 @@ public class JSONConverter {
      */
     public static void addConversion(Class<?> clazz, Class<? extends JSONObject<?>> jsonClazz) {
         jsonMap.put(clazz, jsonClazz);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Class<? extends JSONObject<?>> jsonPerClass() {
+        return (Class) JSONPer.class;
     }
 
     /**

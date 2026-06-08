@@ -257,7 +257,7 @@ public class MotorIOCTRETests {
 
         // Give it a couple cycles to let data propagate into the IOs
         leadMotor.controlToPositionUnprofiled(Radians.zero());
-        double startTime = Timer.getFPGATimestamp();
+        // double startTime = Timer.getFPGATimestamp();
         loopForTime(
                 2.00,
                 () -> {

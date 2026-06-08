@@ -19,8 +19,6 @@ public class JSONPrimitiveCheckStrategy {
         protected FieldNamingStrategy strategy = FieldNamingPolicy.IDENTITY;
         protected JSONSyncConfig config = new JSONSyncConfigBuilder().build();
 
-        public JSONPrimitiveCheckStrategyHelper() {}
-
         public JSONPrimitiveCheckStrategyHelper(
                 FieldNamingStrategy strategy, JSONSyncConfig config) {
             this.strategy = strategy;

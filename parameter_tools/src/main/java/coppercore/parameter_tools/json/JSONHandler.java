@@ -158,32 +158,6 @@ public final class JSONHandler {
      * @param <T> type of object JSONSync is built for.
      * @param blankObject blank version of the target type
      * @param filename file name to load the object from.
-     * @param pathProvider pathProvider to get path to file
-     * @return JSONSync Object for the target type
-     */
-    private <T> JSONSync<T> getJsonSync(T blankObject, String filename, PathProvider pathProvider) {
-        return getJsonSync(blankObject, filename, path_provider, config);
-    }
-
-    /**
-     * Gets JSONSync Object
-     *
-     * @param <T> type of object JSONSync is built for.
-     * @param blankObject blank version of the target type
-     * @param filename file name to load the object from.
-     * @param config JSONSync config
-     * @return JSONSync Object for the target type
-     */
-    private <T> JSONSync<T> getJsonSync(T blankObject, String filename, JSONSyncConfig config) {
-        return getJsonSync(blankObject, filename, path_provider, config);
-    }
-
-    /**
-     * Gets JSONSync Object
-     *
-     * @param <T> type of object JSONSync is built for.
-     * @param blankObject blank version of the target type
-     * @param filename file name to load the object from.
      * @return JSONSync Object for the target type
      */
     private <T> JSONSync<T> getJsonSync(T blankObject, String filename) {

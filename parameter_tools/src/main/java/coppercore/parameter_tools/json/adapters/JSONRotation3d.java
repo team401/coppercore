@@ -7,7 +7,10 @@ import java.lang.reflect.Constructor;
 // CONSIDER: Using a different representation or naming scheme
 // WPILib uses (roll, pitch, yaw) in the constructor, but the getters are (getX, getY, getZ).
 // And internal stores the rotations as a quaternion.
-/** A JSON representation of a Rotation3d object. Currently uses roll, pitch, yaw representation. */
+/**
+ * A JSON representation of a Rotation3d object. Currently uses roll, pitch, yaw representation. We
+ * are using a custom form so that the JSON file can be in degrees.
+ */
 public class JSONRotation3d extends JSONObject<Object> {
     double roll; // Rotation around the X-axis
     double pitch; // Rotation around the Y-axis
@@ -20,14 +23,14 @@ public class JSONRotation3d extends JSONObject<Object> {
      */
     public JSONRotation3d(Rotation3d rotation) {
         super(rotation);
-        roll = rotation.getX();
-        pitch = rotation.getY();
-        yaw = rotation.getZ();
+        roll = Math.toDegrees(rotation.getX());
+        pitch = Math.toDegrees(rotation.getY());
+        yaw = Math.toDegrees(rotation.getZ());
     }
 
     @Override
     public Rotation3d toJava() {
-        return new Rotation3d(roll, pitch, yaw);
+        return new Rotation3d(Math.toRadians(roll), Math.toRadians(pitch), Math.toRadians(yaw));
     }
 
     /**

@@ -4,9 +4,12 @@ import coppercore.parameter_tools.json.helpers.JSONObject;
 import edu.wpi.first.math.geometry.Rotation2d;
 import java.lang.reflect.Constructor;
 
-/** A JSON representation of a Rotation2d object. */
+/**
+ * A JSON representation of a Rotation2d object. We are using a custom form so that the JSON file
+ * can be in degrees.
+ */
 public class JSONRotation2d extends JSONObject<Object> {
-    double radians;
+    double degrees;
 
     /**
      * Default constructor for JSON serialization.
@@ -15,12 +18,12 @@ public class JSONRotation2d extends JSONObject<Object> {
      */
     public JSONRotation2d(Rotation2d rotation) {
         super(rotation);
-        radians = rotation.getRadians();
+        degrees = rotation.getDegrees();
     }
 
     @Override
     public Rotation2d toJava() {
-        return new Rotation2d(radians);
+        return new Rotation2d(Math.toRadians(degrees));
     }
 
     /**
