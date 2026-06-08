@@ -16,8 +16,8 @@ import java.util.Optional;
 
 /**
  * A Gson {@link TypeAdapterFactory} that handles serialization and deserialization of {@link
- * Optional} values. This is necessary because GSON does not support java.util.Optional, see {@link
- * https://github.com/google/gson/issues/1102}
+ * Optional} values. This is necessary because GSON does not support java.util.Optional, see <a href
+ * = "https://github.com/google/gson/issues/1102">this github issue.</a>
  *
  * <ul>
  *   <li>{@code Optional.empty()} is written as JSON {@code null}.
