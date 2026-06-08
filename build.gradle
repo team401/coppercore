@@ -10,8 +10,14 @@ plugins {
 subprojects {
 	apply plugin: 'java'
 	apply plugin: 'com.diffplug.spotless'
-	apply plugin: 'com.vanniktech.maven.publish'
-	
+
+	// The 'standalone' subproject holds experimental main programs that link against
+	// the coppercore library. It must never be published to Maven Central nor bundled
+	// into any released artifact, so the publishing plugin is not applied to it.
+	if (project.name != 'standalone') {
+		apply plugin: 'com.vanniktech.maven.publish'
+	}
+
 	group = 'io.github.team401.coppercore'
 
 	// As of 12/2025, all robot software requires Java 17
@@ -108,6 +114,10 @@ subprojects {
 		testImplementation libs.junit.jupiter	// read junit version from gradle/libs.versions.toml
 		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	}
+
+    // The experimental 'standalone' programs are never published or bundled, so skip
+    // the publishing configuration for that subproject.
+    if (project.name == 'standalone') return
 
     mavenPublishing {
         configure(new JavaLibrary(new JavadocJar.Javadoc(), true))

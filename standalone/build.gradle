@@ -1,0 +1,168 @@
+/*
+ * 'standalone' subproject.
+ *
+ * A scratch space for standalone Java programs (classes with a `main` method) that
+ * compile and run against the coppercore library modules and everything they depend
+ * on (WPILib, AdvantageKit, and vendordeps such as CTRE Phoenix).
+ *
+ * Put your programs under src/main/java in whatever packages you like, then run one
+ * with:
+ *
+ *     ./gradlew :standalone:run -PmainClass=coppercore.standalone.HelloCopperCore
+ *
+ * This subproject is deliberately NOT published to Maven Central and is not bundled
+ * into any released coppercore artifact (publishing is disabled for it in the root
+ * build.gradle, and no library module depends on it).
+ */
+
+import org.gradle.api.file.RelativePath
+
+// GradleRIO is resolved here but NOT applied yet: it reads vendordeps from this
+// project's own `vendordeps/` directory at apply time, so that directory has to be
+// populated first (see the copy below). The plugin is applied a few lines down.
+plugins {
+	alias(libs.plugins.gradlerio).apply(false)
+}
+
+def standaloneTasksRequested = gradle.startParameter.taskNames.any { taskName ->
+	taskName == ':standalone' ||
+		taskName.startsWith(':standalone:') ||
+		taskName == 'standalone' ||
+		taskName.startsWith('standalone:')
+}
+
+// This is a scratch space, so it is configured only when one of its own tasks is
+// requested. Everything below relies on the `wpi` extension that GradleRIO provides, and
+// GradleRIO reads vendordeps at apply time (so the mirror copy must happen first and can't
+// be deferred to a task). When no :standalone task is requested we therefore skip all of
+// that and disable this project's tasks, which (a) avoids configuration-time filesystem
+// writes for unrelated builds and (b) keeps `standalone` out of the aggregate `./gradlew
+// build`, so an experimental program that fails to compile can never break the library
+// build or publishing. The `java`/`spotless` tasks created by the root build.gradle still
+// exist here; disabling them makes them no-ops in that case.
+if (!standaloneTasksRequested) {
+	tasks.matching { it.name != 'clean' }.configureEach { it.enabled = false }
+	return
+}
+
+// Single source of truth for vendordeps: the `*/vendordeps` directories of the library
+// modules. There is intentionally NO committed copy under standalone/vendordeps (that
+// would be a second copy to keep in sync). Instead this mirrors the modules' vendordeps
+// into this project's git-ignored `vendordeps/` (only reached when a :standalone task is
+// requested, per the guard above), then applies GradleRIO, which reads vendordeps at apply
+// time. A copy (rather than a symlink) is used so it works on every platform and aggregates
+// vendordeps from any number of modules.
+copy {
+	from(rootProject.subprojects.findAll { it != project }.collect { "${it.projectDir}/vendordeps" })
+	into "${projectDir}/vendordeps"
+	include '*.json'
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+apply plugin: 'edu.wpi.first.GradleRIO'
+
+// Use the release JNI/native libraries. Flip to true to debug native code.
+wpi.java.debugJni = false
+
+dependencies {
+	// All coppercore library modules, so a standalone program can use any of them.
+	implementation project(':geometry')
+	implementation project(':math')
+	implementation project(':controls')
+	implementation project(':parameter_tools')
+	implementation project(':monitors')
+	implementation project(':vision')
+	implementation project(':metadata')
+	implementation project(':wpilib_interface')
+
+	// WPILib + vendordep (e.g. CTRE Phoenix) Java APIs, on the compile classpath.
+	annotationProcessor wpi.java.deps.wpilibAnnotations()
+	implementation wpi.java.deps.wpilib()
+	implementation wpi.java.vendor.java()
+
+	// Native (JNI) libraries for the desktop platform, including vendordep natives.
+	// These are extracted and put on java.library.path by the run/test tasks below.
+	nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
+	nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
+	simulationRelease wpi.sim.enableRelease()
+
+	nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+	nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
+	simulationDebug wpi.sim.enableDebug()
+
+	// Other libraries used across coppercore, exposed here for direct use too.
+	implementation libs.wpilib.newcommands
+	annotationProcessor libs.akit.autolog
+	implementation libs.akit.java
+	implementation libs.revlib
+	implementation libs.json.simple
+	implementation libs.photonlib.java
+	implementation libs.photontargeting.java
+	implementation libs.gson
+}
+
+// The simulation GUI/driver station are off by default so programs can run headless
+// from the command line. Set defaultEnabled = true if you want the sim GUI.
+wpi.sim.addGui().defaultEnabled = false
+wpi.sim.addDriverstation()
+
+// injects the JNI extraction dir into java.library.path for tests, mirroring the
+// library modules (so any tests placed here also get native libraries).
+wpi.java.configureTestTasks(test)
+
+// Match the string-concat compile flag used by the WPILib-facing modules.
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs.add '-XDstringConcat=inline'
+}
+
+// ---------------------------------------------------------------------------
+// Running standalone programs
+// ---------------------------------------------------------------------------
+
+// The native (JNI) configuration to use, picked by wpi.java.debugJni above.
+def nativeConfig = wpi.java.debugJni ? configurations.nativeDebug : configurations.nativeRelease
+
+// Where extracted .so/.dll/.dylib files land. All flattened into one directory so it
+// can serve as java.library.path (and the OS loader search path for inter-lib deps).
+def nativeLibDir = layout.buildDirectory.dir('standaloneNatives')
+
+def extractStandaloneNatives = tasks.register('extractStandaloneNatives', Copy) {
+	description = 'Extracts WPILib and vendordep JNI native libraries for running standalone programs.'
+	group = 'application'
+	from { nativeConfig.collect { zipTree(it) } }
+	into nativeLibDir
+	include '**/*.so', '**/*.so.*', '**/*.dll', '**/*.dylib', '**/*.jnilib'
+	includeEmptyDirs = false
+	// Flatten every library into the destination root.
+	eachFile { it.relativePath = new RelativePath(true, it.name) }
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Resolve the requested main class from -PmainClass=... (alias: -Pmain=...).
+def requestedMain = (findProperty('mainClass') ?: findProperty('main'))?.toString()
+
+tasks.register('run', JavaExec) {
+	group = 'application'
+	description = 'Runs a standalone main class. Usage: ./gradlew :standalone:run -PmainClass=pkg.MyProgram [--args="..."]'
+	dependsOn extractStandaloneNatives
+	classpath = sourceSets.main.runtimeClasspath
+	if (requestedMain) {
+		mainClass = requestedMain
+	}
+
+	def libDir = nativeLibDir.get().asFile.absolutePath
+	// Tell the JVM where JNI libraries live, and tell the OS loader where to find their
+	// (possibly inter-dependent) shared objects on each platform.
+	systemProperty 'java.library.path', libDir
+	environment 'LD_LIBRARY_PATH', libDir + File.pathSeparator + (System.getenv('LD_LIBRARY_PATH') ?: '')
+	environment 'DYLD_LIBRARY_PATH', libDir + File.pathSeparator + (System.getenv('DYLD_LIBRARY_PATH') ?: '')
+	environment 'PATH', libDir + File.pathSeparator + (System.getenv('PATH') ?: '')
+
+	doFirst {
+		if (!requestedMain) {
+			throw new GradleException(
+					'No main class specified. Run with: ' +
+					'./gradlew :standalone:run -PmainClass=your.package.YourProgram')
+		}
+	}
+}

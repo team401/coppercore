@@ -13,3 +13,8 @@ plugins {
 rootProject.name = 'coppercore'
 
 include('geometry', 'wpilib_interface', 'math', 'controls', "parameter_tools", 'monitors', 'vision', 'metadata')
+
+// 'standalone' hosts experimental Java programs (with main methods) that compile and
+// run against the coppercore library modules. It is intentionally NOT published or
+// bundled into any released artifact (see the publishing guard in build.gradle).
+include('standalone')
