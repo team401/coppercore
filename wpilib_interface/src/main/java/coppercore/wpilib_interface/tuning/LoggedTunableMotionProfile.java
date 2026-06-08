@@ -11,6 +11,11 @@ import coppercore.wpilib_interface.subsystems.motors.MotorIO;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
 import coppercore.wpilib_interface.subsystems.motors.profile.MutableMotionProfileConfig;
 
+/**
+ * A LoggedTunableMotionProfile enables the setting of motion profiles during tuning. It aggregates
+ * all 5 parameters: max velocity/acc/jerk as well as expoKV/expoKA, even though either the first 3
+ * or last 2 are used.
+ */
 public class LoggedTunableMotionProfile {
     LoggedAngularVelocity maxVelocity;
     LoggedAngularAcceleration maxAcceleration;

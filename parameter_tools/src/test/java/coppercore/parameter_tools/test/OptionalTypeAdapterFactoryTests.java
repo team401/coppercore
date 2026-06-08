@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+// Written by Codex 5.5 (High).
 public class OptionalTypeAdapterFactoryTests {
     private static final Type OPTIONAL_STRING_TYPE = new TypeToken<Optional<String>>() {}.getType();
     private static final Type OPTIONAL_INTEGER_LIST_TYPE =
