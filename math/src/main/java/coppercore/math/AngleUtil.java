@@ -20,7 +20,7 @@ public class AngleUtil {
      */
     public static double normalizeHeading(double originalHeadingRadians) {
         // First, mod by 2pi, placing any angle into the range -2pi to 2pi
-        // Next, add 2pi, so that all angles will be from 0 to 2pi
+        // Next, add 2pi, so that all angles will be from 0 to 4pi
         // Finally, mod by 2pi again, reducing all angles to be 0 to 2pi
         return ((originalHeadingRadians % TAU) + TAU) % TAU;
     }

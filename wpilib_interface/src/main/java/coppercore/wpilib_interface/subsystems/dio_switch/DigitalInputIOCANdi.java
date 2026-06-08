@@ -94,12 +94,9 @@ public class DigitalInputIOCANdi implements DigitalInputIO {
         if (inputs.connected && closedSignal.hasUpdated()) {
             if (readCount < 3) {
                 // Only increment readCount inside here to prevent an eventual overflow issue during
-                // very
-                // long runtimes
-                // Doing the math, it would take about 1.5 years of continuous runtime at 50hz to
-                // cause this
-                // to occur, but in the spirit of doing things the right way this check should exist
-                // anyway.
+                // very long runtimes. Doing the math, it would take about 1.5 years of continuous
+                // runtime at 50hz to cause this to occur, but in the spirit of doing things the
+                // right way this check should exist anyway.
                 readCount++;
                 return;
             }

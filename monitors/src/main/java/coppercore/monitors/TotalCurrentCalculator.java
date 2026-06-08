@@ -47,7 +47,8 @@ public class TotalCurrentCalculator {
     }
 
     /**
-     * Records the latest current draw for one subsystem.
+     * Records the latest current draw for one subsystem, such as the identity hashcode of the
+     * subsystem object.
      *
      * @param id stable subsystem identifier
      * @param supplyCurrentAmps subsystem supply current in amps

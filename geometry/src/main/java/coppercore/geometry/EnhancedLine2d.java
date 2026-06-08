@@ -5,8 +5,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import java.util.Optional;
 
 /**
- * EnhancedLine replaces Line to provide extra functionality that should make its way back to
- * coppercore.
+ * EnhancedLine represents a line segment and has a method that can check whether two line segments
+ * intersect within certain bounds.
  */
 public class EnhancedLine2d {
     protected final Translation2d start;
