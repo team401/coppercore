@@ -15,18 +15,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-        with: 
+        with:
           submodules: true
           fetch-depth: 0
 
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Stage package on central portal
         run: ./gradlew publishToMavenCentral --no-configuration-cache -PRELEASE_SIGNING_ENABLED=true

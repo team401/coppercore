@@ -1,4 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
 
@@ -40,23 +39,23 @@ subprojects {
 		mavenCentral()
 		maven {
 			// FRC/wpilib maven repository
-			url 'https://frcmaven.wpi.edu/artifactory/release/'
+			url = 'https://frcmaven.wpi.edu/artifactory/release/'
 		}
 		maven {
 			// AdvantageKit maven repository
-			url "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
+			url = "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
 		}
 		maven {
 			// PhotonVision internal maven repository
-			url "https://maven.photonvision.org/repository/internal"
+			url = "https://maven.photonvision.org/repository/internal"
 		}
 		maven {
 			// PhotonVision snapshots maven repository
-			url "https://maven.photonvision.org/repository/snapshots"
+			url = "https://maven.photonvision.org/repository/snapshots"
 		}
 		maven {
 			// REV maven repository (for REVLib)
-			url "https://maven.revrobotics.com/"
+			url = "https://maven.revrobotics.com/"
 		}
 		gradlePluginPortal()
 		mavenLocal()	// this is local to your machine
@@ -120,8 +119,11 @@ subprojects {
     if (project.name == 'standalone') return
 
     mavenPublishing {
-        configure(new JavaLibrary(new JavadocJar.Javadoc(), true))
-        publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+        configure(new com.vanniktech.maven.publish.JavaLibrary(
+        	new com.vanniktech.maven.publish.JavadocJar.Javadoc(), true))
+    	publishToMavenCentral()   // Central Portal is now the default, no argument needed
+
+
 
         // Project release information.
         coordinates(group, project.name, version)

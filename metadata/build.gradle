@@ -10,13 +10,14 @@ plugins {
 def generatedDir = layout.buildDirectory.dir("generated/sources/metadata/java/main")
 
 def coppercore = project.group.toString().tokenize('.').last()
+def projectVersion = provider { project.version.toString() }
 def pkg = "${coppercore}.${project.name}"
 
 tasks.register("generateCopperCoreMetadata") {
 	outputs.dir(generatedDir)
 
 	doLast {
-		def v = project.version.toString()
+		def v = projectVersion.get()
 		def base = v.split('-', 2)[0]   // safe for SNAPSHOT later
 		def parts = base.tokenize('.')
 		if (parts.size() != 3) {
