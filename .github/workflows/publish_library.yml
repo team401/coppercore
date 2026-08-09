@@ -1,38 +1,103 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# GitHub recommends pinning actions to a commit SHA.
-# To get a newer version, you will need to update the SHA.
-# You can also reference a tag or branch, but the action may change without warning.
-
 name: Publish to Maven Central
+
 on:
   workflow_dispatch:
   release:
     types: [created]
+
 jobs:
   publish:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-        with: 
+      - uses: actions/checkout@v5
+        with:
           submodules: true
+      - uses: actions/checkout@v5
+        with:
           fetch-depth: 0
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/setup-gradle@v6
 
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # mavenCentralDeploymentValidation=PUBLISHED in gradle.properties makes the
+      # plugin block until Central reaches PUBLISHED (or fail with error details if
+      # it reaches FAILED), so the Gradle exit code is the real source of truth.
       - name: Publish package
-        run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache -PRELEASE_SIGNING_ENABLED=true
+        id: publish
+        run: |
+          ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache \
+            -PRELEASE_SIGNING_ENABLED=true \
+            -PsignAllPublications=true \
+            -Pversion="${{ steps.version.outputs.version }}" \
+            --console=plain \
+            2>&1 | tee publish_output.txt
+          exit ${PIPESTATUS[0]}
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ORG_GRADLE_PROJECT_MAVENCENTRALUSERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ORG_GRADLE_PROJECT_MAVENCENTRALPASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGINMEMORYKEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGINMEMORYKEYPASSWORD }}
+
+      - name: Write job summary
+        if: always()
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          if [ "${{ steps.publish.outcome }}" = "success" ]; then
+            echo "## ✅ Maven Central Publish Succeeded" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Version:** \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "[🔍 View on Maven Central](https://central.sonatype.com/search?q=io.github.team401.coppercore)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Maven Central Publish Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Version:** \`$VERSION\`  **Run:** [View logs]($RUN_URL)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Error Details" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            grep -E "(FAILED|ERROR|Exception|> Task|Could not|Caused by|Execution failed|deployment)" publish_output.txt \
+              | tail -50 >> $GITHUB_STEP_SUMMARY || echo "(no error lines extracted)" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "[🔍 Check Central Portal for deployment status](https://central.sonatype.com/publishing/deployments)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Open issue on publish failure
+        if: failure() && github.event_name == 'release'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = context.ref.replace('refs/tags/', '');
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Maven Central publish failed: ${tag}`,
+              body: [
+                `The publish workflow failed for release \`${tag}\`.`,
+                '',
+                `**[View the failed run](${runUrl})**`,
+                '',
+                'The error details from Central (if any) will be in the run logs under the "Publish package" step.',
+                '',
+                '[View Central Portal deployments](https://central.sonatype.com/publishing/deployments)',
+              ].join('\n'),
+              labels: ['bug'],
+            });
