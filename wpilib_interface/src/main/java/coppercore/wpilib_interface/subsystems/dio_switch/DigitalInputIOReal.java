@@ -1,6 +1,6 @@
 package coppercore.wpilib_interface.subsystems.dio_switch;
 
-import edu.wpi.first.wpilibj.DigitalInput;
+import org.wpilib.wpilibj.DigitalInput;
 
 /**
  * DigitalInputIOReal implements DigitalInputIO to update a value based on a physical DigitalInput

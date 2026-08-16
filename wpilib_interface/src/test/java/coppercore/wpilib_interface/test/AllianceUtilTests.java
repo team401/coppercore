@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import coppercore.wpilib_interface.alliance_util.AllianceUtil;
-import edu.wpi.first.hal.AllianceStationID;
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.wpilib.hal.AllianceStationID;
+import org.wpilib.hal.HAL;
+import org.wpilib.wpilibj.DriverStation.Alliance;
+import org.wpilib.wpilibj.simulation.DriverStationSim;
 
 // This was made with Codex 5.5 Medium.
 public class AllianceUtilTests {

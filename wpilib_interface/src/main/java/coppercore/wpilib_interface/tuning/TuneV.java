@@ -2,14 +2,14 @@
 
 package coppercore.wpilib_interface.tuning;
 
-import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecond;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.MutAngularVelocity;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import java.util.ArrayList;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.MutAngularVelocity;
+import org.wpilib.wpilibj.smartdashboard.SmartDashboard;
+import org.wpilib.wpilibj2.command.Command;
 
 /**
  * A command to automatically characterize kV for a Tunable system.

@@ -1,6 +1,6 @@
 package coppercore.wpilib_interface.subsystems.dio_switch;
 
-import edu.wpi.first.wpilibj.simulation.DIOSim;
+import org.wpilib.wpilibj.simulation.DIOSim;
 
 /**
  * DigitalInputIOSim implements DigitalInputIO by extending DigitalInputIOReal and using wpilib's

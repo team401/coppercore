@@ -4,8 +4,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import coppercore.parameter_tools.json.annotations.AfterJsonLoad;
 import coppercore.parameter_tools.path_provider.PathProvider;
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.wpilibj.RobotController;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,6 +24,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+import org.wpilib.hal.HAL;
+import org.wpilib.wpilibj.RobotController;
 
 /** Handler to create JSONSync objects with given config and path provider */
 public final class JSONHandler {

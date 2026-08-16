@@ -1,11 +1,11 @@
 package coppercore.wpilib_interface.subsystems.sim;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecond;
 
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.wpilibj.simulation.DCMotorSim;
 
 /**
  * The HardstoppedDCMotorSimAdapter class extends {@link DCMotorSimAdapter} to add hardstops (hard

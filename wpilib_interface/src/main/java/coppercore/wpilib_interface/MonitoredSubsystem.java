@@ -1,11 +1,11 @@
 package coppercore.wpilib_interface;
 
 import coppercore.monitors.Monitor;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
+import org.wpilib.wpilibj.Timer;
+import org.wpilib.wpilibj2.command.SubsystemBase;
 
 /**
  * This class simplifies the process of monitoring the health and status of subsystems within the

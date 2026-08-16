@@ -1,8 +1,8 @@
 package coppercore.parameter_tools.json.adapters;
 
 import coppercore.parameter_tools.json.helpers.JSONObject;
-import edu.wpi.first.math.geometry.Rotation2d;
 import java.lang.reflect.Constructor;
+import org.wpilib.math.geometry.Rotation2d;
 
 /**
  * A JSON representation of a Rotation2d object. We are using a custom form so that the JSON file

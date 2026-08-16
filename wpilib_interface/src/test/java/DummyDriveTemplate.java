@@ -1,5 +1,5 @@
 import coppercore.wpilib_interface.DriveTemplate;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import org.wpilib.math.kinematics.ChassisSpeeds;
 
 /**
  * The DummyDriveTemplate class implements DriveTemplate by simply storing the values passed to it

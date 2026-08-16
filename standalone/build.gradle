@@ -59,7 +59,7 @@ copy {
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-apply plugin: 'edu.wpi.first.GradleRIO'
+apply plugin: 'org.wpilib.GradleRIO'
 
 // Use the release JNI/native libraries. Flip to true to debug native code.
 wpi.java.debugJni = false

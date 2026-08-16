@@ -1,10 +1,10 @@
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecond;
 
 import coppercore.wpilib_interface.DriveWithJoysticks;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.wpilib.math.kinematics.ChassisSpeeds;
 
 /**
  * The DriveWithJoysticksTests class tests the functionality of DriveWithJoysticks to make sure it's

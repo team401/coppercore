@@ -2,12 +2,12 @@
 
 package coppercore.wpilib_interface.tuning;
 
-import static edu.wpi.first.units.Units.Rotations;
+import static org.wpilib.units.Units.Rotations;
 
-import edu.wpi.first.math.filter.MedianFilter;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
+import org.wpilib.math.filter.MedianFilter;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.wpilibj.smartdashboard.SmartDashboard;
+import org.wpilib.wpilibj2.command.Command;
 
 /**
  * A command to automatically characterize kG
@@ -34,8 +34,9 @@ public class TuneG extends Command {
 
     /**
      * Create a command to automatically characterize kG for a Tunable system
-     * 
-     * <p> WARNING: this command is very finicky and doesn't seem to function properly. We recommend using a TuneS to tune your kG, or tuning it manually
+     *
+     * <p>WARNING: this command is very finicky and doesn't seem to function properly. We recommend
+     * using a TuneS to tune your kG, or tuning it manually
      *
      * @param mechanism The Tunable mechanism/subsystem to tune
      * @param rampUpSpeed How much to increase the applied output by per loop. 0.001 is very precise

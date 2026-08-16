@@ -1,9 +1,9 @@
 package coppercore.wpilib_interface.test;
 
 import coppercore.wpilib_interface.UnitUtils;
-import edu.wpi.first.units.Units;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.wpilib.units.Units;
 
 public class UnitUtilsTests {
     @Test

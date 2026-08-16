@@ -1,9 +1,9 @@
 package coppercore.wpilib_interface;
 
 import coppercore.monitors.Monitor;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import java.util.function.BooleanSupplier;
+import org.wpilib.wpilibj.Alert;
+import org.wpilib.wpilibj.Alert.AlertType;
 
 public class MonitorWithAlert extends Monitor {
     Alert alert;

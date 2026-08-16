@@ -8,8 +8,8 @@ package coppercore.parameter_tools.json;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.LongSerializationPolicy;
 import com.google.gson.TypeAdapterFactory;
-import edu.wpi.first.math.Pair;
 import java.util.List;
+import org.wpilib.math.Pair;
 
 /** Configuration class for customizing Gson behavior. */
 public record JSONSyncConfig(

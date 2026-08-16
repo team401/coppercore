@@ -2,8 +2,8 @@ package coppercore.wpilib_interface.subsystems.motors;
 
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
+import org.wpilib.wpilibj.Alert;
+import org.wpilib.wpilibj.Alert.AlertType;
 
 /**
  * Base class containing shared functionality for CAN-bus attached motor controllers, such as

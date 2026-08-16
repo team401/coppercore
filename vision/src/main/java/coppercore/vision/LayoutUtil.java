@@ -1,10 +1,10 @@
 package coppercore.vision;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
 import java.io.IOException;
 import java.util.Collections;
+import org.wpilib.driverstation.DriverStationErrors;
+import org.wpilib.system.Filesystem;
+import org.wpilib.vision.apriltag.AprilTagFieldLayout;
 
 /* This is not currently used in the 2026 robot code, it uses
  * frc.robot.constants.AprilTagConstants.getTagLayout() instead.
@@ -30,7 +30,7 @@ public class LayoutUtil {
                                     + name
                                     + ".json");
         } catch (IOException ioe) {
-            DriverStation.reportWarning(
+            DriverStationErrors.reportWarning(
                     "Failed to load AprilTag Layout: " + ioe.getLocalizedMessage(), false);
             layout = new AprilTagFieldLayout(Collections.emptyList(), 0.0, 0.0);
         }

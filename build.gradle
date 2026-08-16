@@ -92,7 +92,7 @@ subprojects {
 			// Allow ignoring certain parts in formatting using // spotless:off/on.
 			toggleOffOn()
 			// apply a specific flavor of google-java-format
-			googleJavaFormat('1.19.2').aosp().reflowLongStrings()
+			googleJavaFormat('1.34.0').aosp().reflowLongStrings()
 			// fix formatting of type annotations
 			formatAnnotations()
 		}

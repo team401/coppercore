@@ -1,13 +1,13 @@
 package coppercore.wpilib_interface.test;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Kilograms;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Rotations;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -33,19 +33,19 @@ import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXSim;
 import coppercore.wpilib_interface.subsystems.sim.DummySimAdapter;
 import coppercore.wpilib_interface.subsystems.sim.ElevatorSimAdapter;
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.PerUnit;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.wpilib.hal.HAL;
+import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.units.PerUnit;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.wpilibj.Timer;
+import org.wpilib.wpilibj.simulation.DriverStationSim;
+import org.wpilib.wpilibj.simulation.ElevatorSim;
+import org.wpilib.wpilibj.simulation.SimHooks;
 
 /**
  * The MotorIOCTRETests class contains tests for TalonFX motor IOs and CANCoder encoderIOs using

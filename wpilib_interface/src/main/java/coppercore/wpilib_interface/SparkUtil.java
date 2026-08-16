@@ -5,11 +5,11 @@ import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO.NeutralMode;
-import edu.wpi.first.wpilibj.DriverStation;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.wpilib.wpilibj.DriverStation;
 
 /** Utilities for working with REV/Spark hardware */
 public class SparkUtil {

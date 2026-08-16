@@ -5,14 +5,14 @@ import coppercore.parameter_tools.json.annotations.JSONName;
 import coppercore.parameter_tools.json.annotations.JsonSubtype;
 import coppercore.parameter_tools.json.annotations.JsonType;
 import coppercore.parameter_tools.json.helpers.JSONConverter;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.wpilib.math.MathUtil;
+import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.wpilibj2.command.CommandScheduler;
+import org.wpilib.wpilibj2.command.button.Trigger;
 
 // Some Javadoc written by Copilot based on user description
 
@@ -658,7 +658,7 @@ public class Controller {
          *
          * @return a normalized value in the range [0.0, 1.0]: 1.0 if the underlying button is
          *     pressed, 0.0 if not, after applying {@code prepareValue}.
-         * @see edu.wpi.first.wpilibj.DriverStation#getStickButton(int, int)
+         * @see org.wpilib.wpilibj.DriverStation#getStickButton(int, int)
          * @see #prepareValue(double, double, double)
          */
         public double getValue() {
@@ -889,7 +889,7 @@ public class Controller {
          * @return the POV value as a double after processing by prepareValue; raw inputs are -1 for
          *     neutral/not-pressed or an angle in degrees (0–360) which are converted according to
          *     prepareValue's semantics
-         * @see edu.wpi.first.wpilibj.DriverStation#getStickPOV(int, int)
+         * @see org.wpilib.wpilibj.DriverStation#getStickPOV(int, int)
          */
         public double getValue() {
             return prepareValue(DriverStation.getStickPOV(port, id), -1, 360);

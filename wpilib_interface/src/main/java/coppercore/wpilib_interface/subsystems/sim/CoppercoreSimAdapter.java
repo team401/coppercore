@@ -1,9 +1,9 @@
 package coppercore.wpilib_interface.subsystems.sim;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Voltage;
 
 /**
  * The CoppercoreSimAdapter interface provides the MotorIO{TalonFX/SparkMax}Sim classes with a
@@ -17,8 +17,8 @@ import edu.wpi.first.units.measure.Voltage;
  * universal interface expected by a coppercore sim IO.
  *
  * @see coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXSim
- * @see edu.wpi.first.wpilibj.simulation.SingleJointedArmSim
- * @see edu.wpi.first.wpilibj.simulation.ElevatorSim
+ * @see org.wpilib.wpilibj.simulation.SingleJointedArmSim
+ * @see org.wpilib.wpilibj.simulation.ElevatorSim
  */
 public interface CoppercoreSimAdapter {
     /**

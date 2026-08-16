@@ -1,6 +1,6 @@
 package coppercore.wpilib_interface.subsystems.dio_switch;
 
-import static edu.wpi.first.units.Units.Hertz;
+import static org.wpilib.units.Units.Hertz;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
@@ -9,9 +9,9 @@ import com.ctre.phoenix6.hardware.CANdi;
 import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.StatusSignalRefresher;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.DriverStation;
+import org.wpilib.wpilibj.Alert;
+import org.wpilib.wpilibj.Alert.AlertType;
+import org.wpilib.wpilibj.DriverStation;
 
 /**
  * The DigitalInputIOCANdi class implements the DigitalInputIO interface using a CANdi to read a

@@ -1,7 +1,7 @@
 package coppercore.wpilib_interface;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.wpilib.math.kinematics.ChassisSpeeds;
+import org.wpilib.wpilibj2.command.Subsystem;
 
 /**
  * This sets the goal speeds and is a foundational component of the drive subsystem. It allows us to

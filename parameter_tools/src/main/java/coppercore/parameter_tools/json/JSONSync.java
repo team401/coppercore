@@ -9,12 +9,12 @@ import coppercore.parameter_tools.json.strategies.JSONExcludeExclusionStrategy;
 import coppercore.parameter_tools.json.strategies.JSONNamingStrategy;
 import coppercore.parameter_tools.json.strategies.JSONPrimitiveCheckStrategy;
 import coppercore.parameter_tools.path_provider.PathProvider;
-import edu.wpi.first.math.Pair;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import org.wpilib.math.Pair;
 
 /**
  * A utility class for synchronizing Java objects with JSON files. Provides functionality for

@@ -1,7 +1,7 @@
 package coppercore.wpilib_interface.tuning;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.wpilib.wpilibj.DriverStation;
 
 /**
  * A test mode manager adds a LoggedDashboardChooser for a set of test modes described by an enum.

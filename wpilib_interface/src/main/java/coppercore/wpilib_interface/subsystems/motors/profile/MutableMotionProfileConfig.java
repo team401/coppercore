@@ -2,22 +2,22 @@ package coppercore.wpilib_interface.subsystems.motors.profile;
 
 import static coppercore.wpilib_interface.UnitUtils.VoltsPerRotationPerSecond;
 import static coppercore.wpilib_interface.UnitUtils.VoltsPerRotationPerSecondSquared;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Second;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.Second;
 
-import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.AngularVelocityUnit;
-import edu.wpi.first.units.VelocityUnit;
-import edu.wpi.first.units.VoltageUnit;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.MutAngularAcceleration;
-import edu.wpi.first.units.measure.MutAngularVelocity;
-import edu.wpi.first.units.measure.MutPer;
-import edu.wpi.first.units.measure.MutVelocity;
-import edu.wpi.first.units.measure.Per;
-import edu.wpi.first.units.measure.Velocity;
+import org.wpilib.units.AngularAccelerationUnit;
+import org.wpilib.units.AngularVelocityUnit;
+import org.wpilib.units.VelocityUnit;
+import org.wpilib.units.VoltageUnit;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.MutAngularAcceleration;
+import org.wpilib.units.measure.MutAngularVelocity;
+import org.wpilib.units.measure.MutPer;
+import org.wpilib.units.measure.MutVelocity;
+import org.wpilib.units.measure.Per;
+import org.wpilib.units.measure.Velocity;
 
 /**
  * A generic, mutable motion profile configuration, with methods for modifying its fields.

@@ -1,6 +1,6 @@
 package coppercore.math;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Rotation2d;
 
 /** The AngleUtil class contains utility methods for dealing with angles */
 public class AngleUtil {
