@@ -19,10 +19,10 @@ subprojects {
 
 	group = 'io.github.team401.coppercore'
 
-	// As of 12/2025, all robot software requires Java 17
+	// Systemcore will use Java 25
 	java {
 		toolchain {
-			languageVersion = JavaLanguageVersion.of(17)
+			languageVersion = JavaLanguageVersion.of(25)
 		}
 	}
 

@@ -34,7 +34,7 @@ dependencies {
 	nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
 	simulationRelease wpi.sim.enableRelease()
 
-	implementation libs.wpilib.newcommands
+	implementation libs.wpilib.commands
 
 	annotationProcessor libs.akit.autolog
 	implementation libs.akit.java
