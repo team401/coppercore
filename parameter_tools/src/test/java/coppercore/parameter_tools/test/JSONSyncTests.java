@@ -98,7 +98,10 @@ public class JSONSyncTests {
         Assertions.assertEquals(10.0, instance.testDouble, "testDouble should be 10.0");
         Assertions.assertEquals(2, instance.testingIntField, "testInt should be 2");
         Assertions.assertEquals(
-                0.47, instance.pose.getRotation().getRadians(), "rotation radians should be 0.47");
+                0.47,
+                instance.pose.getRotation().getRadians(),
+                1e-12,
+                "rotation radians should be 0.47");
         Assertions.assertNull(instance.motorData, "motorData should be null");
         Assertions.assertEquals(
                 10.0, instance.testPer.magnitude(), 0.1, "testPer magnitude should be 10.0");

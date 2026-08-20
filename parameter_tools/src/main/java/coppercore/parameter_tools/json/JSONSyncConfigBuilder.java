@@ -11,7 +11,7 @@ import coppercore.parameter_tools.json.adapters.PolymorphDeserializer;
 import coppercore.parameter_tools.json.adapters.PolymorphTypeAdapterFactory;
 import java.util.ArrayList;
 import java.util.List;
-import org.wpilib.math.Pair;
+import org.wpilib.math.util.Pair;
 
 /** Builder class for creating a JSONSyncConfig instance. */
 public class JSONSyncConfigBuilder {

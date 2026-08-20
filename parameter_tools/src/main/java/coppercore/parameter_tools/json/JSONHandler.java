@@ -24,8 +24,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
-import org.wpilib.hal.HAL;
-import org.wpilib.wpilibj.RobotController;
+import org.wpilib.hardware.hal.HAL;
+import org.wpilib.system.RobotController;
 
 /** Handler to create JSONSync objects with given config and path provider */
 public final class JSONHandler {
