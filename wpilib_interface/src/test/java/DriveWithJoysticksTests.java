@@ -4,7 +4,7 @@ import static org.wpilib.units.Units.RadiansPerSecond;
 import coppercore.wpilib_interface.DriveWithJoysticks;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.wpilib.math.kinematics.ChassisSpeeds;
+import org.wpilib.math.kinematics.ChassisVelocities;
 
 /**
  * The DriveWithJoysticksTests class tests the functionality of DriveWithJoysticks to make sure it's
@@ -28,27 +28,27 @@ public class DriveWithJoysticksTests {
     private static double SPEED_EPSILON = 1e-6;
 
     /**
-     * Assert that each field of a given set of ChassisSpeeds is within SPEED_EPSILON of an expected
+     * Assert that each field of a given set of ChassisVelocities is within SPEED_EPSILON of an expected
      * value.
      *
      * <p>Using AssertEquals compares doubles internally, so this method is required instead.
      *
-     * @param speeds The ChassisSpeeds to test
+     * @param velocities The ChassisVelocities to test
      * @param expectedVx The expected vx in m/s
      * @param expectedVy The expected vy in m/s
      * @param expectedOmega The expected omega (angular velocity) in rad/s
      * @param message The message to pass to each assertEquals call
      */
     private void assertChassisSpeeds(
-            ChassisSpeeds speeds,
+            ChassisVelocities velocities,
             double expectedVx,
             double expectedVy,
             double expectedOmega,
             String message) {
-        Assertions.assertEquals(expectedVx, speeds.vxMetersPerSecond, SPEED_EPSILON, message);
-        Assertions.assertEquals(expectedVy, speeds.vyMetersPerSecond, SPEED_EPSILON, message);
+        Assertions.assertEquals(expectedVx, velocities.vxMetersPerSecond, SPEED_EPSILON, message);
+        Assertions.assertEquals(expectedVy, velocities.vyMetersPerSecond, SPEED_EPSILON, message);
         Assertions.assertEquals(
-                expectedOmega, speeds.omegaRadiansPerSecond, SPEED_EPSILON, message);
+                expectedOmega, velocities.omegaRadiansPerSecond, SPEED_EPSILON, message);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class DriveWithJoysticksTests {
         command.execute();
 
         Assertions.assertEquals(
-                new ChassisSpeeds(),
+                new ChassisVelocities(),
                 dummyDrive.getLastGoalSpeeds(),
                 "Zeros on joysticks should result in zero chassis speeds.");
         assertFieldCentric(dummyDrive);

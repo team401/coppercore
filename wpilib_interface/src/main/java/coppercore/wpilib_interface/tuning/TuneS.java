@@ -4,8 +4,8 @@ package coppercore.wpilib_interface.tuning;
 
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
-import org.wpilib.wpilibj.smartdashboard.SmartDashboard;
-import org.wpilib.wpilibj2.command.Command;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.command2.Command;
 
 /**
  * A command to automatically tune kS for a tunable system

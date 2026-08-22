@@ -37,15 +37,15 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.wpilib.hal.HAL;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.hardware.hal.HAL;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.PerUnit;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.wpilibj.DriverStation;
-import org.wpilib.wpilibj.Timer;
-import org.wpilib.wpilibj.simulation.DriverStationSim;
-import org.wpilib.wpilibj.simulation.ElevatorSim;
-import org.wpilib.wpilibj.simulation.SimHooks;
+import org.wpilib.system.Timer;
+import org.wpilib.simulation.DriverStationSim;
+import org.wpilib.simulation.ElevatorSim;
+import org.wpilib.simulation.SimHooks;
 
 /**
  * The MotorIOCTRETests class contains tests for TalonFX motor IOs and CANCoder encoderIOs using
@@ -125,7 +125,7 @@ public class MotorIOCTRETests {
     void initializeSimFeatures() {
         HAL.initialize(500, 2);
         SimHooks.setHALRuntimeType(2);
-        SimHooks.setProgramStarted();
+        SimHooks.setProgramStarted(true);
     }
 
     /**

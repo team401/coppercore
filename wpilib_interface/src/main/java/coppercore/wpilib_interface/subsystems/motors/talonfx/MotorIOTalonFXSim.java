@@ -11,8 +11,8 @@ import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.sim.CoppercoreSimAdapter;
-import org.wpilib.wpilibj.RobotController;
-import org.wpilib.wpilibj.Timer;
+import org.wpilib.system.RobotController;
+import org.wpilib.system.Timer;
 
 /**
  * A MotorIOTalonFXSim uses Phoenix-6 simulation features (TalonFX sim state) to read and update a

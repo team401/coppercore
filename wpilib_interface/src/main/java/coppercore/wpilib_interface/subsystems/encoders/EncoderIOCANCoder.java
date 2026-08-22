@@ -12,9 +12,9 @@ import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
-import org.wpilib.wpilibj.Alert;
+import org.wpilib.driverstation.Alert;
 import org.wpilib.wpilibj.Alert.AlertType;
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.DriverStation;
 
 /**
  * The EncoderIOCANCoder class implements the EncoderIO interface for a physical CANCoder device by

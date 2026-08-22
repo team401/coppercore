@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import org.wpilib.math.MathUtil;
-import org.wpilib.wpilibj.DriverStation;
-import org.wpilib.wpilibj2.command.CommandScheduler;
-import org.wpilib.wpilibj2.command.button.Trigger;
+import org.wpilib.math.util.MathUtil;
+import org.wpilib.driverstation.DriverStation;
+import org.wpilib.command2.CommandScheduler;
+import org.wpilib.command2.button.Trigger;
 
 // Some Javadoc written by Copilot based on user description
 

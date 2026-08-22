@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.DriverStation;
 
 /** Utilities for working with REV/Spark hardware */
 public class SparkUtil {

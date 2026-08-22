@@ -12,9 +12,9 @@ import coppercore.wpilib_interface.subsystems.sim.CoppercoreSimAdapter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import org.wpilib.math.system.plant.DCMotor;
-import org.wpilib.wpilibj.RobotController;
-import org.wpilib.wpilibj.Timer;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.system.RobotController;
+import org.wpilib.system.Timer;
 
 /**
  * The MotorIOSparkMaxSim class extends the MotorIOSparkMax class to provide simulation capabilities

@@ -2,7 +2,7 @@ package coppercore.wpilib_interface.subsystems.motors;
 
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
-import org.wpilib.wpilibj.Alert;
+import org.wpilib.driverstation.Alert;
 import org.wpilib.wpilibj.Alert.AlertType;
 
 /**

@@ -10,7 +10,7 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.wpilibj.simulation.DCMotorSim;
+import org.wpilib.simulation.DCMotorSim;
 
 /**
  * The DCMotorSimAdapter class wraps a DCMotorSim to implement the CoppercoreSimAdapter interface,
@@ -27,27 +27,27 @@ public class DCMotorSimAdapter extends BaseSimAdapter {
 
     @Override
     public Angle getMotorPosition() {
-        return dcMotorSim.getAngularPosition();
+        return Angle.ofBaseUnits(dcMotorSim.getAngularPosition(), Radians);
     }
 
     @Override
     public AngularVelocity getMotorAngularVelocity() {
-        return dcMotorSim.getAngularVelocity();
+        return AngularVelocity.ofBaseUnits(dcMotorSim.getAngularVelocity(), RadiansPerSecond);
     }
 
     @Override
     public Angle getEncoderPosition() {
-        return dcMotorSim.getAngularPosition().div(config.motorToEncoderRatio);
+        return Angle.ofBaseUnits(dcMotorSim.getAngularPosition() / config.motorToEncoderRatio, Radians);
     }
 
     @Override
     public AngularVelocity getEncoderAngularVelocity() {
-        return dcMotorSim.getAngularVelocity().div(config.motorToEncoderRatio);
+        return AngularVelocity.ofBaseUnits(dcMotorSim.getAngularVelocity() / config.motorToEncoderRatio, RadiansPerSecond);
     }
 
     @Override
     public Current getCurrentDraw() {
-        return Amps.of(dcMotorSim.getCurrentDrawAmps());
+        return Amps.of(dcMotorSim.getCurrentDraw());
     }
 
     @Override

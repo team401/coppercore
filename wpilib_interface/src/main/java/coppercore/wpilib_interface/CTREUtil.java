@@ -11,7 +11,7 @@ import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO.NeutralMode;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.DriverStation;
 
 /** Utilities for working with CTRE hardware */
 public final class CTREUtil {

@@ -11,7 +11,7 @@ import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.MutAngle;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.wpilibj.simulation.FlywheelSim;
+import org.wpilib.simulation.FlywheelSim;
 
 /**
  * The FlywheelSimAdapter class wraps a WPILib FlywheelSim for use with CopperCore motor IOs by

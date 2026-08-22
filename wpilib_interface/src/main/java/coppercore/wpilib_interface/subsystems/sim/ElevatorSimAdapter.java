@@ -11,7 +11,7 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.wpilibj.simulation.ElevatorSim;
+import org.wpilib.simulation.ElevatorSim;
 
 /**
  * The ElevatorSimAdapter class adapts wpilib ElevatorSim for use with MotorIO{TalonFX/SparkMax}Sim
@@ -45,7 +45,7 @@ public class ElevatorSimAdapter extends BaseSimAdapter {
     @Override
     public Angle getMotorPosition() {
         Angle mechanismPos =
-                Meters.of(elevatorSim.getPositionMeters())
+                Meters.of(elevatorSim.getPosition())
                         .timesConversionFactor(config.elevatorToMechanismRatio.reciprocal());
         Angle encoderPos = mechanismPos.times(config.encoderToMechanismRatio);
         Angle motorPos = encoderPos.times(config.motorToEncoderRatio);
@@ -55,7 +55,7 @@ public class ElevatorSimAdapter extends BaseSimAdapter {
 
     @Override
     public AngularVelocity getMotorAngularVelocity() {
-        double velocityMetersPerSecond = elevatorSim.getVelocityMetersPerSecond();
+        double velocityMetersPerSecond = elevatorSim.getVelocity();
         double metersPerRotation = config.elevatorToMechanismRatio.in(Meters.per(Rotations));
 
         double mechanismVelRotationsPerSecond = velocityMetersPerSecond / metersPerRotation;
@@ -70,7 +70,7 @@ public class ElevatorSimAdapter extends BaseSimAdapter {
     @Override
     public Angle getEncoderPosition() {
         Angle mechanismPos =
-                Meters.of(elevatorSim.getPositionMeters())
+                Meters.of(elevatorSim.getPosition())
                         .timesConversionFactor(config.elevatorToMechanismRatio.reciprocal());
         Angle encoderPos = mechanismPos.times(config.encoderToMechanismRatio);
 
@@ -79,7 +79,7 @@ public class ElevatorSimAdapter extends BaseSimAdapter {
 
     @Override
     public AngularVelocity getEncoderAngularVelocity() {
-        double velocityMetersPerSecond = elevatorSim.getVelocityMetersPerSecond();
+        double velocityMetersPerSecond = elevatorSim.getVelocity();
         double metersPerRotation = config.elevatorToMechanismRatio.in(Meters.per(Rotations));
 
         double mechanismVelRotationsPerSecond = velocityMetersPerSecond / metersPerRotation;
@@ -91,7 +91,7 @@ public class ElevatorSimAdapter extends BaseSimAdapter {
 
     @Override
     public Current getCurrentDraw() {
-        return Amps.of(elevatorSim.getCurrentDrawAmps());
+        return Amps.of(elevatorSim.getCurrentDraw());
     }
 
     @Override

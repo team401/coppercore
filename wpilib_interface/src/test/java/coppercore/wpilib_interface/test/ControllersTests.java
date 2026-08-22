@@ -10,7 +10,7 @@ import coppercore.wpilib_interface.controllers.Controllers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.wpilib.wpilibj.DriverStation;
-import org.wpilib.wpilibj.simulation.DriverStationSim;
+import org.wpilib.simulation.DriverStationSim;
 
 public class ControllersTests {
 

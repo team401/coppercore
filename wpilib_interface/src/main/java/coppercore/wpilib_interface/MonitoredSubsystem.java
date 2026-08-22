@@ -4,8 +4,8 @@ import coppercore.monitors.Monitor;
 import java.util.ArrayList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
-import org.wpilib.wpilibj.Timer;
-import org.wpilib.wpilibj2.command.SubsystemBase;
+import org.wpilib.system.Timer;
+import org.wpilib.command2.SubsystemBase;
 
 /**
  * This class simplifies the process of monitoring the health and status of subsystems within the
@@ -49,7 +49,7 @@ public abstract class MonitoredSubsystem extends SubsystemBase {
     private void runMonitors() {
         registeredMonitors.forEach(
                 monitor -> {
-                    monitor.periodic(Timer.getFPGATimestamp());
+                    monitor.periodic(Timer.getTimestamp());
 
                     if (loggingEnabled && monitor.getLoggingEnabled()) {
                         Logger.recordOutput(

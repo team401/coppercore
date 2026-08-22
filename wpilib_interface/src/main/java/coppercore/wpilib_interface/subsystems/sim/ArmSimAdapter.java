@@ -10,7 +10,7 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.wpilibj.simulation.SingleJointedArmSim;
+import org.wpilib.simulation.SingleJointedArmSim;
 
 /**
  * The ElevatorSimAdapter class adapts the wpilib SingleJointedArmSim for use with coppercore's
@@ -49,7 +49,7 @@ public class ArmSimAdapter implements CoppercoreSimAdapter {
 
     @Override
     public Angle getEncoderPosition() {
-        Angle mechanismPos = Radians.of(armSim.getAngleRads());
+        Angle mechanismPos = Radians.of(armSim.getAngle());
         Angle encoderPos = mechanismPos.times(config.encoderToMechanismRatio);
 
         return encoderPos;
@@ -57,7 +57,7 @@ public class ArmSimAdapter implements CoppercoreSimAdapter {
 
     @Override
     public AngularVelocity getEncoderAngularVelocity() {
-        double mechanismVelRadPerSec = armSim.getVelocityRadPerSec();
+        double mechanismVelRadPerSec = armSim.getVelocity();
         double encoderVelRadPerSec = mechanismVelRadPerSec * config.encoderToMechanismRatio;
 
         return RadiansPerSecond.of(encoderVelRadPerSec);
@@ -65,7 +65,7 @@ public class ArmSimAdapter implements CoppercoreSimAdapter {
 
     @Override
     public Current getCurrentDraw() {
-        return Amps.of(armSim.getCurrentDrawAmps());
+        return Amps.of(armSim.getCurrentDraw());
     }
 
     @Override

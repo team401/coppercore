@@ -9,9 +9,9 @@ import com.ctre.phoenix6.hardware.CANdi;
 import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.StatusSignalRefresher;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
-import org.wpilib.wpilibj.Alert;
+import org.wpilib.driverstation.Alert;
 import org.wpilib.wpilibj.Alert.AlertType;
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.DriverStation;
 
 /**
  * The DigitalInputIOCANdi class implements the DigitalInputIO interface using a CANdi to read a

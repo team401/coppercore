@@ -6,8 +6,8 @@ import static org.wpilib.units.Units.Rotations;
 
 import org.wpilib.math.filter.MedianFilter;
 import org.wpilib.units.measure.Angle;
-import org.wpilib.wpilibj.smartdashboard.SmartDashboard;
-import org.wpilib.wpilibj2.command.Command;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.command2.Command;
 
 /**
  * A command to automatically characterize kG
