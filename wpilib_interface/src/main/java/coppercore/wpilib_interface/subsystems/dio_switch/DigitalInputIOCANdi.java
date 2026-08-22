@@ -10,8 +10,7 @@ import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.StatusSignalRefresher;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import org.wpilib.driverstation.Alert;
-import org.wpilib.wpilibj.Alert.AlertType;
-import org.wpilib.driverstation.DriverStation;
+import org.wpilib.driverstation.DriverStationErrors;
 
 /**
  * The DigitalInputIOCANdi class implements the DigitalInputIO interface using a CANdi to read a
@@ -53,11 +52,11 @@ public class DigitalInputIOCANdi implements DigitalInputIO {
 
         String configFailedToApplyMessage = deviceName + " failed to apply configs.";
 
-        this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, AlertType.kError);
+        this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, Alert.Level.HIGH);
 
         String disconnectedMessage = deviceName + " disconnected.";
 
-        this.disconnectedAlert = new Alert(disconnectedMessage, AlertType.kError);
+        this.disconnectedAlert = new Alert(disconnectedMessage, Alert.Level.HIGH);
 
         CTREUtil.tryUntilOk(
                 () -> this.candi.getConfigurator().apply(candiConfig),
@@ -83,10 +82,10 @@ public class DigitalInputIOCANdi implements DigitalInputIO {
         disconnectedAlert.set(!code.isOK());
 
         if (code.isError()) {
-            DriverStation.reportError(
+            DriverStationErrors.reportError(
                     deviceName + ": Failed to refresh status signals: " + code, false);
         } else if (code.isWarning()) {
-            DriverStation.reportWarning(
+            DriverStationErrors.reportWarning(
                     deviceName + ": Warning while refreshing status signals: " + code, false);
         }
 

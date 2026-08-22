@@ -1,8 +1,8 @@
 package coppercore.wpilib_interface.alliance_util;
 
 import java.util.function.Supplier;
-import org.wpilib.driverstation.MatchState;
 import org.wpilib.driverstation.Alliance;
+import org.wpilib.driverstation.MatchState;
 
 /**
  * The AllianceUtil class provides an easy way to check which alliance we are currently on.

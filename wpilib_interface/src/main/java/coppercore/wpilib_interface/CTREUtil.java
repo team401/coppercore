@@ -11,7 +11,7 @@ import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO.NeutralMode;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import org.wpilib.driverstation.DriverStation;
+import org.wpilib.driverstation.DriverStationErrors;
 
 /** Utilities for working with CTRE hardware */
 public final class CTREUtil {
@@ -59,7 +59,7 @@ public final class CTREUtil {
             }
         }
 
-        DriverStation.reportError(
+        DriverStationErrors.reportError(
                 "tryUntilOk failed after "
                         + maxTries
                         + " attempts (deviceId: "

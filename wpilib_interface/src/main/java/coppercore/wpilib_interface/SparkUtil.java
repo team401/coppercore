@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import org.wpilib.driverstation.DriverStation;
+import org.wpilib.driverstation.DriverStationErrors;
 
 /** Utilities for working with REV/Spark hardware */
 public class SparkUtil {
@@ -75,7 +75,7 @@ public class SparkUtil {
             }
         }
 
-        DriverStation.reportError(
+        DriverStationErrors.reportError(
                 "tryUntilOk failed after"
                         + maxTries
                         + " attempts (deviceId: "

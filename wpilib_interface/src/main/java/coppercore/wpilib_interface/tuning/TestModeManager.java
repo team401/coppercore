@@ -1,7 +1,7 @@
 package coppercore.wpilib_interface.tuning;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 
 /**
  * A test mode manager adds a LoggedDashboardChooser for a set of test modes described by an enum.
@@ -41,7 +41,7 @@ public final class TestModeManager<TestMode extends Enum<?> & TestModeDescriptio
      * will return TestMode.None
      */
     public TestMode getTestMode() {
-        if (!DriverStation.isTest()) {
+        if (!(DriverStationBackend.isUtilityEnabled())) {
             return this.None;
         }
 

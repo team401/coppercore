@@ -37,7 +37,7 @@ public class MonitorWithAlert extends Monitor {
             boolean loggingEnabled,
             String group,
             String alertText,
-            AlertType alertType) {
+            Alert.Level alertType) {
         super(name, sticky, isStateValid, timeToFault, faultCallback, loggingEnabled);
 
         alert = new Alert(group, alertText, alertType);
@@ -60,7 +60,7 @@ public class MonitorWithAlert extends Monitor {
     public static class MonitorWithAlertBuilder extends MonitorBuilder {
         String group = "Alerts";
         String alertText;
-        AlertType alertType;
+        Alert.Level alertType;
 
         @Override
         public MonitorWithAlertBuilder withName(String name) {
@@ -137,7 +137,7 @@ public class MonitorWithAlert extends Monitor {
          * @param alertType The alertType of the alert, e.g. kWarning
          * @return the monitor builder, so that successive builder calls can be chained
          */
-        public MonitorWithAlertBuilder withAlertType(AlertType alertType) {
+        public MonitorWithAlertBuilder withAlertType(Alert.Level alertType) {
             this.alertType = alertType;
             return this;
         }

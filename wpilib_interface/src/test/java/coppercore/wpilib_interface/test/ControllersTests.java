@@ -9,7 +9,7 @@ import coppercore.wpilib_interface.controllers.Controller;
 import coppercore.wpilib_interface.controllers.Controllers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.simulation.DriverStationSim;
 
 public class ControllersTests {
@@ -36,8 +36,8 @@ public class ControllersTests {
     }
 
     public void setupControllerSim(int port, int axisCount, int buttonCount) {
-        DriverStationSim.setJoystickAxisCount(port, axisCount);
-        DriverStationSim.setJoystickButtonCount(port, buttonCount);
+        DriverStationSim.setJoystickAxesAvailable(port, axisCount);
+        DriverStationSim.setJoystickButtonsAvailable(port, buttonCount);
         DriverStationSim.notifyNewData();
     }
 
@@ -146,7 +146,7 @@ public class ControllersTests {
 
         setAxis(0, 0, 0);
         System.out.println(shootButton.isPressed());
-        System.out.println("Axis Value: " + DriverStation.getStickAxis(0, 0));
+        System.out.println("Axis Value: " + DriverStationBackend.getStickAxis(0, 0));
         Assertions.assertEquals(false, shootButton.isPressed());
         setAxis(0, 0, 0.45);
         Assertions.assertEquals(false, shootButton.isPressed());

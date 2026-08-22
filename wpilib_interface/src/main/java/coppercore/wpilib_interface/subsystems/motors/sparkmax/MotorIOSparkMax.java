@@ -7,8 +7,8 @@ import static org.wpilib.units.Units.Volts;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.FeedForwardConfig;
@@ -22,6 +22,7 @@ import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
 import java.util.HashMap;
 import java.util.Map;
+import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.math.util.Units;
 import org.wpilib.units.AngularAccelerationUnit;
 import org.wpilib.units.measure.Angle;
@@ -29,10 +30,8 @@ import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Frequency;
-import org.wpilib.units.measure.MutVoltage;
 import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.wpilibj.DriverStation;
 
 /**
  * The MotorIOSparkMax implements the MotorIO interface for the <a
@@ -99,7 +98,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
      *   <li><b>Default value:</b> 0.0 volts
      * </ul>
      */
-    protected MutVoltage arbitraryFF = Volts.mutable(0.0);
+    protected Voltage arbitraryFF = Volts.of(0.0);
 
     /**
      * Create a new MotorIOSparkMax given a mechanism config, a CANDeviceID, a SparkMaxConfig, and a
@@ -289,7 +288,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         inputs.connected = connected;
 
         if (!connected) {
-            DriverStation.reportError(
+            DriverStationErrors.reportError(
                     deviceName + ": Reading inputs caused error: " + sparkMax.getLastError(),
                     false);
         }
@@ -461,7 +460,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void setArbitraryFeedForwardVoltage(Voltage feedForward) {
-        arbitraryFF.mut_replace(feedForward);
+        arbitraryFF = feedForward;
     }
 
     @Override

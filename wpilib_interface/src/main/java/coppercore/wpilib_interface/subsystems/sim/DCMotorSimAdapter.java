@@ -6,11 +6,11 @@ import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Volts;
 
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
+import org.wpilib.simulation.DCMotorSim;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.simulation.DCMotorSim;
 
 /**
  * The DCMotorSimAdapter class wraps a DCMotorSim to implement the CoppercoreSimAdapter interface,
@@ -37,12 +37,14 @@ public class DCMotorSimAdapter extends BaseSimAdapter {
 
     @Override
     public Angle getEncoderPosition() {
-        return Angle.ofBaseUnits(dcMotorSim.getAngularPosition() / config.motorToEncoderRatio, Radians);
+        return Angle.ofBaseUnits(
+                dcMotorSim.getAngularPosition() / config.motorToEncoderRatio, Radians);
     }
 
     @Override
     public AngularVelocity getEncoderAngularVelocity() {
-        return AngularVelocity.ofBaseUnits(dcMotorSim.getAngularVelocity() / config.motorToEncoderRatio, RadiansPerSecond);
+        return AngularVelocity.ofBaseUnits(
+                dcMotorSim.getAngularVelocity() / config.motorToEncoderRatio, RadiansPerSecond);
     }
 
     @Override

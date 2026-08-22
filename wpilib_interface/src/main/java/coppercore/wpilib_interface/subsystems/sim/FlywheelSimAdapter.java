@@ -6,12 +6,11 @@ import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Volts;
 
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
+import org.wpilib.simulation.FlywheelSim;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
-import org.wpilib.units.measure.MutAngle;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.simulation.FlywheelSim;
 
 /**
  * The FlywheelSimAdapter class wraps a WPILib FlywheelSim for use with CopperCore motor IOs by
@@ -24,7 +23,7 @@ import org.wpilib.simulation.FlywheelSim;
  */
 public class FlywheelSimAdapter extends BaseSimAdapter {
     protected final FlywheelSim physicsSim;
-    MutAngle integratedPosition = Radians.mutable(0.0);
+    Angle integratedPosition = Radians.of(0.0);
 
     /**
      * Creates an adapter around a WPILib flywheel simulation.
@@ -44,12 +43,12 @@ public class FlywheelSimAdapter extends BaseSimAdapter {
         physicsSim.update(deltaTimeSeconds);
 
         double dthetaRadians =
-                physicsSim.getAngularVelocityRadPerSec() * deltaTimeSeconds
+                physicsSim.getAngularVelocity() * deltaTimeSeconds
                         + 0.5
-                                * physicsSim.getAngularAccelerationRadPerSecSq()
+                                * physicsSim.getAngularAcceleration()
                                 * deltaTimeSeconds
                                 * deltaTimeSeconds;
-        integratedPosition.mut_plus(Radians.of(dthetaRadians));
+        integratedPosition.plus(Radians.of(dthetaRadians));
     }
 
     /** {@inheritDoc} */
@@ -73,19 +72,20 @@ public class FlywheelSimAdapter extends BaseSimAdapter {
     /** {@inheritDoc} */
     @Override
     public AngularVelocity getEncoderAngularVelocity() {
-        return physicsSim.getAngularVelocity().times(config.encoderToMechanismRatio);
+        return AngularVelocity.ofBaseUnits(
+                physicsSim.getAngularVelocity() * config.encoderToMechanismRatio, RadiansPerSecond);
     }
 
     /** {@inheritDoc} */
     @Override
     public Current getCurrentDraw() {
-        return Amps.of(physicsSim.getCurrentDrawAmps());
+        return Amps.of(physicsSim.getCurrentDraw());
     }
 
     /** {@inheritDoc} */
     @Override
     public void setState(Angle newAngle, AngularVelocity newAngularVelocity) {
-        integratedPosition.mut_replace(newAngle);
+        integratedPosition = newAngle;
         physicsSim.setAngularVelocity(newAngularVelocity.in(RadiansPerSecond));
     }
 }

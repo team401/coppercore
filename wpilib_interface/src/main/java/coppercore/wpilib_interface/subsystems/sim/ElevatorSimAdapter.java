@@ -7,11 +7,11 @@ import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Volts;
 
 import coppercore.wpilib_interface.subsystems.configs.ElevatorMechanismConfig;
+import org.wpilib.simulation.ElevatorSim;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.simulation.ElevatorSim;
 
 /**
  * The ElevatorSimAdapter class adapts wpilib ElevatorSim for use with MotorIO{TalonFX/SparkMax}Sim

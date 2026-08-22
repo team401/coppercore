@@ -6,11 +6,11 @@ import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Volts;
 
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
+import org.wpilib.simulation.SingleJointedArmSim;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.simulation.SingleJointedArmSim;
 
 /**
  * The ElevatorSimAdapter class adapts the wpilib SingleJointedArmSim for use with coppercore's

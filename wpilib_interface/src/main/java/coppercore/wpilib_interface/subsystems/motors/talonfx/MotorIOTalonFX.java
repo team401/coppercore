@@ -40,6 +40,7 @@ import coppercore.wpilib_interface.subsystems.motors.MotorIO;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
 import java.util.Optional;
+import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.math.util.Units;
 import org.wpilib.units.AngularAccelerationUnit;
 import org.wpilib.units.measure.Angle;
@@ -47,11 +48,9 @@ import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Frequency;
-import org.wpilib.units.measure.MutCurrent;
 import org.wpilib.units.measure.Temperature;
 import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.wpilibj.DriverStation;
 
 /**
  * A base motor IO that implements closed-loop control for a TalonFX-supporting motor using
@@ -258,7 +257,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      *   <li><b>Default value:</b> 0.0 amps
      * </ul>
      */
-    protected MutCurrent arbitraryFF = Amps.mutable(0.0);
+    protected Current arbitraryFF = Amps.of(0.0);
 
     /** A neutral request to use for basic config-based neutral mode commands */
     protected final NeutralOut neutralRequest = new NeutralOut();
@@ -903,11 +902,11 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         disconnectedAlert.set(!potentialErrorCode.isOK());
 
         if (potentialErrorCode.isError()) {
-            DriverStation.reportError(
+            DriverStationErrors.reportError(
                     deviceName + ": Failed to refresh status signals: " + potentialErrorCode,
                     false);
         } else if (potentialErrorCode.isWarning()) {
-            DriverStation.reportWarning(
+            DriverStationErrors.reportWarning(
                     deviceName + ": Warning while refreshing status signals: " + potentialErrorCode,
                     false);
         }
@@ -1179,7 +1178,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void setArbitraryFeedForwardCurrent(Current feedForward) {
-        arbitraryFF.mut_replace(feedForward);
+        arbitraryFF = feedForward;
     }
 
     @Override
@@ -1196,7 +1195,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void setNeutralMode(NeutralMode neutralMode) {
-        talon.setNeutralMode(CTREUtil.translateNeutralMode(neutralMode));
+        talon.configNeutralMode(CTREUtil.translateNeutralMode(neutralMode));
     }
 
     @Override

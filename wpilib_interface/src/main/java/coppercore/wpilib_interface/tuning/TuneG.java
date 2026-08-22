@@ -4,10 +4,10 @@ package coppercore.wpilib_interface.tuning;
 
 import static org.wpilib.units.Units.Rotations;
 
-import org.wpilib.math.filter.MedianFilter;
-import org.wpilib.units.measure.Angle;
-import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.command2.Command;
+import org.wpilib.math.filter.MedianFilter;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.units.measure.Angle;
 
 /**
  * A command to automatically characterize kG

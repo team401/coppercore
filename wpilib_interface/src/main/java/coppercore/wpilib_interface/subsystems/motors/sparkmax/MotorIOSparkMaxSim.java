@@ -206,7 +206,7 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
         this.lastTimestampSeconds = timestamp;
 
         physicsSimAdapter.update(
-                Volts.of(sparkMax.getAppliedOutput() * RobotController.getBatteryVoltage()),
+                Volts.of(sparkMax.getAppliedOutput().get() * RobotController.getBatteryVoltage()),
                 deltaTimeSeconds);
 
         sparkSim.iterate(

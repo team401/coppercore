@@ -8,9 +8,9 @@ import coppercore.wpilib_interface.alliance_util.AllianceUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.wpilib.driverstation.Alliance;
 import org.wpilib.hardware.hal.AllianceStationID;
 import org.wpilib.hardware.hal.HAL;
-import org.wpilib.driverstation.Alliance;
 import org.wpilib.simulation.DriverStationSim;
 
 // This was made with Codex 5.5 Medium.

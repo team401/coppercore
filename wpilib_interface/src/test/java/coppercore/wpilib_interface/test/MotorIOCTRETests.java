@@ -37,15 +37,15 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.hardware.hal.HAL;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.units.PerUnit;
-import org.wpilib.units.measure.Angle;
-import org.wpilib.wpilibj.DriverStation;
-import org.wpilib.system.Timer;
 import org.wpilib.simulation.DriverStationSim;
 import org.wpilib.simulation.ElevatorSim;
 import org.wpilib.simulation.SimHooks;
+import org.wpilib.system.Timer;
+import org.wpilib.units.PerUnit;
+import org.wpilib.units.measure.Angle;
 
 /**
  * The MotorIOCTRETests class contains tests for TalonFX motor IOs and CANCoder encoderIOs using
@@ -141,7 +141,7 @@ public class MotorIOCTRETests {
         SimHooks.pauseTiming();
         while (timeElapsed < timeSeconds || (timeSeconds == 0.0 && timeElapsed == 0.0)) {
             SimHooks.stepTiming(0.02);
-            if (DriverStation.isEnabled()) {
+            if (DriverStationBackend.isEnabled()) {
                 Unmanaged.feedEnable(100);
             }
             loop.run();
@@ -253,7 +253,7 @@ public class MotorIOCTRETests {
         // delay ~100ms so the devices can start up and enable
         Timer.delay(0.100);
 
-        assert DriverStation.isEnabled();
+        assert DriverStationBackend.isEnabled();
 
         // Give it a couple cycles to let data propagate into the IOs
         leadMotor.controlToPositionUnprofiled(Radians.zero());

@@ -5,11 +5,10 @@ package coppercore.wpilib_interface.tuning;
 import static org.wpilib.units.Units.RotationsPerSecond;
 
 import java.util.ArrayList;
+import org.wpilib.command2.Command;
+import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
-import org.wpilib.units.measure.MutAngularVelocity;
-import org.wpilib.smartdashboard.SmartDashboard;
-import org.wpilib.command2.Command;
 
 /**
  * A command to automatically characterize kV for a Tunable system.
@@ -29,7 +28,7 @@ public class TuneV extends Command {
 
     double kS;
     double pastkV;
-    MutAngularVelocity average = RotationsPerSecond.mutable(0.0);
+    AngularVelocity average = RotationsPerSecond.of(0.0);
     AngularVelocity vel = RotationsPerSecond.of(0.0);
 
     Angle maxPos;
@@ -74,10 +73,10 @@ public class TuneV extends Command {
         mechanism.setOutput(0.0);
 
         for (AngularVelocity v : velocities) {
-            average.mut_plus(v);
+            average.plus(v);
         }
 
-        average.mut_divide(velocities.size());
+        average.div(velocities.size());
 
         double kV = (output - kS) / average.in(RotationsPerSecond);
         SmartDashboard.putNumber(

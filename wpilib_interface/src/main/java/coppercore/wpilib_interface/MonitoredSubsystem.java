@@ -4,8 +4,8 @@ import coppercore.monitors.Monitor;
 import java.util.ArrayList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
-import org.wpilib.system.Timer;
 import org.wpilib.command2.SubsystemBase;
+import org.wpilib.system.Timer;
 
 /**
  * This class simplifies the process of monitoring the health and status of subsystems within the
