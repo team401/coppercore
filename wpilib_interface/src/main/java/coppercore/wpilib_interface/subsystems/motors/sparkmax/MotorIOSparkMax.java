@@ -123,7 +123,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         // Copy the config since updating follow mode modifies the config in place.
         this.sparkMaxConfig = new SparkMaxConfig().apply(sparkMaxConfig);
 
-        this.sparkMax = new SparkMax(id.id(), motorType);
+        this.sparkMax = new SparkMax(id.systemCoreBusId(), id.id(), motorType);
 
         this.controller = sparkMax.getClosedLoopController();
 
