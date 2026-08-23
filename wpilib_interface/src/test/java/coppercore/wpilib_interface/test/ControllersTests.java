@@ -93,7 +93,7 @@ public class ControllersTests {
         Controller.Axis driveAxis = controller.getAxis("drive");
         assertNotNull(driveAxis);
 
-        setupControllerSim(2, 1, 1);
+        setupControllerSim(2, 1, 2);
 
         setAxis(2, 0, 0);
         Assertions.assertEquals(0.0, driveAxis.getValue(), DELTA);
