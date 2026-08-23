@@ -24,6 +24,7 @@ import org.wpilib.system.Timer;
  *     intended. It has been left in coppercore to provide the opportunity for it to be fixed and
  *     iterated upon in the future without having to start from a blank slate.
  */
+@SuppressWarnings("unused")
 @Deprecated
 public class MotorIOSparkMaxSim extends MotorIOSparkMax {
     /** Sim adapter to read physics sim values from and update with simulated motor output */

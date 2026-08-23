@@ -48,7 +48,7 @@ public class TuneV extends Command {
 
         this.maxPos = maxPos;
 
-        this.withTimeout(5);
+        // this.withTimeout(5);
     }
 
     @Override

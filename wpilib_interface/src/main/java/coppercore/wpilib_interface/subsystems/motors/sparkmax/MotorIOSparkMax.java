@@ -260,14 +260,14 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
             connected &=
                     SparkUtil.ifOk(
                             sparkMax,
-                            () -> sparkMax.getEncoder().getPosition(),
+                            () -> sparkMax.getEncoder().getPosition().get(),
                             (positionRotations) ->
                                     inputs.positionRadians =
                                             Units.rotationsToRadians(positionRotations));
             connected &=
                     SparkUtil.ifOk(
                             sparkMax,
-                            () -> sparkMax.getEncoder().getVelocity(),
+                            () -> sparkMax.getEncoder().getVelocity().get(),
                             (velocityRPM) ->
                                     inputs.velocityRadiansPerSecond =
                                             Units.rotationsPerMinuteToRadiansPerSecond(
@@ -277,12 +277,12 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         connected &=
                 SparkUtil.ifOk(
                         sparkMax,
-                        () -> sparkMax.getAppliedOutput() * sparkMax.getBusVoltage(),
+                        () -> sparkMax.getAppliedOutput().get() * sparkMax.getBusVoltage().get(),
                         (appliedVolts) -> inputs.appliedVolts = appliedVolts);
         connected &=
                 SparkUtil.ifOk(
                         sparkMax,
-                        sparkMax::getOutputCurrent,
+                        sparkMax.getOutputCurrent()::get,
                         (current) -> inputs.supplyCurrentAmps = current);
 
         inputs.connected = connected;
@@ -298,7 +298,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void controlNeutral() {
-        sparkMax.set(0.0);
+        sparkMax.stopMotor();
     }
 
     @Override
