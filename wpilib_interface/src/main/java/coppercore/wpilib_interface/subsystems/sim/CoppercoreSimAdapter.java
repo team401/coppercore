@@ -17,8 +17,8 @@ import org.wpilib.units.measure.Voltage;
  * universal interface expected by a coppercore sim IO.
  *
  * @see coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXSim
- * @see org.wpilib.wpilibj.simulation.SingleJointedArmSim
- * @see org.wpilib.wpilibj.simulation.ElevatorSim
+ * @see org.wpilib.simulation.SingleJointedArmSim
+ * @see org.wpilib.simulation.ElevatorSim
  */
 public interface CoppercoreSimAdapter {
     /**

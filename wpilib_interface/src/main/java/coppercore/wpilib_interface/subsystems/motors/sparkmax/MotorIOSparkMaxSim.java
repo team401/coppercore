@@ -68,7 +68,7 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
      * @param motorType The motor type, either brushless or brushed
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
-     *     of motors. For example {@link org.wpilib.math.system.plant.DCMotor#getNEO(int)}
+     *     of motors. For example {@link org.wpilib.math.system.DCMotor#getNEO(int)}
      */
     public MotorIOSparkMaxSim(
             MechanismConfig config,
@@ -100,7 +100,7 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
      * @param motorType The motor type, either brushless or brushed
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
-     *     of motors. For example {@link org.wpilib.math.system.plant.DCMotor#getNEO(int)}
+     *     of motors. For example {@link org.wpilib.math.system.DCMotor#getNEO(int)}
      * @return a new MotorIOSparkMaxSim configured as the lead motor
      */
     public static MotorIOSparkMaxSim newLeader(
@@ -126,7 +126,7 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
      * @param motorType The motor type, either brushless or brushed
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
-     *     of motors. For example {@link org.wpilib.math.system.plant.DCMotor#getNEO(int)}
+     *     of motors. For example {@link org.wpilib.math.system.DCMotor#getNEO(int)}
      */
     public MotorIOSparkMaxSim(
             MechanismConfig config,
@@ -162,7 +162,7 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
      * @param motorType The motor type, either brushless or brushed
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
-     *     of motors. For example {@link org.wpilib.math.system.plant.DCMotor#getNEO(int)}
+     *     of motors. For example {@link org.wpilib.math.system.DCMotor#getNEO(int)}
      * @return a new MotorIOSparkMaxSim configured as the follower motor
      */
     public static MotorIOSparkMaxSim newFollower(

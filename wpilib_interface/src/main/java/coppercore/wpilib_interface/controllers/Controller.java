@@ -11,7 +11,6 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.command2.button.Trigger;
-import org.wpilib.driverstation.DriverStation;
 import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.math.util.MathUtil;
 
@@ -659,7 +658,7 @@ public class Controller {
          *
          * @return a normalized value in the range [0.0, 1.0]: 1.0 if the underlying button is
          *     pressed, 0.0 if not, after applying {@code prepareValue}.
-         * @see org.wpilib.wpilibj.DriverStation#getStickButton(int, int)
+         * @see org.wpilib.driverstation.internal.DriverStationBackend#getStickButton(int, int)
          * @see #prepareValue(double, double, double)
          */
         public double getValue() {
@@ -718,7 +717,7 @@ public class Controller {
      * using: sign(value) * ((|value| - deadband) / (1.0 - deadband)).
      *
      * @see LowLevelControlElement
-     * @see DriverStation#getStickAxis(int, int)
+     * @see DriverStationBackend#getStickAxis(int, int)
      */
     public static class LowLevelAxis extends LowLevelControlElement {
         /**
@@ -855,7 +854,7 @@ public class Controller {
      *       = down, 225 = down-left, 270 = left, 315 = up-left).
      * </ul>
      *
-     * @see DriverStation#getStickPOV(int, int)
+     * @see DriverStationBackend#getStickPOV(int, int)
      */
     public static class LowLevelPOV extends LowLevelControlElement {
 
@@ -890,7 +889,7 @@ public class Controller {
          * @return the POV value as a double after processing by prepareValue; raw inputs are -1 for
          *     neutral/not-pressed or an angle in degrees (0–360) which are converted according to
          *     prepareValue's semantics
-         * @see org.wpilib.wpilibj.DriverStation#getStickPOV(int, int)
+         * @see org.wpilib.driverstation.internal.DriverStationBackend#getStickPOV(int, int)
          */
         public double getValue() {
             return prepareValue(DriverStationBackend.getStickPOV(port, id).value, -1, 360);
