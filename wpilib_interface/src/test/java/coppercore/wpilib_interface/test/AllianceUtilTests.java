@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import coppercore.wpilib_interface.alliance_util.AllianceUtil;
-import edu.wpi.first.hal.AllianceStationID;
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.wpilib.driverstation.Alliance;
+import org.wpilib.hardware.hal.AllianceStationID;
+import org.wpilib.hardware.hal.HAL;
+import org.wpilib.simulation.DriverStationSim;
 
 // This was made with Codex 5.5 Medium.
 public class AllianceUtilTests {
@@ -23,7 +23,7 @@ public class AllianceUtilTests {
 
     @BeforeEach
     public void resetDriverStationSim() {
-        setAllianceStation(AllianceStationID.Unknown);
+        setAllianceStation(AllianceStationID.UNKNOWN);
     }
 
     private void setAllianceStation(AllianceStationID allianceStationId) {
@@ -33,28 +33,28 @@ public class AllianceUtilTests {
 
     @Test
     public void getAllianceDefaultsToRedWhenUnknown() {
-        setAllianceStation(AllianceStationID.Unknown);
+        setAllianceStation(AllianceStationID.UNKNOWN);
 
-        assertEquals(Alliance.Red, AllianceUtil.getAlliance());
+        assertEquals(Alliance.RED, AllianceUtil.getAlliance());
         assertTrue(AllianceUtil.isRed());
-        assertEquals(Alliance.Blue, AllianceUtil.getOppAlliance());
+        assertEquals(Alliance.BLUE, AllianceUtil.getOppAlliance());
     }
 
     @Test
     public void getAllianceReturnsRedFromDriverStation() {
-        setAllianceStation(AllianceStationID.Red2);
+        setAllianceStation(AllianceStationID.RED_2);
 
-        assertEquals(Alliance.Red, AllianceUtil.getAlliance());
+        assertEquals(Alliance.RED, AllianceUtil.getAlliance());
         assertTrue(AllianceUtil.isRed());
-        assertEquals(Alliance.Blue, AllianceUtil.getOppAlliance());
+        assertEquals(Alliance.BLUE, AllianceUtil.getOppAlliance());
     }
 
     @Test
     public void getAllianceReturnsBlueFromDriverStation() {
-        setAllianceStation(AllianceStationID.Blue3);
+        setAllianceStation(AllianceStationID.BLUE_3);
 
-        assertEquals(Alliance.Blue, AllianceUtil.getAlliance());
+        assertEquals(Alliance.BLUE, AllianceUtil.getAlliance());
         assertFalse(AllianceUtil.isRed());
-        assertEquals(Alliance.Red, AllianceUtil.getOppAlliance());
+        assertEquals(Alliance.RED, AllianceUtil.getOppAlliance());
     }
 }

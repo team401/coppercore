@@ -1,14 +1,14 @@
 package coppercore.wpilib_interface.subsystems.motors.sparkmax;
 
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.Rotations;
+import static org.wpilib.units.Units.Volts;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.FeedForwardConfig;
@@ -20,19 +20,18 @@ import coppercore.wpilib_interface.subsystems.motors.CanBusMotorControllerBase;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Frequency;
-import edu.wpi.first.units.measure.MutVoltage;
-import edu.wpi.first.units.measure.Velocity;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.DriverStation;
 import java.util.HashMap;
 import java.util.Map;
+import org.wpilib.driverstation.DriverStationErrors;
+import org.wpilib.math.util.Units;
+import org.wpilib.units.AngularAccelerationUnit;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Frequency;
+import org.wpilib.units.measure.Velocity;
+import org.wpilib.units.measure.Voltage;
 
 /**
  * The MotorIOSparkMax implements the MotorIO interface for the <a
@@ -99,7 +98,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
      *   <li><b>Default value:</b> 0.0 volts
      * </ul>
      */
-    protected MutVoltage arbitraryFF = Volts.mutable(0.0);
+    protected Voltage arbitraryFF = Volts.of(0.0);
 
     /**
      * Create a new MotorIOSparkMax given a mechanism config, a CANDeviceID, a SparkMaxConfig, and a
@@ -124,7 +123,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         // Copy the config since updating follow mode modifies the config in place.
         this.sparkMaxConfig = new SparkMaxConfig().apply(sparkMaxConfig);
 
-        this.sparkMax = new SparkMax(id.id(), motorType);
+        this.sparkMax = new SparkMax(id.systemCoreBusId(), id.id(), motorType);
 
         this.controller = sparkMax.getClosedLoopController();
 
@@ -261,14 +260,14 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
             connected &=
                     SparkUtil.ifOk(
                             sparkMax,
-                            () -> sparkMax.getEncoder().getPosition(),
+                            () -> sparkMax.getEncoder().getPosition().get(),
                             (positionRotations) ->
                                     inputs.positionRadians =
                                             Units.rotationsToRadians(positionRotations));
             connected &=
                     SparkUtil.ifOk(
                             sparkMax,
-                            () -> sparkMax.getEncoder().getVelocity(),
+                            () -> sparkMax.getEncoder().getVelocity().get(),
                             (velocityRPM) ->
                                     inputs.velocityRadiansPerSecond =
                                             Units.rotationsPerMinuteToRadiansPerSecond(
@@ -278,18 +277,18 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
         connected &=
                 SparkUtil.ifOk(
                         sparkMax,
-                        () -> sparkMax.getAppliedOutput() * sparkMax.getBusVoltage(),
+                        () -> sparkMax.getAppliedOutput().get() * sparkMax.getBusVoltage().get(),
                         (appliedVolts) -> inputs.appliedVolts = appliedVolts);
         connected &=
                 SparkUtil.ifOk(
                         sparkMax,
-                        sparkMax::getOutputCurrent,
+                        sparkMax.getOutputCurrent()::get,
                         (current) -> inputs.supplyCurrentAmps = current);
 
         inputs.connected = connected;
 
         if (!connected) {
-            DriverStation.reportError(
+            DriverStationErrors.reportError(
                     deviceName + ": Reading inputs caused error: " + sparkMax.getLastError(),
                     false);
         }
@@ -299,7 +298,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void controlNeutral() {
-        sparkMax.set(0.0);
+        sparkMax.stopMotor();
     }
 
     @Override
@@ -461,7 +460,7 @@ public class MotorIOSparkMax extends CanBusMotorControllerBase implements MotorI
 
     @Override
     public void setArbitraryFeedForwardVoltage(Voltage feedForward) {
-        arbitraryFF.mut_replace(feedForward);
+        arbitraryFF = feedForward;
     }
 
     @Override

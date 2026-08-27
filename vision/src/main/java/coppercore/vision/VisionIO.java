@@ -1,13 +1,13 @@
 package coppercore.vision;
 
 import coppercore.math.RunOnce;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import java.util.Optional;
 import java.util.function.DoubleFunction;
 import org.littletonrobotics.junction.AutoLog;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Transform3d;
+import org.wpilib.vision.apriltag.AprilTagFieldLayout;
 
 /**
  * Represents an IO wrapper for vision localizer to query. This class is responsible for updating

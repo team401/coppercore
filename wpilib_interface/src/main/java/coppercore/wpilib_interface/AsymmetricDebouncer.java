@@ -1,7 +1,7 @@
 package coppercore.wpilib_interface;
 
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import org.wpilib.math.filter.Debouncer;
+import org.wpilib.math.filter.Debouncer.DebounceType;
 
 /**
  * An asymmetric debouncer: debounces both the rising and falling edge and allows for having

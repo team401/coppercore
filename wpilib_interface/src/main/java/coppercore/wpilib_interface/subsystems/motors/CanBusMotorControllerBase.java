@@ -2,8 +2,7 @@ package coppercore.wpilib_interface.subsystems.motors;
 
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
+import org.wpilib.driverstation.Alert;
 
 /**
  * Base class containing shared functionality for CAN-bus attached motor controllers, such as
@@ -46,10 +45,10 @@ public class CanBusMotorControllerBase {
 
         String configFailedToApplyMessage = deviceName + " failed to apply configs.";
 
-        this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, AlertType.kError);
+        this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, Alert.Level.HIGH);
 
         String disconnectedMessage = deviceName + " disconnected/invalid status code.";
 
-        this.disconnectedAlert = new Alert(disconnectedMessage, AlertType.kError);
+        this.disconnectedAlert = new Alert(disconnectedMessage, Alert.Level.HIGH);
     }
 }

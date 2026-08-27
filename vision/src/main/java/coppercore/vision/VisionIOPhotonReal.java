@@ -1,10 +1,6 @@
 package coppercore.vision;
 
 import coppercore.math.RunOnce;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +9,10 @@ import java.util.Set;
 import java.util.function.DoubleFunction;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Transform3d;
+import org.wpilib.vision.apriltag.AprilTagFieldLayout;
 
 /** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {

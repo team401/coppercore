@@ -1,16 +1,16 @@
 package coppercore.vision;
 
 import coppercore.math.RunOnce;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
 import java.util.function.DoubleFunction;
 import java.util.function.Supplier;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Transform3d;
+import org.wpilib.system.Timer;
+import org.wpilib.vision.apriltag.AprilTagFieldLayout;
 
 /** implements vision io through photon vision simulation */
 public class VisionIOPhotonSim extends VisionIOPhotonReal {
@@ -97,7 +97,7 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
 
         if (cameraType == VisionLocalizer.CameraType.MOBILE) {
             robotToCameraAt
-                    .apply(Timer.getFPGATimestamp())
+                    .apply(Timer.getTimestamp())
                     .ifPresentOrElse(
                             (robotToCamera) -> {
                                 visionSim.adjustCamera(cameraSim, robotToCamera);
@@ -134,7 +134,7 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
         // Add sim camera
         cameraSim = new PhotonCameraSim(camera, cameraProperties, tagLayout);
         robotToCameraAt
-                .apply(Timer.getFPGATimestamp())
+                .apply(Timer.getTimestamp())
                 .ifPresentOrElse(
                         (robotToCamera) -> {
                             visionSim.addCamera(cameraSim, robotToCamera);

@@ -9,9 +9,9 @@ import com.google.gson.TypeAdapterFactory;
 import coppercore.parameter_tools.json.adapters.OptionalTypeAdapterFactory;
 import coppercore.parameter_tools.json.adapters.PolymorphDeserializer;
 import coppercore.parameter_tools.json.adapters.PolymorphTypeAdapterFactory;
-import edu.wpi.first.math.Pair;
 import java.util.ArrayList;
 import java.util.List;
+import org.wpilib.math.util.Pair;
 
 /** Builder class for creating a JSONSyncConfig instance. */
 public class JSONSyncConfigBuilder {

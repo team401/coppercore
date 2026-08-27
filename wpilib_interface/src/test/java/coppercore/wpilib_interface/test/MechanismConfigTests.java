@@ -74,7 +74,7 @@ public class MechanismConfigTests {
                 NullPointerException.class,
                 () -> {
                     MechanismConfig.builder()
-                            .withLeadMotorId(new CANDeviceID(CANBus.roboRIO(), 1))
+                            .withLeadMotorId(new CANDeviceID(CANBus.systemcore(0), 1))
                             .withGravityFeedforwardType(GravityFeedforwardType.STATIC_ELEVATOR)
                             .build();
                 });
@@ -99,7 +99,7 @@ public class MechanismConfigTests {
                 () -> {
                     MechanismConfig.builder()
                             .withName("TestMechanism")
-                            .withLeadMotorId(new CANDeviceID(CANBus.roboRIO(), 1))
+                            .withLeadMotorId(new CANDeviceID(CANBus.systemcore(0), 1))
                             .build();
                 });
     }
@@ -119,7 +119,7 @@ public class MechanismConfigTests {
 
     @Test
     public void dataIsCorrect() {
-        CANBus rio = CANBus.roboRIO();
+        CANBus rio = CANBus.systemcore(0);
         MechanismConfig config =
                 MechanismConfig.builder()
                         .withName("TestMechanism")

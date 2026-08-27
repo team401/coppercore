@@ -1,10 +1,10 @@
 package coppercore.parameter_tools.json.adapters;
 
 import coppercore.parameter_tools.json.helpers.JSONObject;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import java.lang.reflect.Constructor;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Translation3d;
 
 /** A JSON representation of a Pose3d object. */
 public class JSONPose3d extends JSONObject<Pose3d> {

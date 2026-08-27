@@ -1,14 +1,14 @@
 package coppercore.wpilib_interface.test;
 
-import static edu.wpi.first.units.Units.Microseconds;
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.Microseconds;
+import static org.wpilib.units.Units.Seconds;
 
 import coppercore.wpilib_interface.AsymmetricDebouncer;
-import edu.wpi.first.util.WPIUtilJNI;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.wpilib.util.WPIUtilJNI;
 
 class AsymmetricDebouncerTests {
     /** Enables WPIUtilJNI mock time and set the time to 0.0 seconds */

@@ -1,13 +1,13 @@
 package coppercore.wpilib_interface.test;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Kilograms;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Rotations;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -33,19 +33,19 @@ import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.talonfx.MotorIOTalonFXSim;
 import coppercore.wpilib_interface.subsystems.sim.DummySimAdapter;
 import coppercore.wpilib_interface.subsystems.sim.ElevatorSimAdapter;
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.PerUnit;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.wpilib.driverstation.internal.DriverStationBackend;
+import org.wpilib.hardware.hal.HAL;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.simulation.DriverStationSim;
+import org.wpilib.simulation.ElevatorSim;
+import org.wpilib.simulation.SimHooks;
+import org.wpilib.system.Timer;
+import org.wpilib.units.PerUnit;
+import org.wpilib.units.measure.Angle;
 
 /**
  * The MotorIOCTRETests class contains tests for TalonFX motor IOs and CANCoder encoderIOs using
@@ -125,7 +125,7 @@ public class MotorIOCTRETests {
     void initializeSimFeatures() {
         HAL.initialize(500, 2);
         SimHooks.setHALRuntimeType(2);
-        SimHooks.setProgramStarted();
+        SimHooks.setProgramStarted(true);
     }
 
     /**
@@ -141,7 +141,7 @@ public class MotorIOCTRETests {
         SimHooks.pauseTiming();
         while (timeElapsed < timeSeconds || (timeSeconds == 0.0 && timeElapsed == 0.0)) {
             SimHooks.stepTiming(0.02);
-            if (DriverStation.isEnabled()) {
+            if (DriverStationBackend.isEnabled()) {
                 Unmanaged.feedEnable(100);
             }
             loop.run();
@@ -253,7 +253,7 @@ public class MotorIOCTRETests {
         // delay ~100ms so the devices can start up and enable
         Timer.delay(0.100);
 
-        assert DriverStation.isEnabled();
+        assert DriverStationBackend.isEnabled();
 
         // Give it a couple cycles to let data propagate into the IOs
         leadMotor.controlToPositionUnprofiled(Radians.zero());

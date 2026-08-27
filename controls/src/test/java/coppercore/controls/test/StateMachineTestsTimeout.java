@@ -1,18 +1,18 @@
 package coppercore.controls.test;
 
-import static edu.wpi.first.units.Units.Seconds;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.wpilib.units.Units.Seconds;
 
 import coppercore.controls.state_machine.State;
 import coppercore.controls.state_machine.StateMachine;
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
 import java.util.List;
 import java.util.function.BiFunction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.wpilib.hardware.hal.HAL;
+import org.wpilib.simulation.SimHooks;
 
 /*
  * Test `whenTimeout` transition.

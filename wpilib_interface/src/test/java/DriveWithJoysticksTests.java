@@ -1,10 +1,10 @@
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecond;
 
 import coppercore.wpilib_interface.DriveWithJoysticks;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.wpilib.math.kinematics.ChassisVelocities;
 
 /**
  * The DriveWithJoysticksTests class tests the functionality of DriveWithJoysticks to make sure it's
@@ -28,27 +28,26 @@ public class DriveWithJoysticksTests {
     private static double SPEED_EPSILON = 1e-6;
 
     /**
-     * Assert that each field of a given set of ChassisSpeeds is within SPEED_EPSILON of an expected
-     * value.
+     * Assert that each field of a given set of ChassisVelocities is within SPEED_EPSILON of an
+     * expected value.
      *
      * <p>Using AssertEquals compares doubles internally, so this method is required instead.
      *
-     * @param speeds The ChassisSpeeds to test
+     * @param velocities The ChassisVelocities to test
      * @param expectedVx The expected vx in m/s
      * @param expectedVy The expected vy in m/s
      * @param expectedOmega The expected omega (angular velocity) in rad/s
      * @param message The message to pass to each assertEquals call
      */
-    private void assertChassisSpeeds(
-            ChassisSpeeds speeds,
+    private void assertChassisVelocities(
+            ChassisVelocities velocities,
             double expectedVx,
             double expectedVy,
             double expectedOmega,
             String message) {
-        Assertions.assertEquals(expectedVx, speeds.vxMetersPerSecond, SPEED_EPSILON, message);
-        Assertions.assertEquals(expectedVy, speeds.vyMetersPerSecond, SPEED_EPSILON, message);
-        Assertions.assertEquals(
-                expectedOmega, speeds.omegaRadiansPerSecond, SPEED_EPSILON, message);
+        Assertions.assertEquals(expectedVx, velocities.vx, SPEED_EPSILON, message);
+        Assertions.assertEquals(expectedVy, velocities.vy, SPEED_EPSILON, message);
+        Assertions.assertEquals(expectedOmega, velocities.omega, SPEED_EPSILON, message);
     }
 
     @Test
@@ -70,16 +69,16 @@ public class DriveWithJoysticksTests {
         command.execute();
 
         Assertions.assertEquals(
-                new ChassisSpeeds(),
-                dummyDrive.getLastGoalSpeeds(),
-                "Zeros on joysticks should result in zero chassis speeds.");
+                new ChassisVelocities(),
+                dummyDrive.getLastGoalVelocities(),
+                "Zeros on joysticks should result in zero chassis velocities.");
         assertFieldCentric(dummyDrive);
 
         leftStickX = 0.5;
         command.execute();
 
-        assertChassisSpeeds(
-                dummyDrive.getLastGoalSpeeds(),
+        assertChassisVelocities(
+                dummyDrive.getLastGoalVelocities(),
                 0.0,
                 -0.25,
                 0.0,
@@ -92,8 +91,8 @@ public class DriveWithJoysticksTests {
         leftStickY = -0.5;
         command.execute();
 
-        assertChassisSpeeds(
-                dummyDrive.getLastGoalSpeeds(),
+        assertChassisVelocities(
+                dummyDrive.getLastGoalVelocities(),
                 0.25,
                 0.0,
                 0.0,
@@ -108,8 +107,8 @@ public class DriveWithJoysticksTests {
         rightStickX = 1.0;
         command.execute();
 
-        assertChassisSpeeds(
-                dummyDrive.getLastGoalSpeeds(),
+        assertChassisVelocities(
+                dummyDrive.getLastGoalVelocities(),
                 -Math.sqrt(2.0) / 2.0,
                 -Math.sqrt(2.0) / 2.0,
                 -Math.PI,
@@ -138,9 +137,9 @@ public class DriveWithJoysticksTests {
         command.execute();
 
         Assertions.assertEquals(
-                new ChassisSpeeds(),
-                dummyDrive.getLastGoalSpeeds(),
-                "Zeros on joysticks should result in zero chassis speeds.");
+                new ChassisVelocities(),
+                dummyDrive.getLastGoalVelocities(),
+                "Zeros on joysticks should result in zero chassis velocities.");
         assertFieldCentric(dummyDrive);
 
         leftStickX = 0.5 * Math.cos(Math.PI / 4);
@@ -149,8 +148,8 @@ public class DriveWithJoysticksTests {
         command.execute();
 
         Assertions.assertEquals(
-                new ChassisSpeeds(),
-                dummyDrive.getLastGoalSpeeds(),
+                new ChassisVelocities(),
+                dummyDrive.getLastGoalVelocities(),
                 "All axes should be zero when within deadband.");
         assertFieldCentric(dummyDrive);
 
@@ -159,8 +158,8 @@ public class DriveWithJoysticksTests {
         rightStickX = 0.0;
         command.execute();
 
-        assertChassisSpeeds(
-                dummyDrive.getLastGoalSpeeds(),
+        assertChassisVelocities(
+                dummyDrive.getLastGoalVelocities(),
                 0.25,
                 0.0,
                 0.0,
@@ -171,8 +170,8 @@ public class DriveWithJoysticksTests {
         leftStickY = -0.9;
         command.execute();
 
-        assertChassisSpeeds(
-                dummyDrive.getLastGoalSpeeds(),
+        assertChassisVelocities(
+                dummyDrive.getLastGoalVelocities(),
                 0.8 * 0.8,
                 0.0,
                 0.0,
@@ -183,8 +182,8 @@ public class DriveWithJoysticksTests {
         leftStickY = -1.0;
         command.execute();
 
-        assertChassisSpeeds(
-                dummyDrive.getLastGoalSpeeds(),
+        assertChassisVelocities(
+                dummyDrive.getLastGoalVelocities(),
                 1.0,
                 0.0,
                 0.0,

@@ -1,15 +1,15 @@
 package coppercore.wpilib_interface;
 
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.Volts;
 
-import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.AngularVelocityUnit;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.PerUnit;
-import edu.wpi.first.units.Unit;
-import edu.wpi.first.units.VoltageUnit;
+import org.wpilib.units.AngularAccelerationUnit;
+import org.wpilib.units.AngularVelocityUnit;
+import org.wpilib.units.Measure;
+import org.wpilib.units.PerUnit;
+import org.wpilib.units.Unit;
+import org.wpilib.units.VoltageUnit;
 
 /** Utilities for dealing with the WPILib units library. */
 public final class UnitUtils {

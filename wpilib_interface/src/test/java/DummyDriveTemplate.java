@@ -1,5 +1,5 @@
 import coppercore.wpilib_interface.DriveTemplate;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import org.wpilib.math.kinematics.ChassisVelocities;
 
 /**
  * The DummyDriveTemplate class implements DriveTemplate by simply storing the values passed to it
@@ -7,31 +7,31 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * DriveWithJoysticks command.
  */
 public class DummyDriveTemplate implements DriveTemplate {
-    /** The last set of chassis speeds passed to setGoalSpeeds */
-    private ChassisSpeeds lastGoalSpeeds = null;
+    /** The last set of chassis Velocities passed to setGoalVelocities */
+    private ChassisVelocities lastGoalVelocities = null;
 
-    /** The last value of field centric passed to setGoalSpeeds. Defaults to false. */
+    /** The last value of field centric passed to setGoalVelocities. Defaults to false. */
     private boolean lastFieldCentric = false;
 
-    public void setGoalSpeeds(ChassisSpeeds goalSpeeds, boolean fieldCentric) {
-        lastGoalSpeeds = goalSpeeds;
+    public void setGoalVelocities(ChassisVelocities goalVelocities, boolean fieldCentric) {
+        lastGoalVelocities = goalVelocities;
         lastFieldCentric = fieldCentric;
     }
 
     /**
-     * Get the last set of goal speeds that were passed to setGoalSpeeds.
+     * Get the last set of goal velocities that were passed to setGoalVelocities.
      *
-     * @return A ChassisSpeeds if setGoalSpeeds has been called, or null if not.
+     * @return A ChassisVelocities if setGoalVelocities has been called, or null if not.
      */
-    public ChassisSpeeds getLastGoalSpeeds() {
-        return lastGoalSpeeds;
+    public ChassisVelocities getLastGoalVelocities() {
+        return lastGoalVelocities;
     }
 
     /**
-     * Get the last value of fieldCentric passed to setGoalSpeeds.
+     * Get the last value of fieldCentric passed to setGoalVelocities.
      *
-     * @return A boolean, the last value of fieldCentric passed to setGoalSpeeds, or false if it has
-     *     not yet been called.
+     * @return A boolean, the last value of fieldCentric passed to setGoalVelocities, or false if it
+     *     has not yet been called.
      */
     public boolean getLastFieldCentricValue() {
         return lastFieldCentric;

@@ -1,10 +1,10 @@
 package coppercore.parameter_tools.json.adapters;
 
 import coppercore.parameter_tools.json.helpers.JSONObject;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import java.lang.reflect.Constructor;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Transform2d;
+import org.wpilib.math.geometry.Translation2d;
 
 /** A JSON representation of a Transform2d object. */
 public class JSONTransform2d extends JSONObject<Transform2d> {

@@ -59,7 +59,7 @@ copy {
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-apply plugin: 'edu.wpi.first.GradleRIO'
+apply plugin: 'org.wpilib.GradleRIO'
 
 // Use the release JNI/native libraries. Flip to true to debug native code.
 wpi.java.debugJni = false
@@ -91,7 +91,7 @@ dependencies {
 	simulationDebug wpi.sim.enableDebug()
 
 	// Other libraries used across coppercore, exposed here for direct use too.
-	implementation libs.wpilib.newcommands
+	implementation libs.wpilib.commands
 	annotationProcessor libs.akit.autolog
 	implementation libs.akit.java
 	implementation libs.revlib
