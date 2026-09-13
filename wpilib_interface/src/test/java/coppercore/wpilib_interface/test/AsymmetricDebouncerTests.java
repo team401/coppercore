@@ -1,6 +1,6 @@
 package coppercore.wpilib_interface.test;
 
-import static org.wpilib.units.Units.Microseconds;
+import static org.wpilib.units.Units.Nanoseconds;
 import static org.wpilib.units.Units.Seconds;
 
 import coppercore.wpilib_interface.AsymmetricDebouncer;
@@ -35,7 +35,7 @@ class AsymmetricDebouncerTests {
      * @param timeSeconds the time to set, in seconds
      */
     private void setMockTimeSeconds(double timeSeconds) {
-        WPIUtilJNI.setMockTime((long) Seconds.of(timeSeconds).in(Microseconds));
+        WPIUtilJNI.setMockTime((long) Seconds.of(timeSeconds).in(Nanoseconds));
     }
 
     /**

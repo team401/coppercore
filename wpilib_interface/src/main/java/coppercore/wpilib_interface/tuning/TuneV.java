@@ -6,16 +6,16 @@ import static org.wpilib.units.Units.RotationsPerSecond;
 
 import java.util.ArrayList;
 import org.wpilib.command2.Command;
-import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.telemetry.Telemetry;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 
 /**
  * A command to automatically characterize kV for a Tunable system.
  *
- * <p>Relies on SmartDashboard Test-Mode/kS to get a more accurate number.
+ * <p>Relies on the Test-Mode/kS tunable to get a more accurate number.
  *
- * <p>Outputs its findings to SmartDashboard Test-Mode/kV and to console.
+ * <p>Logs its findings under Test-Mode/kV, updates the tunable, and prints to console.
  */
 public class TuneV extends Command {
     private Tunable mechanism;
@@ -43,9 +43,6 @@ public class TuneV extends Command {
     public TuneV(Tunable mechanism, double output, Angle maxPos) {
         this.mechanism = mechanism;
         this.output = output;
-        this.kS = SmartDashboard.getNumber("Test-Mode/kS", 0);
-        this.pastkV = SmartDashboard.getNumber("Test-Mode/kV", 0);
-
         this.maxPos = maxPos;
 
         // this.withTimeout(5);
@@ -53,15 +50,18 @@ public class TuneV extends Command {
 
     @Override
     public void initialize() {
-        SmartDashboard.putBoolean("Test-Mode/Ended", false);
+        kS = TestModeTunables.KS.get();
+        pastkV = TestModeTunables.KV.get();
+        Telemetry.log("Test-Mode/Ended", false);
         mechanism.setOutput(output);
         velocities = new ArrayList<AngularVelocity>();
+        average = RotationsPerSecond.of(0.0);
     }
 
     @Override
     public void execute() {
         vel = mechanism.getVelocity();
-        SmartDashboard.putNumber("Test-Mode/VelocityRotPerSec", vel.in(RotationsPerSecond));
+        Telemetry.log("Test-Mode/VelocityRotPerSec", vel.in(RotationsPerSecond));
         // if (Math.abs(subsystem.getPosition(slot)) < 0.6 * conversionFactor) {
         velocities.add(vel);
         // }
@@ -69,18 +69,18 @@ public class TuneV extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        SmartDashboard.putBoolean("Test-Mode/Ended", true);
+        Telemetry.log("Test-Mode/Ended", true);
         mechanism.setOutput(0.0);
 
         for (AngularVelocity v : velocities) {
-            average.plus(v);
+            average = average.plus(v);
         }
 
-        average.div(velocities.size());
+        average = average.div(velocities.size());
 
         double kV = (output - kS) / average.in(RotationsPerSecond);
-        SmartDashboard.putNumber(
-                "Test-Mode/kV", ((output - kS) / average.in(RotationsPerSecond)) + pastkV);
+        TestModeTunables.KV.set(kV + pastkV);
+        Telemetry.log("Test-Mode/kV", kV + pastkV);
         System.out.println("=====");
         System.out.println("  TuneV: kV = " + kV);
         System.out.println("=====");

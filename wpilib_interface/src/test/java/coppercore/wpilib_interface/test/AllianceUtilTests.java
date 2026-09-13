@@ -18,7 +18,7 @@ public class AllianceUtilTests {
 
     @BeforeAll
     public static void initializeHal() {
-        HAL.initialize(500, 0);
+        HAL.initialize();
     }
 
     @BeforeEach

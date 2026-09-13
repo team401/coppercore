@@ -48,7 +48,7 @@ public class FlywheelSimAdapter extends BaseSimAdapter {
                                 * physicsSim.getAngularAcceleration()
                                 * deltaTimeSeconds
                                 * deltaTimeSeconds;
-        integratedPosition.plus(Radians.of(dthetaRadians));
+        integratedPosition = integratedPosition.plus(Radians.of(dthetaRadians));
     }
 
     /** {@inheritDoc} */

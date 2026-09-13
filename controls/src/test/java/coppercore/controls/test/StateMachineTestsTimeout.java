@@ -43,7 +43,7 @@ public class StateMachineTestsTimeout {
 
     @BeforeEach
     void setup() {
-        HAL.initialize(500, 0);
+        HAL.initialize();
         SimHooks.pauseTiming();
     }
 

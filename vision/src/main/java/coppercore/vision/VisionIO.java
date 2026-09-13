@@ -4,10 +4,10 @@ import coppercore.math.RunOnce;
 import java.util.Optional;
 import java.util.function.DoubleFunction;
 import org.littletonrobotics.junction.AutoLog;
+import org.wpilib.fields.Field;
 import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Transform3d;
-import org.wpilib.vision.apriltag.AprilTagFieldLayout;
 
 /**
  * Represents an IO wrapper for vision localizer to query. This class is responsible for updating
@@ -111,7 +111,7 @@ public interface VisionIO {
      * @param robotToCameraAt the function to get the robot to camera transform at a given time
      */
     public default void initializeCamera(
-            AprilTagFieldLayout tagLayout,
+            Field tagLayout,
             RunOnce tagLayoutRunOnce,
             DoubleFunction<Optional<Transform3d>> robotToCameraAt) {}
 

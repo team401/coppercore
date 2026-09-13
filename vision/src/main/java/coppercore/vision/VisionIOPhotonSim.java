@@ -4,15 +4,17 @@ import coppercore.math.RunOnce;
 import java.util.Optional;
 import java.util.function.DoubleFunction;
 import java.util.function.Supplier;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.simulation.VisionTargetSim;
+import org.wpilib.fields.Field;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Transform3d;
 import org.wpilib.system.Timer;
-import org.wpilib.vision.apriltag.AprilTagFieldLayout;
 
-/** implements vision io through photon vision simulation */
+/** Implements vision IO through PhotonVision simulation. */
 public class VisionIOPhotonSim extends VisionIOPhotonReal {
     private static VisionSystemSim visionSim;
 
@@ -47,6 +49,9 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
 
         // Initialize vision sim
         if (visionSim == null) {
+            // TODO: PhotonLib alpha-2 still calls the removed SmartDashboard API here. This
+            // compiles against WPILib alpha-7, but simulation needs an alpha-7-compatible
+            // PhotonLib.
             visionSim = new VisionSystemSim("main");
         }
 
@@ -115,24 +120,24 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      * Creates a camera with the given initial transform. This should be called only once when the
      * VisionIOPhotonSim is created. This is called for both mobile and stationary cameras.
      *
-     * @param tagLayout the AprilTagFieldLayout currently in use
+     * @param tagLayout the field layout currently in use
      * @param tagLayoutRunOnce a RunOnce which should be passed to all instances during
      *     initialization to ensure that tags are only added once.
      * @param robotToCameraAt the initial transform of the robot to the camera as a double function
      */
     @Override
     public void initializeCamera(
-            AprilTagFieldLayout tagLayout,
+            Field tagLayout,
             RunOnce tagLayoutRunOnce,
             DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
         super.initializeCamera(tagLayout, tagLayoutRunOnce, robotToCameraAt);
-        tagLayoutRunOnce.run(
-                () -> {
-                    visionSim.addAprilTags(tagLayout);
-                });
+        tagLayoutRunOnce.run(() -> addAprilTagsToSimulation(tagLayout));
 
         // Add sim camera
-        cameraSim = new PhotonCameraSim(camera, cameraProperties, tagLayout);
+        // TODO: Pass tagLayout when PhotonCameraSim accepts Field. The alpha-2 overload loads an
+        // old default AprilTagFieldLayout, losing our field for multitag simulation and relying on
+        // another API removed from WPILib alpha-7.
+        cameraSim = new PhotonCameraSim(camera, cameraProperties);
         robotToCameraAt
                 .apply(Timer.getTimestamp())
                 .ifPresentOrElse(
@@ -144,5 +149,24 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
                                     "could not add camera as robotToCamera does not exist");
                         });
     }
+
+    /** Adapts WPILib's Field to the target API in PhotonLib alpha-2. */
+    private static void addAprilTagsToSimulation(Field tagLayout) {
+        // TODO: Replace this adapter with PhotonLib's Field-based addAprilTags method when
+        // available.
+        // Keep the singular group name: PhotonLib's clearAprilTags() removes "apriltag".
+        for (var tag : tagLayout.getTags()) {
+            // getTagPose applies the field's current origin; tag.getPose() does not.
+            tagLayout
+                    .getTagPose(tag.getID())
+                    .ifPresent(
+                            pose ->
+                                    visionSim.addVisionTargets(
+                                            "apriltag",
+                                            new VisionTargetSim(
+                                                    pose,
+                                                    TargetModel.kAprilTag36h11,
+                                                    tag.getID())));
+        }
+    }
 }
-//

@@ -9,8 +9,8 @@ import com.ctre.phoenix6.hardware.CANdi;
 import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.StatusSignalRefresher;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
-import org.wpilib.driverstation.Alert;
 import org.wpilib.driverstation.DriverStationErrors;
+import org.wpilib.util.Alert;
 
 /**
  * The DigitalInputIOCANdi class implements the DigitalInputIO interface using a CANdi to read a
@@ -52,11 +52,12 @@ public class DigitalInputIOCANdi implements DigitalInputIO {
 
         String configFailedToApplyMessage = deviceName + " failed to apply configs.";
 
-        this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, Alert.Level.HIGH);
+        this.configFailedToApplyAlert =
+                new Alert("Alerts", configFailedToApplyMessage, Alert.Level.HIGH);
 
         String disconnectedMessage = deviceName + " disconnected.";
 
-        this.disconnectedAlert = new Alert(disconnectedMessage, Alert.Level.HIGH);
+        this.disconnectedAlert = new Alert("Alerts", disconnectedMessage, Alert.Level.HIGH);
 
         CTREUtil.tryUntilOk(
                 () -> this.candi.getConfigurator().apply(candiConfig),

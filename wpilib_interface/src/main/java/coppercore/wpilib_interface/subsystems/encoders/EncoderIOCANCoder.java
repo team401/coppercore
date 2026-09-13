@@ -10,10 +10,10 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
-import org.wpilib.driverstation.Alert;
 import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.util.Alert;
 
 /**
  * The EncoderIOCANCoder class implements the EncoderIO interface for a physical CANCoder device by
@@ -78,11 +78,16 @@ public class EncoderIOCANCoder implements EncoderIO {
 
         String configFailedToApplyMessage = deviceName + " failed to apply configs.";
 
-        this.configFailedToApplyAlert = new Alert(configFailedToApplyMessage, Alert.Level.HIGH);
+        this.configFailedToApplyAlert =
+                new Alert(
+                        "configFailedToApplyAlert_" + this.deviceName,
+                        configFailedToApplyMessage,
+                        Alert.Level.HIGH);
 
         String disconnectedMessage = deviceName + " disconnected/invalid status code.";
 
-        this.disconnectedAlert = new Alert(disconnectedMessage, Alert.Level.HIGH);
+        this.disconnectedAlert =
+                new Alert("disconnected_" + this.deviceName, disconnectedMessage, Alert.Level.HIGH);
 
         CTREUtil.tryUntilOk(
                 () -> cancoder.getConfigurator().apply(cancoderConfig),

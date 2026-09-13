@@ -522,7 +522,7 @@ public final class JSONHandler {
      */
     private String getHostAddress() {
         try {
-            HAL.initialize(500, 0);
+            HAL.initialize();
             int team = RobotController.getTeamNumber();
             if (team > 0) {
                 int te = team / 100;

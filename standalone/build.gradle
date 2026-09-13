@@ -62,7 +62,7 @@ copy {
 apply plugin: 'org.wpilib.GradleRIO'
 
 // Use the release JNI/native libraries. Flip to true to debug native code.
-wpi.java.debugJni = false
+wpi.java.runSimWithDebugJni.set(false)
 
 dependencies {
 	// All coppercore library modules, so a standalone program can use any of them.
@@ -119,8 +119,8 @@ tasks.withType(JavaCompile).configureEach {
 // Running standalone programs
 // ---------------------------------------------------------------------------
 
-// The native (JNI) configuration to use, picked by wpi.java.debugJni above.
-def nativeConfig = wpi.java.debugJni ? configurations.nativeDebug : configurations.nativeRelease
+// The native (JNI) configuration to use, picked by wpi.java.runSimWithDebugJni above.
+def nativeConfig = wpi.java.runSimWithDebugJni.get() ? configurations.nativeDebug : configurations.nativeRelease
 
 // Where extracted .so/.dll/.dylib files land. All flattened into one directory so it
 // can serve as java.library.path (and the OS loader search path for inter-lib deps).

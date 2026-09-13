@@ -1,8 +1,8 @@
 package coppercore.math.test;
 
 import static org.wpilib.units.Units.Inches;
-import static org.wpilib.units.Units.Microseconds;
 import static org.wpilib.units.Units.Millimeters;
+import static org.wpilib.units.Units.Nanoseconds;
 import static org.wpilib.units.Units.Seconds;
 
 import coppercore.math.CachedDataTime;
@@ -25,12 +25,12 @@ public class CachedDataTimeTest {
      * Set WPIUtilJni's mock time to timeSeconds
      *
      * <p>This exists as a wrapper because WPIUtilJNI.setMockTime expects the time as a long in
-     * microseconds
+     * nanoseconds
      *
      * @param timeSeconds the time to set, in seconds
      */
     private void setMockTimeSeconds(double timeSeconds) {
-        WPIUtilJNI.setMockTime((long) Seconds.of(timeSeconds).in(Microseconds));
+        WPIUtilJNI.setMockTime((long) Seconds.of(timeSeconds).in(Nanoseconds));
     }
 
     @Test

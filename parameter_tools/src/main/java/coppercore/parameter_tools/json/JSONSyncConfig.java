@@ -9,7 +9,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.LongSerializationPolicy;
 import com.google.gson.TypeAdapterFactory;
 import java.util.List;
-import org.wpilib.math.util.Pair;
+import org.wpilib.util.Pair;
 
 /** Configuration class for customizing Gson behavior. */
 public record JSONSyncConfig(

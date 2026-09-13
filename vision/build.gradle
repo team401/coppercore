@@ -6,7 +6,7 @@ plugins {
 }
 
 // Set to true to use debug for JNI.
-wpi.java.debugJni = false
+wpi.java.runSimWithDebugJni.set(false)
 
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true

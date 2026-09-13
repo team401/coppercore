@@ -24,8 +24,8 @@ public class AsymmetricDebouncer {
      *     filtered value to change to false.
      */
     public AsymmetricDebouncer(double riseTimeSeconds, double fallTimeSeconds) {
-        riseDebouncer = new Debouncer(riseTimeSeconds, DebounceType.kRising);
-        fallDebouncer = new Debouncer(fallTimeSeconds, DebounceType.kFalling);
+        riseDebouncer = new Debouncer(riseTimeSeconds, DebounceType.RISING);
+        fallDebouncer = new Debouncer(fallTimeSeconds, DebounceType.FALLING);
     }
 
     /**

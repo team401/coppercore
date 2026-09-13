@@ -9,17 +9,17 @@ import java.util.Set;
 import java.util.function.DoubleFunction;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
+import org.wpilib.fields.Field;
 import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Transform3d;
-import org.wpilib.vision.apriltag.AprilTagFieldLayout;
 
 /** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {
     protected final PhotonCamera camera;
     protected final boolean logSingleTagObservations;
     public final String name;
-    private AprilTagFieldLayout aprilTagLayout;
+    private Field aprilTagLayout;
 
     /**
      * Creates a new VisionIOPhotonVision.
@@ -45,7 +45,7 @@ public class VisionIOPhotonReal implements VisionIO {
 
     @Override
     public void initializeCamera(
-            AprilTagFieldLayout tagLayout,
+            Field tagLayout,
             RunOnce tagLayoutRunOnce,
             DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
         aprilTagLayout = tagLayout;
