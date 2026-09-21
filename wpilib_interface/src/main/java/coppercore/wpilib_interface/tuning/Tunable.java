@@ -1,8 +1,8 @@
 package coppercore.wpilib_interface.tuning;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
 
 /**
  * An interface to allow a subsystem to be tuned in a standardized way. Implementing Tunable allows

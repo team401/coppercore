@@ -2,15 +2,15 @@
 
 package coppercore.wpilib_interface.tuning;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
+import org.wpilib.command2.Command;
+import org.wpilib.telemetry.Telemetry;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
 
 /**
  * A command to automatically tune kS for a tunable system
  *
- * <p>Outputs its findings to SmartDashboard Test-Mode/kS and to console.
+ * <p>Logs its findings under Test-Mode/kS, updates the tunable, and prints to console.
  */
 public class TuneS extends Command {
     private Tunable mechanism;
@@ -56,7 +56,8 @@ public class TuneS extends Command {
     @Override
     public void end(boolean interrupted) {
         mechanism.setOutput(0.0);
-        SmartDashboard.putNumber("Test-Mode/kS", appliedOutput);
+        TestModeTunables.KS.set(appliedOutput);
+        Telemetry.log("Test-Mode/kS", appliedOutput);
         System.out.println("=====");
         System.out.println("  TuneS: kS = " + appliedOutput);
         System.out.println("=====");

@@ -1,16 +1,16 @@
 package coppercore.wpilib_interface.subsystems.sim;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Volts;
 
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import org.wpilib.simulation.SingleJointedArmSim;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Voltage;
 
 /**
  * The ElevatorSimAdapter class adapts the wpilib SingleJointedArmSim for use with coppercore's
@@ -49,7 +49,7 @@ public class ArmSimAdapter implements CoppercoreSimAdapter {
 
     @Override
     public Angle getEncoderPosition() {
-        Angle mechanismPos = Radians.of(armSim.getAngleRads());
+        Angle mechanismPos = Radians.of(armSim.getAngle());
         Angle encoderPos = mechanismPos.times(config.encoderToMechanismRatio);
 
         return encoderPos;
@@ -57,7 +57,7 @@ public class ArmSimAdapter implements CoppercoreSimAdapter {
 
     @Override
     public AngularVelocity getEncoderAngularVelocity() {
-        double mechanismVelRadPerSec = armSim.getVelocityRadPerSec();
+        double mechanismVelRadPerSec = armSim.getVelocity();
         double encoderVelRadPerSec = mechanismVelRadPerSec * config.encoderToMechanismRatio;
 
         return RadiansPerSecond.of(encoderVelRadPerSec);
@@ -65,7 +65,7 @@ public class ArmSimAdapter implements CoppercoreSimAdapter {
 
     @Override
     public Current getCurrentDraw() {
-        return Amps.of(armSim.getCurrentDrawAmps());
+        return Amps.of(armSim.getCurrentDraw());
     }
 
     @Override

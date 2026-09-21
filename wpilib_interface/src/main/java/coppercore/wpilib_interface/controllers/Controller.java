@@ -5,14 +5,14 @@ import coppercore.parameter_tools.json.annotations.JSONName;
 import coppercore.parameter_tools.json.annotations.JsonSubtype;
 import coppercore.parameter_tools.json.annotations.JsonType;
 import coppercore.parameter_tools.json.helpers.JSONConverter;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.wpilib.command2.CommandScheduler;
+import org.wpilib.command2.button.Trigger;
+import org.wpilib.driverstation.internal.DriverStationBackend;
+import org.wpilib.math.util.MathUtil;
 
 // Some Javadoc written by Copilot based on user description
 
@@ -347,7 +347,7 @@ public class Controller {
     private static double adjustRange(
             double value, double oldMin, double oldMax, double newMin, double newMax) {
         // Ensure value is inside old range
-        double clampedValue = MathUtil.clamp(value, newMin, newMax);
+        double clampedValue = Math.clamp(value, newMin, newMax);
         // Calculate normalized value in old range
         double t = (clampedValue - oldMin) / (oldMax - oldMin);
         // Map the normalized value to the new range
@@ -515,7 +515,7 @@ public class Controller {
          */
         protected double fixRange(double value, double oldMin, double oldMax) {
             return (clampValue)
-                    ? MathUtil.clamp(value, minValue, maxValue)
+                    ? Math.clamp(value, minValue, maxValue)
                     : adjustRange(value, oldMin, oldMax, minValue, maxValue);
         }
 
@@ -658,11 +658,11 @@ public class Controller {
          *
          * @return a normalized value in the range [0.0, 1.0]: 1.0 if the underlying button is
          *     pressed, 0.0 if not, after applying {@code prepareValue}.
-         * @see edu.wpi.first.wpilibj.DriverStation#getStickButton(int, int)
+         * @see org.wpilib.driverstation.internal.DriverStationBackend#getStickButton(int, int)
          * @see #prepareValue(double, double, double)
          */
         public double getValue() {
-            boolean pressed = DriverStation.getStickButton(port, id);
+            boolean pressed = DriverStationBackend.getStickButton(port, id);
             return prepareValue((pressed) ? 1.0 : 0.0, 0.0, 1.0);
         }
     }
@@ -717,7 +717,7 @@ public class Controller {
      * using: sign(value) * ((|value| - deadband) / (1.0 - deadband)).
      *
      * @see LowLevelControlElement
-     * @see DriverStation#getStickAxis(int, int)
+     * @see DriverStationBackend#getStickAxis(int, int)
      */
     public static class LowLevelAxis extends LowLevelControlElement {
         /**
@@ -812,7 +812,7 @@ public class Controller {
          * @return the processed axis value after deadband filtering and range preparation
          */
         public double getValue() {
-            double value = DriverStation.getStickAxis(port, id);
+            double value = DriverStationBackend.getStickAxis(port, id);
             return prepareValue(applyDeadband(value), minValue, maxValue);
         }
     }
@@ -854,7 +854,7 @@ public class Controller {
      *       = down, 225 = down-left, 270 = left, 315 = up-left).
      * </ul>
      *
-     * @see DriverStation#getStickPOV(int, int)
+     * @see DriverStationBackend#getStickPOV(int, int)
      */
     public static class LowLevelPOV extends LowLevelControlElement {
 
@@ -889,10 +889,10 @@ public class Controller {
          * @return the POV value as a double after processing by prepareValue; raw inputs are -1 for
          *     neutral/not-pressed or an angle in degrees (0–360) which are converted according to
          *     prepareValue's semantics
-         * @see edu.wpi.first.wpilibj.DriverStation#getStickPOV(int, int)
+         * @see org.wpilib.driverstation.internal.DriverStationBackend#getStickPOV(int, int)
          */
         public double getValue() {
-            return prepareValue(DriverStation.getStickPOV(port, id), -1, 360);
+            return prepareValue(DriverStationBackend.getStickPOV(port, id).value, -1, 360);
         }
     }
 
@@ -1070,7 +1070,7 @@ public class Controller {
          */
         protected double fixRange(double value) {
             return (clampValue)
-                    ? MathUtil.clamp(value, minValue, maxValue)
+                    ? Math.clamp(value, minValue, maxValue)
                     : adjustRange(
                             value,
                             lowLevelControlElement.minValue,
@@ -1383,7 +1383,7 @@ public class Controller {
          */
         public boolean isPressed() {
             double value = getPreparedValue();
-            boolean pressed = testThreshold(MathUtil.clamp(value, minValue, maxValue));
+            boolean pressed = testThreshold(Math.clamp(value, minValue, maxValue));
             return applyToggle(pressed);
         }
 

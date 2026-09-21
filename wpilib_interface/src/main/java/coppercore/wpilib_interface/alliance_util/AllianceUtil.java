@@ -1,8 +1,8 @@
 package coppercore.wpilib_interface.alliance_util;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.util.function.Supplier;
+import org.wpilib.driverstation.Alliance;
+import org.wpilib.driverstation.MatchState;
 
 /**
  * The AllianceUtil class provides an easy way to check which alliance we are currently on.
@@ -69,7 +69,7 @@ public class AllianceUtil {
      *     {@code true} otherwise.
      */
     public static boolean isRed() {
-        return getAlliance() == Alliance.Red;
+        return getAlliance() == Alliance.RED;
     }
 
     /**
@@ -81,7 +81,7 @@ public class AllianceUtil {
      *     {@code Red} otherwise.
      */
     public static Alliance getAlliance() {
-        return DriverStation.getAlliance().orElse(Alliance.Red);
+        return MatchState.getAlliance().orElse(Alliance.RED);
     }
 
     /**
@@ -91,8 +91,8 @@ public class AllianceUtil {
      */
     public static Alliance getOppAlliance() {
         return switch (getAlliance()) {
-            case Red -> Alliance.Blue;
-            case Blue -> Alliance.Red;
+            case RED -> Alliance.BLUE;
+            case BLUE -> Alliance.RED;
         };
     }
 }

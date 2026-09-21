@@ -1,10 +1,6 @@
 package coppercore.vision;
 
 import coppercore.math.RunOnce;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,13 +9,17 @@ import java.util.Set;
 import java.util.function.DoubleFunction;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
+import org.wpilib.fields.Field;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Transform3d;
 
 /** This class implements io using photon vision */
 public class VisionIOPhotonReal implements VisionIO {
     protected final PhotonCamera camera;
     protected final boolean logSingleTagObservations;
     public final String name;
-    private AprilTagFieldLayout aprilTagLayout;
+    private Field aprilTagLayout;
 
     /**
      * Creates a new VisionIOPhotonVision.
@@ -45,7 +45,7 @@ public class VisionIOPhotonReal implements VisionIO {
 
     @Override
     public void initializeCamera(
-            AprilTagFieldLayout tagLayout,
+            Field tagLayout,
             RunOnce tagLayoutRunOnce,
             DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
         aprilTagLayout = tagLayout;

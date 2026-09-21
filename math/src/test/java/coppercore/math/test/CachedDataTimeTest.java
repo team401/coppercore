@@ -1,17 +1,17 @@
 package coppercore.math.test;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Microseconds;
-import static edu.wpi.first.units.Units.Millimeters;
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Millimeters;
+import static org.wpilib.units.Units.Nanoseconds;
+import static org.wpilib.units.Units.Seconds;
 
 import coppercore.math.CachedDataTime;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.util.WPIUtilJNI;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.util.WPIUtilJNI;
 
 public class CachedDataTimeTest {
 
@@ -25,12 +25,12 @@ public class CachedDataTimeTest {
      * Set WPIUtilJni's mock time to timeSeconds
      *
      * <p>This exists as a wrapper because WPIUtilJNI.setMockTime expects the time as a long in
-     * microseconds
+     * nanoseconds
      *
      * @param timeSeconds the time to set, in seconds
      */
     private void setMockTimeSeconds(double timeSeconds) {
-        WPIUtilJNI.setMockTime((long) Seconds.of(timeSeconds).in(Microseconds));
+        WPIUtilJNI.setMockTime((long) Seconds.of(timeSeconds).in(Nanoseconds));
     }
 
     @Test

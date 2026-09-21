@@ -1,7 +1,7 @@
 package coppercore.wpilib_interface.subsystems.motors.sparkmax;
 
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.Volts;
 
 import com.revrobotics.sim.SparkMaxSim;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -9,12 +9,12 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.sim.CoppercoreSimAdapter;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.system.RobotController;
+import org.wpilib.system.Timer;
 
 /**
  * The MotorIOSparkMaxSim class extends the MotorIOSparkMax class to provide simulation capabilities
@@ -24,6 +24,7 @@ import java.util.function.Function;
  *     intended. It has been left in coppercore to provide the opportunity for it to be fixed and
  *     iterated upon in the future without having to start from a blank slate.
  */
+@SuppressWarnings("unused")
 @Deprecated
 public class MotorIOSparkMaxSim extends MotorIOSparkMax {
     /** Sim adapter to read physics sim values from and update with simulated motor output */
@@ -67,7 +68,7 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
      * @param motorType The motor type, either brushless or brushed
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
-     *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
+     *     of motors. For example {@link org.wpilib.math.system.DCMotor#getNEO(int)}
      */
     public MotorIOSparkMaxSim(
             MechanismConfig config,
@@ -99,7 +100,7 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
      * @param motorType The motor type, either brushless or brushed
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
-     *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
+     *     of motors. For example {@link org.wpilib.math.system.DCMotor#getNEO(int)}
      * @return a new MotorIOSparkMaxSim configured as the lead motor
      */
     public static MotorIOSparkMaxSim newLeader(
@@ -125,7 +126,7 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
      * @param motorType The motor type, either brushless or brushed
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
-     *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
+     *     of motors. For example {@link org.wpilib.math.system.DCMotor#getNEO(int)}
      */
     public MotorIOSparkMaxSim(
             MechanismConfig config,
@@ -161,7 +162,7 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
      * @param motorType The motor type, either brushless or brushed
      * @param physicsSimAdapter An ElevatorSimAdapter or ArmSimAdapter to use for simulation values
      * @param motorFactory A method to create the gearbox passed to the SparkMaxSim, given a number
-     *     of motors. For example {@link edu.wpi.first.math.system.plant.DCMotor#getNEO(int)}
+     *     of motors. For example {@link org.wpilib.math.system.DCMotor#getNEO(int)}
      * @return a new MotorIOSparkMaxSim configured as the follower motor
      */
     public static MotorIOSparkMaxSim newFollower(
@@ -206,7 +207,7 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
         this.lastTimestampSeconds = timestamp;
 
         physicsSimAdapter.update(
-                Volts.of(sparkMax.getAppliedOutput() * RobotController.getBatteryVoltage()),
+                Volts.of(sparkMax.getAppliedOutput().get() * RobotController.getBatteryVoltage()),
                 deltaTimeSeconds);
 
         sparkSim.iterate(

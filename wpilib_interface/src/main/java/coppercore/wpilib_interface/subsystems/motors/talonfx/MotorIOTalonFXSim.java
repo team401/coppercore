@@ -1,6 +1,6 @@
 package coppercore.wpilib_interface.subsystems.motors.talonfx;
 
-import static edu.wpi.first.units.Units.Hertz;
+import static org.wpilib.units.Units.Hertz;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -11,8 +11,8 @@ import coppercore.wpilib_interface.CTREUtil;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.sim.CoppercoreSimAdapter;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
+import org.wpilib.system.RobotController;
+import org.wpilib.system.Timer;
 
 /**
  * A MotorIOTalonFXSim uses Phoenix-6 simulation features (TalonFX sim state) to read and update a

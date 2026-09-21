@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import coppercore.parameter_tools.json.JSONHandler;
 import coppercore.wpilib_interface.controllers.Controller;
 import coppercore.wpilib_interface.controllers.Controllers;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.wpilib.driverstation.internal.DriverStationBackend;
+import org.wpilib.simulation.DriverStationSim;
 
 public class ControllersTests {
 
@@ -36,8 +36,8 @@ public class ControllersTests {
     }
 
     public void setupControllerSim(int port, int axisCount, int buttonCount) {
-        DriverStationSim.setJoystickAxisCount(port, axisCount);
-        DriverStationSim.setJoystickButtonCount(port, buttonCount);
+        DriverStationSim.setJoystickAxesAvailable(port, axisCount);
+        DriverStationSim.setJoystickButtonsAvailable(port, buttonCount);
         DriverStationSim.notifyNewData();
     }
 
@@ -93,7 +93,7 @@ public class ControllersTests {
         Controller.Axis driveAxis = controller.getAxis("drive");
         assertNotNull(driveAxis);
 
-        setupControllerSim(2, 1, 1);
+        setupControllerSim(2, 1, 2);
 
         setAxis(2, 0, 0);
         Assertions.assertEquals(0.0, driveAxis.getValue(), DELTA);
@@ -146,7 +146,7 @@ public class ControllersTests {
 
         setAxis(0, 0, 0);
         System.out.println(shootButton.isPressed());
-        System.out.println("Axis Value: " + DriverStation.getStickAxis(0, 0));
+        System.out.println("Axis Value: " + DriverStationBackend.getStickAxis(0, 0));
         Assertions.assertEquals(false, shootButton.isPressed());
         setAxis(0, 0, 0.45);
         Assertions.assertEquals(false, shootButton.isPressed());

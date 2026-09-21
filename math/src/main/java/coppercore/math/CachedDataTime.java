@@ -1,6 +1,6 @@
 package coppercore.math;
 
-import edu.wpi.first.math.MathSharedStore;
+import org.wpilib.math.util.MathSharedStore;
 
 /**
  * This class is used for temporarily storing data in a cache and determining whether or not it is

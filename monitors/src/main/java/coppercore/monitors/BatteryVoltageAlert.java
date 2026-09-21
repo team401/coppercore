@@ -1,6 +1,6 @@
 package coppercore.monitors;
 
-import edu.wpi.first.math.filter.LinearFilter;
+import org.wpilib.math.filter.LinearFilter;
 
 /**
  * BatteryVoltageAlert is a utility class that checks whether the battery voltage drops below a

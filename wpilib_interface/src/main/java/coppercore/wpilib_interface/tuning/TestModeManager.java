@@ -1,15 +1,15 @@
 package coppercore.wpilib_interface.tuning;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkChooser;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 
 /**
- * A test mode manager adds a LoggedDashboardChooser for a set of test modes described by an enum.
- * One of the enum values must be `None`. The enum class must implement TestModeDescription.
+ * A test mode manager adds a LoggedNetworkChooser for a set of test modes described by an enum. One
+ * of the enum values must be `None`. The enum class must implement TestModeDescription.
  */
 public final class TestModeManager<TestMode extends Enum<?> & TestModeDescription> {
     private TestMode None;
-    private LoggedDashboardChooser<TestMode> testModeChooser = null;
+    private LoggedNetworkChooser<TestMode> testModeChooser = null;
 
     /**
      * Construct a new test mode manager.
@@ -20,13 +20,13 @@ public final class TestModeManager<TestMode extends Enum<?> & TestModeDescriptio
      * @param enumClazz - the enum class containing the test modes
      */
     public TestModeManager(String prefix, Class<TestMode> enumClazz) {
-        this.testModeChooser = new LoggedDashboardChooser<>(prefix + " Test Mode Selector");
+        this.testModeChooser = new LoggedNetworkChooser<>(prefix + " Test Mode Selector");
         for (TestMode mode : enumClazz.getEnumConstants()) {
             if ("None".equals(mode.name())) {
                 None = mode;
-                testModeChooser.addDefaultOption(mode.getDescription(), mode);
+                testModeChooser.addDefault(mode.getDescription(), mode);
             } else {
-                testModeChooser.addOption(mode.getDescription(), mode);
+                testModeChooser.add(mode.getDescription(), mode);
             }
         }
         if (None == null)
@@ -41,7 +41,7 @@ public final class TestModeManager<TestMode extends Enum<?> & TestModeDescriptio
      * will return TestMode.None
      */
     public TestMode getTestMode() {
-        if (!DriverStation.isTest()) {
+        if (!(DriverStationBackend.isUtilityEnabled())) {
             return this.None;
         }
 

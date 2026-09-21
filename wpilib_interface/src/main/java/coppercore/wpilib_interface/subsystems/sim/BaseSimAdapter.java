@@ -1,8 +1,8 @@
 package coppercore.wpilib_interface.subsystems.sim;
 
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
 
 /**
  * The BaseSimAdapter class serves as a base class for classes that implement CoppercoreSimAdapter

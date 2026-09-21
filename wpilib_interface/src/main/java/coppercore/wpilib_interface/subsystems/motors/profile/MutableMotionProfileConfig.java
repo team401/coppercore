@@ -2,22 +2,18 @@ package coppercore.wpilib_interface.subsystems.motors.profile;
 
 import static coppercore.wpilib_interface.UnitUtils.VoltsPerRotationPerSecond;
 import static coppercore.wpilib_interface.UnitUtils.VoltsPerRotationPerSecondSquared;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Second;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.Second;
 
-import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.AngularVelocityUnit;
-import edu.wpi.first.units.VelocityUnit;
-import edu.wpi.first.units.VoltageUnit;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.MutAngularAcceleration;
-import edu.wpi.first.units.measure.MutAngularVelocity;
-import edu.wpi.first.units.measure.MutPer;
-import edu.wpi.first.units.measure.MutVelocity;
-import edu.wpi.first.units.measure.Per;
-import edu.wpi.first.units.measure.Velocity;
+import org.wpilib.units.AngularAccelerationUnit;
+import org.wpilib.units.AngularVelocityUnit;
+import org.wpilib.units.VelocityUnit;
+import org.wpilib.units.VoltageUnit;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Per;
+import org.wpilib.units.measure.Velocity;
 
 /**
  * A generic, mutable motion profile configuration, with methods for modifying its fields.
@@ -48,12 +44,12 @@ import edu.wpi.first.units.measure.Velocity;
  * </ul>
  */
 public final class MutableMotionProfileConfig extends MotionProfileConfig {
-    private MutAngularVelocity maxVelocity;
-    private MutAngularAcceleration maxAcceleration;
-    private MutVelocity<AngularAccelerationUnit> maxJerk;
+    private AngularVelocity maxVelocity;
+    private AngularAcceleration maxAcceleration;
+    private Velocity<AngularAccelerationUnit> maxJerk;
 
-    private MutPer<VoltageUnit, AngularVelocityUnit> expoKv;
-    private MutPer<VoltageUnit, AngularAccelerationUnit> expoKa;
+    private Per<VoltageUnit, AngularVelocityUnit> expoKv;
+    private Per<VoltageUnit, AngularAccelerationUnit> expoKa;
 
     /**
      * A generic, mutable motion profile configuration
@@ -82,11 +78,11 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
             Velocity<AngularAccelerationUnit> maxJerk,
             Per<VoltageUnit, AngularVelocityUnit> expoKv,
             Per<VoltageUnit, AngularAccelerationUnit> expoKa) {
-        this.maxVelocity = maxVelocity.mutableCopy();
-        this.maxAcceleration = maxAcceleration.mutableCopy();
-        this.maxJerk = maxJerk.mutableCopy();
-        this.expoKv = expoKv.mutableCopy();
-        this.expoKa = expoKa.mutableCopy();
+        this.maxVelocity = maxVelocity;
+        this.maxAcceleration = maxAcceleration;
+        this.maxJerk = maxJerk;
+        this.expoKv = expoKv;
+        this.expoKa = expoKa;
     }
 
     /**
@@ -95,23 +91,23 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      * @param other The config to copy from.
      */
     protected MutableMotionProfileConfig(MotionProfileConfig other) {
-        this.maxVelocity = other.getMaxVelocity().mutableCopy();
-        this.maxAcceleration = other.getMaxAcceleration().mutableCopy();
-        this.maxJerk = other.getMaxJerk().mutableCopy();
-        this.expoKv = other.getExpoKv().mutableCopy();
-        this.expoKa = other.getExpoKa().mutableCopy();
+        this(
+                other.getMaxVelocity(),
+                other.getMaxAcceleration(),
+                other.getMaxJerk(),
+                other.getExpoKv(),
+                other.getExpoKa());
     }
 
     /** Create a new config by setting all fields to zero. */
     private MutableMotionProfileConfig() {
-        this.maxVelocity = RotationsPerSecond.mutable(0.0);
-        this.maxAcceleration = RotationsPerSecondPerSecond.mutable(0.0);
+        this.maxVelocity = RotationsPerSecond.of(0.0);
+        this.maxAcceleration = RotationsPerSecondPerSecond.of(0.0);
         this.maxJerk =
                 Velocity.ofRelativeUnits(
-                                0.0, VelocityUnit.combine(RotationsPerSecondPerSecond, Second))
-                        .mutableCopy();
-        this.expoKv = VoltsPerRotationPerSecond.mutableNative(0.0);
-        this.expoKa = VoltsPerRotationPerSecondSquared.mutableNative(0.0);
+                        0.0, VelocityUnit.combine(RotationsPerSecondPerSecond, Second));
+        this.expoKv = VoltsPerRotationPerSecond.ofNative(0.0);
+        this.expoKa = VoltsPerRotationPerSecondSquared.ofNative(0.0);
     }
 
     /**
@@ -153,11 +149,7 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      */
     public ImmutableMotionProfileConfig freeze() {
         return new ImmutableMotionProfileConfig(
-                this.maxVelocity.copy(),
-                this.maxAcceleration.copy(),
-                this.maxJerk.copy(),
-                this.expoKv,
-                this.expoKa);
+                this.maxVelocity, this.maxAcceleration, this.maxJerk, this.expoKv, this.expoKa);
     }
 
     @Override
@@ -194,7 +186,7 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      * @return This object, for easy chaining.
      */
     public MutableMotionProfileConfig withMaxVelocity(AngularVelocity newMaxVelocity) {
-        this.maxVelocity.mut_replace(newMaxVelocity);
+        this.maxVelocity = newMaxVelocity;
         return this;
     }
 
@@ -206,7 +198,7 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      * @return This object, for easy chaining.
      */
     public MutableMotionProfileConfig withMaxAcceleration(AngularAcceleration newMaxAcceleration) {
-        this.maxAcceleration.mut_replace(newMaxAcceleration);
+        this.maxAcceleration = newMaxAcceleration;
         return this;
     }
 
@@ -217,7 +209,7 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      * @return This object, for easy chaining.
      */
     public MutableMotionProfileConfig withMaxJerk(Velocity<AngularAccelerationUnit> newMaxJerk) {
-        this.maxJerk.mut_replace(newMaxJerk);
+        this.maxJerk = newMaxJerk;
         return this;
     }
 
@@ -229,7 +221,7 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      * @return This object, for easy chaining.
      */
     public MutableMotionProfileConfig withExpoKv(Per<VoltageUnit, AngularVelocityUnit> newExpoKv) {
-        this.expoKv.mut_replace(newExpoKv);
+        this.expoKv = newExpoKv;
         return this;
     }
 
@@ -242,7 +234,7 @@ public final class MutableMotionProfileConfig extends MotionProfileConfig {
      */
     public MutableMotionProfileConfig withExpoKa(
             Per<VoltageUnit, AngularAccelerationUnit> newExpoKa) {
-        this.expoKa.mut_replace(newExpoKa);
+        this.expoKa = newExpoKa;
         return this;
     }
 }

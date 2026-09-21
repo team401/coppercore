@@ -6,7 +6,7 @@ plugins {
 }
 
 // Set to true to use debug for JNI.
-wpi.java.debugJni = false
+wpi.java.runSimWithDebugJni.set(false)
 
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true
@@ -34,7 +34,7 @@ dependencies {
 	nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
 	simulationRelease wpi.sim.enableRelease()
 
-	implementation libs.wpilib.newcommands
+	implementation libs.wpilib.commands
 
 	annotationProcessor libs.akit.autolog
 	implementation libs.akit.java

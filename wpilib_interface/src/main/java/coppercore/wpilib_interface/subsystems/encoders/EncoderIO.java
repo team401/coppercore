@@ -1,6 +1,6 @@
 package coppercore.wpilib_interface.subsystems.encoders;
 
-import edu.wpi.first.units.measure.Angle;
+import org.wpilib.units.measure.Angle;
 
 /**
  * A generic encoder IO. This is geared mostly towards use with a CANCoder. Contains methods to

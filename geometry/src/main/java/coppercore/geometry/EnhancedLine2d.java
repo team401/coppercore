@@ -1,8 +1,8 @@
 package coppercore.geometry;
 
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import java.util.Optional;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.geometry.Translation3d;
 
 /**
  * EnhancedLine represents a line segment and has a method that can check whether two line segments

@@ -1,7 +1,7 @@
 package coppercore.math;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Millimeters;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Millimeters;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
