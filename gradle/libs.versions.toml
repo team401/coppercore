@@ -12,9 +12,8 @@ junit-jupiter = "5.10.1"
 advantagekit = "27.0.0-alpha-5"
 json-simple = "1.1.1"
 gson = "2.11.0"
-# TODO: PhotonLib alpha-2 targets WPILib alpha-6. Upgrade for alpha-7 before using vision sim;
-# its VisionSystemSim still calls the removed SmartDashboard API.
-photonlib = "v2027.0.0-alpha-2"
+# Using PhotonLib's dev-v2027 release to support alpha-7
+photonlib = "dev-v2027.0.0-alpha-2-61-g35191812"
 revlib = "2027.0.0-alpha-7"
 
 [plugins]

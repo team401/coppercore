@@ -15,8 +15,8 @@ import org.wpilib.hardware.bus.CANPort;
  * <p>REV's SparkMax motors, which do not support CANivore, now expect a CAN bus id in their
  * constructor.
  *
- * <p>CTR instead chose to continue name CAN busses using strings, and provides methods to refer to
- * the systemcore busses via factory methods: CANBus.systemcore(int).
+ * <p>CTR continues to name CAN busses using strings, while accepting a {@link CANPort} when
+ * constructing a {@link CANBus} for a native Systemcore or Motioncore port.
  *
  * <p>We continue to piggyback on Phoenix6's CANBus abstraction, but add a method to retrieve the
  * systemcore CAN bus id for systemcore busses.
