@@ -2,23 +2,23 @@ package coppercore.vision;
 
 import coppercore.math.RunOnce;
 import coppercore.vision.VisionIO.SingleTagObservation;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleFunction;
 import org.littletonrobotics.junction.Logger;
+import org.wpilib.command2.SubsystemBase;
+import org.wpilib.fields.Field;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Transform3d;
+import org.wpilib.math.linalg.Matrix;
+import org.wpilib.math.linalg.VecBuilder;
+import org.wpilib.math.numbers.N1;
+import org.wpilib.math.numbers.N3;
+import org.wpilib.util.Alert;
+import org.wpilib.util.Alert.Level;
 
 /**
  * Localizes the robot using camera measurements. Periodically updates camera data and allows for
@@ -30,7 +30,7 @@ public class VisionLocalizer extends SubsystemBase {
     private final Alert[] disconnectedAlerts;
     // avoid NullPointerExceptions by setting a default no-op
     private VisionConsumer consumer;
-    public AprilTagFieldLayout aprilTagLayout;
+    public Field aprilTagLayout;
 
     private final VisionGainConstants gainConstants;
 
@@ -126,7 +126,7 @@ public class VisionLocalizer extends SubsystemBase {
      */
     public VisionLocalizer(
             VisionConsumer consumer,
-            AprilTagFieldLayout aprilTagLayout,
+            Field aprilTagLayout,
             VisionGainConstants gainConstants,
             CameraConfig... cameras) {
         this.consumer = consumer;
@@ -150,7 +150,10 @@ public class VisionLocalizer extends SubsystemBase {
         this.disconnectedAlerts = new Alert[cameras.length];
         for (int i = 0; i < inputs.length; i++) {
             disconnectedAlerts[i] =
-                    new Alert("Vision camera " + i + " is disconnected.", AlertType.kWarning);
+                    new Alert(
+                            "camera" + i + "Disconnected",
+                            "Vision camera " + i + " is disconnected.",
+                            Level.MEDIUM);
         }
     }
 

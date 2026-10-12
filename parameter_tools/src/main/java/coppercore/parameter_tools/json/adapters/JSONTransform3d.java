@@ -1,10 +1,10 @@
 package coppercore.parameter_tools.json.adapters;
 
 import coppercore.parameter_tools.json.helpers.JSONObject;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import java.lang.reflect.Constructor;
+import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Transform3d;
+import org.wpilib.math.geometry.Translation3d;
 
 /** A JSON representation of a Transform3d object. */
 public class JSONTransform3d extends JSONObject<Transform3d> {

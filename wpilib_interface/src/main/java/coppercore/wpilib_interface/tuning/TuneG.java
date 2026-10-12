@@ -2,19 +2,19 @@
 
 package coppercore.wpilib_interface.tuning;
 
-import static edu.wpi.first.units.Units.Rotations;
+import static org.wpilib.units.Units.Rotations;
 
-import edu.wpi.first.math.filter.MedianFilter;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
+import org.wpilib.command2.Command;
+import org.wpilib.math.filter.MedianFilter;
+import org.wpilib.telemetry.Telemetry;
+import org.wpilib.units.measure.Angle;
 
 /**
  * A command to automatically characterize kG
  *
- * <p>Relies on SmartDashboard Test-Mode/kS to get a more accurate number.
+ * <p>Relies on the Test-Mode/kS tunable to get a more accurate number.
  *
- * <p>Outputs its findings to SmartDashboard at Test-Mode/kS and to console
+ * <p>Logs its findings under Test-Mode/kG and prints them to console.
  */
 public class TuneG extends Command {
     private Tunable mechanism;
@@ -34,8 +34,9 @@ public class TuneG extends Command {
 
     /**
      * Create a command to automatically characterize kG for a Tunable system
-     * 
-     * <p> WARNING: this command is very finicky and doesn't seem to function properly. We recommend using a TuneS to tune your kG, or tuning it manually
+     *
+     * <p>WARNING: this command is very finicky and doesn't seem to function properly. We recommend
+     * using a TuneS to tune your kG, or tuning it manually
      *
      * @param mechanism The Tunable mechanism/subsystem to tune
      * @param rampUpSpeed How much to increase the applied output by per loop. 0.001 is very precise
@@ -47,8 +48,6 @@ public class TuneG extends Command {
     public TuneG(
             Tunable mechanism, double rampUpSpeed, int filterWindow, double movementThreshold) {
         this.mechanism = mechanism;
-        this.kS = SmartDashboard.getNumber("Test-Mode/kS", 0);
-
         this.rampUpSpeed = rampUpSpeed;
 
         positionFilter = new MedianFilter(filterWindow);
@@ -60,6 +59,7 @@ public class TuneG extends Command {
 
     @Override
     public void initialize() {
+        kS = TestModeTunables.KS.get();
         startPosition = mechanism.getPosition();
         kG = kS;
     }
@@ -75,7 +75,7 @@ public class TuneG extends Command {
     @Override
     public void end(boolean interrupted) {
         mechanism.setOutput(0.0);
-        SmartDashboard.putNumber("Test-Mode/kG", kG - kS);
+        Telemetry.log("Test-Mode/kG", kG - kS);
         System.out.println("=====");
         System.out.println("  TuneG: kG = " + (kG - kS));
         System.out.println("=====");

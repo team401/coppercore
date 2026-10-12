@@ -5,16 +5,16 @@ import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.json.annotations.JSONName;
 import coppercore.parameter_tools.json.annotations.JsonSubtype;
 import coppercore.parameter_tools.json.annotations.JsonType;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.PerUnit;
-import edu.wpi.first.units.TimeUnit;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Per;
 import java.util.List;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.units.AngleUnit;
+import org.wpilib.units.PerUnit;
+import org.wpilib.units.TimeUnit;
+import org.wpilib.units.Units;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Per;
 
 /**
  * Example class to demonstrate the usage of the {@link JSONSync} utility for saving and loading

@@ -1,13 +1,12 @@
 package coppercore.parameter_tools.json.adapters.measure;
 
+import coppercore.parameter_tools.json.helpers.JSONObject;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.function.Function;
-
-import coppercore.parameter_tools.json.helpers.JSONObject;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Unit;
-import edu.wpi.first.units.Units;
+import org.wpilib.units.Measure;
+import org.wpilib.units.Unit;
+import org.wpilib.units.Units;
 
 /** A JSON representation of a Measure object. */
 @SuppressWarnings("rawtypes")
@@ -45,16 +44,16 @@ public class JSONMeasure extends JSONObject<Measure> {
             System.out.println("Warning: Unit not registered in map: " + unit);
             System.out.println(
                     """
-                -------------------------------------------------------------------------
-                To register it, call one of the following methods:
-                JSONMeasure.registerUnit(<YOUR UNIT>);
-                JSONMeasure.registerUnit(<YOUR UNIT>, "CustomName1", "CustomName2", ...);
-                JSONMeasure.registerUnit("CustomName", <Converter to your unit>);
+                        -------------------------------------------------------------------------
+                        To register it, call one of the following methods:
+                        JSONMeasure.registerUnit(<YOUR UNIT>);
+                        JSONMeasure.registerUnit(<YOUR UNIT>, "CustomName1", "CustomName2", ...);
+                        JSONMeasure.registerUnit("CustomName", <Converter to your unit>);
 
-                Note: The unit must be registered before deserializing or serializing any
-                Measure of the Unit. You only need to register each unit once, typically
-                should be done in a static context.
-            """);
+                        Note: The unit must be registered before deserializing or serializing any
+                        Measure of the Unit. You only need to register each unit once, typically
+                        should be done in a static context.
+                    """);
         }
     }
 
@@ -212,20 +211,10 @@ public class JSONMeasure extends JSONObject<Measure> {
         JSONMeasure.registerUnit(Units.Fahrenheit, "Fahrenheit", "°F", "F");
 
         // ## Feedforward Units ##
-        JSONMeasure.registerUnit(
-                Units.VoltsPerMeterPerSecond,
-                "V/(m/s)");
-        JSONMeasure.registerUnit(
-                Units.VoltsPerMeterPerSecondSquared,
-                "V/(m/s²)",
-                "V/(m/s^2)");
-        JSONMeasure.registerUnit(
-                Units.VoltsPerRadianPerSecond,
-                "V/(rad/s)");
-        JSONMeasure.registerUnit(
-                Units.VoltsPerRadianPerSecondSquared,
-                "V/(rad/s²)",
-                "V/(rad/s^2)");
+        JSONMeasure.registerUnit(Units.VoltsPerMeterPerSecond, "V/(m/s)");
+        JSONMeasure.registerUnit(Units.VoltsPerMeterPerSecondSquared, "V/(m/s²)", "V/(m/s^2)");
+        JSONMeasure.registerUnit(Units.VoltsPerRadianPerSecond, "V/(rad/s)");
+        JSONMeasure.registerUnit(Units.VoltsPerRadianPerSecondSquared, "V/(rad/s²)", "V/(rad/s^2)");
     }
 
     @Override

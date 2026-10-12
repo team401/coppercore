@@ -71,6 +71,6 @@ the change up automatically.
   part of the aggregate `./gradlew build` and a program that fails to compile here can never
   break the library build or publishing. Use `./gradlew :standalone:build` to compile-check
   this module on its own.
-- Native libraries default to the **release** variant. Set `wpi.java.debugJni = true` in
+- Native libraries default to the **release** variant. Set `wpi.java.runSimWithDebugJni.set(true)` in
   `build.gradle` to use debug natives.
 - The simulation GUI and driver station are disabled by default so programs run headless.

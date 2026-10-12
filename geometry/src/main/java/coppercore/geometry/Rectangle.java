@@ -1,6 +1,6 @@
 package coppercore.geometry;
 
-import edu.wpi.first.math.geometry.Translation2d;
+import org.wpilib.math.geometry.Translation2d;
 
 public class Rectangle {
     protected final Translation2d bottomLeft;

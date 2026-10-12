@@ -8,6 +8,7 @@ import coppercore.wpilib_interface.subsystems.configs.CANDeviceID;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig.GravityFeedforwardType;
 import org.junit.jupiter.api.Test;
+import org.wpilib.hardware.bus.CANPort;
 
 /**
  * Tests for the MechanismConfig to ensure that its builder correctly validates and stores
@@ -74,7 +75,7 @@ public class MechanismConfigTests {
                 NullPointerException.class,
                 () -> {
                     MechanismConfig.builder()
-                            .withLeadMotorId(new CANDeviceID(CANBus.roboRIO(), 1))
+                            .withLeadMotorId(new CANDeviceID(new CANBus(CANPort.CAN_S0), 1))
                             .withGravityFeedforwardType(GravityFeedforwardType.STATIC_ELEVATOR)
                             .build();
                 });
@@ -99,7 +100,7 @@ public class MechanismConfigTests {
                 () -> {
                     MechanismConfig.builder()
                             .withName("TestMechanism")
-                            .withLeadMotorId(new CANDeviceID(CANBus.roboRIO(), 1))
+                            .withLeadMotorId(new CANDeviceID(new CANBus(CANPort.CAN_S0), 1))
                             .build();
                 });
     }
@@ -119,7 +120,7 @@ public class MechanismConfigTests {
 
     @Test
     public void dataIsCorrect() {
-        CANBus rio = CANBus.roboRIO();
+        CANBus rio = new CANBus(CANPort.CAN_S0);
         MechanismConfig config =
                 MechanismConfig.builder()
                         .withName("TestMechanism")

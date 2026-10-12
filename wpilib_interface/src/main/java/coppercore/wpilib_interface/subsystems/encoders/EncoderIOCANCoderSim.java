@@ -1,6 +1,6 @@
 package coppercore.wpilib_interface.subsystems.encoders;
 
-import static edu.wpi.first.units.Units.Rotations;
+import static org.wpilib.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.signals.SensorDirectionValue;

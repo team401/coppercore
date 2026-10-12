@@ -1,16 +1,16 @@
 package coppercore.wpilib_interface.subsystems.sim;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Volts;
 
 import coppercore.wpilib_interface.subsystems.configs.MechanismConfig;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import org.wpilib.simulation.DCMotorSim;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Voltage;
 
 /**
  * The DCMotorSimAdapter class wraps a DCMotorSim to implement the CoppercoreSimAdapter interface,
@@ -27,27 +27,29 @@ public class DCMotorSimAdapter extends BaseSimAdapter {
 
     @Override
     public Angle getMotorPosition() {
-        return dcMotorSim.getAngularPosition();
+        return Angle.ofBaseUnits(dcMotorSim.getAngularPosition(), Radians);
     }
 
     @Override
     public AngularVelocity getMotorAngularVelocity() {
-        return dcMotorSim.getAngularVelocity();
+        return AngularVelocity.ofBaseUnits(dcMotorSim.getAngularVelocity(), RadiansPerSecond);
     }
 
     @Override
     public Angle getEncoderPosition() {
-        return dcMotorSim.getAngularPosition().div(config.motorToEncoderRatio);
+        return Angle.ofBaseUnits(
+                dcMotorSim.getAngularPosition() / config.motorToEncoderRatio, Radians);
     }
 
     @Override
     public AngularVelocity getEncoderAngularVelocity() {
-        return dcMotorSim.getAngularVelocity().div(config.motorToEncoderRatio);
+        return AngularVelocity.ofBaseUnits(
+                dcMotorSim.getAngularVelocity() / config.motorToEncoderRatio, RadiansPerSecond);
     }
 
     @Override
     public Current getCurrentDraw() {
-        return Amps.of(dcMotorSim.getCurrentDrawAmps());
+        return Amps.of(dcMotorSim.getCurrentDraw());
     }
 
     @Override
