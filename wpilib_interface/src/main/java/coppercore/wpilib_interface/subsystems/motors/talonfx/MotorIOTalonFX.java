@@ -1,12 +1,12 @@
 package coppercore.wpilib_interface.subsystems.motors.talonfx;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Celsius;
-import static edu.wpi.first.units.Units.Hertz;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Celsius;
+import static org.wpilib.units.Units.Hertz;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Rotations;
+import static org.wpilib.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
@@ -39,19 +39,18 @@ import coppercore.wpilib_interface.subsystems.motors.CanBusMotorControllerBase;
 import coppercore.wpilib_interface.subsystems.motors.MotorIO;
 import coppercore.wpilib_interface.subsystems.motors.MotorInputs;
 import coppercore.wpilib_interface.subsystems.motors.profile.MotionProfileConfig;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Frequency;
-import edu.wpi.first.units.measure.MutCurrent;
-import edu.wpi.first.units.measure.Temperature;
-import edu.wpi.first.units.measure.Velocity;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.DriverStation;
 import java.util.Optional;
+import org.wpilib.driverstation.DriverStationErrors;
+import org.wpilib.math.util.Units;
+import org.wpilib.units.AngularAccelerationUnit;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Frequency;
+import org.wpilib.units.measure.Temperature;
+import org.wpilib.units.measure.Velocity;
+import org.wpilib.units.measure.Voltage;
 
 /**
  * A base motor IO that implements closed-loop control for a TalonFX-supporting motor using
@@ -258,7 +257,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
      *   <li><b>Default value:</b> 0.0 amps
      * </ul>
      */
-    protected MutCurrent arbitraryFF = Amps.mutable(0.0);
+    protected Current arbitraryFF = Amps.of(0.0);
 
     /** A neutral request to use for basic config-based neutral mode commands */
     protected final NeutralOut neutralRequest = new NeutralOut();
@@ -903,11 +902,11 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
         disconnectedAlert.set(!potentialErrorCode.isOK());
 
         if (potentialErrorCode.isError()) {
-            DriverStation.reportError(
+            DriverStationErrors.reportError(
                     deviceName + ": Failed to refresh status signals: " + potentialErrorCode,
                     false);
         } else if (potentialErrorCode.isWarning()) {
-            DriverStation.reportWarning(
+            DriverStationErrors.reportWarning(
                     deviceName + ": Warning while refreshing status signals: " + potentialErrorCode,
                     false);
         }
@@ -1179,7 +1178,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void setArbitraryFeedForwardCurrent(Current feedForward) {
-        arbitraryFF.mut_replace(feedForward);
+        arbitraryFF = feedForward;
     }
 
     @Override
@@ -1196,7 +1195,7 @@ public class MotorIOTalonFX extends CanBusMotorControllerBase implements MotorIO
 
     @Override
     public void setNeutralMode(NeutralMode neutralMode) {
-        talon.setNeutralMode(CTREUtil.translateNeutralMode(neutralMode));
+        talon.configNeutralMode(CTREUtil.translateNeutralMode(neutralMode));
     }
 
     @Override

@@ -1,7 +1,7 @@
 package coppercore.wpilib_interface;
 
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import org.wpilib.math.filter.Debouncer;
+import org.wpilib.math.filter.Debouncer.DebounceType;
 
 /**
  * An asymmetric debouncer: debounces both the rising and falling edge and allows for having
@@ -24,8 +24,8 @@ public class AsymmetricDebouncer {
      *     filtered value to change to false.
      */
     public AsymmetricDebouncer(double riseTimeSeconds, double fallTimeSeconds) {
-        riseDebouncer = new Debouncer(riseTimeSeconds, DebounceType.kRising);
-        fallDebouncer = new Debouncer(fallTimeSeconds, DebounceType.kFalling);
+        riseDebouncer = new Debouncer(riseTimeSeconds, DebounceType.RISING);
+        fallDebouncer = new Debouncer(fallTimeSeconds, DebounceType.FALLING);
     }
 
     /**

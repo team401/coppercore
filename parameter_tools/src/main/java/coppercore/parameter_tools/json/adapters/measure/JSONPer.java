@@ -1,11 +1,11 @@
 package coppercore.parameter_tools.json.adapters.measure;
 
 import coppercore.parameter_tools.json.helpers.JSONObject;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.PerUnit;
-import edu.wpi.first.units.Unit;
-import edu.wpi.first.units.measure.Per;
 import java.lang.reflect.Constructor;
+import org.wpilib.units.Measure;
+import org.wpilib.units.PerUnit;
+import org.wpilib.units.Unit;
+import org.wpilib.units.measure.Per;
 
 /** A JSON representation of a Per object. */
 public class JSONPer<Dividend extends Unit, Divisor extends Unit>

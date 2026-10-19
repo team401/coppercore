@@ -1,17 +1,17 @@
 package coppercore.wpilib_interface.subsystems.motors.profile;
 
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Second;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.Second;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.revrobotics.spark.config.MAXMotionConfig;
-import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.AngularVelocityUnit;
-import edu.wpi.first.units.VoltageUnit;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Per;
-import edu.wpi.first.units.measure.Velocity;
+import org.wpilib.units.AngularAccelerationUnit;
+import org.wpilib.units.AngularVelocityUnit;
+import org.wpilib.units.VoltageUnit;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Per;
+import org.wpilib.units.measure.Velocity;
 
 /**
  * A generic motion profile configuration

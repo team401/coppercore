@@ -1,8 +1,8 @@
 package coppercore.parameter_tools.json.adapters;
 
 import coppercore.parameter_tools.json.helpers.JSONObject;
-import edu.wpi.first.math.geometry.Translation3d;
 import java.lang.reflect.Constructor;
+import org.wpilib.math.geometry.Translation3d;
 
 /**
  * A JSON adapter for the Translation3d class, enabling serialization and deserialization

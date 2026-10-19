@@ -1,10 +1,10 @@
 package coppercore.vision;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
 import java.io.IOException;
-import java.util.Collections;
+import java.nio.file.Path;
+import org.wpilib.driverstation.DriverStationErrors;
+import org.wpilib.fields.Field;
+import org.wpilib.system.Filesystem;
 
 /* This is not currently used in the 2026 robot code, it uses
  * frc.robot.constants.AprilTagConstants.getTagLayout() instead.
@@ -17,22 +17,21 @@ public class LayoutUtil {
      * layout fails to load, an empty layout is returned and a warning is logged.
      *
      * @param name The name of the layout file (without the .json extension).
-     * @return The initialized {@link AprilTagFieldLayout}.
+     * @return The initialized {@link Field}.
      */
-    public static AprilTagFieldLayout initLayout(String name) {
-        AprilTagFieldLayout layout;
-        // AprilTagFieldLayout's constructor throws an IOException, so we must catch it
+    public static Field initLayout(String name) {
+        Field layout;
         try {
             layout =
-                    new AprilTagFieldLayout(
-                            Filesystem.getDeployDirectory().getAbsolutePath()
-                                    + "/taglayout/"
-                                    + name
-                                    + ".json");
+                    Field.loadFromFile(
+                            Path.of(
+                                    Filesystem.getDeployDirectory().getAbsolutePath(),
+                                    "taglayout",
+                                    name + ".json"));
         } catch (IOException ioe) {
-            DriverStation.reportWarning(
+            DriverStationErrors.reportWarning(
                     "Failed to load AprilTag Layout: " + ioe.getLocalizedMessage(), false);
-            layout = new AprilTagFieldLayout(Collections.emptyList(), 0.0, 0.0);
+            layout = new Field();
         }
         return layout;
     }

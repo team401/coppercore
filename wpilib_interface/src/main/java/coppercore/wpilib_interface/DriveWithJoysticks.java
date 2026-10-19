@@ -1,22 +1,22 @@
 package coppercore.wpilib_interface;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecond;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.numbers.N2;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import java.util.function.Supplier;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.button.CommandJoystick;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Transform2d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.math.linalg.VecBuilder;
+import org.wpilib.math.linalg.Vector;
+import org.wpilib.math.numbers.N2;
+import org.wpilib.math.util.MathUtil;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.LinearVelocity;
 
 /**
  * The DriveWithJoysticks command controls a holonomic drivetrain using the joysticks or suppliers
@@ -139,22 +139,22 @@ public class DriveWithJoysticks extends Command {
     @Override
     public void execute() {
         // clamp inputs between 0 and 1 to prevent crazy speeds
-        double leftJoystickX = MathUtil.clamp(driveXSupplier.get(), -1, 1);
-        double leftJoystickY = MathUtil.clamp(driveYSupplier.get(), -1, 1);
-        double rightJoystickX = MathUtil.clamp(rotationSupplier.get(), -1, 1);
+        double leftJoystickX = Math.clamp(driveXSupplier.get(), -1, 1);
+        double leftJoystickY = Math.clamp(driveYSupplier.get(), -1, 1);
+        double rightJoystickX = Math.clamp(rotationSupplier.get(), -1, 1);
 
         Translation2d linearSpeeds = getLinearVelocity(-leftJoystickX, -leftJoystickY);
 
         double omega = MathUtil.applyDeadband(-rightJoystickX, joystickDeadband);
         omega = MathUtil.copyDirectionPow(omega, magnitudeExponent);
 
-        ChassisSpeeds speeds =
-                new ChassisSpeeds(
+        ChassisVelocities velocities =
+                new ChassisVelocities(
                         linearSpeeds.getX() * maxLinearVelocity.in(MetersPerSecond),
                         linearSpeeds.getY() * maxLinearVelocity.in(MetersPerSecond),
                         omega * maxAngularVelocity.in(RadiansPerSecond));
 
-        drive.setGoalSpeeds(speeds, true);
+        drive.setGoalVelocities(velocities, true);
     }
 
     /**

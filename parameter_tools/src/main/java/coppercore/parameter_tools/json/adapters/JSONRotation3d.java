@@ -1,8 +1,8 @@
 package coppercore.parameter_tools.json.adapters;
 
 import coppercore.parameter_tools.json.helpers.JSONObject;
-import edu.wpi.first.math.geometry.Rotation3d;
 import java.lang.reflect.Constructor;
+import org.wpilib.math.geometry.Rotation3d;
 
 // CONSIDER: Using a different representation or naming scheme
 // WPILib uses (roll, pitch, yaw) in the constructor, but the getters are (getX, getY, getZ).

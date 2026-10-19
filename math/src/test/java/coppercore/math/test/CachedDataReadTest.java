@@ -1,13 +1,13 @@
 package coppercore.math.test;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Millimeters;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Millimeters;
 
 import coppercore.math.CachedDataRead;
-import edu.wpi.first.units.measure.Distance;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.wpilib.units.measure.Distance;
 
 public class CachedDataReadTest {
 

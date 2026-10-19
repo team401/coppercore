@@ -1,18 +1,18 @@
 package coppercore.vision;
 
 import coppercore.math.RunOnce;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
 import java.util.function.DoubleFunction;
 import java.util.function.Supplier;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
+import org.wpilib.fields.Field;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Transform3d;
+import org.wpilib.system.Timer;
 
-/** implements vision io through photon vision simulation */
+/** Implements vision IO through PhotonVision simulation. */
 public class VisionIOPhotonSim extends VisionIOPhotonReal {
     private static VisionSystemSim visionSim;
 
@@ -97,7 +97,7 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
 
         if (cameraType == VisionLocalizer.CameraType.MOBILE) {
             robotToCameraAt
-                    .apply(Timer.getFPGATimestamp())
+                    .apply(Timer.getTimestamp())
                     .ifPresentOrElse(
                             (robotToCamera) -> {
                                 visionSim.adjustCamera(cameraSim, robotToCamera);
@@ -115,26 +115,25 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
      * Creates a camera with the given initial transform. This should be called only once when the
      * VisionIOPhotonSim is created. This is called for both mobile and stationary cameras.
      *
-     * @param tagLayout the AprilTagFieldLayout currently in use
+     * @param tagLayout the field layout currently in use
      * @param tagLayoutRunOnce a RunOnce which should be passed to all instances during
      *     initialization to ensure that tags are only added once.
      * @param robotToCameraAt the initial transform of the robot to the camera as a double function
      */
     @Override
     public void initializeCamera(
-            AprilTagFieldLayout tagLayout,
+            Field tagLayout,
             RunOnce tagLayoutRunOnce,
             DoubleFunction<Optional<Transform3d>> robotToCameraAt) {
         super.initializeCamera(tagLayout, tagLayoutRunOnce, robotToCameraAt);
-        tagLayoutRunOnce.run(
-                () -> {
-                    visionSim.addAprilTags(tagLayout);
-                });
+        // All cameras share one VisionSystemSim, so add the field targets only once.
+        tagLayoutRunOnce.run(() -> visionSim.addAprilTags(tagLayout));
 
         // Add sim camera
+        // Give PhotonCameraSim the same field used for targets and multitag pose estimation.
         cameraSim = new PhotonCameraSim(camera, cameraProperties, tagLayout);
         robotToCameraAt
-                .apply(Timer.getFPGATimestamp())
+                .apply(Timer.getTimestamp())
                 .ifPresentOrElse(
                         (robotToCamera) -> {
                             visionSim.addCamera(cameraSim, robotToCamera);
@@ -145,4 +144,3 @@ public class VisionIOPhotonSim extends VisionIOPhotonReal {
                         });
     }
 }
-//

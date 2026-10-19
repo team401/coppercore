@@ -1,9 +1,7 @@
 package coppercore.controls.state_machine;
 
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.Seconds;
 
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.Timer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -11,6 +9,8 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import org.wpilib.system.Timer;
+import org.wpilib.units.measure.Time;
 
 /**
  * An abstract class representing a state in a state machine.

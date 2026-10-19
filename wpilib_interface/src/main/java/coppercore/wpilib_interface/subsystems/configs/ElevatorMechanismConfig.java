@@ -1,9 +1,9 @@
 package coppercore.wpilib_interface.subsystems.configs;
 
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.DistanceUnit;
-import edu.wpi.first.units.measure.Per;
 import java.util.Objects;
+import org.wpilib.units.AngleUnit;
+import org.wpilib.units.DistanceUnit;
+import org.wpilib.units.measure.Per;
 
 /**
  * The ElevatorMechanismConfig class extends the functionality of a {@link MechanismConfig} to
