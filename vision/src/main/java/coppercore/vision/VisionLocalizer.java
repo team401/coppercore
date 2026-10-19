@@ -151,7 +151,7 @@ public class VisionLocalizer extends SubsystemBase {
         for (int i = 0; i < inputs.length; i++) {
             disconnectedAlerts[i] =
                     new Alert(
-                            "camera" + i + "Disconnected",
+                            "camera" + i + "Disconnected" + this,
                             "Vision camera " + i + " is disconnected.",
                             Level.MEDIUM);
         }

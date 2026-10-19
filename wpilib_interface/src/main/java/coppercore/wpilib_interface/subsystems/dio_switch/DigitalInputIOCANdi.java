@@ -53,11 +53,20 @@ public class DigitalInputIOCANdi implements DigitalInputIO {
         String configFailedToApplyMessage = deviceName + " failed to apply configs.";
 
         this.configFailedToApplyAlert =
-                new Alert("Alerts", configFailedToApplyMessage, Alert.Level.HIGH);
+                new Alert(
+                        "Alerts",
+                        "configFailedToApplyAlert_" + this.deviceName,
+                        configFailedToApplyMessage,
+                        Alert.Level.HIGH);
 
         String disconnectedMessage = deviceName + " disconnected.";
 
-        this.disconnectedAlert = new Alert("Alerts", disconnectedMessage, Alert.Level.HIGH);
+        this.disconnectedAlert =
+                new Alert(
+                        "Alerts",
+                        "disconnectedMessageAlert_" + this.deviceName,
+                        disconnectedMessage,
+                        Alert.Level.HIGH);
 
         CTREUtil.tryUntilOk(
                 () -> this.candi.getConfigurator().apply(candiConfig),
