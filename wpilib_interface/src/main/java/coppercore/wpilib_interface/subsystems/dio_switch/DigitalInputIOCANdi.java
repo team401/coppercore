@@ -55,7 +55,7 @@ public class DigitalInputIOCANdi implements DigitalInputIO {
         this.configFailedToApplyAlert =
                 new Alert(
                         "Alerts",
-                        "configFailedToApplyAlert_" + this.deviceName,
+                        "configFailedToApplyAlert_" + this.deviceName + signal,
                         configFailedToApplyMessage,
                         Alert.Level.HIGH);
 
@@ -64,7 +64,7 @@ public class DigitalInputIOCANdi implements DigitalInputIO {
         this.disconnectedAlert =
                 new Alert(
                         "Alerts",
-                        "disconnectedMessageAlert_" + this.deviceName,
+                        "disconnectedMessageAlert_" + this.deviceName + signal,
                         disconnectedMessage,
                         Alert.Level.HIGH);
 
